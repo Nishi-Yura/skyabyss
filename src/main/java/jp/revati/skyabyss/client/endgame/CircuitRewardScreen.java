@@ -19,6 +19,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 巡りの報いの幕 (endgame/CircuitCamps.Reward。巡り路を終えたとき)。Wynncraft のルートランの報いの箱のように、
 // 中央の箱が揺れて、引いた品を一つずつ枠へ出す。階級が高いほど揺れが長く強く、出たときに階級の色で光る (ヒロイック・神器は音も大きい)。
@@ -27,11 +28,11 @@ import net.minecraft.world.item.Items;
 public class CircuitRewardScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
     private static final int BG = 0x05070A;
-    private static final int PANEL = 0x0C1022;
-    private static final int CARD = 0x101630;
-    private static final int GOLD = 0xE9C46A;
-    private static final int TEAL = 0x8FD0FF;
-    private static final int DIM = 0x9AA4C4;
+    private static final int PANEL = 0x181722;
+    private static final int CARD = 0x16151E;
+    private static final int GOLD = 0xF89CD2;
+    private static final int TEAL = 0xFFF6EA;
+    private static final int DIM = 0x9A929C;
 
     private static final int W = Golden.L_W;
     private static final int H = Golden.L_H;
@@ -235,7 +236,7 @@ public class CircuitRewardScreen extends Screen implements jp.revati.skyabyss.cl
             ItemStack st = items().get(i);
             int rgb = tier(st).rgb();
             boolean on = mx >= s[0] && mx < s[0] + SLOT && my >= s[1] && my < s[1] + SLOT;
-            Golden.outline(g, s[0], s[1], s[0] + SLOT, s[1] + SLOT, argb(1f, rgb));
+            Paper.edge(g, s[0], s[1], s[0] + SLOT, s[1] + SLOT, argb(1f, rgb));
             if (on) {
                 g.fill(s[0] + 1, s[1] + 1, s[0] + SLOT - 1, s[1] + SLOT - 1, argb(0.12f, GOLD));
             }
@@ -257,7 +258,7 @@ public class CircuitRewardScreen extends Screen implements jp.revati.skyabyss.cl
                 : going ? Component.translatable("gui.skyabyss.reward.count", shown, items().size()).copy().append("  ").append(Component.translatable("gui.skyabyss.reward.skip"))
                 : Component.translatable("gui.skyabyss.reward.done");
         Golden.Box fb = LAYOUT.foot();
-        g.drawCenteredString(font, foot, W / 2, Golden.textY(fb.y(), fb.h()), argb(1f, going ? Golden.DIM : TEAL));
+        g.drawCenteredString(font, foot, W / 2, Golden.textY(fb.y(), fb.h()), argb(1f, going ? Paper.ON_BLACK_DIM : TEAL));
         fit.end(g);
         if (!hovered.isEmpty()) {
             g.renderTooltip(font, hovered, screenX, screenY);

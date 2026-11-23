@@ -18,6 +18,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ScreenEvent;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 持ち物の画面 (docs/design/56 の 4 章。2026-11-11 の案 A)。バニラの持ち物の画面の代わりに開く (E キー・つまみ)。入れ物はバニラと同じ (InventoryMenu)。
 //   真ん中: バニラと同じ形・同じ枠の位置 (防具 4・人形・逆手・袋 27・手もと 9)。作業台の場所に装飾 3 枠 (護符・装飾 2。mixin/InventoryMenuAccessoryMixin)
@@ -127,19 +128,19 @@ public class SkyInventoryScreen extends AbstractContainerScreen<InventoryMenu> i
         int cy = GearPanel.CORE_Y;
         // 選んでいる手もとの枠
         int sel = cx + 8 + player.getInventory().selected * 18;
-        Golden.outline(g, sel - 2, cy + 141, sel + 18, cy + 161, 0xFF000000 | Golden.GOLD);
+        Paper.edge(g, sel - 2, cy + 141, sel + 18, cy + 161, 0xFF000000 | Paper.ON_BLACK_PINK);
         // 装飾の 3 枠: 金の縁。空の枠には印 (護符 = 首飾り、装飾 = 輪)
-        g.drawString(font, Component.translatable("skyabyss_gear.screen.title"), cx + AccessorySlots.X[0], cy + 11, Golden.PALE, false);
+        g.drawString(font, Component.translatable("skyabyss_gear.screen.title"), cx + AccessorySlots.X[0], cy + 11, Paper.ON_BLACK_HI, false);
         for (int a = 0; a < AccessorySlots.SIZE; a++) {
             int x = cx + AccessorySlots.X[a];
             int y = cy + AccessorySlots.Y;
-            Golden.outline(g, x - 1, y - 1, x + 17, y + 17, Golden.LINE);
+            Paper.edge(g, x - 1, y - 1, x + 17, y + 17, Paper.EDGE);
             if (menu.getSlot(AccessorySlots.FIRST + a).getItem().isEmpty()) {
                 g.blit(ACC_TEXTURE, x, y, 16, 16, a == 0 ? 0 : 40, 380, 32, 32, 512, 512);
             }
         }
         Component key = Component.translatable("skyabyss_gear.screen.charm_key", jp.revati.skyabyss.client.accessory.AccessoryClient.CHARM_KEY.getTranslatedKeyMessage());
-        g.drawString(font, key, cx + AccessorySlots.X[0], cy + AccessorySlots.Y + 21, Golden.DIM, false);
+        g.drawString(font, key, cx + AccessorySlots.X[0], cy + AccessorySlots.Y + 21, Paper.ON_BLACK_DIM, false);
         // 袋の数 (人形の右下、袋の上)
         int used = 0;
         for (int i = 9; i < 36; i++) {
@@ -148,7 +149,7 @@ public class SkyInventoryScreen extends AbstractContainerScreen<InventoryMenu> i
             }
         }
         String count = used + " / 27";
-        g.drawString(font, count, cx + 168 - font.width(count), cy + 72, Golden.DIM, false);
+        g.drawString(font, count, cx + 168 - font.width(count), cy + 72, Paper.ON_BLACK_DIM, false);
         g.pose().popPose();
         GearPanel.doll(g, leftPos, topPos, mouseX, mouseY, player);
     }

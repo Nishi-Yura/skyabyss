@@ -14,6 +14,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 封の箱の欄 (旅袋のつまみの四つ目。docs/design/52 の 7 章・00 の 310)。持っている封の箱を種類ごとに見る画面 (開けるのは町の封切り師)。
 // 押すと一つ (シフトで全部) 持ち物へ取り出せる (落とす・仲間に渡すため。BoxNetwork.TakeOut)。
@@ -21,7 +22,7 @@ import net.minecraft.world.item.ItemStack;
 //   左の板: 重ねた箱の名前と数。右の板: 手引き。持ち物と同じ組み方 (client/inventory/GearPanel。docs/design/56 の 4 章)
 public class BoxPouchScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     static final int W = GearPanel.W, H = GearPanel.H;
-    static final int GOLD = 0xFF000000 | Golden.GOLD, TEXT = 0xFF000000 | Golden.TEXT, DIM = 0xFF000000 | Golden.SOFT;
+    static final int GOLD = 0xFF000000 | Paper.ON_BLACK_PINK, TEXT = 0xFF000000 | Golden.TEXT, DIM = 0xFF000000 | Paper.ON_BLACK_SOFT;
     static final int CORE_H = 180;
     private static final Golden.Box LEFT = GearPanel.left(CORE_H);
     private static final Golden.Box RIGHT = GearPanel.right(CORE_H);
@@ -99,8 +100,8 @@ public class BoxPouchScreen extends Screen implements jp.revati.skyabyss.client.
         }
         g.pose().popPose();
         int x = px + DX, y = py + DY;
-        g.drawString(font, Component.translatable("skyabyss_box.pouch.titan"), x + X0, y + 19, Golden.PALE, false);
-        g.drawString(font, Component.translatable("skyabyss_box.pouch.rarity"), x + X0, y + 52, Golden.PALE, false);
+        g.drawString(font, Component.translatable("skyabyss_box.pouch.titan"), x + X0, y + 19, Paper.ON_BLACK_HI, false);
+        g.drawString(font, Component.translatable("skyabyss_box.pouch.rarity"), x + X0, y + 52, Paper.ON_BLACK_HI, false);
         for (int b = 0; b < 5; b++) {
             String n = NUMERALS[b];
             g.drawString(font, n, x + BAND_X + b * PITCH + (16 - font.width(n)) / 2, y + 58, DIM, false);
@@ -114,11 +115,11 @@ public class BoxPouchScreen extends Screen implements jp.revati.skyabyss.client.
             int sx = x + s.x(), sy = y + s.y();
             Golden.slot(g, sx - 1, sy - 1, 18);
             if (n > 0) {
-                Golden.outline(g, sx - 1, sy - 1, sx + 17, sy + 17, 0xFF5A8FC0);
+                Paper.edge(g, sx - 1, sy - 1, sx + 17, sy + 17, 0xFF5A5460);
             }
             g.renderItem(stack(s.kind()), sx, sy);
             if (n <= 0) {
-                g.fill(sx, sy, sx + 16, sy + 16, 0xC80A0E1E);
+                g.fill(sx, sy, sx + 16, sy + 16, 0xC80E0D14);
             } else {
                 String t = n > 999 ? "999+" : String.valueOf(n);
                 g.pose().pushPose();

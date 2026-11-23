@@ -19,11 +19,11 @@ public final class SkillScreenAccess {
         return ExtPage.tip(d, a);
     }
 
-    // 品の札 (技の絵・稀さの縁・持っていなければ「？」) と Lv の点
-    public static void aspectTile(net.minecraft.client.gui.GuiGraphics g, net.minecraft.client.gui.Font font, int x, int y, int size, Aspect a, int lv, boolean hover, int ticks) {
-        ExtPage.tile(g, font, x, y, size, a, lv, hover, false, ticks);
+    // 品の札 (切り絵の紙の札・稀さは右上の菱・持っていなければ「？」) と Lv の点。黒い紙の上 (試練の板) に置く。seq は札の傾きを散らす番号
+    public static void aspectTile(net.minecraft.client.gui.GuiGraphics g, net.minecraft.client.gui.Font font, int x, int y, int size, Aspect a, int lv, boolean hover, int seq) {
+        ExtPage.paperTile(g, font, x, y, size, a, lv, hover, false, false, seq);
         if (lv > 0) {
-            ExtPage.pips(g, x, y + size + 1, size, lv, a.rarity());
+            ExtPage.paperPips(g, x, y + size + 2, size, lv);
         }
     }
 

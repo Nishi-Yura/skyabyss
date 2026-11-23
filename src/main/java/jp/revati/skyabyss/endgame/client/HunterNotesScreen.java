@@ -25,6 +25,7 @@ import net.minecraft.world.entity.LivingEntity;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import net.neoforged.neoforge.network.PacketDistributor;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 狩人の手帳 (endgame/HunterNotes)。旅の記録の図鑑の枠を押すと開く。見るだけの画面:
 //   左  敵の並び (図鑑の順。倒していない型は「？？？」、慣れた型は金の印)。ホイールで送る
@@ -33,11 +34,11 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // 板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 敵の並びは脇の列 (左)、頁は主の列 (右)、下の段に動かし方
 public class HunterNotesScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final int BG = 0x05070F;
-    private static final int GOLD = 0xE9C46A;
-    private static final int TEAL = 0x8FD0FF;
-    private static final int TEXT = 0xE6E8EE;
-    private static final int DIM = jp.revati.skyabyss.client.ui.Golden.SOFT;
-    private static final int FAINT = jp.revati.skyabyss.client.ui.Golden.DIM;
+    private static final int GOLD = 0xF89CD2;
+    private static final int TEAL = 0xFFF6EA;
+    private static final int TEXT = 0xECE4D6;
+    private static final int DIM = Paper.ON_BLACK_SOFT;
+    private static final int FAINT = Paper.ON_BLACK_DIM;
 
     private static final jp.revati.skyabyss.client.ui.Golden.Layout LAYOUT = jp.revati.skyabyss.client.ui.Golden.Layout.large(jp.revati.skyabyss.client.ui.Golden.FOOT);
     private static final jp.revati.skyabyss.client.ui.Golden.Box LIST_BOX = LAYOUT.body().minor(true);
@@ -214,7 +215,7 @@ public class HunterNotesScreen extends Screen implements jp.revati.skyabyss.clie
             int barH = ROWS * ROW_H;
             int knobH = Math.max(8, barH * ROWS / l.size());
             int knobY = LIST_Y + (barH - knobH) * scroll / Math.max(1, l.size() - ROWS);
-            g.fill(LIST_X + LIST_W + 2, knobY, LIST_X + LIST_W + 4, knobY + knobH, argb(1f, 0x4A5A68));
+            g.fill(LIST_X + LIST_W + 2, knobY, LIST_X + LIST_W + 4, knobY + knobH, argb(1f, 0x4A4450));
         }
     }
 

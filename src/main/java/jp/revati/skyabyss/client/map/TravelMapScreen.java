@@ -398,9 +398,9 @@ public class TravelMapScreen extends Screen {
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         // 景色を少し暗くする (INK は地図そのものが景色の上に乗るので、ここで濃く)
         if (style() == Config.MapStyle.INK) {
-            g.fillGradient(0, 0, width, height, 0xB0080B10, 0xD0080B10);
+            g.fill(0, 0, width, height, 0xC00E0D14);
         } else {
-            g.fillGradient(0, 0, width, height, 0x80101418, 0xA0101418);
+            g.fill(0, 0, width, height, 0x900E0D14);
         }
     }
 
@@ -924,7 +924,7 @@ public class TravelMapScreen extends Screen {
             int[] at = project(obj.getX() + 0.5, obj.getZ() + 0.5);
             // 目的は明滅する光の輪の上に (いちばん目立つ印)
             float pulse = 0.35f + 0.3f * (float) Math.sin((time + Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true)) * 0.2);
-            sprite(g, S_GLOW, at[0], at[1], 0, 0f, 0xFFF2C14E, pulse);
+            sprite(g, S_GLOW, at[0], at[1], 0, 0f, 0xFFF89CD2, pulse);
             backing(g, at[0], at[1], 0.8f);
             sprite(g, S_OBJECTIVE, at[0], at[1], 0, at[2] == 1 ? 0.75f : 1f);
             hits.add(hit(at, 80, List.of(Component.translatable("map.skyabyss.mark.objective"), MapText.where(me, obj.getX() + 0.5, obj.getZ() + 0.5)), null));

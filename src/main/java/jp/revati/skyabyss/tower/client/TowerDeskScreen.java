@@ -13,6 +13,7 @@ import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 塔の受付の画面 (あいだの塔。docs/design/54 の 2.2)。2026-11-02 の声「なぜ大規模レイドの入り方がチャット？これまで通り UI 出したらいいんじゃない」。
 //   上: 今日の挑戦 (一人一日一回)。中: 隊 (作る・入る・抜ける・隊の人)。隊長には今週の賭け (三つまで) と「塔へ入る」。下: 塔の店・記録の板・閉じる。
@@ -22,9 +23,9 @@ public final class TowerDeskScreen extends Screen {
     static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
     static final int W = Golden.L_W;
     static final int H = Golden.L_H;
-    static final int GOLD = Golden.GOLD;
+    static final int GOLD = Paper.ON_BLACK_PINK;
     static final int TEXT = Golden.TEXT;
-    static final int SOFT = Golden.SOFT;
+    static final int SOFT = Paper.ON_BLACK_SOFT;
     static final int DENY = Golden.DENY;
     static final int ROW = Golden.ROW;
     // 釦の行 (高さ 13 + あいだ 5)
@@ -73,24 +74,24 @@ public final class TowerDeskScreen extends Screen {
         top = 0;
         int y = Y_BUTTONS;
         if (state.leader().isEmpty()) {
-            Button create = Button.builder(Component.translatable("gui.skyabyss.tower_desk.create"), b -> cmd("create"))
+            Button create = Paper.tag(Component.translatable("gui.skyabyss.tower_desk.create"), b -> cmd("create"))
                     .bounds(LEFT.x(), y, LEFT.w(), Golden.BTN).build();
             create.active = !state.usedToday();
             addRenderableWidget(create);
             for (int i = 0; i < Math.min(4, state.joinLeaders().size()); i++) {
                 String leader = state.joinLeaders().get(i);
-                Button join = Button.builder(Component.translatable("gui.skyabyss.tower_desk.join", leader, state.joinCounts().get(i), state.max()), b -> cmd("join " + leader))
+                Button join = Paper.tag(Component.translatable("gui.skyabyss.tower_desk.join", leader, state.joinCounts().get(i), state.max()), b -> cmd("join " + leader))
                         .bounds(RIGHT.x(), y + i * STEP, RIGHT.w(), Golden.BTN).build();
                 join.active = !state.usedToday();
                 addRenderableWidget(join);
             }
         } else {
             if (state.isLeader()) {
-                addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.tower_desk.start"), b -> cmd("start"))
+                addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.tower_desk.start"), b -> cmd("start"))
                         .bounds(LEFT.x(), y, LEFT.w(), Golden.BTN).build());
             }
             Golden.Box quitBox = state.isLeader() ? RIGHT : LEFT;
-            addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.tower_desk.quit"), b -> cmd("quit"))
+            addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.tower_desk.quit"), b -> cmd("quit"))
                     .bounds(quitBox.x(), y, Math.min(quitBox.w(), Golden.S89 + Golden.S34), Golden.BTN).build());
             if (state.isLeader()) {
                 // 今週の賭け: 押すと選ぶ / 外す (三つまで)。二列
@@ -99,7 +100,7 @@ public final class TowerDeskScreen extends Screen {
                     String id = state.wagers().get(i);
                     boolean on = state.chosen().contains(id);
                     Component label = Component.literal(on ? "✔ " : "").append(Component.translatable("message.skyabyss.tower.wager." + id));
-                    Button w = Button.builder(label, b -> cmd("wager " + id))
+                    Button w = Paper.tag(label, b -> cmd("wager " + id))
                             .bounds(BODY.x() + (i % 2) * (colW + Golden.GAP), Y_WAGERS + ROW + 3 + (i / 2) * STEP, colW, Golden.BTN)
                             .tooltip(Tooltip.create(Component.translatable("message.skyabyss.tower.wager." + id + ".desc"))).build();
                     w.active = on || state.chosen().size() < state.pickMax();
@@ -109,12 +110,12 @@ public final class TowerDeskScreen extends Screen {
         }
         Golden.Box foot = LAYOUT.foot();
         int by = foot.y() + 4;
-        addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.tower_desk.shop"), b -> cmd("shop")).bounds(foot.x(), by, Golden.S89, Golden.BTN).build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.tower_desk.records"), b -> {
+        addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.tower_desk.shop"), b -> cmd("shop")).bounds(foot.x(), by, Golden.S89, Golden.BTN).build());
+        addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.tower_desk.records"), b -> {
             cmd("records");
             Minecraft.getInstance().setScreen(new ChatScreen(""));
         }).bounds(foot.x() + Golden.S89 + Golden.S5, by, Golden.S89, Golden.BTN).build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.tower_desk.close"), b -> onClose()).bounds(foot.right() - Golden.S89, by, Golden.S89, Golden.BTN).build());
+        addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.tower_desk.close"), b -> onClose()).bounds(foot.right() - Golden.S89, by, Golden.S89, Golden.BTN).build());
     }
 
     private void cmd(String sub) {

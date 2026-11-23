@@ -23,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.PacketDistributor;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 旅の記録 (記録・技のつまみの「旅」。docs/design/54 の 6.2.7)。見るだけの画面:
 //   上の 5 行   土地ごと (都のまわり・鯨見・汐守・風待・灰炉): 名声の段とバー、名所の数、今週の旗。乗せると点・値引き・週の点
@@ -45,14 +46,14 @@ public class JourneyScreen extends Screen {
     static final Golden.Box CODEX = new Golden.Box(SIDE.x(), SIDE.y(), SIDE.w(), (SIDE.h() - Golden.GAP) / 2);
     static final Golden.Box MASTERY = new Golden.Box(SIDE.x(), CODEX.bottom() + Golden.GAP, SIDE.w(), SIDE.bottom() - CODEX.bottom() - Golden.GAP);
 
-    static final int TITLE = Golden.PALE;
+    static final int TITLE = Paper.ON_BLACK_HI;
     static final int TEXT = Golden.TEXT;
-    static final int SOFT = Golden.SOFT;
-    static final int DIM = Golden.DIM;
-    static final int GOLD = Golden.GOLD;
-    static final int TEAL = Golden.TEAL;
+    static final int SOFT = Paper.ON_BLACK_SOFT;
+    static final int DIM = Paper.ON_BLACK_DIM;
+    static final int GOLD = Paper.ON_BLACK_PINK;
+    static final int TEAL = Paper.ON_BLACK_HI;
     // 土地の印の色 (都の鐘・岩鯨の岩・潮殻の潮・雷翼の雷・余燼の熾)
-    static final int[] LAND_RGB = {0xD8C27A, 0, 0xB8A27E, 0x8FD0FF, 0x9FB8FF, 0xFF9A5A};
+    static final int[] LAND_RGB = {0xD8C27A, 0, 0xB8A27E, 0x8FD0FF, 0x9FB8FF, 0xFF9A5A}; // 意味の色 (土地ごと。切り絵でも替えない)
 
     @Nullable
     private static CompoundTag data;
@@ -83,7 +84,7 @@ public class JourneyScreen extends Screen {
         top = 0;
         RpgTabs.addHead(this::addRenderableWidget, LAYOUT.head(), RpgTabs.JOURNEY);
         // 記録の画面 (踏破・塔・深み・釣り・早駆け・転生・空見。record/RecordsHub) を開く釦。つまみの右
-        addRenderableWidget(net.minecraft.client.gui.components.Button.builder(Component.translatable("gui.skyabyss.records_hub.open"),
+        addRenderableWidget(jp.revati.skyabyss.client.ui.Paper.tag(Component.translatable("gui.skyabyss.records_hub.open"),
                 b -> jp.revati.skyabyss.client.record.RecordsHubScreen.request(jp.revati.skyabyss.record.RecordsHub.CLEAR))
                 .bounds(LAYOUT.head().x() + RpgTabs.headWidth(RpgTabs.JOURNEY) + Golden.S8, LAYOUT.head().y() + 4, Golden.S55, Golden.BTN).build());
         PacketDistributor.sendToServer(new Journey.Request());
@@ -221,11 +222,11 @@ public class JourneyScreen extends Screen {
 
     // 細い帯 (高さ 3。満ちれば水色)
     private static void bar(GuiGraphics g, int x, int y, int w, float frac, boolean full) {
-        g.fill(x, y, x + w, y + 3, 0xFF364064);
-        g.fill(x + 1, y + 1, x + w - 1, y + 2, 0xFF0A0E1E);
+        g.fill(x, y, x + w, y + 3, 0xFF3A3644);
+        g.fill(x + 1, y + 1, x + w - 1, y + 2, 0xFF0E0D14);
         int fill = Math.max(0, Math.min(w - 2, Math.round((w - 2) * frac)));
         if (fill > 0) {
-            g.fill(x + 1, y + 1, x + 1 + fill, y + 2, full ? 0xFF8FD0FF : 0xFFE0B040);
+            g.fill(x + 1, y + 1, x + 1 + fill, y + 2, full ? 0xFFFFF6EA : 0xFFE45A9C);
         }
     }
 

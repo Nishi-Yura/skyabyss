@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 
 import jp.revati.skyabyss.client.ui.FitText;
 import jp.revati.skyabyss.client.ui.Golden;
+import jp.revati.skyabyss.client.ui.Paper;
 import jp.revati.skyabyss.client.ui.ScrollPanel;
 import jp.revati.skyabyss.rpg.aspect.Aspect;
 import jp.revati.skyabyss.rpg.aspect.Aspects;
@@ -149,9 +150,9 @@ final class ExtPage {
         Golden.Box lb = left(body);
         int lx = lb.x() + Golden.S5;
         int lw = lb.w() - 2 * Golden.S5;
-        FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.aspect.altar"), lb.cx(), Golden.textY(lb.y() + 2, Golden.ROW), lw, GOLD, false);
+        FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.aspect.altar"), lb.cx(), Golden.textY(lb.y() + 2, Golden.ROW), lw, Paper.ON_BLACK_PINK, false);
         int cx = lb.cx();
-        int cy = lb.y() + 2 + Golden.ROW + 4 + RING + SLOT / 2;
+        int cy = lb.y() + 2 + Golden.ROW + 4 + ALTAR_RAD + 2;
         altar(g, cx, cy, job);
         for (int i = 0; i < Aspects.MAX_SLOTS; i++) {
             double ang = Math.toRadians(-90 + 72 * i);
@@ -161,10 +162,11 @@ final class ExtPage {
             Aspect a = isOpen ? Aspects.get(d.aspectSlots[i]) : null;
             boolean hover = in(mx, my, sx, sy, SLOT, SLOT);
             if (!isOpen) {
-                g.fill(sx, sy, sx + SLOT, sy + SLOT, 0xFF05070F);
-                Golden.outline(g, sx, sy, sx + SLOT, sy + SLOT, 0xFF2A2E36);
+                // 閉じた枠: 生成りの台紙を少し沈めた升に、開く Lv を墨で
+                g.fill(sx, sy, sx + SLOT, sy + SLOT, 0xFFB8AEA4);
+                g.fill(sx + 1, sy + 1, sx + SLOT - 1, sy + SLOT - 1, 0xFFD8D0C4);
                 String need = i < 4 ? String.valueOf(new int[] {20, 30, 40, 50}[i]) : "転";
-                g.drawString(font, need, sx + (SLOT - font.width(need)) / 2 + 1, sy + 7, 0xFF4A505C, false);
+                g.drawString(font, need, sx + (SLOT - font.width(need)) / 2 + 1, sy + 7, Paper.INK_SOFT, false);
                 if (hover) {
                     tip = List.of(i < 4 ? Component.translatable("gui.skyabyss.aspect.slot_locked", new int[] {20, 30, 40, 50}[i]).withColor(SOFT)
                             : Component.translatable("gui.skyabyss.aspect.slot_locked_rebirth").withColor(SOFT));
@@ -172,17 +174,16 @@ final class ExtPage {
                 continue;
             }
             if (a == null) {
-                g.fill(sx, sy, sx + SLOT, sy + SLOT, hover ? 0xFF20242C : 0xFF15181E);
-                Golden.outline(g, sx, sy, sx + SLOT, sy + SLOT, 0xFF4A5680);
-                // 空きの印 (小さな菱)
-                diamond(g, sx + SLOT / 2, sy + SLOT / 2, 2, 0xFF3A404C);
+                // 空きの枠: 台紙を切り抜いた黒い升と、真ん中の灰の菱
+                g.fill(sx, sy, sx + SLOT, sy + SLOT, hover ? Paper.BLACK : Paper.BLACK_LO);
+                diamond(g, sx + SLOT / 2, sy + SLOT / 2, 2, hover ? Paper.GREY : Paper.GREY_LO);
                 if (hover) {
                     tip = List.of(Component.translatable("gui.skyabyss.aspect.empty").withColor(SOFT),
                             Component.translatable("gui.skyabyss.aspect.empty_hint").withColor(DIM));
                 }
             } else {
                 int lv = Aspects.level(d, a);
-                tile(g, font, sx, sy, SLOT, a, lv, hover, false);
+                paperTile(g, font, sx, sy, SLOT, a, lv, hover, false, true, i);
                 if (hover) {
                     tip = new ArrayList<>(tip(d, a));
                     tip.add(Component.translatable("gui.skyabyss.aspect.click_remove").withColor(PALE));
@@ -205,10 +206,10 @@ final class ExtPage {
                 }
             }
         }
-        int sy0 = cy + RING + SLOT / 2 + 4;
-        FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.aspect.slots", used, open), cx, sy0, lw, SOFT, false);
+        int sy0 = cy + (int) (ALTAR_RAD * 0.81f) + 7;
+        FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.aspect.slots", used, open), cx, sy0, lw, Paper.ON_BLACK, false);
         if (sy0 + Golden.ROW + 8 <= lb.bottom()) {
-            FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.aspect.pity", Math.max(0, Aspects.PITY - d.aspectPity)), cx, sy0 + Golden.ROW, lw, DIM, false);
+            FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.aspect.pity", Math.max(0, Aspects.PITY - d.aspectPity)), cx, sy0 + Golden.ROW, lw, Paper.ON_BLACK_SOFT, false);
         }
 
         // ---- 右: 棚
@@ -217,11 +218,11 @@ final class ExtPage {
         int rw = rb.w() - 2 * Golden.S5;
         Component count = Component.translatable("gui.skyabyss.aspect.collected", owned, total);
         int cw = font.width(count);
-        g.drawString(font, count, rx + rw - cw, Golden.textY(rb.y() + 2, Golden.ROW), SOFT, false);
+        g.drawString(font, count, rx + rw - cw, Golden.textY(rb.y() + 2, Golden.ROW), Paper.ON_BLACK_SOFT, false);
         FitText.draw(g, font, Component.translatable("gui.skyabyss.aspect.title").append(job == null ? Component.empty()
-                : Component.literal("・").append(Component.translatable(job.nameKey()))), rx, Golden.textY(rb.y() + 2, Golden.ROW), rw - cw - Golden.S8, GOLD, false);
+                : Component.literal("・").append(Component.translatable(job.nameKey()))), rx, Golden.textY(rb.y() + 2, Golden.ROW), rw - cw - Golden.S8, Paper.ON_BLACK_PINK, false);
         int vy = rb.y() + 2 + Golden.ROW + 3;
-        g.fill(rx, vy - 2, rx + rw, vy - 1, 0xFF222A48);
+        g.fill(rx, vy - 2, rx + rw, vy - 1, Paper.PINK_LO);
         shelf.setViewport(rx, vy, rw, rb.bottom() - 3 - vy);
         int groupH = GROUP_HEAD + 2 * (TILE + PIPS + 1) + GROUP_GAP;
         shelf.setContentHeight(job == null ? 0 : GROUPS.length * groupH - GROUP_GAP);
@@ -242,13 +243,16 @@ final class ExtPage {
                     }
                 }
                 // 段の見出し: 小さな玉・名前・数・細い線
-                diamond(g, tx0 + 2, y + 5, 2, argb(grp.isEmpty() ? 0x8FD0FF : GOLD));
+                // 段の見出し: 菱 (どの祠でも = 灰、祠ごと = 桃色)・名前・数・点線
+                diamond(g, tx0 + 2, y + 5, 2, grp.isEmpty() ? Paper.GREY : Paper.PINK);
                 Component n = groupName(grp);
                 String c = have + " / " + list.size();
-                g.drawString(font, n, tx0 + 8, y + 1, have > 0 ? TEXT : SOFT, false);
+                g.drawString(font, n, tx0 + 8, y + 1, have > 0 ? Paper.ON_BLACK : Paper.ON_BLACK_SOFT, false);
                 int nw = font.width(n);
-                g.drawString(font, c, tx0 + rowW - font.width(c), y + 1, DIM, false);
-                g.fill(tx0 + 8 + nw + 4, y + 5, tx0 + rowW - font.width(c) - 4, y + 6, 0xFF222A48);
+                g.drawString(font, c, tx0 + rowW - font.width(c), y + 1, Paper.ON_BLACK_SOFT, false);
+                for (int lx2 = tx0 + 8 + nw + 4; lx2 < tx0 + rowW - font.width(c) - 4; lx2 += 4) {
+                    g.fill(lx2, y + 5, lx2 + 2, y + 6, Paper.GREY_LO);
+                }
                 int ty = y + GROUP_HEAD;
                 int[] col = new int[2];
                 for (int i = 0; i < list.size(); i++) {
@@ -258,9 +262,9 @@ final class ExtPage {
                     int tyy = ty + row * (TILE + PIPS + 1);
                     int lv = Aspects.level(d, a);
                     boolean hover = inView && in(mx, my, tx, tyy, TILE, TILE);
-                    tile(g, font, tx, tyy, TILE, a, lv, hover, worn.contains(a.id()));
+                    paperTile(g, font, tx, tyy, TILE, a, lv, hover, worn.contains(a.id()), false, i + col[row]);
                     if (lv > 0) {
-                        pips(g, tx, tyy + TILE + 1, TILE, lv, a.rarity());
+                        paperPips(g, tx, tyy + TILE + 1, TILE, lv);
                     }
                     if (hover) {
                         tip = new ArrayList<>(tip(d, a));
@@ -276,83 +280,90 @@ final class ExtPage {
             }
         }
         shelf.end(g);
-        shelf.drawBar(g, 0xFF1A1D24, 0xFF5A6690);
+        shelf.drawBar(g, 0xFF2A2834, Paper.PINK);
         if (job == null) {
-            FitText.draw(g, font, Component.translatable("gui.skyabyss.aspect.no_job"), rx, vy + 4, rw, SOFT, false);
+            FitText.draw(g, font, Component.translatable("gui.skyabyss.aspect.no_job"), rx, vy + 4, rw, Paper.ON_BLACK_SOFT, false);
         }
         if (tip != null) {
             g.renderComponentTooltip(font, tip, mx, my);
         }
     }
 
-    // 祭壇の地: 枠を結ぶ点の輪・五つの枠へ伸びる細い線・真ん中の職の印
+    // 祭壇の地 (切り絵): 五つの枠を角に置いた生成りの五角の台紙 (角は手で少しずつずらす) と濃い桃色の影、
+    // 真ん中から枠へ伸びる桃色の点線、真ん中の桃色の菱に職の木の絵
+    // 台紙の五角の半径 (枠の角まで包む)
+    private static final int ALTAR_RAD = 58;
+    private static final float[] ALTAR_R = {1.00f, 0.95f, 1.04f, 0.97f, 1.02f};
+    private static final float[] ALTAR_TURN = {-2f, 3f, -1f, 2f, -3f};
+
     private void altar(GuiGraphics g, int cx, int cy, Job job) {
-        for (int deg = 0; deg < 360; deg += 5) {
-            double r = Math.toRadians(deg);
-            int px = cx + (int) Math.round(Math.cos(r) * RING);
-            int py = cy + (int) Math.round(Math.sin(r) * RING);
-            g.fill(px, py, px + 1, py + 1, deg % 15 == 0 ? 0xFF3E4652 : 0xFF262C35);
-        }
+        int rad = ALTAR_RAD;
+        int pad = rad + 6;
+        Paper.draw(g, "aspect_altar", "", cx - pad, cy - pad, 2 * pad + 1, 2 * pad + 1, s -> {
+            float[] pts = new float[10];
+            for (int i = 0; i < 5; i++) {
+                double a = Math.toRadians(-90 + 72 * i + ALTAR_TURN[i]);
+                pts[i * 2] = pad + (float) Math.cos(a) * rad * ALTAR_R[i];
+                pts[i * 2 + 1] = pad + (float) Math.sin(a) * rad * ALTAR_R[i];
+            }
+            s.layer(pts, Paper.CREAM, Paper.PINK_LO, 3, 4);
+        });
         for (int i = 0; i < Aspects.MAX_SLOTS; i++) {
             double a = Math.toRadians(-90 + 72 * i);
-            for (int t = 10; t < RING - SLOT / 2 - 1; t += 2) {
+            for (int t = 12; t < RING - SLOT / 2 - 1; t += 3) {
                 int px = cx + (int) Math.round(Math.cos(a) * t);
                 int py = cy + (int) Math.round(Math.sin(a) * t);
-                g.fill(px, py, px + 1, py + 1, 0xFF2E3540);
+                g.fill(px, py, px + 1, py + 1, Paper.PINK_LO);
             }
         }
-        // 真ん中: 二重の菱と、職の木の絵 (ゆっくり光る)
-        float pulse = 0.5f + 0.5f * (float) Math.sin(ticks * 0.08);
-        diamond(g, cx, cy, 11, 0xFF0A0E1E);
-        diamond(g, cx, cy, 10, alpha(GOLD, 60 + (int) (60 * pulse)));
-        diamond(g, cx, cy, 9, 0xFF14171D);
+        diamond(g, cx + 1, cy + 1, 10, Paper.PINK_LO);
+        diamond(g, cx, cy, 10, Paper.PINK);
+        diamond(g, cx, cy, 8, Paper.BLACK_LO);
         if (job != null && job.tree != null) {
             SkillHud.drawIcon(g, job.tree.iconIndex(), cx - 6, cy - 6, 12);
         } else {
-            Golden.gem(g, cx, cy, 3);
+            diamond(g, cx, cy, 3, Paper.PINK_HI);
         }
     }
 
-    // 品の札: 地・稀さの縁 (レジェンドは二重で光る)・技の絵。持っていなければ「？」
-    private void tile(GuiGraphics g, Font font, int x, int y, int s, Aspect a, int lv, boolean hover, boolean worn) {
-        tile(g, font, x, y, s, a, lv, hover, worn, ticks);
-    }
-
-    static void tile(GuiGraphics g, Font font, int x, int y, int s, Aspect a, int lv, boolean hover, boolean worn, int ticks) {
-        int col = RARITY[a.rarity()];
-        if (lv <= 0) {
-            g.fill(x, y, x + s, y + s, hover ? 0xFF181B21 : 0xFF0E1014);
-            Golden.outline(g, x, y, x + s, y + s, alpha(col, 70));
-            g.drawString(font, "?", x + (s - font.width("?")) / 2 + 1, y + (s - 8) / 2 + 1, alpha(col, 140), false);
+    // 切り絵の品の札 (名残のページ): 少し傾けた紙の札に技の絵。稀さは右上の菱 (レア = 灰、エピック = 桃色、レジェンド = 大きな明るい桃色)。
+    // 持っていなければ暗い札に「？」。付けている品は持ち上げて (影を濃い桃色に) 上の端に桃色の菱を留める。
+    // onCream なら祭壇の台紙の上 (札の地は黒)、でなければ黒い紙の上 (札の地は生成り)。
+    // 試練の板 (TrialBoardScreen) も SkillScreenAccess.aspectTile からこれを使う
+    static void paperTile(GuiGraphics g, Font font, int x, int y, int s, Aspect a, int lv, boolean hover, boolean worn, boolean onCream, int seq) {
+        boolean known = lv > 0;
+        int body = !known ? (onCream ? 0xFFB8AEA4 : Paper.GREY_LO) : onCream ? Paper.BLACK_LO : hover ? 0xFFFFF6EA : Paper.CREAM;
+        int under = worn ? Paper.PINK_LO : onCream ? 0xFFB8AEA4 : Paper.BLACK_LO;
+        int off = worn ? 3 : 1;
+        float tilt = seq % 3 == 0 ? -2.5f : seq % 3 == 1 ? 1.5f : 3f;
+        int lift = hover && known ? 1 : 0;
+        String name = "aspect_tile_" + s + "_" + Integer.toHexString(body) + "_" + Integer.toHexString(under) + "_" + off + "_" + tilt;
+        Paper.draw(g, name, "", x - 4, y - 4 - lift, s + 9, s + 9,
+                sh -> sh.layer(Paper.rotRect(s / 2f + 4, s / 2f + 4, s, s, tilt), body, under, off, off));
+        if (!known) {
+            g.drawString(font, "?", x + (s - font.width("?")) / 2 + 1, y + (s - 8) / 2 + 1, onCream ? Paper.INK_SOFT : Paper.ON_BLACK_SOFT, false);
             return;
         }
-        g.fill(x, y, x + s, y + s, hover ? 0xFF2A2F3A : 0xFF1A1D24);
-        // 地の下半分に稀さの色を薄く
-        g.fillGradient(x + 1, y + s / 2, x + s - 1, y + s - 1, alpha(col, 0), alpha(col, 70));
-        Golden.outline(g, x, y, x + s, y + s, argb(col));
-        if (a.rarity() == Aspect.LEGENDARY) {
-            float pulse = 0.5f + 0.5f * (float) Math.sin(ticks * 0.15 + x * 0.1);
-            Golden.outline(g, x - 1, y - 1, x + s + 1, y + s + 1, alpha(col, 70 + (int) (110 * pulse)));
-        }
         int icon = s - 4;
-        // 今の形の絵 (変異していれば変異の絵)。刻印・書き換え・秘伝はその色の縁
         net.minecraft.world.entity.player.Player me = Minecraft.getInstance().player;
-        SkillHud.drawIcon(g, jp.revati.skyabyss.rpg.skill.SkillChanges.icon(me, a.skill()), x + 2, y + 2, icon);
-        SkillHud.changeFrame(g, me, a.skill(), x + 2, y + 2, icon);
+        SkillHud.drawIcon(g, jp.revati.skyabyss.rpg.skill.SkillChanges.icon(me, a.skill()), x + 2, y + 2 - lift, icon);
+        SkillHud.changeFrame(g, me, a.skill(), x + 2, y + 2 - lift, icon);
+        int r = a.rarity() == Aspect.LEGENDARY ? 3 : 2;
+        int rc = a.rarity() == Aspect.LEGENDARY ? Paper.PINK_HI : a.rarity() == Aspect.RARE ? Paper.GREY : Paper.PINK;
+        diamond(g, x + s - 1, y + 1 - lift, r + 1, Paper.BLACK_LO);
+        diamond(g, x + s - 1, y + 1 - lift, r, rc);
         if (worn) {
-            // 付けている印: 左上の金の三角
-            for (int i = 0; i < 5; i++) {
-                g.fill(x + 1, y + 1 + i, x + 6 - i, y + 2 + i, argb(GOLD));
-            }
+            diamond(g, x + s / 2, y - 2 - lift, 3, Paper.BLACK_LO);
+            diamond(g, x + s / 2, y - 2 - lift, 2, Paper.PINK_HI);
         }
     }
 
-    // Lv の点 (5 つ。持っている Lv だけ稀さの色)
-    static void pips(GuiGraphics g, int x, int y, int w, int lv, int rarity) {
+    // Lv の点 (5 つ。持っている Lv だけ桃色)
+    static void paperPips(GuiGraphics g, int x, int y, int w, int lv) {
         int step = 4;
         int x0 = x + (w - (Aspects.MAX_LEVEL * step - 1)) / 2;
         for (int i = 0; i < Aspects.MAX_LEVEL; i++) {
-            g.fill(x0 + i * step, y, x0 + i * step + 3, y + 2, i < lv ? argb(RARITY[rarity]) : 0xFF222A48);
+            g.fill(x0 + i * step, y, x0 + i * step + 3, y + 2, i < lv ? Paper.PINK : Paper.GREY_LO);
         }
     }
 

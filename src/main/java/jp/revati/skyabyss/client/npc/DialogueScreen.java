@@ -28,13 +28,13 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // 操作: クリック / 数字キー / ↑↓ と Enter・Space。本文の途中でクリックすると全文を出す。Esc で立ち去る
 public class DialogueScreen extends Screen {
     private static final int TEXT = 0xFFE9E3D4;
-    private static final int NAME = 0xFF8FD0FF;
-    private static final int SOFT = 0xFF9A9AAE;
-    private static final int GOLD = 0xFFE9C46A;
+    private static final int NAME = 0xFFFFF6EA;
+    private static final int SOFT = 0xFF9A929C;
+    private static final int GOLD = 0xFFF89CD2;
     private static final int PANEL = 0xF2101318;
     private static final int EDGE = 0xFFC9A85C;
-    private static final int EDGE_IN = 0xFF141C3A;
-    private static final int HOVER = 0x308FD0FF;
+    private static final int EDGE_IN = 0xFF1C1A26;
+    private static final int HOVER = 0x30E45A9C;
     // 行は 13 (docs/design/56)
     private static final int LINE_H = jp.revati.skyabyss.client.ui.Golden.ROW;
     private static final int OPTION_H = 13;
@@ -200,8 +200,8 @@ public class DialogueScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        // ぼかさず、下を少し暗くするだけ (相手の顔と景色が見えるように)
-        g.fillGradient(0, height / 2, width, height, 0x00000000, 0x90000000);
+        // ぼかさず、下を少し暗くするだけ (相手の顔と景色が見えるように)。切り絵なので段なしの一枚
+        g.fill(0, height * 3 / 5, width, height, 0x700E0D14);
     }
 
     @Override
@@ -218,7 +218,7 @@ public class DialogueScreen extends Screen {
         // 顔
         int fx = cx + jp.revati.skyabyss.client.ui.Golden.S8;
         int fy = cy + jp.revati.skyabyss.client.ui.Golden.S8;
-        g.fill(fx - 1, fy - 1, fx + face + 1, fy + face + 1, 0xFF0A0E1E);
+        g.fill(fx - 1, fy - 1, fx + face + 1, fy + face + 1, 0xFF0E0D14);
         // 画面の画素に合わせた整数倍 (facePx 画素 = 絵の 1 画素)。GUI 単位に直した倍率で拡大する
         float k = facePx / (float) Math.max(1.0, Minecraft.getInstance().getWindow().getGuiScale());
         g.pose().pushPose();
@@ -288,7 +288,7 @@ public class DialogueScreen extends Screen {
             }
         }
         body.end(g);
-        body.drawBar(g, EDGE_IN, 0x888FD0FF);
+        body.drawBar(g, EDGE_IN, 0x88E45A9C);
         // 続き (欄の外の右下に出す)
         if (fullyShown() && more) {
             long t = Minecraft.getInstance().level == null ? 0 : Minecraft.getInstance().level.getGameTime();
@@ -328,7 +328,7 @@ public class DialogueScreen extends Screen {
         for (int i = 1; i <= 4; i++) {
             sb.append(i <= tier ? "◆" : "◇");
         }
-        g.drawCenteredString(font, sb.toString(), cx, y, 0xFF8FD0FF);
+        g.drawCenteredString(font, sb.toString(), cx, y, 0xFFFFF6EA);
     }
 
     private int optionAt(double mx, double my) {

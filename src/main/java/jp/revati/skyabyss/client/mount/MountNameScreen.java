@@ -9,6 +9,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.network.PacketDistributor;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 乗り物に名前を付ける (絆 II から。docs/design/38 の 8)。打って「決める」でサーバーへ送り、店の画面へ戻る。空なら名前を外す
 public class MountNameScreen extends Screen {
@@ -31,8 +32,8 @@ public class MountNameScreen extends Screen {
         box.setValue(current);
         addRenderableWidget(box);
         setInitialFocus(box);
-        addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.mount.name_ok"), b -> done(true)).bounds(cx - 82, cy + 18, 80, 20).build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.mount.name_cancel"), b -> done(false)).bounds(cx + 2, cy + 18, 80, 20).build());
+        addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.mount.name_ok"), b -> done(true)).bounds(cx - 82, cy + 18, 80, 20).primary().build());
+        addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.mount.name_cancel"), b -> done(false)).bounds(cx + 2, cy + 18, 80, 20).build());
     }
 
     private void done(boolean send) {
@@ -55,7 +56,7 @@ public class MountNameScreen extends Screen {
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.render(g, mouseX, mouseY, partialTick);
         g.drawCenteredString(font, title, width / 2, height / 2 - 30, 0xFFE9E0C8);
-        g.drawCenteredString(font, Component.translatable("gui.skyabyss.mount.name_hint", MountData.NAME_MAX), width / 2, height / 2 + 46, 0xFF8A93A6);
+        g.drawCenteredString(font, Component.translatable("gui.skyabyss.mount.name_hint", MountData.NAME_MAX), width / 2, height / 2 + 46, 0xFF8A8290);
     }
 
     @Override

@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 都の店の画面 (docs/design/35 の 3.1・3.3、00 の 223)。バニラの取引の画面は使わない。
 // 板の上に見出し (店の名前) と手持ちの鐘銭、つまみ (買う / 売る)、品の行。行の右に値段の札 (鐘銭と素材。足りない数は赤)。
@@ -127,7 +128,7 @@ public class ShopScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fillGradient(0, 0, width, height, 0x800A0E1E, 0xA00A0E1E);
+        g.fill(0, 0, width, height, 0xA00E0D14);
     }
 
     @Override
@@ -188,7 +189,7 @@ public class ShopScreen extends Screen {
         }
         Golden.Box body = LAYOUT.body();
         jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable(mode == BACK ? "gui.skyabyss.shop.hint_back" : sellOnly() ? "gui.skyabyss.buyback.hint" : mode == SELL ? "gui.skyabyss.shop.hint_sell" : "gui.skyabyss.shop.hint_buy"),
-                body.x() + Golden.S5, Golden.textY(body.bottom() - Golden.ROW, Golden.ROW), body.w() - Golden.S13, 0xFF000000 | Golden.DIM, false);
+                body.x() + Golden.S5, Golden.textY(body.bottom() - Golden.ROW, Golden.ROW), body.w() - Golden.S13, 0xFF000000 | Paper.ON_BLACK_DIM, false);
         fit.end(g);
         if (!hoverStack.isEmpty()) {
             g.renderTooltip(font, hoverStack, screenX, screenY);

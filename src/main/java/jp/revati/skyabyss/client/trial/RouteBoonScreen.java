@@ -15,6 +15,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.neoforged.neoforge.network.PacketDistributor;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 挑戦の加護を選ぶ画面 (trial/RouteBoons)。試練の板と同じ石板の枠に、二枚の札。
 // 押す (または 1 / 2) と選んで閉じる。Esc では閉じない (閉じると選び直せず、選び終わるまで仲間も次の部屋へ運ばれないため。
@@ -24,12 +25,12 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public class RouteBoonScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final Golden.Layout LAYOUT = Golden.Layout.medium(Golden.FOOT);
     private static final int BG = 0x05070F;
-    private static final int PANEL = 0x0C1022;
-    private static final int CARD = 0x101630;
-    private static final int GOLD = 0xE9C46A;
-    private static final int TEAL = 0x8FD0FF;
-    private static final int TEXT = 0xE6E8EE;
-    private static final int DIM = 0x9AA4C4;
+    private static final int PANEL = 0x181722;
+    private static final int CARD = 0x16151E;
+    private static final int GOLD = 0xF89CD2;
+    private static final int TEAL = 0xFFF6EA;
+    private static final int TEXT = 0xECE4D6;
+    private static final int DIM = 0x9A929C;
 
     private static final int W = Golden.M_W;
     private static final int H = Golden.M_H;
@@ -191,13 +192,13 @@ public class RouteBoonScreen extends Screen implements jp.revati.skyabyss.client
             boolean on = hover == i;
             Golden.recess(g, new Golden.Box(x, CARD_Y, CARD_W, CARD_H));
             if (on) {
-                Golden.outline(g, x, CARD_Y, x + CARD_W, CARD_Y + CARD_H, argb(1f, GOLD));
+                Paper.edge(g, x, CARD_Y, x + CARD_W, CARD_Y + CARD_H, argb(1f, GOLD));
                 g.fill(x + 1, CARD_Y + 1, x + CARD_W - 1, CARD_Y + CARD_H - 1, argb(0.08f, GOLD));
             }
             // 押す数字の札
             int nx = x + Golden.S5;
             int ny = CARD_Y + Golden.S5;
-            Golden.outline(g, nx, ny, nx + Golden.S13, ny + Golden.S13, argb(1f, on ? GOLD : 0x4A5A68));
+            Paper.edge(g, nx, ny, nx + Golden.S13, ny + Golden.S13, argb(1f, on ? GOLD : 0x4A4450));
             String n = String.valueOf(i + 1);
             g.drawString(font, n, nx + 7 - font.width(n) / 2, Golden.textY(ny, Golden.S13), argb(1f, on ? GOLD : TEXT), false);
             jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable(b.key()), nx + Golden.S13 + Golden.S5, Golden.textY(ny, Golden.S13),
@@ -211,7 +212,7 @@ public class RouteBoonScreen extends Screen implements jp.revati.skyabyss.client
         }
         Golden.Box foot = LAYOUT.foot();
         jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.boon.help"), foot.x() + Golden.S5, Golden.textY(foot.y(), foot.h()),
-                foot.w() - Golden.S13, argb(1f, Golden.DIM), false);
+                foot.w() - Golden.S13, argb(1f, Paper.ON_BLACK_DIM), false);
         fit.end(g);
     }
 

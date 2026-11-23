@@ -1220,6 +1220,8 @@ public final class ShotRunner {
             // バニラの進捗の画面 (ポーズ画面の「進捗・実績」・L キーと同じ。控え帳の「記し」へ差し替わるか)
             case "advancements" -> () -> new net.minecraft.client.gui.screens.advancements.AdvancementsScreen(mc.player.connection.getAdvancements());
             case "pause" -> () -> new PauseScreen(true);
+            case "options" -> () -> new net.minecraft.client.gui.screens.options.OptionsScreen(null, mc.options);
+            case "video_options" -> () -> new net.minecraft.client.gui.screens.options.VideoSettingsScreen(null, mc, mc.options);
             case "travel_map_demo" -> () -> jp.revati.skyabyss.client.map.TravelMapScreen.demo(false);
             case "travel_map" -> () -> { jp.revati.skyabyss.client.map.MapClient.open(); return mc.screen; };
             case "travel_map_voyage_demo" -> () -> jp.revati.skyabyss.client.map.TravelMapScreen.demo(true);
@@ -1235,6 +1237,8 @@ public final class ShotRunner {
             case "skills_build" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().buildPage();
             case "job_choice" -> jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen::new;
             case "job_choice_shaman" -> () -> new jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen().pick(jp.revati.skyabyss.rpg.skill.Job.SHAMAN);
+            case "job_choice_archer" -> () -> new jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen().pick(jp.revati.skyabyss.rpg.skill.Job.ARCHER);
+            case "job_room_archer" -> () -> new jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen(true).pick(jp.revati.skyabyss.rpg.skill.Job.ARCHER);
             case "skills_tryon" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.WHALE_SWEEP)
                     .tryOn(jp.revati.skyabyss.rpg.skill.Skill.ROCK_CALL, jp.revati.skyabyss.rpg.skill.Skill.WHALE_SWEEP);
             case "skills_cleave" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.TITAN_CLEAVE);

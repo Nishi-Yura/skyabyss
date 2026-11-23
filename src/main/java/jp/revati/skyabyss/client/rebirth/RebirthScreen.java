@@ -20,6 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.network.PacketDistributor;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 称号と飾りの画面 (C04・C23)。左 = 称号の一覧 (解けたものを選ぶ。解けていないものは条件が見える)、右 = 見せ方の切り替え (名札の効果・称号・背中の飾り・光・プリズムを止める・順位表に載せる)。
 // 色の段と記号は固定で切れない。記録画面の「称号」から、または /rebirthfx で開く。
@@ -33,10 +34,10 @@ public final class RebirthScreen extends Screen implements jp.revati.skyabyss.cl
     private static final int ROW = Golden.ROW;
     private static final int LIST_Y = LIST.y() + ROW + Golden.S5;
     private static final int ROWS = (LIST.bottom() - 2 - LIST_Y) / ROW;
-    private static final int TEXT = 0xFFE9EDF0;
-    private static final int SOFT = 0xFF9AA7AE;
+    private static final int TEXT = 0xFFECE4D6;
+    private static final int SOFT = 0xFF9A929C;
     private static final int LOCKED = 0xFF5F6A70;
-    private static final int GOLD = 0xFFE6B84A;
+    private static final int GOLD = 0xFFF89CD2;
 
     private final Screen parent;
     private int left;
@@ -73,7 +74,7 @@ public final class RebirthScreen extends Screen implements jp.revati.skyabyss.cl
         int bw = LOOK.w() - 2 * Golden.S5;
         int y = LOOK.y() + ROW + Golden.S5;
         for (Toggle t : TOGGLES) {
-            Button b = addRenderableWidget(Button.builder(label(t), btn -> {
+            Button b = addRenderableWidget(Paper.tag(label(t), btn -> {
                 t.value.set(!RebirthConfig.on(t.value));
                 RebirthConfig.CLIENT_SPEC.save();
                 btn.setMessage(label(t));
@@ -81,7 +82,7 @@ public final class RebirthScreen extends Screen implements jp.revati.skyabyss.cl
             toggles.add(b);
             y += Golden.BTN + Golden.S5;
         }
-        addRenderableWidget(Button.builder(boardLabel(), btn -> {
+        addRenderableWidget(Paper.tag(boardLabel(), btn -> {
             boolean now = !hidden();
             PacketDistributor.sendToServer(new RebirthNet.HiddenPayload(now));
             // 返事 (同期) を待たず見た目だけ先に替える

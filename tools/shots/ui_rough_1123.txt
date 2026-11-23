@@ -1,0 +1,65 @@
+# UI の作り直しのラフ (11/23) の素材: 景色の背景 1 枚と、ジョブごとの正面の姿 6 枚。
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/ui_rough_1123.txt -PshotsName=ui_rough_1123
+world ui_rough_1123 flat
+size 1920 1080
+timeout 600
+render 8
+clouds off
+guiscale 4
+
+cmd time set noon
+cmd gamemode creative
+cmd skyabyss playtest skip opening
+cmd skyabyss cinematic stop
+cmd skyabyss level set @p 12
+camera 0 -60 0 200 -8
+waitchunks
+hud off
+chat clear
+wait 40
+shot bg
+
+render 2
+cmd setblock 0 219 0 barrier
+camera 0 220 0 200 0
+wait 20
+perspective front
+fov 40
+cmd skyabyss job choose warrior
+cmd item replace entity @p weapon.mainhand with skyabyss:shrine_sword
+wait 20
+look 200 -6
+chat clear
+wait 10
+shot job_warrior
+cmd skyabyss job choose smith
+cmd item replace entity @p weapon.mainhand with skyabyss:shrine_hammer
+wait 20
+chat clear
+wait 10
+shot job_smith
+cmd skyabyss job choose mage
+cmd item replace entity @p weapon.mainhand with skyabyss:shrine_staff
+wait 20
+chat clear
+wait 10
+shot job_mage
+cmd skyabyss job choose archer
+cmd item replace entity @p weapon.mainhand with skyabyss:shrine_bow
+wait 20
+chat clear
+wait 10
+shot job_archer
+cmd skyabyss job choose assassin
+cmd item replace entity @p weapon.mainhand with skyabyss:shrine_dagger
+wait 20
+chat clear
+wait 10
+shot job_assassin
+cmd skyabyss job choose shaman
+cmd item replace entity @p weapon.mainhand with skyabyss:shrine_bell_staff
+wait 20
+chat clear
+wait 10
+shot job_shaman
+quit

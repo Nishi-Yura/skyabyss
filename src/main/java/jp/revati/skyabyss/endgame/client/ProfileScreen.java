@@ -35,6 +35,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.network.PacketDistributor;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // プロフィール (持ち物の画面の右上の札から開く。自分のことを見る・決める画面)。
 //   左      人形・名前と名札の称号 (名前の上)・組合の旗と名前
@@ -70,11 +71,11 @@ public class ProfileScreen extends Screen {
     static final int LIST_Y = MAIN.y() + Golden.S5;
     static final int LIST_ROWS = (MAIN.h() - 2 * Golden.S5 - Golden.ROW - Golden.S3) / ROW;
 
-    static final int TITLE = Golden.PALE;
+    static final int TITLE = Paper.ON_BLACK_HI;
     static final int TEXT = Golden.TEXT;
-    static final int SOFT = Golden.SOFT;
-    static final int DIM = Golden.DIM;
-    static final int GOLD = Golden.GOLD;
+    static final int SOFT = Paper.ON_BLACK_SOFT;
+    static final int DIM = Paper.ON_BLACK_DIM;
+    static final int GOLD = Paper.ON_BLACK_PINK;
 
     static final int ME = 0;
     static final int TITLES = 1;
@@ -133,14 +134,14 @@ public class ProfileScreen extends Screen {
             int y = MAIN.y() + Golden.S5;
             int bw = BODY_R - BODY_X;
             for (Toggle t : TOGGLES) {
-                addRenderableWidget(Button.builder(label(t), btn -> {
+                addRenderableWidget(Paper.tag(label(t), btn -> {
                     t.value.set(!RebirthConfig.on(t.value));
                     RebirthConfig.CLIENT_SPEC.save();
                     btn.setMessage(label(t));
                 }).bounds(left + BODY_X, y, bw, Golden.BTN).build());
                 y += Golden.BTN + Golden.S5;
             }
-            addRenderableWidget(Button.builder(boardLabel(hidden()), btn -> {
+            addRenderableWidget(Paper.tag(boardLabel(hidden()), btn -> {
                 boolean now = !hidden();
                 PacketDistributor.sendToServer(new RebirthNet.HiddenPayload(now));
                 btn.setMessage(boardLabel(now));

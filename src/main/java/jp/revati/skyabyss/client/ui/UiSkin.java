@@ -49,6 +49,13 @@ public final class UiSkin {
         return active;
     }
 
+    // 切り絵の絵柄 (A) のとき、バニラの画面の釦も mod の釦 (Paper.button) で描く (mixin/GlassButtonMixin)
+    private static volatile boolean paper;
+
+    public static boolean paper() {
+        return active && paper;
+    }
+
     // 箱の画面の見出し (バニラの濃い灰色) を絵柄の色に
     public static int label(int color) {
         if (!active || (color & 0xFFFFFF) != 0x404040) {
@@ -69,6 +76,7 @@ public final class UiSkin {
             tipBg = (int) o.get("tooltip_bg").getAsLong();
             tipEdge = (int) o.get("tooltip_edge").getAsLong();
             tipEdge2 = (int) o.get("tooltip_edge2").getAsLong();
+            paper = o.has("paper") && o.get("paper").getAsBoolean();
             active = true;
         } catch (Exception e) {
             SkyAbyss.LOGGER.warn("UI skin: could not read {}: {}", SKIN, e.toString());
@@ -86,7 +94,7 @@ public final class UiSkin {
             if (event.getPackType() != PackType.CLIENT_RESOURCES) {
                 return;
             }
-            String[] names = {"天と淵: 画面の絵柄 A 暗い板", "天と淵: 画面の絵柄 B 帳面", "天と淵: 画面の絵柄 C 黒い石と金"};
+            String[] names = {"天と淵: 画面の絵柄 A 切り絵", "天と淵: 画面の絵柄 B 帳面", "天と淵: 画面の絵柄 C 黒い石と金"};
             for (int i = 0; i < PACKS.length; i++) {
                 event.addPackFinders(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "resourcepacks/" + PACKS[i]), PackType.CLIENT_RESOURCES,
                         Component.literal(names[i]), PackSource.BUILT_IN, false, Pack.Position.TOP);
@@ -142,12 +150,12 @@ public final class UiSkin {
         }
 
         @SubscribeEvent
-        // ツールチップは板と同じ絵柄 (藍の地に金の細い縁。docs/design/56 の 2 章)。絵柄のパックの有無によらない。
+        // ツールチップは板と同じ絵柄 (黒い紙に桃色の細い縁。docs/design/56 の 2.1)。絵柄のパックの有無によらない。
         // 品のレア度は縁の色でなく名前の色で見せる (縁が品ごとに変わると板の縁とそろわない)
         static void onTooltipColor(RenderTooltipEvent.Color event) {
-            event.setBackground(0xF00C1022);
-            event.setBorderStart(Golden.LINE);
-            event.setBorderEnd(0xFF8A7440);
+            event.setBackground(0xF0181722);
+            event.setBorderStart(Paper.PINK);
+            event.setBorderEnd(Paper.PINK_LO);
         }
     }
 

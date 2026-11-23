@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 厩舎の画面 (docs/design/38 の 5 章)。左に見た目の一覧 (押すと買う・選ぶ)、右に今の見た目の姿 (一覧に触れるとその見た目)、
 // 速さ・跳びの段 (押すと一段上げる)、笛をもらう釦。決めるのはサーバー (MountService)。押すたびに新しい持ち物が届いて描き直す。
@@ -77,7 +78,7 @@ public class MountShopScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fillGradient(0, 0, width, height, 0x800A0E1E, 0xA00A0E1E);
+        g.fill(0, 0, width, height, 0xA00E0D14);
     }
 
     private int lookY() {
@@ -174,7 +175,7 @@ public class MountShopScreen extends Screen {
         boolean canName = view.bond() >= 2;
         int ww = canName ? rw - NAME_W - 4 : rw;
         boolean hw = mouseX >= rx && mouseX < rx + ww && mouseY >= wy && mouseY < wy + Golden.BTN;
-        g.fill(rx, wy, rx + ww, wy + Golden.BTN, view.whistle() ? 0xFF161B22 : hw ? 0xFF364064 : 0xFF222C52);
+        g.fill(rx, wy, rx + ww, wy + Golden.BTN, view.whistle() ? 0xFF161B22 : hw ? 0xFF3A3644 : 0xFF2C2434);
         g.renderOutline(rx, wy, ww, Golden.BTN, view.whistle() ? FacilityUi.LINE : FacilityUi.TEAL);
         TextClip.line(g, font, Component.translatable(view.whistle() ? "gui.skyabyss.mount.whistle_have" : "gui.skyabyss.mount.whistle_get"),
                 rx + Golden.S5, Golden.textY(wy, Golden.BTN), ww - 2 * Golden.S5, view.whistle() ? FacilityUi.DIM : 0xFFFFFFFF, false);
@@ -182,12 +183,12 @@ public class MountShopScreen extends Screen {
         if (canName) {
             int nx = rx + rw - NAME_W;
             boolean hn = mouseX >= nx && mouseX < nx + NAME_W && mouseY >= wy && mouseY < wy + Golden.BTN;
-            g.fill(nx, wy, nx + NAME_W, wy + Golden.BTN, hn ? 0xFF364064 : 0xFF222C52);
+            g.fill(nx, wy, nx + NAME_W, wy + Golden.BTN, hn ? 0xFF3A3644 : 0xFF2C2434);
             g.renderOutline(nx, wy, NAME_W, Golden.BTN, FacilityUi.TEAL);
             TextClip.line(g, font, Component.translatable("gui.skyabyss.mount.name_button"), nx + 4, Golden.textY(wy, Golden.BTN), NAME_W - 8, 0xFFFFFFFF, false);
         }
         TextClip.line(g, font, Component.translatable("gui.skyabyss.mount.hint"), rx + Golden.S5, Golden.textY(RIGHT.bottom() - Golden.ROW, Golden.ROW), rw - 2 * Golden.S5,
-                0xFF000000 | Golden.DIM, false);
+                0xFF000000 | Paper.ON_BLACK_DIM, false);
         fit.end(g);
     }
 
@@ -249,7 +250,7 @@ public class MountShopScreen extends Screen {
         }
         int price = MountStats.price(MountStats.ROW_KIND[kind], tier + 1);
         boolean hover = statHit(kind, mx, my);
-        g.fill(bx, y + 1, bx + bw, y + STAT_H - 1, hover ? 0xFF364064 : 0xFF141A34);
+        g.fill(bx, y + 1, bx + bw, y + STAT_H - 1, hover ? 0xFF3A3644 : 0xFF1E1C28);
         g.renderOutline(bx, y + 1, bw, STAT_H - 2, hover ? FacilityUi.TEAL : FacilityUi.LINE);
         g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), bx + 1, y + 2);
         g.drawString(font, Integer.toString(price), bx + 19, Golden.textY(y, STAT_H), view.coins() >= price ? FacilityUi.GOLD : FacilityUi.LACK, false);

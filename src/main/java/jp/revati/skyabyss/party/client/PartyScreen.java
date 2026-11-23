@@ -15,13 +15,14 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.network.PacketDistributor;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 「物語と仲間」の画面 (O)。上の帯に物語の段階とレベルの上限 (招待が届いていれば右に受ける・断る)、主の列 (左) に仲間、脇の列 (右) に招待できる人。
 // 板は黄金比の大きい板 (client/ui/Golden。docs/design/56)。Esc で閉じる。操作はサーバーへ送るだけ (検めるのはサーバー)。届いた状態で描き直す
 public final class PartyScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final int TEXT = Golden.TEXT;
-    private static final int SOFT = Golden.SOFT;
-    private static final int GOLD = Golden.GOLD;
+    private static final int SOFT = Paper.ON_BLACK_SOFT;
+    private static final int GOLD = Paper.ON_BLACK_PINK;
     private static final int MAX_LIST = 8;
     private static final int ROW = Golden.ROW;
     // 仲間と招待できる人の一行 (釦 13 + 余白)
@@ -67,9 +68,9 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
         // 招待が届いている (物語の帯の右下)
         if (!s.inviteFrom().isEmpty()) {
             int by = STORY.bottom() - Golden.S5 - Golden.BTN;
-            addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.party.decline"), b -> send(PartyNetwork.Action.DECLINE, ""))
+            addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.party.decline"), b -> send(PartyNetwork.Action.DECLINE, ""))
                     .bounds(STORY.right() - Golden.S5 - Golden.S34, by, Golden.S34, Golden.BTN).build());
-            addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.party.accept"), b -> send(PartyNetwork.Action.ACCEPT, ""))
+            addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.party.accept"), b -> send(PartyNetwork.Action.ACCEPT, ""))
                     .bounds(STORY.right() - Golden.S5 - 2 * Golden.S34 - Golden.S3, by, Golden.S34, Golden.BTN).build());
         }
         // 仲間 (主の列)
@@ -78,10 +79,10 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
         for (PartyNetwork.Member m : s.members()) {
             if (leader && !m.id().equals(self)) {
                 int by = y + (PROW - Golden.BTN) / 2;
-                addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.party.promote"), b -> send(PartyNetwork.Action.PROMOTE, m.name()))
+                addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.party.promote"), b -> send(PartyNetwork.Action.PROMOTE, m.name()))
                         .bounds(MEMBERS.right() - Golden.S5 - 2 * Golden.S21 - Golden.S3, by, Golden.S21, Golden.BTN).tooltip(net.minecraft.client.gui.components.Tooltip.create(
                                 Component.translatable("gui.skyabyss.party.promote_tip"))).build());
-                addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.party.kick"), b -> send(PartyNetwork.Action.KICK, m.name()))
+                addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.party.kick"), b -> send(PartyNetwork.Action.KICK, m.name()))
                         .bounds(MEMBERS.right() - Golden.S5 - Golden.S21, by, Golden.S21, Golden.BTN).tooltip(net.minecraft.client.gui.components.Tooltip.create(
                                 Component.translatable("gui.skyabyss.party.kick_tip"))).build());
             }
@@ -89,11 +90,11 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
         }
         if (!s.members().isEmpty()) {
             // 抜ける: 仲間の見出しの右
-            addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.party.leave"), b -> send(PartyNetwork.Action.LEAVE, ""))
+            addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.party.leave"), b -> send(PartyNetwork.Action.LEAVE, ""))
                     .bounds(MEMBERS.right() - Golden.S5 - Golden.S55, MEMBERS.y() + 2, Golden.S55, Golden.BTN).build());
         }
         // パーティー募集の画面 (脇の列の見出しの右)
-        addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.party.finder.open"), b -> {
+        addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.party.finder.open"), b -> {
             minecraft.setScreen(new PartyFinderScreen(this));
             send(PartyNetwork.Action.FINDER_LIST, "");
         }).bounds(OTHERS.right() - Golden.S5 - Golden.S34, OTHERS.y() + 2, Golden.S34, Golden.BTN).tooltip(net.minecraft.client.gui.components.Tooltip.create(
@@ -102,7 +103,7 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
         inviteButtons.clear();
         if (leader && s.members().size() < 4) {
             for (String name : candidates(s)) {
-                inviteButtons.add(addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.party.invite"),
+                inviteButtons.add(addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.party.invite"),
                         b -> send(PartyNetwork.Action.INVITE, name)).bounds(OTHERS.right() - Golden.S8 - Golden.S34, CAND_Y, Golden.S34, Golden.BTN).build()));
             }
         }
@@ -227,7 +228,7 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
                     OTHERS.w() - 2 * Golden.S8 - Golden.S34 - Golden.S5, TEXT, false);
         }
         candPanel.end(g);
-        candPanel.drawBar(g, 0x30FFFFFF, 0x90E9C46A);
+        candPanel.drawBar(g, 0x30FFFFFF, 0x90E45A9C);
         for (int i = 0; i < inviteButtons.size(); i++) {
             Button b = inviteButtons.get(i);
             int oy = candPanel.top() + i * PROW;

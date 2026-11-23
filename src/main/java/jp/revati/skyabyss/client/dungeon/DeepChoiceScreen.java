@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.neoforged.neoforge.network.PacketDistributor;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 層の門で「ふつうに入る / 深く潜る」を選ぶ画面 (dungeon/DeepChoice)。左右二枚の札: ふつう (石の色) と深く潜る (淵の紫、何が変わるかを三行)。
 // 札を押すと入る。Esc で閉じれば入らない
@@ -56,17 +57,17 @@ public class DeepChoiceScreen extends Screen {
         fit.begin(g);
         Golden.frame(g, font, LAYOUT, null);
         Golden.Box head = LAYOUT.head();
-        g.drawString(font, title, head.x() + Golden.S5, Golden.textY(head.y(), head.h()), Golden.GOLD, false);
+        g.drawString(font, title, head.x() + Golden.S5, Golden.textY(head.y(), head.h()), Paper.ON_BLACK_PINK, false);
         Golden.Box body = LAYOUT.body();
         g.drawString(font, Component.translatable("gui.skyabyss.dungeon.deep.mood", Component.translatable(data.moodName())), body.x() + 2,
-                Golden.textY(body.y(), Golden.ROW), Golden.SOFT, false);
+                Golden.textY(body.y(), Golden.ROW), Paper.ON_BLACK_SOFT, false);
         for (boolean deep : new boolean[] {false, true}) {
             Golden.Box c = card(deep);
             boolean hover = mx >= c.x() && mx < c.right() && my >= c.y() && my < c.bottom();
-            g.fill(c.x(), c.y(), c.right(), c.bottom(), deep ? (hover ? 0xFF2E2440 : 0xFF1E182C) : (hover ? 0xFF262A34 : 0xFF181B22));
-            Golden.outline(g, c.x(), c.y(), c.right(), c.bottom(), 0xFF000000 | (deep ? DEEP : hover ? Golden.TEXT : 0x5A6690));
+            g.fill(c.x(), c.y(), c.right(), c.bottom(), deep ? (hover ? 0xFF2E2440 : 0xFF1E182C) : (hover ? 0xFF2A2632 : 0xFF181B22));
+            Paper.edge(g, c.x(), c.y(), c.right(), c.bottom(), 0xFF000000 | (deep ? DEEP : hover ? Golden.TEXT : 0x5A5460));
             if (hover) {
-                Golden.outline(g, c.x() + 1, c.y() + 1, c.right() - 1, c.bottom() - 1, 0x60FFFFFF);
+                Paper.edge(g, c.x() + 1, c.y() + 1, c.right() - 1, c.bottom() - 1, 0x60FFFFFF);
             }
             int x = c.x() + Golden.S5;
             int w = c.w() - 2 * Golden.S5;
@@ -79,7 +80,7 @@ public class DeepChoiceScreen extends Screen {
                     : List.of("gui.skyabyss.dungeon.deep.normal_desc");
             for (String k : keys) {
                 for (FormattedCharSequence line : TextWrap.split(font, Component.literal("・").append(Component.translatable(k)), w)) {
-                    g.drawString(font, line, x, y, Golden.SOFT, false);
+                    g.drawString(font, line, x, y, Paper.ON_BLACK_SOFT, false);
                     y += 10;
                 }
                 y += 2;
@@ -87,7 +88,7 @@ public class DeepChoiceScreen extends Screen {
             if (deep) {
                 y += 3;
                 for (FormattedCharSequence line : TextWrap.split(font, Component.translatable("gui.skyabyss.dungeon.deep.party"), w)) {
-                    g.drawString(font, line, x, y, Golden.DIM, false);
+                    g.drawString(font, line, x, y, Paper.ON_BLACK_DIM, false);
                     y += 10;
                 }
             }

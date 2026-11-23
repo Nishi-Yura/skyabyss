@@ -16,6 +16,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 巡り路の野営地の画面 (endgame/CircuitCamps。報いの箱を押すと開く)。試練の板と同じ石板の枠:
 //   題と野営地の名・今の景品 (階級の色の枠。指すと品の説明)・入れ替えまでの時間・階級ごとの出やすさ・決まり・今日の残り・「歩き出す」
@@ -24,12 +25,12 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public class CircuitCampScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
     private static final int BG = 0x05070F;
-    private static final int PANEL = 0x0C1022;
-    private static final int CARD = 0x101630;
-    private static final int GOLD = 0xE9C46A;
-    private static final int TEAL = 0x8FD0FF;
-    private static final int TEXT = 0xE6E8EE;
-    private static final int DIM = 0x9AA4C4;
+    private static final int PANEL = 0x181722;
+    private static final int CARD = 0x16151E;
+    private static final int GOLD = 0xF89CD2;
+    private static final int TEAL = 0xFFF6EA;
+    private static final int TEXT = 0xECE4D6;
+    private static final int DIM = 0x9A929C;
 
     private static final int W = Golden.L_W;
     private static final int H = Golden.L_H;
@@ -72,7 +73,7 @@ public class CircuitCampScreen extends Screen implements jp.revati.skyabyss.clie
     }
 
     static int tierRgb(ItemStack s) {
-        return s.getItem() instanceof ModGear g ? g.tier().rgb() : 0x9AA4C4;
+        return s.getItem() instanceof ModGear g ? g.tier().rgb() : 0x9A929C;
     }
 
     static Component time(int seconds) {
@@ -129,7 +130,7 @@ public class CircuitCampScreen extends Screen implements jp.revati.skyabyss.clie
             int rgb = tierRgb(st);
             boolean on = mx >= s[0] && mx < s[0] + SLOT && my >= s[1] && my < s[1] + SLOT;
             Golden.recess(g, new Golden.Box(s[0], s[1], SLOT, SLOT));
-            Golden.outline(g, s[0], s[1], s[0] + SLOT, s[1] + SLOT, argb(on ? 1f : 0.75f, rgb));
+            Paper.edge(g, s[0], s[1], s[0] + SLOT, s[1] + SLOT, argb(on ? 1f : 0.75f, rgb));
             if (on) {
                 g.fill(s[0] + 1, s[1] + 1, s[0] + SLOT - 1, s[1] + SLOT - 1, argb(0.12f, GOLD));
             }
@@ -167,15 +168,15 @@ public class CircuitCampScreen extends Screen implements jp.revati.skyabyss.clie
             if (y + Golden.ROW > LAYOUT.body().bottom()) {
                 break;
             }
-            g.drawString(font, line, bx, Golden.textY(y, Golden.ROW), argb(1f, Golden.DIM), false);
+            g.drawString(font, line, bx, Golden.textY(y, Golden.ROW), argb(1f, Paper.ON_BLACK_DIM), false);
         }
         Golden.Box foot = LAYOUT.foot();
         g.drawString(font, Component.translatable("gui.skyabyss.camp.left", view.runsLeft()), foot.x() + Golden.S5, Golden.textY(foot.y(), foot.h()),
                 argb(1f, view.runsLeft() > 0 ? TEAL : DIM), false);
         // 歩き出す (歩いているあいだは、やめる)
         boolean on = mx >= btnX() && mx < btnX() + BTN_W && my >= btnY() && my < btnY() + BTN_H;
-        g.fill(btnX(), btnY(), btnX() + BTN_W, btnY() + BTN_H, on ? 0xFF2A2618 : 0xFF101630);
-        Golden.outline(g, btnX(), btnY(), btnX() + BTN_W, btnY() + BTN_H, argb(1f, on ? GOLD : 0x8A6E2C));
+        g.fill(btnX(), btnY(), btnX() + BTN_W, btnY() + BTN_H, on ? 0xFF2A2618 : 0xFF16151E);
+        Paper.edge(g, btnX(), btnY(), btnX() + BTN_W, btnY() + BTN_H, argb(1f, on ? GOLD : 0x8C2C60));
         Component b = Component.translatable(view.running() ? "gui.skyabyss.camp.stop" : "gui.skyabyss.camp.start");
         g.drawString(font, b, btnX() + BTN_W / 2 - font.width(b) / 2, Golden.textY(btnY(), BTN_H), argb(1f, GOLD), false);
         fit.end(g);

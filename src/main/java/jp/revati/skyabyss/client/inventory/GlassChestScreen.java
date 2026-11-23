@@ -14,6 +14,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ScreenEvent;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 箱の画面 (預かり所と、世界の箱。docs/design/56 の 4 章。2026-11-11 からバニラの箱の形)。バニラの箱の画面の代わりに開く。
 // 入れ物も枠の置き場もバニラと同じ (ChestMenu): 上に箱の枠 (9 列 × 行)、下に袋 27 と手もと 9。見た目だけ夜空のガラスの板。
@@ -57,14 +58,14 @@ public class GlassChestScreen extends AbstractContainerScreen<ChestMenu> impleme
             }
         }
         String count = used + " / " + box;
-        g.drawString(font, count, imageWidth - 8 - font.width(count), titleLabelY, Golden.DIM, false);
+        g.drawString(font, count, imageWidth - 8 - font.width(count), titleLabelY, Paper.ON_BLACK_DIM, false);
         g.pose().popPose();
     }
 
     @Override
     protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
-        g.drawString(font, title, titleLabelX, titleLabelY, Golden.GOLD, false);
-        g.drawString(font, Component.translatable("gui.skyabyss.gear.bag"), inventoryLabelX, inventoryLabelY, Golden.PALE, false);
+        g.drawString(font, title, titleLabelX, titleLabelY, Paper.ON_BLACK_PINK, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.gear.bag"), inventoryLabelX, inventoryLabelY, Paper.ON_BLACK_HI, false);
     }
 
     @Override

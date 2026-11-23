@@ -46,13 +46,13 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
     static final Sprite W_TOAST = new Sprite(0, 104, 320, 64);
 
     // 墨の色
-    static final int INK = 0xFF3B2A1C;
-    static final int FADED = 0xFF8E7B5E;
-    static final int TEAL = 0xFF1D6E69;
-    static final int TITLE = 0xFF184F55;
-    static final int PAPER = 0xFFF2E6C8;
+    static final int INK = 0xFF181722;
+    static final int FADED = 0xFF6E6468;
+    static final int TEAL = 0xFF8C2C60;
+    static final int TITLE = 0xFFB0326E;
+    static final int PAPER = 0xFFECE4D6;
     // まだ何も記されていない章のしおりの字
-    static final int TAB_LOCKED = 0xFF5E5040;
+    static final int TAB_LOCKED = 0xFF6E6468;
 
     // 見開きの大きさと、頁の内側 (書の左上からの位置)
     private static final int BW = 304;
@@ -341,7 +341,7 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
         int y = top - (on ? 18 : 15);
         boolean known = chapterKnown(chapter);
         Component label = Component.translatable(chapter.tabKey());
-        int color = on ? TITLE : known ? INK : TAB_LOCKED;
+        int color = on ? INK : known ? INK : TAB_LOCKED;
         if (!on && hoverTab(index, mouseX, mouseY)) {
             color = TEAL;
         }
@@ -431,7 +431,7 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
                 drawInkBar(g, x, y + 4, line.color());
             } else {
                 if (line.bar()) {
-                    g.fill(x + 1, y - 1, x + 2, y + line.height() - 1, 0x801D6E69);
+                    g.fill(x + 1, y - 1, x + 2, y + line.height() - 1, 0x808C2C60);
                 }
                 int color = line.color();
                 if (line.link() != null && mouseX >= x && mouseX < x + RIGHT_W && mouseY >= y && mouseY < y + line.height()) {
@@ -456,7 +456,7 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
             int thumb = Math.max(8, track * shown / Math.max(1, lines.size()));
             int ty = top + BODY_Y + (track - thumb) * bodyScroll / max;
             g.fill(x + RIGHT_W + 4, top + BODY_Y, x + RIGHT_W + 6, top + BODY_BOTTOM, 0x40000000);
-            g.fill(x + RIGHT_W + 4, ty, x + RIGHT_W + 6, ty + thumb, 0x90 << 24 | 0x1D6E69);
+            g.fill(x + RIGHT_W + 4, ty, x + RIGHT_W + 6, ty + thumb, 0x90 << 24 | 0x8C2C60);
         }
     }
 

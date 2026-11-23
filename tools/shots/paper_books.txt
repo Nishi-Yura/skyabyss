@@ -1,0 +1,54 @@
+# 伝承の書と記録の帳 (切り絵。docs/design/56 の 2.1)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/paper_books.txt -PshotsName=paper_books
+world paper_books flat
+size 1920 1080
+timeout 600
+render 4
+clouds off
+guiscale 4
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss playtest skip opening
+cmd skyabyss cinematic stop
+cmd skyabyss level set @p 12
+cmd skyabyss job choose mage
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+
+window 1920 1080
+guiscale 4
+
+window 1920 1080
+guiscale 4
+wait 10
+open lore
+wait 8
+overlap lore_1920_g4
+shot lore_1920_g4
+close
+wait 4
+cmd skyrecord deeds
+wait 30
+overlap record_1920_g4
+shot record_1920_g4
+close
+wait 4
+window 1280 720
+guiscale 3
+wait 10
+open lore
+wait 8
+overlap lore_1280_g3
+shot lore_1280_g3
+close
+wait 4
+cmd skyrecord deeds
+wait 30
+overlap record_1280_g3
+shot record_1280_g3
+close

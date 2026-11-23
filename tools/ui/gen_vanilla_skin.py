@@ -2,7 +2,7 @@
 """バニラの画面 (箱の画面・ボタン・ホットバー・ツールチップ・メニューの背景) を mod の絵柄で描き直したリソースパックを作る。
 
 python -I tools/ui/gen_vanilla_skin.py      → src/main/resources/resourcepacks/skyabyss_ui_<a|b|c>/
-  a = 暗い板 (mod の画面と同じ: 暗い青灰色の板、骨色の継ぎ目の縁、青緑の菱形の隅)  … 既定 (仮)
+  a = 切り絵 (mod の画面と同じ: 黒い紙の板・灰の細い縁の升・右上に桃色の菱・釦は斜めの短冊。docs/design/56 の 2.1)  … 既定
   b = 帳面 (羊皮紙の板、焦げ茶の縁、金の隅。伝承の書と同じ)
   c = 黒い石と金 (炭の石の板、金の縁、琥珀の隅。炉の画面と同じ)
 バニラの絵はマス目と窓の位置を読むためだけに使う。板・縁・マス目・窓は一から描き、矢印や炎の枠のような小さな印だけ形を mod の色で塗り直す。
@@ -25,10 +25,12 @@ JAR = os.path.expanduser('~/.gradle/caches/neoformruntime/artifacts/minecraft_1.
 S = 2  # 細かさ
 
 SKINS = {
-    'a': dict(name='暗い板 (mod の画面と同じ)', panel=(27, 33, 41), panel2=(23, 28, 35), edge=(201, 191, 166), edge2=(143, 134, 112),
-              corner=(95, 199, 192), slot=(15, 18, 24), slot_lo=(8, 10, 13), slot_hi=(42, 49, 59), window=(10, 12, 16), window2=(22, 60, 66),
-              ink=(233, 227, 212), ramp=[(10, 12, 16), (42, 49, 59), (120, 126, 128), (201, 191, 166)], label=0xE9E3D4, label_dim=0xA9B2B8,
-              button=(36, 44, 54), button_hi=(48, 72, 78), button_edge=(143, 134, 112), button_edge_hi=(95, 199, 192)),
+    # 色は client/ui/Paper と同じ (BLACK・BLACK_LO・PINK・PINK_LO・GREY・GREY_LO・CREAM)
+    'a': dict(name='切り絵 (mod の画面と同じ)', paper=True, panel=(24, 23, 34), panel2=(24, 23, 34), edge=(24, 23, 34), edge2=(14, 13, 20),
+              corner=(228, 90, 156), slot=(14, 13, 20), slot_lo=(58, 54, 66), slot_hi=(58, 54, 66), window=(14, 13, 20), window2=(14, 13, 20),
+              ink=(236, 228, 214), ramp=[(14, 13, 20), (90, 84, 96), (168, 162, 154), (236, 228, 214)], label=0xECE4D6, label_dim=0x9A929C,
+              button=(236, 228, 214), button_hi=(255, 246, 234), button_edge=(14, 13, 20), button_edge_hi=(228, 90, 156),
+              cream=(236, 228, 214), cream_lo=(201, 191, 174), pink=(228, 90, 156), pink_lo=(140, 44, 96), grey_lo=(90, 84, 96), black=(24, 23, 34), black_lo=(14, 13, 20)),
     'b': dict(name='帳面 (羊皮紙)', panel=(222, 207, 170), panel2=(210, 193, 152), edge=(92, 62, 38), edge2=(64, 42, 26),
               corner=(196, 152, 64), slot=(186, 168, 128), slot_lo=(150, 130, 94), slot_hi=(236, 224, 196), window=(58, 44, 32), window2=(96, 76, 52),
               ink=(52, 38, 26), ramp=[(52, 38, 26), (120, 96, 64), (180, 160, 120), (240, 230, 206)], label=0x3A2A1C, label_dim=0x6E5A44,
@@ -209,7 +211,7 @@ def skin_container(src, sk, seed=1):
             if near(p, V_PANEL, 3):
                 for i in range(S):
                     for j in range(S):
-                        put(op, x * S + i, y * S + j, noise(rng, sk['panel'] if rng.random() > 0.08 else sk['panel2'], 2))
+                        put(op, x * S + i, y * S + j, sk['panel'] if sk.get('paper') else noise(rng, sk['panel'] if rng.random() > 0.08 else sk['panel2'], 2))
                 continue
             # そのほかの印 (矢印・炎の枠・文字欄など): 形はそのまま、色は明るさで mod の色に
             fill2(op, x, y, ramp(sk, lum(p)), p[3])
@@ -220,13 +222,14 @@ def skin_container(src, sk, seed=1):
     # 隅の菱形 (板の外の箱の四隅の近く)
     bb = src.getbbox()
     if bb:
-        for (cx, cy) in ((bb[0] + 1, bb[1] + 1), (bb[2] - 2, bb[1] + 1), (bb[0] + 1, bb[3] - 2), (bb[2] - 2, bb[3] - 2)):
+        corners = ((bb[2] - 4, bb[1] + 3),) if sk.get('paper') else ((bb[0] + 1, bb[1] + 1), (bb[2] - 2, bb[1] + 1), (bb[0] + 1, bb[3] - 2), (bb[2] - 2, bb[3] - 2))
+        for (cx, cy) in corners:
             if 0 <= cx < w and 0 <= cy < h and sp[cx, cy][3] > 0:
                 X, Y = cx * S + S // 2, cy * S + S // 2
                 for dy in range(-3, 4):
                     for dx in range(-3, 4):
                         if abs(dx) + abs(dy) <= 3 and 0 <= X + dx < w * S and 0 <= Y + dy < h * S:
-                            put(op, X + dx, Y + dy, sk['corner'] if abs(dx) + abs(dy) < 3 else sk['edge2'])
+                            put(op, X + dx, Y + dy, (sk['corner'] if (dy < 0 and dx >= 0) or not sk.get('paper') else sk['pink_lo']) if abs(dx) + abs(dy) < 3 else sk['edge2'])
     return out, len(slots), len(wins)
 
 
@@ -272,13 +275,71 @@ def button(w, h, sk, state):
     return im
 
 
+def slip(w, h, sk, body, stripe, shadow=True, flat=False):
+    """切り絵の釦の紙 (client/ui/Paper.slip と同じ形: 右へ傾けた短冊・左の端に斜めの筋・右下に黒い紙の硬い影)。
+    w, h は 1 倍の大きさ。紙は (0..w-1, 0..h-2) に、影は (1, 2) ずらして"""
+    from PIL import ImageDraw
+    im = Image.new('RGBA', (w * S, h * S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    bh = h - 2 if shadow else h
+    bw = w - 1 if shadow else w
+    sl = max(2, round(bh * 0.23))
+
+    def poly(pts, c, ox=0, oy=0):
+        d.polygon([((x + ox) * S, (y + oy) * S) for x, y in pts], fill=tuple(c) + (255,))
+
+    p = [(sl, 0), (bw, 0), (bw - sl, bh), (0, bh)]
+    if shadow:
+        poly(p, sk['black_lo'], 1, 2)
+    poly(p, body)
+    if stripe and not flat and bw > sl + 8:
+        poly([(sl + 3, 0), (sl + 5, 0), (5, bh), (3, bh)], stripe)
+    # 塗りの外へはみ出た 1 列 (PIL は右下の辺を含む) は気にしない (どれも同じ形)
+    return im
+
+
+def border(left, top, right, bottom):
+    return {'left': left, 'top': top, 'right': right, 'bottom': bottom}
+
+
+def nine4(w, h, b):
+    return {'gui': {'scaling': {'type': 'nine_slice', 'width': w, 'height': h, 'border': b}}}
+
+
+def paper_widgets(tex, sk, load, meta):
+    """切り絵の小物: 釦 = 生成りの短冊 (乗せると明るく・押せないと灰)。つまみ・滑り棒の地は黒い紙 (バニラは白い字を描くので)"""
+    wd = os.path.join(tex, 'sprites', 'widget')
+    b20 = nine4(200, 20, border(9, 9, 9, 10))
+    save(slip(200, 20, sk, sk['cream'], sk['pink']), os.path.join(wd, 'button.png'), b20)
+    save(slip(200, 20, sk, sk['button_hi'], sk['pink']), os.path.join(wd, 'button_highlighted.png'), b20)
+    save(slip(200, 20, sk, sk['grey_lo'], None, shadow=False, flat=True), os.path.join(wd, 'button_disabled.png'), b20)
+    # 滑り棒: 地は黒い紙 (白い字が読める)、つまみは桃色の短冊
+    save(slip(200, 20, sk, sk['black_lo'], None, shadow=False), os.path.join(wd, 'slider.png'), b20)
+    save(slip(200, 20, sk, sk['black_lo'], sk['pink_lo'], shadow=False), os.path.join(wd, 'slider_highlighted.png'), b20)
+    hb = nine4(8, 20, border(3, 9, 3, 10))
+    save(slip(8, 20, sk, sk['pink'], None, shadow=False), os.path.join(wd, 'slider_handle.png'), hb)
+    save(slip(8, 20, sk, sk['cream'], None, shadow=False), os.path.join(wd, 'slider_handle_highlighted.png'), hb)
+    # 入力欄: 黒い紙に灰の細い縁 (選ぶと桃色の縁)
+    for nm, e in (('text_field', sk['grey_lo']), ('text_field_highlighted', sk['pink'])):
+        save(frame(200, 20, dict(sk, edge=e, panel=sk['black_lo']), inner_alpha=255), os.path.join(wd, nm + '.png'), nine(200, 20, 1))
+    im = Image.new('RGBA', (6 * S, 32 * S), tuple(sk['pink']) + (255,))
+    save(im, os.path.join(wd, 'scroller.png'), nine(6, 32, 2))
+    # つまみ (作る世界の画面など): 選んだものは桃色、ほかは黒い紙に桃色の筋 (バニラは字を白・灰で描く)
+    for nm in ('tab', 'tab_highlighted', 'tab_selected', 'tab_selected_highlighted'):
+        src = load('sprites/widget/' + nm + '.png')
+        w, h = src.size[0], src.size[1]
+        body = sk['pink'] if 'selected' in nm else (sk['grey_lo'] if 'highlighted' in nm else sk['black_lo'])
+        im = slip(w, h, sk, body, sk['cream'] if 'selected' in nm else sk['pink'], shadow=False)
+        save(im, os.path.join(wd, nm + '.png'), meta('sprites/widget/' + nm + '.png'))
+
+
 def panel(w, h, sk, alpha=255, seed=3):
     rng = random.Random(seed)
     im = Image.new('RGBA', (w * S, h * S), (0, 0, 0, 0))
     px = im.load()
     for y in range(h * S):
         for x in range(w * S):
-            put(px, x, y, noise(rng, sk['panel'], 2), alpha)
+            put(px, x, y, sk['panel'] if sk.get('paper') else noise(rng, sk['panel'], 2), alpha)
     return im
 
 
@@ -359,23 +420,26 @@ def main():
             if (short.startswith('recipe_book/') or short.startswith('advancements/tab') or short == 'advancements/title_box.png') and not keep:
                 save(skin_sprite_recolor(load(nm), sk), os.path.join(tex, nm), meta(nm))
         # 小物: ボタン・つまみ・入力欄・スクロール・タブ
-        for st in ('normal', 'highlighted', 'disabled'):
-            nm = 'button' if st == 'normal' else 'button_' + st
-            save(button(200, 20, sk, st), os.path.join(tex, 'sprites', 'widget', nm + '.png'), nine(200, 20, 3))
-        save(button(200, 20, sk, 'normal'), os.path.join(tex, 'sprites', 'widget', 'slider.png'), nine(200, 20, 3))
-        save(button(200, 20, sk, 'highlighted'), os.path.join(tex, 'sprites', 'widget', 'slider_highlighted.png'), nine(200, 20, 3))
-        save(button(8, 20, sk, 'normal'), os.path.join(tex, 'sprites', 'widget', 'slider_handle.png'), nine(8, 20, 3))
-        save(button(8, 20, sk, 'highlighted'), os.path.join(tex, 'sprites', 'widget', 'slider_handle_highlighted.png'), nine(8, 20, 3))
-        for nm, st in (('text_field', 'normal'), ('text_field_highlighted', 'highlighted')):
-            im = frame(200, 20, sk, inner_alpha=255)
-            if st == 'highlighted':
-                im = frame(200, 20, dict(sk, edge=sk['corner']), inner_alpha=255)
-            save(im, os.path.join(tex, 'sprites', 'widget', nm + '.png'), nine(200, 20, 1))
-        save(button(6, 32, sk, 'normal'), os.path.join(tex, 'sprites', 'widget', 'scroller.png'), nine(6, 32, 2))
-        for nm in ('tab', 'tab_highlighted', 'tab_selected', 'tab_selected_highlighted'):
-            src = load('sprites/widget/' + nm + '.png')
-            save(button(src.size[0], src.size[1], sk, 'highlighted' if 'highlighted' in nm or 'selected' in nm else 'normal'),
-                 os.path.join(tex, 'sprites', 'widget', nm + '.png'), meta('sprites/widget/' + nm + '.png'))
+        if sk.get('paper'):
+            paper_widgets(tex, sk, load, meta)
+        else:
+            for st in ('normal', 'highlighted', 'disabled'):
+                nm = 'button' if st == 'normal' else 'button_' + st
+                save(button(200, 20, sk, st), os.path.join(tex, 'sprites', 'widget', nm + '.png'), nine(200, 20, 3))
+            save(button(200, 20, sk, 'normal'), os.path.join(tex, 'sprites', 'widget', 'slider.png'), nine(200, 20, 3))
+            save(button(200, 20, sk, 'highlighted'), os.path.join(tex, 'sprites', 'widget', 'slider_highlighted.png'), nine(200, 20, 3))
+            save(button(8, 20, sk, 'normal'), os.path.join(tex, 'sprites', 'widget', 'slider_handle.png'), nine(8, 20, 3))
+            save(button(8, 20, sk, 'highlighted'), os.path.join(tex, 'sprites', 'widget', 'slider_handle_highlighted.png'), nine(8, 20, 3))
+            for nm, st in (('text_field', 'normal'), ('text_field_highlighted', 'highlighted')):
+                im = frame(200, 20, sk, inner_alpha=255)
+                if st == 'highlighted':
+                    im = frame(200, 20, dict(sk, edge=sk['corner']), inner_alpha=255)
+                save(im, os.path.join(tex, 'sprites', 'widget', nm + '.png'), nine(200, 20, 1))
+            save(button(6, 32, sk, 'normal'), os.path.join(tex, 'sprites', 'widget', 'scroller.png'), nine(6, 32, 2))
+            for nm in ('tab', 'tab_highlighted', 'tab_selected', 'tab_selected_highlighted'):
+                src = load('sprites/widget/' + nm + '.png')
+                save(button(src.size[0], src.size[1], sk, 'highlighted' if 'highlighted' in nm or 'selected' in nm else 'normal'),
+                     os.path.join(tex, 'sprites', 'widget', nm + '.png'), meta('sprites/widget/' + nm + '.png'))
         # ホットバー・経験値・効果の枠
         for nm in ('hotbar', 'hotbar_selection', 'hotbar_offhand_left', 'hotbar_offhand_right', 'experience_bar_background',
                    'experience_bar_progress', 'effect_background', 'effect_background_ambient', 'jump_bar_background', 'jump_bar_cooldown', 'jump_bar_progress'):
@@ -403,7 +467,7 @@ def main():
         # 見出しの文字の色 (UiSkin)
         os.makedirs(os.path.join(base, 'assets', 'skyabyss', 'ui'), exist_ok=True)
         with open(os.path.join(base, 'assets', 'skyabyss', 'ui', 'skin.json'), 'w', encoding='utf-8') as f:
-            json.dump({'label': sk['label'], 'label_dim': sk['label_dim'], 'tooltip_bg': (0xF0 << 24) | (sk['panel'][0] << 16) | (sk['panel'][1] << 8) | sk['panel'][2],
+            json.dump({'paper': bool(sk.get('paper')), 'label': sk['label'], 'label_dim': sk['label_dim'], 'tooltip_bg': (0xF0 << 24) | (sk['panel'][0] << 16) | (sk['panel'][1] << 8) | sk['panel'][2],
                        'tooltip_edge': (0xFF << 24) | (sk['edge2'][0] << 16) | (sk['edge2'][1] << 8) | sk['edge2'][2],
                        'tooltip_edge2': (0xFF << 24) | (sk['corner'][0] << 16) | (sk['corner'][1] << 8) | sk['corner'][2]}, f)
         with open(os.path.join(base, 'pack.mcmeta'), 'w', encoding='utf-8') as f:

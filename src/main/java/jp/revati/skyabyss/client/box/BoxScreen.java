@@ -24,6 +24,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 封切り師の画面 (docs/design/52 の 6 章)。
 //   一覧: 持っている箱 (種類・帯・数) から選び「開ける」「まとめて開ける」
@@ -42,7 +43,7 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
     static final int SUM_COLS = 13;
     static final int RC = Golden.S34;
     static final int ROW = Golden.ROW;
-    static final int GOLD = 0xFFE9C46A, TEXT = 0xFFD8DCE6, DIM = 0xFFA4ACC8, LINE = 0xFF3A4252;
+    static final int GOLD = 0xFFF89CD2, TEXT = 0xFFECE4D6, DIM = 0xFF9A929C, LINE = 0xFF3A3644;
     static final float SINGLE_MS = 3800f, BATCH_MS = 1100f;
 
     enum Mode {
@@ -116,11 +117,11 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
                 String k = selectedKind();
                 if (k != null) {
                     int n = countOf(k);
-                    addRenderableWidget(Button.builder(Component.translatable("skyabyss_box.screen.open"), b -> request(k, 1))
-                            .bounds(x + INFO.x(), fy, Golden.S89, Golden.BTN).build());
+                    addRenderableWidget(Paper.tag(Component.translatable("skyabyss_box.screen.open"), b -> request(k, 1))
+                            .bounds(x + INFO.x(), fy, Golden.S89, Golden.BTN).primary().build());
                     if (n > 1) {
                         int all = Math.min(n, LootBoxes.MAX_BATCH);
-                        addRenderableWidget(Button.builder(Component.translatable("skyabyss_box.screen.open_all", all), b -> request(k, all))
+                        addRenderableWidget(Paper.tag(Component.translatable("skyabyss_box.screen.open_all", all), b -> request(k, all))
                                 .bounds(x + INFO.x() + Golden.S89 + Golden.S5, fy, Golden.S89 + Golden.S21, Golden.BTN).build());
                     }
                 }
@@ -128,13 +129,13 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
             case CARD -> {
                 String k = result.kind();
                 if (countOf(k) > 0) {
-                    addRenderableWidget(Button.builder(Component.translatable("skyabyss_box.screen.again"), b -> request(k, 1))
+                    addRenderableWidget(Paper.tag(Component.translatable("skyabyss_box.screen.again"), b -> request(k, 1))
                             .bounds(x + W / 2 - Golden.S89 - Golden.S3, fy, Golden.S89, Golden.BTN).build());
                 }
-                addRenderableWidget(Button.builder(Component.translatable("skyabyss_box.screen.back"), b -> toList())
+                addRenderableWidget(Paper.tag(Component.translatable("skyabyss_box.screen.back"), b -> toList())
                         .bounds(x + W / 2 + Golden.S3, fy, Golden.S89, Golden.BTN).build());
             }
-            case SUMMARY -> addRenderableWidget(Button.builder(Component.translatable("skyabyss_box.screen.back"), b -> toList())
+            case SUMMARY -> addRenderableWidget(Paper.tag(Component.translatable("skyabyss_box.screen.back"), b -> toList())
                     .bounds(x + W / 2 - Golden.S89 / 2, fy, Golden.S89, Golden.BTN).build());
             default -> {
             }
@@ -335,8 +336,8 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
             }
             boolean sel = i == selected;
             int col = boxColor(kinds.get(i));
-            g.fill(cx, cy, cx + cs, cy + cs, sel ? col : 0xFF0A0E1E);
-            g.fill(cx + 1, cy + 1, cx + cs - 1, cy + cs - 1, sel ? 0xFF262B38 : 0xFF141A34);
+            g.fill(cx, cy, cx + cs, cy + cs, sel ? col : 0xFF0E0D14);
+            g.fill(cx + 1, cy + 1, cx + cs - 1, cy + cs - 1, sel ? 0xFF2A2632 : 0xFF1E1C28);
             g.fill(cx + 1, cy + cs - 2, cx + cs - 1, cy + cs - 1, col);
             item(g, boxStack(kinds.get(i)), cx + 2, cy + 2, 1);
             String n = String.valueOf(counts.get(i));
@@ -394,7 +395,7 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
             int ixi = Math.round(ix);
             ItemStack s = reel.get(i);
             int col = 0xFF000000 | tier(s).rgb();
-            g.fill(ixi + 1, bandY + 4, ixi + RC - 1, bandY + bandH - 4, 0xFF141A34);
+            g.fill(ixi + 1, bandY + 4, ixi + RC - 1, bandY + bandH - 4, 0xFF1E1C28);
             g.fill(ixi + 1, bandY + bandH - 6, ixi + RC - 1, bandY + bandH - 4, col);
             item(g, s, ixi + 1, bandY + 4, 2);
         }
@@ -429,7 +430,7 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
         }
         Component hint = Component.translatable("skyabyss_box.screen.skip");
         Golden.Box foot = LAYOUT.foot();
-        g.drawString(font, hint, x + (W - font.width(hint)) / 2, y + Golden.textY(foot.y(), foot.h()), 0xFF000000 | Golden.DIM, false);
+        g.drawString(font, hint, x + (W - font.width(hint)) / 2, y + Golden.textY(foot.y(), foot.h()), 0xFF000000 | Paper.ON_BLACK_DIM, false);
     }
 
     private void drawCard(GuiGraphics g, int x, int y) {
@@ -443,7 +444,7 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
         int by = y + body.y();
         int box = Golden.S55;
         g.fill(bx, by, bx + box, by + box, col);
-        g.fill(bx + 1, by + 1, bx + box - 1, by + box - 1, 0xFF0A0E1E);
+        g.fill(bx + 1, by + 1, bx + box - 1, by + box - 1, 0xFF0E0D14);
         g.fill(bx + 1, by + box - 3, bx + box - 1, by + box - 1, col);
         item(g, win, bx + 4, by + 3, 3);
         List<Component> tip = new ArrayList<>(Screen.getTooltipFromItem(minecraft, win));
@@ -459,8 +460,8 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
             int cx = sumX(x, i), cy = sumY(y, i);
             ItemStack s = result.gear().get(i);
             int col = 0xFF000000 | tier(s).rgb();
-            g.fill(cx, cy, cx + cs, cy + cs, 0xFF0A0E1E);
-            g.fill(cx + 1, cy + 1, cx + cs - 1, cy + cs - 1, 0xFF141A34);
+            g.fill(cx, cy, cx + cs, cy + cs, 0xFF0E0D14);
+            g.fill(cx + 1, cy + 1, cx + cs - 1, cy + cs - 1, 0xFF1E1C28);
             g.fill(cx + 1, cy + cs - 2, cx + cs - 1, cy + cs - 1, col);
             item(g, s, cx + 2, cy + 2, 1);
         }

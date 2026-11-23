@@ -16,6 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // ステータス画面 (J キー)。見るだけの記録: レベルと経験値、基礎 (筋力・敏捷・精神・耐久) とその効き目、記憶の断片。
 // 基礎は技の木の節で上がる (docs/design/48。振り分けの釦はない。基礎は SkillManager.refreshStats が木から写す)。
@@ -39,11 +40,11 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
     static final int BAR_W = SIDE.w() - 2 * Golden.S8;
     static final int BAR_H = Golden.S5;
 
-    static final int TITLE = Golden.PALE;
+    static final int TITLE = Paper.ON_BLACK_HI;
     static final int TEXT = Golden.TEXT;
-    static final int SOFT = Golden.SOFT;
-    static final int GOLD = Golden.GOLD;
-    static final int LORE = Golden.TEAL;
+    static final int SOFT = Paper.ON_BLACK_SOFT;
+    static final int GOLD = Paper.ON_BLACK_PINK;
+    static final int LORE = Paper.ON_BLACK_HI;
 
     // 画面は窓に合わせて一様に大きくする (描くのも、当たりも、この一つの変換を通す)。論理の原点は (left, top)
     private final UiFit fit = new UiFit();
@@ -153,11 +154,11 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
         boolean max = d.level >= GrowthRules.MAX_LEVEL;
         g.drawString(font, Component.translatable("gui.skyabyss.growth.hud_level", d.level), sx, Golden.textY(y, Golden.ROW), GOLD, false);
         float fraction = max ? 1f : (float) d.xp / Math.max(1, d.xpNeed());
-        g.fill(BAR_X, BAR_Y, BAR_X + BAR_W, BAR_Y + BAR_H, 0xFF364064);
-        g.fill(BAR_X + 1, BAR_Y + 1, BAR_X + BAR_W - 1, BAR_Y + BAR_H - 1, 0xFF0A0E1E);
+        g.fill(BAR_X, BAR_Y, BAR_X + BAR_W, BAR_Y + BAR_H, 0xFF3A3644);
+        g.fill(BAR_X + 1, BAR_Y + 1, BAR_X + BAR_W - 1, BAR_Y + BAR_H - 1, 0xFF0E0D14);
         int fill = Mth.clamp(Math.round((BAR_W - 2) * fraction), 0, BAR_W - 2);
         if (fill > 0) {
-            g.fill(BAR_X + 1, BAR_Y + 1, BAR_X + 1 + fill, BAR_Y + BAR_H - 1, max ? 0xFF8FD0FF : 0xFFE0B040);
+            g.fill(BAR_X + 1, BAR_Y + 1, BAR_X + 1 + fill, BAR_Y + BAR_H - 1, max ? 0xFFFFF6EA : 0xFFE45A9C);
         }
         Component xpText = max ? Component.translatable("gui.skyabyss.growth.max")
                 : Component.translatable("gui.skyabyss.growth.xp", d.xp, d.xpNeed());

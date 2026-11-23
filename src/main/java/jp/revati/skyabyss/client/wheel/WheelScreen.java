@@ -13,10 +13,10 @@ public final class WheelScreen extends Screen {
     static final int RADIUS = 92;
     static final int CELL = 22;
     static final int DEAD = 26;
-    private static final int GOLD = 0xFFE7B54A;
-    private static final int EDGE = 0xFF3A4A58;
-    private static final int FILL = 0xE0141A22;
-    private static final int FILL_ON = 0xF02A2618;
+    private static final int GOLD = 0xFFF89CD2;
+    private static final int EDGE = 0xFF3A3644;
+    private static final int FILL = 0xE0181722;
+    private static final int FILL_ON = 0xF08C2C60;
 
     private int selected = -1;
     private int age;
@@ -100,7 +100,7 @@ public final class WheelScreen extends Screen {
             double a = Math.PI * 2 * selected / n;
             int ex = cx + (int) Math.round(Math.sin(a) * (RADIUS - CELL - 4));
             int ey = cy - (int) Math.round(Math.cos(a) * (RADIUS - CELL - 4));
-            line(g, cx, cy, ex, ey, 0x99E7B54A);
+            line(g, cx, cy, ex, ey, 0x99E45A9C);
         }
         for (int i = 0; i < n; i++) {
             double a = Math.PI * 2 * i / n;
@@ -122,7 +122,7 @@ public final class WheelScreen extends Screen {
             g.pose().pushPose();
             g.pose().translate(x, y + half - 11, 0);
             g.pose().scale(ts, ts, 1f);
-            g.drawString(font, name, -w / 2, 0, on ? GOLD : 0xFFD8DEE6, true);
+            g.drawString(font, name, -w / 2, 0, on ? GOLD : 0xFFECE4D6, true);
             g.pose().popPose();
         }
         // 中心: 選んだ項目の名前とキー。選んでいないときは使い方
@@ -130,9 +130,9 @@ public final class WheelScreen extends Screen {
             WheelClient.Entry e = list.get(selected);
             Component name = Component.translatable("gui.skyabyss.wheel." + e.id());
             g.drawCenteredString(font, name, cx, cy - 9, GOLD);
-            g.drawCenteredString(font, Component.translatable("gui.skyabyss.wheel.key", e.key().getTranslatedKeyMessage()), cx, cy + 3, 0xFF9AA6B2);
+            g.drawCenteredString(font, Component.translatable("gui.skyabyss.wheel.key", e.key().getTranslatedKeyMessage()), cx, cy + 3, 0xFF9A929C);
         } else {
-            g.drawCenteredString(font, Component.translatable("gui.skyabyss.wheel.hint"), cx, cy - 4, 0xFF9AA6B2);
+            g.drawCenteredString(font, Component.translatable("gui.skyabyss.wheel.hint"), cx, cy - 4, 0xFF9A929C);
         }
     }
 

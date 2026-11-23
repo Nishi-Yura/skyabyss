@@ -1,0 +1,306 @@
+# 切り絵のスキルの木 (docs/design/56 の「切り絵」) を 3 つの窓の大きさで撮る。重なりは overlap の行
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/paper_skill.txt -PshotsName=paper_skill
+world paper_skill flat
+size 1920 1080
+timeout 900
+render 4
+clouds off
+guiscale 4
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss playtest skip opening
+cmd skyabyss cinematic stop
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+
+# 1. 残り 0 点で、段がまだ上がる技の節を開く (tools/shots/tree_taken_points.txt と同じ)
+cmd skyabyss level set @p 2
+cmd skyabyss skill forget @p
+cmd skyabyss job reset
+cmd skyabyss job choose archer
+cmd skyabyss skill node @p cloud_pierce
+cmd skyabyss skill node @p agi_1
+wait 20
+window 1920 1080
+wait 10
+guiscale 4
+wait 10
+open skills_node:cloud_pierce
+wait 8
+overlap taken0_1920_g4
+shot taken0_1920_g4
+close
+wait 4
+window 1920 1080
+wait 10
+guiscale 2
+wait 10
+open skills_node:cloud_pierce
+wait 8
+overlap taken0_1920_g2
+shot taken0_1920_g2
+close
+wait 4
+window 1280 720
+wait 10
+guiscale 3
+wait 10
+open skills_node:cloud_pierce
+wait 8
+overlap taken0_1280_g3
+shot taken0_1280_g3
+close
+wait 4
+
+# 2. Lv12 の弓使い: 木・技の節・小さな節・試着・名残
+cmd skyabyss level set @p 12
+wait 20
+window 1920 1080
+wait 10
+guiscale 4
+wait 10
+open skills
+wait 8
+overlap tree_1920_g4
+shot tree_1920_g4
+close
+wait 4
+open skills_node:cloud_pierce
+wait 8
+overlap node_1920_g4
+shot node_1920_g4
+close
+wait 4
+open skills_node:agi_1
+wait 8
+overlap stat_1920_g4
+shot stat_1920_g4
+close
+wait 4
+open skills_tryon
+wait 8
+overlap tryon_1920_g4
+shot tryon_1920_g4
+close
+wait 4
+open skills_ext
+wait 8
+overlap ext_1920_g4
+shot ext_1920_g4
+close
+wait 4
+window 1920 1080
+wait 10
+guiscale 2
+wait 10
+open skills
+wait 8
+overlap tree_1920_g2
+shot tree_1920_g2
+close
+wait 4
+open skills_node:cloud_pierce
+wait 8
+overlap node_1920_g2
+shot node_1920_g2
+close
+wait 4
+open skills_node:agi_1
+wait 8
+overlap stat_1920_g2
+shot stat_1920_g2
+close
+wait 4
+open skills_tryon
+wait 8
+overlap tryon_1920_g2
+shot tryon_1920_g2
+close
+wait 4
+open skills_ext
+wait 8
+overlap ext_1920_g2
+shot ext_1920_g2
+close
+wait 4
+window 1280 720
+wait 10
+guiscale 3
+wait 10
+open skills
+wait 8
+overlap tree_1280_g3
+shot tree_1280_g3
+close
+wait 4
+open skills_node:cloud_pierce
+wait 8
+overlap node_1280_g3
+shot node_1280_g3
+close
+wait 4
+open skills_node:agi_1
+wait 8
+overlap stat_1280_g3
+shot stat_1280_g3
+close
+wait 4
+open skills_tryon
+wait 8
+overlap tryon_1280_g3
+shot tryon_1280_g3
+close
+wait 4
+open skills_ext
+wait 8
+overlap ext_1280_g3
+shot ext_1280_g3
+close
+wait 4
+
+# 3. 転生 3 回: 淵と前世の木 (木 v1。木のつまみが出る)
+cmd skyabyss level set @p 50
+cmd skyabyss dev rebirth 3
+wait 140
+cmd skyabyss skill learn @p deep_pull 2
+cmd skyabyss skill learn @p deep_mirror 3
+cmd skyabyss skill learn @p old_vigil 1
+wait 20
+window 1920 1080
+wait 10
+guiscale 4
+wait 10
+open skills_deep
+wait 8
+overlap deep_1920_g4
+shot deep_1920_g4
+close
+wait 4
+open skills_past
+wait 8
+overlap past_1920_g4
+shot past_1920_g4
+close
+wait 4
+open skills_node:cloud_pierce
+wait 8
+overlap reborn_1920_g4
+shot reborn_1920_g4
+close
+wait 4
+open skills_tryon
+wait 8
+overlap reborn_tryon_1920_g4
+shot reborn_tryon_1920_g4
+close
+wait 4
+window 1920 1080
+wait 10
+guiscale 2
+wait 10
+open skills_deep
+wait 8
+overlap deep_1920_g2
+shot deep_1920_g2
+close
+wait 4
+open skills_past
+wait 8
+overlap past_1920_g2
+shot past_1920_g2
+close
+wait 4
+open skills_node:cloud_pierce
+wait 8
+overlap reborn_1920_g2
+shot reborn_1920_g2
+close
+wait 4
+open skills_tryon
+wait 8
+overlap reborn_tryon_1920_g2
+shot reborn_tryon_1920_g2
+close
+wait 4
+window 1280 720
+wait 10
+guiscale 3
+wait 10
+open skills_deep
+wait 8
+overlap deep_1280_g3
+shot deep_1280_g3
+close
+wait 4
+open skills_past
+wait 8
+overlap past_1280_g3
+shot past_1280_g3
+close
+wait 4
+open skills_node:cloud_pierce
+wait 8
+overlap reborn_1280_g3
+shot reborn_1280_g3
+close
+wait 4
+open skills_tryon
+wait 8
+overlap reborn_tryon_1280_g3
+shot reborn_tryon_1280_g3
+close
+wait 4
+
+cmd skyabyss skill aspect @p archer_r1 3
+cmd skyabyss skill aspect @p archer_r2 1
+cmd skyabyss skill aspect @p archer_e1 2
+cmd skyabyss skill aspect @p archer_m_stone_whale1 1
+cmd skyabyss skill aspect @p archer_e_stone_whale2 1
+wait 20
+window 1920 1080
+wait 10
+guiscale 4
+wait 10
+open skills_ext
+wait 8
+click 209 91
+wait 20
+close
+wait 4
+window 1920 1080
+wait 10
+guiscale 4
+wait 10
+open skills_ext
+wait 8
+overlap ext_owned_1920_g4
+shot ext_owned_1920_g4
+close
+wait 4
+window 1920 1080
+wait 10
+guiscale 2
+wait 10
+open skills_ext
+wait 8
+overlap ext_owned_1920_g2
+shot ext_owned_1920_g2
+close
+wait 4
+window 1280 720
+wait 10
+guiscale 3
+wait 10
+open skills_ext
+wait 8
+overlap ext_owned_1280_g3
+shot ext_owned_1280_g3
+close
+wait 4
+cmd skyabyss dev rebirth 0
+quit

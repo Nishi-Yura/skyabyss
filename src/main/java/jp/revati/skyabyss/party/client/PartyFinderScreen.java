@@ -13,14 +13,15 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.network.PacketDistributor;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // パーティー募集の画面 (party/PartyFinder。2026-11-07 の声「パーティー検索もできるようにしてほしい」)。
 // 上の帯: 自分の募集 (目的を選ぶ・募集する・やめる)。下: 募集の一覧 (募集した人・目的・人数・平均のレベル・「加わる」)。
 // O の画面の「募集」か /party find で開く。開いているあいだ 2 秒ごとに一覧を求める。Esc で O の画面へ戻る
 public final class PartyFinderScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final int TEXT = Golden.TEXT;
-    private static final int SOFT = Golden.SOFT;
-    private static final int GOLD = Golden.GOLD;
+    private static final int SOFT = Paper.ON_BLACK_SOFT;
+    private static final int GOLD = Paper.ON_BLACK_PINK;
     private static final int ROW = Golden.ROW;
     private static final int PROW = Golden.S21;
 
@@ -72,7 +73,7 @@ public final class PartyFinderScreen extends Screen implements jp.revati.skyabys
         PartyNetwork.Finder f = last;
         int by = MINE.bottom() - Golden.S5 - Golden.BTN;
         // 目的 (押すたびに次へ)
-        addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.party.goal." + goal), b -> {
+        addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.party.goal." + goal), b -> {
             int i = PartyFinder.GOALS.indexOf(goal);
             goal = PartyFinder.GOALS.get((i + 1) % PartyFinder.GOALS.size());
             if (!last.myGoal().isEmpty()) {
@@ -82,15 +83,15 @@ public final class PartyFinderScreen extends Screen implements jp.revati.skyabys
         }).bounds(MINE.x() + Golden.S8, by, Golden.S89, Golden.BTN).tooltip(net.minecraft.client.gui.components.Tooltip.create(
                 Component.translatable("gui.skyabyss.party.finder.goal_tip"))).build()).active = f.canPost();
         if (f.myGoal().isEmpty()) {
-            addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.party.finder.post"), b -> send(PartyNetwork.Action.FINDER_POST, goal))
+            addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.party.finder.post"), b -> send(PartyNetwork.Action.FINDER_POST, goal))
                     .bounds(MINE.right() - Golden.S8 - Golden.S55, by, Golden.S55, Golden.BTN).build()).active = f.canPost();
         } else {
-            addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.party.finder.close"), b -> send(PartyNetwork.Action.FINDER_CLOSE, ""))
+            addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.party.finder.close"), b -> send(PartyNetwork.Action.FINDER_CLOSE, ""))
                     .bounds(MINE.right() - Golden.S8 - Golden.S55, by, Golden.S55, Golden.BTN).build());
         }
         joinButtons.clear();
         for (PartyFinder.Row r : f.rows()) {
-            Button b = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.party.finder.join"), x -> send(PartyNetwork.Action.FINDER_JOIN, r.leaderName()))
+            Button b = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.party.finder.join"), x -> send(PartyNetwork.Action.FINDER_JOIN, r.leaderName()))
                     .bounds(LIST.right() - Golden.S8 - Golden.S34, LIST_Y, Golden.S34, Golden.BTN).build());
             b.active = !r.mine() && !f.inParty() && r.members() < jp.revati.skyabyss.party.Parties.MAX_MEMBERS;
             joinButtons.add(b);
@@ -154,7 +155,7 @@ public final class PartyFinderScreen extends Screen implements jp.revati.skyabys
                     jp.revati.skyabyss.party.Parties.MAX_MEMBERS, r.avgLevel()), ox + nameW + goalW + 2 * Golden.S5, ty, Golden.S55, SOFT, false);
         }
         panel.end(g);
-        panel.drawBar(g, 0x30FFFFFF, 0x90E9C46A);
+        panel.drawBar(g, 0x30FFFFFF, 0x90E45A9C);
         for (int i = 0; i < joinButtons.size(); i++) {
             Button b = joinButtons.get(i);
             int oy = panel.top() + i * PROW;

@@ -19,6 +19,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 記録 (record/RecordsHub。2026-11-05 の ct_records = one)。見出しの下につまみ 7 (踏破・塔・深み・釣り・早駆け・転生・空見)、
 // その下の欄に頁の行 (サーバーが作った文。見出しは金)。行は欄の幅で折り返し、目盛りつきで送る。つまみを押すとその頁をサーバーへ頼む
@@ -109,7 +110,7 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
             tabButtons.add(b);
         }
         // 転生の頁: 順位表に載せる・載せない (見出しの帯の左)
-        hideButton = addRenderableWidget(Button.builder(hideLabel(), x -> {
+        hideButton = addRenderableWidget(Paper.tag(hideLabel(), x -> {
             hidden = !hidden;
             PacketDistributor.sendToServer(new jp.revati.skyabyss.rebirth.RebirthNet.HiddenPayload(hidden));
             x.setMessage(hideLabel());
@@ -146,7 +147,7 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
             g.drawString(font, wrapped.get(i), LIST.x() + Golden.S8, Golden.textY(y, LINE_H), Golden.TEXT, false);
         }
         panel.end(g);
-        panel.drawBar(g, 0xFF141C3A, 0x888FD0FF);
+        panel.drawBar(g, 0xFF1C1A26, 0x88E45A9C);
         for (net.minecraft.client.gui.components.Renderable r : renderables) {
             r.render(g, mx, my, partialTick);
         }
@@ -220,7 +221,7 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
     // 撮影用: 見本の頁 (`open jp.revati.skyabyss.client.record.RecordsHubScreen$Sample`)
     public static final class Sample extends RecordsHubScreen {
         public Sample() {
-            super(RecordsHub.FISHING, false, List.of(Component.literal("釣り大会（今週）").withStyle(s -> s.withColor(0xF2D78A)),
+            super(RecordsHub.FISHING, false, List.of(Component.literal("釣り大会（今週）").withStyle(s -> s.withColor(0xF89CD2)),
                     Component.literal("1. Alice　黄金のマス 52.3 cm"), Component.literal("2. Bob　岩魚 41.0 cm"), Component.empty(),
                     Component.literal("自分の一番: 岩魚 38.2 cm")));
         }

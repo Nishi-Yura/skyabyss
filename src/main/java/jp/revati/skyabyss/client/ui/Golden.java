@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 //   中身は主の列 0.618 と脇の列 0.382 に分ける (あいだ 5)。余白は 3・5・8・13・21・34・55 だけ。
 //   字は等倍だけ (縮めた字は使わない)。文と一覧の行は 13、釦の高さは 13。強弱は色で (金・空色・淡い灰)。
 //   板を大きく描くときは UiFit が字の 1 画素を画面の整数の画素にそろえる。
-// 絵柄は A「夜空の硝子」: 藍の半透明の地・金の細い線・角の菱形・見出しの帯の星。地も線もコードで描く (絵のファイルもリソースパックも要らない)
+// 絵柄は切り絵 (2026-11-24 に夜空の硝子から替えた。docs/design/56 の 2.1): 黒い紙・生成りの札・桃色・灰の菱。HUD の枠 (hudFrame) だけは夜空のまま
 public final class Golden {
     private Golden() {
     }
@@ -183,39 +183,83 @@ public final class Golden {
 
     // ---------------------------------------------------------------- 描く
 
-    // 板: 藍の地・外の暗い線・金の細い線・四隅の菱形・見出しの帯の星
+    // 板 (切り絵。docs/design/56 の「切り絵」): 画面の大中小の板 (論理の 0,0 に置いた Layout の板) なら、黒い紙と桃色の山を窓の端まで敷く。
+    // それ以外の板 (会話の帯・部品の板) は、手で切った黒い紙を一枚 (濃い桃色の影をずらして)
     public static void panel(GuiGraphics g, Box b) {
-        int x0 = b.x();
-        int y0 = b.y();
-        int x1 = b.right();
-        int y1 = b.bottom();
-        g.fillGradient(x0 + 1, y0 + 1, x1 - 1, y1 - 1, GLASS_TOP, GLASS_BOTTOM);
-        stars(g, x0 + S5, y0 + S5, b.w() - 2 * S5, HEAD);
-        outline(g, x0, y0, x1, y1, OUTLINE);
-        outline(g, x0 + 2, y0 + 2, x1 - 2, y1 - 2, LINE);
-        gem(g, x0 + 2, y0 + 2, 2);
-        gem(g, x1 - 3, y0 + 2, 2);
-        gem(g, x0 + 2, y1 - 3, 2);
-        gem(g, x1 - 3, y1 - 3, 2);
-    }
-
-    // 見出しの帯の星 (置き場は板の幅だけで決まる。動かない)
-    private static void stars(GuiGraphics g, int x, int y, int w, int h) {
-        long seed = 0x9E3779B97F4A7C15L;
-        for (int i = 0; i < 22; i++) {
-            seed = seed * 6364136223846793005L + 1442695040888963407L;
-            int sx = x + (int) ((seed >>> 33) % Math.max(1, w));
-            int sy = y + (int) ((seed >>> 20) % Math.max(1, h));
-            int a = 0x40 + (int) ((seed >>> 12) & 0x7F);
-            g.fill(sx, sy, sx + 1, sy + 1, (a << 24) | 0xC8D6FF);
+        if (b.x() == 0 && b.y() == 0 && (b.w() == L_W && b.h() == L_H || b.w() == M_W && b.h() == M_H || b.w() == S_W && b.h() == S_H)) {
+            sheet(g, b);
+            return;
         }
+        int w = b.w();
+        int h = b.h();
+        // 辺は少しずつ斜めに切る (角の点は手で決めた量だけずらす)
+        float[] cut = {-2, 1, w * 0.38f, -1, w + 1, 2, w + 2, h * 0.55f, w, h + 1, w * 0.62f, h + 2, 1, h, -1, h * 0.4f};
+        float[] pts = new float[cut.length];
+        for (int i = 0; i < cut.length; i += 2) {
+            pts[i] = cut[i] + 4;
+            pts[i + 1] = cut[i + 1] + 4;
+        }
+        Paper.draw(g, "golden_panel_" + w + "x" + h, "", b.x() - 4, b.y() - 4, w + 12, h + 12, s -> s.layer(pts, Paper.BLACK, Paper.PINK_LO, 3, 4));
     }
 
-    // 板と見出しの帯の区切りの線 (帯の下、あいだの真ん中) と真ん中の小さな菱形
+    // 窓の端まで敷く黒い紙と、下の桃色の山 (論理の座標で窓の四隅を求める)。峰は手で置いた
+    private static final float[][] PEAKS = {{0.00f, 6}, {0.06f, 1}, {0.15f, 7}, {0.27f, 0}, {0.36f, 5}, {0.49f, 2}, {0.58f, 8}, {0.70f, 1},
+            {0.81f, 6}, {0.90f, 0}, {1.00f, 4}};
+
+    public static void sheet(GuiGraphics g, Box b) {
+        org.joml.Matrix4f inv = new org.joml.Matrix4f(g.pose().last().pose()).invert();
+        org.joml.Vector3f p0 = inv.transformPosition(new org.joml.Vector3f(0, 0, 0));
+        org.joml.Vector3f p1 = inv.transformPosition(new org.joml.Vector3f(g.guiWidth(), g.guiHeight(), 0));
+        int x0 = (int) Math.floor(p0.x);
+        int y0 = (int) Math.floor(p0.y);
+        int sw = (int) Math.ceil(p1.x) - x0;
+        int sh = (int) Math.ceil(p1.y) - y0;
+        int ox = b.x() - x0;
+        int oy = b.y() - y0;
+        // 山の峰: 板の下の端のすぐ下 (板の中の字にはかからない)
+        float base = oy + b.h() + 2;
+        Paper.draw(g, "golden_sheet", ox + "," + oy + "," + sw + "x" + sh + "," + b.w() + "x" + b.h(), x0, y0, sw, sh, s -> {
+            float[] black = {
+                    6, 9, sw * 0.27f, 5, sw * 0.52f, 8, sw * 0.78f, 4, sw - 7, 7,
+                    sw - 4, sh * 0.34f, sw - 7, sh * 0.66f, sw - 5, sh - 10,
+                    sw * 0.58f, sh - 5, sw * 0.24f, sh - 8, 8, sh - 4,
+                    4, sh * 0.62f, 7, sh * 0.31f};
+            s.poly(black, Paper.BLACK);
+            float[] hill = new float[PEAKS.length * 2 + 4];
+            for (int i = 0; i < PEAKS.length; i++) {
+                hill[i * 2] = -20 + (sw + 40) * PEAKS[i][0];
+                hill[i * 2 + 1] = base + PEAKS[i][1];
+            }
+            hill[PEAKS.length * 2] = sw + 20;
+            hill[PEAKS.length * 2 + 1] = sh + 4;
+            hill[PEAKS.length * 2 + 2] = -20;
+            hill[PEAKS.length * 2 + 3] = sh + 4;
+            s.poly(hill, Paper.PINK_LO);
+            for (int i = 0; i + 1 < PEAKS.length; i++) {
+                float ax = hill[i * 2];
+                float ay = hill[i * 2 + 1];
+                float bx = hill[i * 2 + 2];
+                float by = hill[i * 2 + 3];
+                int n = (int) Math.max(1, Math.abs(bx - ax));
+                for (int k = 0; k <= n; k++) {
+                    s.px(Math.round(ax + (bx - ax) * k / n), Math.round(ay + (by - ay) * k / n), Paper.PINK);
+                }
+            }
+            // 紙の上の小さな菱 (板の外の余白に、手で置いた)
+            int[][] dm = {{-14, 30, 2, 1}, {b.w() + 10, 16, 3, 1}, {b.w() + 12, b.h() / 2 + 20, 1, 0}, {-12, b.h() - 40, 1, 0}, {b.w() / 3, -9, 2, 0}};
+            for (int[] q : dm) {
+                s.diamond(ox + q[0], oy + q[1], q[2], q[3] == 1 ? Paper.PINK : Paper.GREY_LO, q[3] == 1 ? Paper.PINK_HI : Paper.GREY);
+            }
+        });
+    }
+
+    // 見出しの帯の下の区切り (濃い桃色の細い線と、左寄りの桃色の菱)
     public static void headLine(GuiGraphics g, Layout l) {
         int y = l.head().bottom() + 2;
-        g.fill(l.inner().x(), y, l.inner().right(), y + 1, LINE_DIM);
-        gem(g, l.inner().cx(), y, 2);
+        g.fill(l.inner().x(), y, l.inner().right(), y + 1, Paper.PINK_LO);
+        int cx = l.inner().x() + Math.round(l.inner().w() * 0.31f);
+        diamond(g, cx, y, 3, Paper.BLACK);
+        diamond(g, cx, y, 2, Paper.PINK);
     }
 
     // 板・帯の線・題 (帯の右寄せ。null なら描かない) をまとめて
@@ -224,61 +268,47 @@ public final class Golden {
         headLine(g, l);
         if (title != null) {
             Box h = l.head();
-            FitText.draw(g, font, title, h.right() - S5 - Math.min(font.width(title), h.w() / 2), textY(h.y(), h.h()), h.w() / 2, GOLD, false);
+            FitText.draw(g, font, title, h.right() - S5 - Math.min(font.width(title), h.w() / 2), textY(h.y(), h.h()), h.w() / 2, Paper.ON_BLACK_PINK, false);
         }
     }
 
-    // 欄 (一段暗い地に細い縁)
+    // 欄: 黒い紙の上に一段暗い紙を重ねる (右と下に濃い桃色の細い影)
     public static void recess(GuiGraphics g, Box b) {
-        g.fill(b.x(), b.y(), b.right(), b.bottom(), RECESS_FILL);
-        outline(g, b.x(), b.y(), b.right(), b.bottom(), RECESS_EDGE);
+        g.fill(b.x() + 2, b.bottom(), b.right() + 2, b.bottom() + 2, Paper.PINK_LO);
+        g.fill(b.right(), b.y() + 2, b.right() + 2, b.bottom(), Paper.PINK_LO);
+        g.fill(b.x(), b.y(), b.right(), b.bottom(), Paper.BLACK_LO);
     }
 
-    // 選んでいる行の地 (空色の地と左の金の印)
+    // 選んでいる行の地 (濃い桃色の地と左の桃色の印)
     public static void selected(GuiGraphics g, Box b) {
-        g.fill(b.x(), b.y(), b.right(), b.bottom(), SELECT);
-        g.fill(b.x(), b.y(), b.x() + 2, b.bottom(), 0xFF000000 | GOLD);
+        g.fill(b.x(), b.y(), b.right(), b.bottom(), 0x708C2C60);
+        g.fill(b.x(), b.y(), b.x() + 2, b.bottom(), Paper.PINK);
     }
 
     // 一行おきの地 (数の表を横に読みやすく)
     public static void stripe(GuiGraphics g, Box b) {
-        g.fill(b.x(), b.y(), b.right(), b.bottom(), 0x14FFFFFF);
+        g.fill(b.x(), b.y(), b.right(), b.bottom(), 0x10ECE4D6);
     }
 
     // 欄の中の区切りの線
     public static void rule(GuiGraphics g, int x0, int x1, int y) {
-        g.fill(x0, y, x1, y + 1, RECESS_EDGE);
+        g.fill(x0, y, x1, y + 1, 0xFF3A3644);
     }
 
-    // つまみ (見出しの帯の中。選んでいれば金の字と下の線)
+    // つまみ (切り絵の札。Paper.tab: 選んでいれば桃色、ほかは一段沈んだ生成り)
     public static void tab(GuiGraphics g, Font font, Box b, Component label, boolean on, boolean hover) {
-        if (on) {
-            g.fill(b.x(), b.y(), b.right(), b.bottom(), 0x28E9C46A);
-            g.fill(b.x(), b.bottom() - 1, b.right(), b.bottom(), 0xFF000000 | GOLD);
-        } else if (hover) {
-            g.fill(b.x(), b.y(), b.right(), b.bottom(), 0x18FFFFFF);
-        }
-        int color = on ? GOLD : hover ? TEXT : SOFT;
-        int w = font.width(label);
-        g.drawString(font, label, b.x() + (b.w() - w) / 2, textY(b.y(), b.h()), color, false);
+        Paper.tab(g, font, b.x(), b.y(), b.w(), b.h(), label, on, hover);
     }
 
-    // 釦 (高さ 13)。primary は金の地に暗い字、ほかは金の細い縁
+    // 釦 (高さ 13。切り絵の札。Paper.button: primary は桃色、ほかは生成り、押せないときは灰。押している間は沈む)
     public static void button(GuiGraphics g, Font font, Box b, Component label, boolean primary, boolean hover, boolean enabled) {
-        if (primary && enabled) {
-            g.fillGradient(b.x(), b.y(), b.right(), b.bottom(), hover ? 0xFFFFE08C : 0xFFF0D07C, hover ? 0xFFD8B25C : 0xFFC6A050);
-        } else {
-            g.fill(b.x(), b.y(), b.right(), b.bottom(), hover && enabled ? 0x28E9C46A : 0x3004060F);
-            outline(g, b.x(), b.y(), b.right(), b.bottom(), enabled ? LINE : RECESS_EDGE);
-        }
-        int color = !enabled ? DIM : primary ? 0x181420 : hover ? GOLD : TEXT;
-        g.drawString(font, label, b.x() + (b.w() - font.width(label)) / 2, textY(b.y(), b.h()), color, false);
+        Paper.button(g, font, b.x(), b.y(), b.w(), b.h(), label, primary, Paper.state(enabled, hover));
     }
 
-    // 品の枠 (size 角。暗い地に細い縁)
+    // 品の枠 (size 角。一段暗い紙の升に、灰の細い縁)
     public static void slot(GuiGraphics g, int x, int y, int size) {
-        g.fill(x, y, x + size, y + size, 0xAA060814);
-        outline(g, x, y, x + size, y + size, 0xFF3E486E);
+        g.fill(x, y, x + size, y + size, Paper.BLACK_LO);
+        outline(g, x, y, x + size, y + size, 0xFF3A3644);
     }
 
     // HUD の枠 (藍の半透明の地・外の暗い線・金の細い線)
@@ -298,10 +328,10 @@ public final class Golden {
         }
     }
 
-    // 菱形 (半径 r)。縁は暗い線、中は金
+    // 菱形 (半径 r)。切り絵の桃色の菱 (黒い縁)
     public static void gem(GuiGraphics g, int cx, int cy, int r) {
-        diamond(g, cx, cy, r + 1, OUTLINE);
-        diamond(g, cx, cy, r, LINE);
+        diamond(g, cx, cy, r + 1, Paper.BLACK_LO);
+        diamond(g, cx, cy, r, Paper.PINK);
     }
 
     private static void diamond(GuiGraphics g, int cx, int cy, int r, int color) {

@@ -1,0 +1,57 @@
+# 釦の清書 (A 斜めの短冊) と、バニラの画面の釦 (docs/design/56 の 2.1)
+# SKYABYSS_UI_SKIN=a bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/paper_buttons.txt -PshotsName=paper_buttons
+world paper_buttons flat
+size 1920 1080
+timeout 600
+render 4
+clouds off
+guiscale 4
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss playtest skip opening
+cmd skyabyss cinematic stop
+cmd skyabyss level set @p 12
+cmd skyabyss job choose mage
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+
+window 1920 1080
+guiscale 4
+
+window 1920 1080
+guiscale 4
+wait 10
+open skills
+wait 8
+shot skills_1920_g4
+close
+open job_choice
+wait 8
+shot job_1920_g4
+close
+open party
+wait 8
+shot party_1920_g4
+close
+guiscale 2
+wait 10
+open options
+wait 8
+hover 700 300
+wait 4
+shot options_1920_g2
+close
+open video_options
+wait 8
+shot video_1920_g2
+close
+guiscale 4
+open wheel
+wait 8
+shot wheel_1920_g4
+close

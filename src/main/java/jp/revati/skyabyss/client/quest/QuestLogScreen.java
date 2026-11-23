@@ -25,6 +25,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.network.PacketDistributor;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // クエストログ (U)。左に一覧 (メイン・サブ・終えたもの)、右に選んだクエストの今の書き付け、目的、報酬。
 // 「やること」を書く帳面で、「知ったこと」は伝承の書に分ける。下の釦で、左の小さな表示に出すクエストを選ぶ。
@@ -41,12 +42,12 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
     private static final Golden.Box PAGE = LAYOUT.body().major(false);
     private static final int ROW_H = Golden.ROW;
     private static final int LINE_H = Golden.ROW;
-    private static final int EDGE_IN = 0xFF141C3A;
-    private static final int TEAL = 0xFF000000 | Golden.TEAL;
-    private static final int GOLD = 0xFF000000 | Golden.GOLD;
+    private static final int EDGE_IN = 0xFF1C1A26;
+    private static final int TEAL = 0xFF000000 | Paper.ON_BLACK_HI;
+    private static final int GOLD = 0xFF000000 | Paper.ON_BLACK_PINK;
     private static final int TEXT = 0xFF000000 | Golden.TEXT;
-    private static final int SOFT = 0xFF000000 | Golden.SOFT;
-    private static final int DIM = 0xFF000000 | Golden.DIM;
+    private static final int SOFT = 0xFF000000 | Paper.ON_BLACK_SOFT;
+    private static final int DIM = 0xFF000000 | Paper.ON_BLACK_DIM;
     private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
 
     private int w;
@@ -96,7 +97,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
     protected void init() {
         layout();
         Golden.Box foot = LAYOUT.footUnder(PAGE);
-        trackButton = addRenderableWidget(Button.builder(Component.empty(), b -> toggleTrack())
+        trackButton = addRenderableWidget(Paper.tag(Component.empty(), b -> toggleTrack())
                 .bounds(foot.right() - Golden.S89, foot.y() + 4, Golden.S89, Golden.BTN).build());
         rebuild();
         if (selected == null) {
@@ -428,7 +429,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
         Font font = Minecraft.getInstance().font;
         Golden.panel(g, LAYOUT.panel());
         Golden.headLine(g, LAYOUT);
-        g.drawString(font, title, LAYOUT.head().x() + Golden.S5, Golden.textY(LAYOUT.head().y(), LAYOUT.head().h()), Golden.PALE, false);
+        g.drawString(font, title, LAYOUT.head().x() + Golden.S5, Golden.textY(LAYOUT.head().y(), LAYOUT.head().h()), Paper.ON_BLACK_HI, false);
         Golden.recess(g, LIST);
         Golden.recess(g, PAGE);
         g.drawString(font, Component.translatable("gui.skyabyss.quest.lore_hint"), LAYOUT.foot().x() + Golden.S5,
@@ -466,7 +467,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
             }
         }
         listPanel.end(g);
-        listPanel.drawBar(g, EDGE_IN, 0x888FD0FF);
+        listPanel.drawBar(g, EDGE_IN, 0x88E45A9C);
         // 右の頁
         QuestDef def = selected == null ? null : QuestClient.quest(selected);
         int bx = bodyLeft();
@@ -485,7 +486,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
                 g.drawString(font, l.text(), bx + l.indent(), Golden.textY(y, LINE_H), l.color(), false);
             }
             bodyPanel.end(g);
-            bodyPanel.drawBar(g, EDGE_IN, 0x888FD0FF);
+            bodyPanel.drawBar(g, EDGE_IN, 0x88E45A9C);
         }
     }
 

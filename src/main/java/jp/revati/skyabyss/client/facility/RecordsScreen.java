@@ -10,6 +10,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 空見の砦の老兵の「試練の記録」(docs/design/35 の 3.2。中身は facility.KeepRecords)。施設の画面と同じ石板と骨の枠。
 //   上に巨神のつまみ 4 つ (出会っていない巨神は「？」)、その巨神の順路の記録 (越えた回数・最速)、試練の一覧 (見ていない試練は「？？？」、済んだ回数、修飾の帯、任意の目標の印)。
@@ -72,7 +73,7 @@ public class RecordsScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fillGradient(0, 0, width, height, 0x800A0E1E, 0xA00A0E1E);
+        g.fill(0, 0, width, height, 0xA00E0D14);
     }
 
     @Override
@@ -96,7 +97,7 @@ public class RecordsScreen extends Screen {
             int tw = tabW(i);
             boolean on = page == i;
             boolean hover = mx >= tx && mx < tx + tw && my >= ty && my < ty + Golden.BTN;
-            Golden.tab(g, font, new Golden.Box(tx, ty, tw, Golden.BTN), p.stopped() ? c.copy().withStyle(st -> st.withColor(Golden.GOLD)) : c, on, hover);
+            Golden.tab(g, font, new Golden.Box(tx, ty, tw, Golden.BTN), p.stopped() ? c.copy().withStyle(st -> st.withColor(Paper.ON_BLACK_PINK)) : c, on, hover);
         }
         Golden.Box foot = LAYOUT.foot();
         g.drawString(font, Component.translatable("gui.skyabyss.records.foot", view.totalCleared(), view.titles()), foot.x() + Golden.S5,
@@ -137,7 +138,7 @@ public class RecordsScreen extends Screen {
                 if (r.modsTotal() > 0) {
                     int bx = x + 212;
                     int bw = Golden.S55;
-                    g.fill(bx, ry + 5, bx + bw, ry + 8, 0xFF0A0E1E);
+                    g.fill(bx, ry + 5, bx + bw, ry + 8, 0xFF0E0D14);
                     g.fill(bx, ry + 5, bx + Math.min(bw, bw * r.modsSeen() / r.modsTotal()), ry + 8, FacilityUi.TEAL);
                     g.drawString(font, r.modsSeen() + "/" + r.modsTotal(), bx + bw + 4, Golden.textY(ry, ROW_H), FacilityUi.DIM, false);
                 }
@@ -146,7 +147,7 @@ public class RecordsScreen extends Screen {
                 }
             }
             rows.end(g);
-            rows.drawBar(g, 0xFF0A0E1E, FacilityUi.TEAL);
+            rows.drawBar(g, 0xFF0E0D14, FacilityUi.TEAL);
         }
         fit.end(g);
     }

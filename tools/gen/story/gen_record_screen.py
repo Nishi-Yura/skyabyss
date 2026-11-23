@@ -173,7 +173,23 @@ def ledger_c(st):
     return img
 
 
-LEDGERS = {"a": ledger_a, "b": ledger_b, "c": ledger_c}
+def ledger_p(st):
+    """切り絵 (今の絵柄。docs/design/56 の 2.1): 手で切った黒い紙に生成りの紙を一枚、真ん中を濃い桃色の線で分ける"""
+    import paper_cut as pc
+    img = pc.sheet_black(BW, BH)
+    # 頁の上の端は見出し (GUI y=9) より上に。左の頁は見出し・持ち主の名前・つまみの段が詰まっているので区切りの線を引かない (つまみの段が区切り)
+    pc.page(img, 20, 8, BW - 22, BH - 20, -7, 8, -4)
+    ImageDraw.Draw(img).rectangle((303, 30, 304, BH - 30), fill=pc.rgba(pc.PINK_LO))
+    # 線の端の印は上下で変える (上 = 桃色の留め、下 = 灰の小さな菱)
+    pc.pin(img, 304, 30, 4)
+    pc.diamond(img, 304, BH - 30, 3, pc.GREY_LO, pc.GREY)
+    pc.rule(img, 320, 572, 54)
+    pc.pin(img, BW - 11, 10, 6)
+    return img
+
+
+LEDGERS = {"a": ledger_a, "b": ledger_b, "c": ledger_c, "p": ledger_p}
+STYLES["p"] = dict(STYLES["b"], name="切り絵")
 
 
 # ---------------------------------------------------------------- 部品
@@ -257,6 +273,35 @@ def widgets(style, st):
 
     def put(part, rect):
         img.paste(part, (rect[0], rect[1]), part)
+
+    if style == "p":
+        import paper_cut as pc
+        put(pc.tab(TAB_OFF[2], TAB_OFF[3], False), TAB_OFF)
+        put(pc.tab(TAB_ON[2], TAB_ON[3], True), TAB_ON)
+        put(pc.mark("safe"), MARK_SAFE)
+        put(pc.mark("attention"), MARK_ATTENTION)
+        put(pc.mark("lost"), MARK_LOST)
+        put(pc.mark("locked"), MARK_LOCKED)
+        put(pc.mark("changed"), MARK_CHANGED)
+        put(pc.arrow(True), ARROW_UP)
+        put(pc.arrow(False), ARROW_DOWN)
+        put(pc.row_selected(ROW_SELECTED[2], ROW_SELECTED[3]), ROW_SELECTED)
+        fr = Image.new("RGBA", BAR_FRAME[2:], pc.rgba(pc.BLACK_LO))
+        ImageDraw.Draw(fr).rectangle((0, 0, BAR_FRAME[2] - 1, BAR_FRAME[3] - 1), outline=pc.rgba(pc.GREY_LO), width=2)
+        put(fr, BAR_FRAME)
+        fl = Image.new("RGBA", BAR_FILL[2:], pc.rgba(pc.PINK))
+        ImageDraw.Draw(fl).line((0, 0, BAR_FILL[2] - 1, 0), fill=pc.rgba(pc.PINK_HI))
+        put(fl, BAR_FILL)
+        # 釦: ふつう・乗せた・押せない (Paper.button と同じ短冊)
+        w, h = BUTTON[0][2], BUTTON[0][3]
+        put(pc.slip(w, h, pc.CREAM, pc.PINK), BUTTON[0])
+        put(pc.slip(w, h, pc.CREAM_HI, pc.PINK, lift=1), BUTTON[1])
+        put(pc.slip(w, h, pc.GREY_LO, None, shadow=False), BUTTON[2])
+        # 管理者が見ているときの印: 濃い桃色の紙の帯 (右の端を斜めに切る)
+        rb = Image.new("RGBA", RIBBON[2:], (0, 0, 0, 0))
+        pc.poly(rb, [(0, 0), (RIBBON[2] - 1, 0), (RIBBON[2] - 14, RIBBON[3] - 1), (0, RIBBON[3] - 1)], pc.PINK_LO)
+        put(rb, RIBBON)
+        return img
 
     put(lb.tab(st, TAB_OFF[2], TAB_OFF[3], False, rng), TAB_OFF)
     put(lb.tab(st, TAB_ON[2], TAB_ON[3], True, rng), TAB_ON)

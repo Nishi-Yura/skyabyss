@@ -18,6 +18,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 祠の画面 (試練の板。docs/design/29 の 2.7・4.2)。祠の祭司に話しかけると開く。暗い石板に画素の枠。四つの頁:
 //   いまの三つ : 引いた三つの試練。枠 (歩・智・闘) の絵・名前・類・段・修飾の札。稀は金の縁、極は赤紫の縁。極のうち一つは「？」(入ってから分かる)
@@ -32,13 +33,13 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     private static final int SHEET_H = 96;
 
     private static final int BG = 0x05070F;
-    private static final int CARD = 0x101630;
-    private static final int GOLD = 0xE9C46A;
-    private static final int TEAL = 0x8FD0FF;
-    private static final int TEXT = 0xE6E8EE;
-    private static final int DIM = 0x9AA4C4;
+    private static final int CARD = 0x16151E;
+    private static final int GOLD = 0xF89CD2;
+    private static final int TEAL = 0xFFF6EA;
+    private static final int TEXT = 0xECE4D6;
+    private static final int DIM = 0x9A929C;
     private static final int GOOD = 0x7BD66B;
-    private static final int RARE = 0xE9C46A;
+    private static final int RARE = 0xF89CD2;
     private static final int EXTREME = 0xC25BD6;
     private static final int COMMON = 0x4A6A72;
     private static final int ABYSS = 0xD8343C;
@@ -263,7 +264,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     private void renderGo(GuiGraphics g, Font font, int mx, int my) {
         boolean hover = mx >= GO_X && mx < GO_X + GO_W && my >= TOOL_Y && my < TOOL_Y + ROW;
         g.fill(GO_X, TOOL_Y, GO_X + GO_W, TOOL_Y + ROW, argb(1f, hover ? 0x3A3018 : 0x241E10));
-        Golden.outline(g, GO_X, TOOL_Y, GO_X + GO_W, TOOL_Y + ROW, argb(1f, GOLD));
+        Paper.edge(g, GO_X, TOOL_Y, GO_X + GO_W, TOOL_Y + ROW, argb(1f, GOLD));
         jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.shrine.go"), GO_X + GO_W / 2, Golden.textY(TOOL_Y, ROW),
                 GO_W - 4, argb(1f, hover ? 0xFFF0C0 : GOLD), false);
         if (hover) {
@@ -274,7 +275,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     // 誓いの頁: 一行目に段と素材の倍率 (選べないときは理由)、その下に誓いを一つずつ (立てているものは金)
     private static final int VOW_TOP = CONTENT.y() + ROW + Golden.S5;
     private static final int VOW_ROW = ROW + Golden.S5;
-    private static final int SOFT_DESC = 0xB4BBD6;
+    private static final int SOFT_DESC = 0x9A929C;
 
     private int vowRowAt(double mx, double my) {
         if (mx < CONTENT.x() || mx >= CONTENT.right() || my < VOW_TOP) {
@@ -307,8 +308,8 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
                 break;
             }
             boolean hover = i == hoverRow;
-            g.fill(CONTENT.x(), y, CONTENT.right(), y + VOW_ROW - 2, argb(1f, v.on() ? 0x2A2618 : hover ? 0x1E2230 : CARD));
-            Golden.outline(g, CONTENT.x(), y, CONTENT.right(), y + VOW_ROW - 2, argb(1f, v.on() ? GOLD : hover ? TEAL : 0x2C3846));
+            g.fill(CONTENT.x(), y, CONTENT.right(), y + VOW_ROW - 2, argb(1f, v.on() ? 0x3A1A2E : hover ? 0x24202E : CARD));
+            Paper.edge(g, CONTENT.x(), y, CONTENT.right(), y + VOW_ROW - 2, argb(1f, v.on() ? GOLD : hover ? TEAL : 0x2C2834));
             String box = v.on() ? "◆ " : "◇ ";
             Component name = Component.literal(box).append(Component.translatable("vow.skyabyss." + v.id())).append(Component.literal("  +" + v.points()));
             int ty = Golden.textY(y, VOW_ROW - 2);
@@ -381,7 +382,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
                 int cy = y + (i / per) * (tile + 6);
                 int lv = jp.revati.skyabyss.rpg.aspect.Aspects.level(d, a);
                 boolean hover = mx >= cx && mx < cx + tile && my >= cy && my < cy + tile;
-                jp.revati.skyabyss.rpg.client.skill.SkillScreenAccess.aspectTile(g, font, cx, cy, tile, a, lv, hover, (int) (mc.level == null ? 0 : mc.level.getGameTime()));
+                jp.revati.skyabyss.rpg.client.skill.SkillScreenAccess.aspectTile(g, font, cx, cy, tile, a, lv, hover, i);
                 if (hover) {
                     tip = jp.revati.skyabyss.rpg.client.skill.SkillScreenAccess.aspectTip(d, a);
                 }
@@ -421,7 +422,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     private void renderCraft(GuiGraphics g, Font font, int x, int y, int mx, int my) {
         boolean hover = mx >= x && mx < x + CRAFT_W && my >= y && my < y + ROW;
         g.fill(x, y, x + CRAFT_W, y + ROW, argb(1f, hover ? 0x2A2618 : CARD));
-        Golden.outline(g, x, y, x + CRAFT_W, y + ROW, argb(1f, hover ? GOLD : 0x4A4A2C));
+        Paper.edge(g, x, y, x + CRAFT_W, y + ROW, argb(1f, hover ? GOLD : 0x4A4450));
         Component label = Component.translatable("gui.skyabyss.shrine.craft");
         g.drawString(font, label, x + CRAFT_W / 2 - font.width(label) / 2, Golden.textY(y, ROW), argb(1f, hover ? GOLD : TEAL), false);
         if (hover) {
@@ -436,9 +437,9 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         boolean on = data.abyssOn();
         boolean hover = open && mx >= x && mx < x + ABYSS_W && my >= y && my < y + ROW;
         float pulse = on ? 0.75f + 0.25f * (float) Math.sin(age * 0.2) : 1f;
-        int line = on ? ABYSS : open ? (hover ? 0x8C4A50 : 0x4A2C32) : 0x2C3846;
+        int line = on ? ABYSS : open ? (hover ? 0x8C4A50 : 0x4A2C32) : 0x2C2834;
         g.fill(x, y, x + ABYSS_W, y + ROW, argb(1f, on ? 0x2A1216 : open ? 0x181014 : CARD));
-        Golden.outline(g, x, y, x + ABYSS_W, y + ROW, argb(1f, line));
+        Paper.edge(g, x, y, x + ABYSS_W, y + ROW, argb(1f, line));
         String key = !open ? "gui.skyabyss.trial.abyss.locked" : on ? "gui.skyabyss.trial.abyss.on" : "gui.skyabyss.trial.abyss.off";
         Component label = Component.translatable(key);
         jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, label, x + ABYSS_W / 2, Golden.textY(y, ROW), ABYSS_W - 4, argb(pulse, on ? 0xFF8A90 : open ? 0xC8A0A6 : DIM), false);
@@ -462,7 +463,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
             i++;
             int rc = rarityColor(card.rarity());
             Golden.recess(g, new Golden.Box(x, y, colW, h));
-            Golden.outline(g, x, y, x + colW, y + h, argb(1f, rc));
+            Paper.edge(g, x, y, x + colW, y + h, argb(1f, rc));
             int tx = x + Golden.S5;
             int tw = colW - 2 * Golden.S5;
             // 枠の絵と名前
@@ -499,7 +500,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
                 }
                 int col = rarityColor(chip.rarity());
                 g.fill(tx, cy, tx + tw, cy + 14, 0xFF0E1118);
-                Golden.outline(g, tx, cy, tx + tw, cy + 14, argb(1f, col));
+                Paper.edge(g, tx, cy, tx + tw, cy + 14, argb(1f, col));
                 icon(g, chipIcon(chip), tx + 2, cy + 1, 12, 1f);
                 jp.revati.skyabyss.client.ui.FitText.draw(g, font, chipText(chip), tx + 16, cy + 3, tw - 18, argb(1f, chip.rarity() >= 1 ? col : TEXT), false);
                 cy += 14 + 2;
@@ -547,7 +548,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
                 if (r.modsTotal() > 0) {
                     int bx = x0 + 252;
                     int bw = Golden.S34 + Golden.S8;
-                    g.fill(bx, y + 5, bx + bw, y + 8, 0xFF0A0E1E);
+                    g.fill(bx, y + 5, bx + bw, y + 8, 0xFF0E0D14);
                     g.fill(bx, y + 5, bx + Math.min(bw, bw * r.modsSeen() / r.modsTotal()), y + 8, argb(1f, TEAL));
                     g.drawString(font, r.modsSeen() + "/" + r.modsTotal(), bx + bw + 3, ty, argb(1f, DIM), false);
                 }

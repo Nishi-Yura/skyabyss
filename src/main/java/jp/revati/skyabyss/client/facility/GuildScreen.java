@@ -20,6 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.DyeColor;
 import net.neoforged.neoforge.network.PacketDistributor;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // ギルドの画面 (組合の受付の書記から。docs/design/35 の 3.4)。黄金比の大きい板 (docs/design/56): 主の列 (左 207) と脇の列 (右 128)、下の段 21
 //   入っていないとき: 主の列 = ギルドの一覧 (行 13。申請 / 入る)、脇の列 = 作る (名前・印・旗の地の色と模様の色・見本)。
@@ -133,40 +134,40 @@ public class GuildScreen extends Screen {
             tag.setValue(oldTag);
             addRenderableWidget(tag);
             Golden.Box b = footButton(FOOT_R, Golden.S89);
-            addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.guild.create"), x -> send("create", "", name.getValue(), tag.getValue(), false))
-                    .bounds(b.x(), b.y(), b.w(), b.h()).build());
+            addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.guild.create"), x -> send("create", "", name.getValue(), tag.getValue(), false))
+                    .bounds(b.x(), b.y(), b.w(), b.h()).primary().build());
             return;
         }
         Golden.Box fb = footButton(FOOT_R, Golden.S89);
         if (view.leader()) {
-            bottom = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.guild.disband"), b -> {
+            bottom = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.guild.disband"), b -> {
                 if (confirmed("disband", "")) {
                     send("disband", "", "", "", false);
                 }
             }).bounds(fb.x(), fb.y(), fb.w(), fb.h()).build());
         } else {
-            bottom = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.guild.leave"), b -> send("leave", "", "", "", false))
+            bottom = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.guild.leave"), b -> send("leave", "", "", "", false))
                     .bounds(fb.x(), fb.y(), fb.w(), fb.h()).build());
         }
         if (tab == 0 && view.leader()) {
-            addRenderableWidget(Button.builder(Component.translatable(view.open() ? "gui.skyabyss.guild.open_on" : "gui.skyabyss.guild.open_off"),
+            addRenderableWidget(Paper.tag(Component.translatable(view.open() ? "gui.skyabyss.guild.open_on" : "gui.skyabyss.guild.open_off"),
                     b -> send("open", "", "", "", !view.open())).bounds(NX, MINOR.y() + Golden.S5, NW, BTN).build());
         }
         if (tab == 1 && !view.req().kill() && !view.req().done()) {
-            addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.guild.deliver"), b -> send("deliver", "", "", "", false))
+            addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.guild.deliver"), b -> send("deliver", "", "", "", false))
                     .bounds(NX, MINOR.bottom() - Golden.S5 - BTN, NW, BTN).build());
         }
         if (tab == 2) {
             int y = MINOR.y() + 2 + ROW + Golden.S3;
-            addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.guild.storage"), b -> send("storage", "", "", "", false))
+            addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.guild.storage"), b -> send("storage", "", "", "", false))
                     .bounds(NX, y, NW, BTN).build());
             y += BTN + Golden.S5;
-            Button take = Button.builder(Component.translatable("gui.skyabyss.guild.take_rank." + view.takeRank()),
+            Button take = Paper.tag(Component.translatable("gui.skyabyss.guild.take_rank." + view.takeRank()),
                     b -> send("take", "", "", "", false, (view.takeRank() + 1) % 3, accent)).bounds(NX, y, NW, BTN).build();
             take.active = view.leader();
             addRenderableWidget(take);
             y += BTN + Golden.S5;
-            addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.guild.banner", view.banner()), b -> send("banner", "", "", "", false))
+            addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.guild.banner", view.banner()), b -> send("banner", "", "", "", false))
                     .bounds(NX, y, NW, BTN).build());
             if (view.leader()) {
                 if (emblemTag == null && myRow() != null) {
@@ -182,7 +183,7 @@ public class GuildScreen extends Screen {
                 emblemTag.setMaxLength(GuildData.TAG_MAX);
                 emblemTag.setValue(old);
                 addRenderableWidget(emblemTag);
-                addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.guild.emblem"),
+                addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.guild.emblem"),
                         b -> send("emblem", pattern, plate, emblemTag.getValue(), false)).bounds(NX + Golden.S34 + Golden.S5, ey, NW - Golden.S34 - Golden.S5, BTN).build());
             }
         }
@@ -267,7 +268,7 @@ public class GuildScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fillGradient(0, 0, width, height, 0x800A0E1E, 0xA00A0E1E);
+        g.fill(0, 0, width, height, 0xA00E0D14);
     }
 
     // 板は窓に合わせて一様に大きく描く (描くのと当たりは同じ変換: fit)
@@ -289,7 +290,7 @@ public class GuildScreen extends Screen {
         hits.clear();
         hitActions.clear();
         if (view.mine().isEmpty()) {
-            g.drawString(font, title, HEAD.x() + Golden.S5, Golden.textY(HEAD.y(), HEAD.h()), Golden.GOLD, false);
+            g.drawString(font, title, HEAD.x() + Golden.S5, Golden.textY(HEAD.y(), HEAD.h()), Paper.ON_BLACK_PINK, false);
             renderList(g, font, mouseX, mouseY);
             renderCreate(g, font, mouseX, mouseY);
         } else {
@@ -306,10 +307,10 @@ public class GuildScreen extends Screen {
     // ---------------------------------------------------------------- 入っていないとき
     private void renderList(GuiGraphics g, Font font, int mx, int my) {
         Golden.recess(g, MAJOR);
-        g.drawString(font, Component.translatable("gui.skyabyss.guild.list_head"), MX, Golden.textY(MAJOR.y() + 2, ROW), Golden.PALE, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.guild.list_head"), MX, Golden.textY(MAJOR.y() + 2, ROW), Paper.ON_BLACK_HI, false);
         List<FacilityNetwork.GuildRow> all = view.guilds();
         if (all.isEmpty()) {
-            g.drawString(font, Component.translatable("gui.skyabyss.guild.list_empty"), MX, Golden.textY(LIST_Y, ROW), Golden.DIM, false);
+            g.drawString(font, Component.translatable("gui.skyabyss.guild.list_empty"), MX, Golden.textY(LIST_Y, ROW), Paper.ON_BLACK_DIM, false);
         }
         listScroll = Math.max(0, Math.min(listScroll, all.size() - LIST_ROWS));
         moreMarks(g, font, MAJOR.right() - Golden.S8 - 2, LIST_Y, LIST_ROWS, listScroll, all.size());
@@ -327,33 +328,33 @@ public class GuildScreen extends Screen {
             int cx = ax - Golden.S5 - font.width(count);
             int bx = drawBadge(g, font, MX, ty, r.tag(), r.color(), r.accent(), r.plate());
             FitText.draw(g, font, Component.literal(r.name()), bx + 3, ty, cx - Golden.S5 - bx - 3, Golden.TEXT, false);
-            g.drawString(font, count, cx, ty, Golden.DIM, false);
+            g.drawString(font, count, cx, ty, Paper.ON_BLACK_DIM, false);
             boolean hover = mx >= ax && mx < ax + aw && my >= ry && my < ry + ROW;
-            g.fill(ax, ry, ax + aw, ry + ROW, r.applied() ? 0xFF161B22 : hover ? 0xFF364064 : 0xFF1A2448);
-            g.drawString(font, act, ax + (aw - font.width(act)) / 2, ty, r.applied() ? Golden.DIM : Golden.TEXT, false);
+            g.fill(ax, ry, ax + aw, ry + ROW, r.applied() ? 0xFF161B22 : hover ? 0xFF3A3644 : 0xFF2A2232);
+            g.drawString(font, act, ax + (aw - font.width(act)) / 2, ty, r.applied() ? Paper.ON_BLACK_DIM : Golden.TEXT, false);
             if (!r.applied()) {
                 hit(ax, ry, aw, ROW, () -> send("apply", r.id(), "", "", false));
             }
         }
         // 下の段の左: 作れる条件
         FitText.draw(g, font, Component.translatable("gui.skyabyss.guild.found_rule"), FOOT_L.x() + Golden.S5, Golden.textY(FOOT_L.y(), FOOT_L.h()),
-                FOOT_L.w() - Golden.S5, Golden.DIM, false);
+                FOOT_L.w() - Golden.S5, Paper.ON_BLACK_DIM, false);
     }
 
     private void renderCreate(GuiGraphics g, Font font, int mx, int my) {
         Golden.recess(g, MINOR);
         int y = MINOR.y() + 2;
-        g.drawString(font, Component.translatable("gui.skyabyss.guild.make_head"), NX, Golden.textY(y, ROW), Golden.PALE, false);
-        FitText.draw(g, font, Component.translatable("gui.skyabyss.guild.name"), NX, Golden.textY(y + ROW, ROW), NW, Golden.DIM, false);
-        FitText.draw(g, font, Component.translatable("gui.skyabyss.guild.tag"), NX, Golden.textY(tagBoxY() - ROW, ROW), NW, Golden.DIM, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.guild.make_head"), NX, Golden.textY(y, ROW), Paper.ON_BLACK_HI, false);
+        FitText.draw(g, font, Component.translatable("gui.skyabyss.guild.name"), NX, Golden.textY(y + ROW, ROW), NW, Paper.ON_BLACK_DIM, false);
+        FitText.draw(g, font, Component.translatable("gui.skyabyss.guild.tag"), NX, Golden.textY(tagBoxY() - ROW, ROW), NW, Paper.ON_BLACK_DIM, false);
         // 名札の見本 (印の欄の右)
         String t = tag == null || tag.getValue().isBlank() ? "?" : tag.getValue().toUpperCase(java.util.Locale.ROOT);
         drawBadge(g, font, NX + Golden.S34 + Golden.S5, Golden.textY(tagBoxY(), BTN), t, color, accent);
         int cy = colorY();
-        FitText.draw(g, font, Component.translatable("gui.skyabyss.guild.color"), NX, Golden.textY(cy, ROW), NW, Golden.DIM, false);
+        FitText.draw(g, font, Component.translatable("gui.skyabyss.guild.color"), NX, Golden.textY(cy, ROW), NW, Paper.ON_BLACK_DIM, false);
         swatches(g, NX + 1, cy + ROW, color, true);
         int ay = cy + ROW + SW_H + Golden.S3;
-        FitText.draw(g, font, Component.translatable("gui.skyabyss.guild.accent"), NX, Golden.textY(ay, ROW), NW, Golden.DIM, false);
+        FitText.draw(g, font, Component.translatable("gui.skyabyss.guild.accent"), NX, Golden.textY(ay, ROW), NW, Paper.ON_BLACK_DIM, false);
         swatches(g, NX + 1, ay + ROW, accent, false);
         // 旗の見本 (既定の模様。見本の右)
         bannerItem(g, NX + 8 * SW_STEP + Golden.S5, cy + ROW, 1.5f, GuildEmblems.DEFAULT, color, accent);
@@ -386,7 +387,7 @@ public class GuildScreen extends Screen {
         // 見出しの帯: 題・旗・印と名前、右につまみ
         int tabsX = HEAD.right() - Golden.S5 - TABS.length * TAB_W - (TABS.length - 1) * TAB_GAP;
         int ty = Golden.textY(HEAD.y(), HEAD.h());
-        g.drawString(font, title, HEAD.x() + Golden.S5, ty, Golden.GOLD, false);
+        g.drawString(font, title, HEAD.x() + Golden.S5, ty, Paper.ON_BLACK_PINK, false);
         int x = HEAD.x() + Golden.S5 + font.width(title) + Golden.S8;
         bannerItem(g, x, HEAD.y() + 2, 1f, view.pattern(), me.color(), me.accent());
         x += 16 + Golden.S3;
@@ -405,8 +406,8 @@ public class GuildScreen extends Screen {
         }
         // 下の段の左: 人数と自分の位
         Component who = Component.translatable("gui.skyabyss.guild.members", view.members().size(), view.max()).append("  ・  ")
-                .append(Component.translatable("gui.skyabyss.guild.rank." + view.rank()).withColor(Golden.GOLD));
-        FitText.draw(g, font, who, FOOT_L.x() + Golden.S5, Golden.textY(FOOT_L.y(), FOOT_L.h()), FOOT_L.w() - Golden.S5, Golden.SOFT, false);
+                .append(Component.translatable("gui.skyabyss.guild.rank." + view.rank()).withColor(Paper.ON_BLACK_PINK));
+        FitText.draw(g, font, who, FOOT_L.x() + Golden.S5, Golden.textY(FOOT_L.y(), FOOT_L.h()), FOOT_L.w() - Golden.S5, Paper.ON_BLACK_SOFT, false);
         switch (tab) {
             case 1 -> renderRequest(g, font);
             case 2 -> renderBanner(g, font, mx, my);
@@ -418,10 +419,10 @@ public class GuildScreen extends Screen {
     // 上・下にまだあるときの小さな印
     private void moreMarks(GuiGraphics g, Font font, int x, int ly, int rows, int scroll, int size) {
         if (scroll > 0) {
-            g.drawString(font, "▲", x, Golden.textY(ly, ROW), Golden.DIM, false);
+            g.drawString(font, "▲", x, Golden.textY(ly, ROW), Paper.ON_BLACK_DIM, false);
         }
         if (scroll + rows < size) {
-            g.drawString(font, "▼", x, Golden.textY(ly + (rows - 1) * ROW, ROW), Golden.DIM, false);
+            g.drawString(font, "▼", x, Golden.textY(ly + (rows - 1) * ROW, ROW), Paper.ON_BLACK_DIM, false);
         }
     }
 
@@ -449,7 +450,7 @@ public class GuildScreen extends Screen {
             if ((i + memberScroll) % 2 == 1) {
                 Golden.stripe(g, new Golden.Box(MAJOR.x() + 1, ry, MAJOR.w() - 2, ROW));
             }
-            g.fill(MX, ry + 5, MX + 3, ry + 8, m.online() ? FacilityUi.TEAL : 0xFF3A3F48);
+            g.fill(MX, ry + 5, MX + 3, ry + 8, m.online() ? FacilityUi.TEAL : 0xFF3A3644);
             String mark = m.rank() == 2 ? "★ " : m.rank() == 1 ? "☆ " : "";
             int nameRight = right;
             if (view.leader() && m.rank() < 2) {
@@ -462,7 +463,7 @@ public class GuildScreen extends Screen {
                 Component o = Component.translatable(m.rank() == 1 ? "gui.skyabyss.guild.demote" : "gui.skyabyss.guild.promote");
                 int ow = font.width(o) + 6;
                 int ox = kx - ow - 2;
-                g.fill(ox, ry + 1, ox + ow, ry + ROW - 1, mx >= ox && mx < ox + ow && my >= ry && my < ry + ROW ? 0xFF364064 : 0xFF1A2448);
+                g.fill(ox, ry + 1, ox + ow, ry + ROW - 1, mx >= ox && mx < ox + ow && my >= ry && my < ry + ROW ? 0xFF3A3644 : 0xFF2A2232);
                 g.drawString(font, o, ox + 3, ty, FacilityUi.TEXT, false);
                 hit(ox, ry + 1, ow, ROW - 2, () -> send("officer", m.id().toString(), "", "", m.rank() != 1));
                 // 長を譲る (★。二度押し)
@@ -477,7 +478,7 @@ public class GuildScreen extends Screen {
                 });
                 nameRight = sx - Golden.S3;
             }
-            FitText.draw(g, font, Component.literal(mark + m.name()), MX + 7, ty, nameRight - MX - 7, m.rank() >= 1 ? Golden.GOLD : Golden.TEXT, false);
+            FitText.draw(g, font, Component.literal(mark + m.name()), MX + 7, ty, nameRight - MX - 7, m.rank() >= 1 ? Paper.ON_BLACK_PINK : Golden.TEXT, false);
         }
         // 脇の列: 長は「誰でも入れる」(釦)、長と副長は申請の一覧、長には譲り方の手引き
         Golden.recess(g, MINOR);
@@ -493,17 +494,17 @@ public class GuildScreen extends Screen {
             hintTop = MINOR.bottom() - 2 - Math.min(3, lines.size()) * ROW;
             Golden.rule(g, NX, MINOR.right() - Golden.S5, hintTop - 2);
             for (int i = 0; i < lines.size() && i < 3; i++) {
-                g.drawString(font, lines.get(i), NX, Golden.textY(hintTop + i * ROW, ROW), Golden.DIM, false);
+                g.drawString(font, lines.get(i), NX, Golden.textY(hintTop + i * ROW, ROW), Paper.ON_BLACK_DIM, false);
             }
         }
         if (view.rank() < 1) {
             return;
         }
-        g.drawString(font, Component.translatable("gui.skyabyss.guild.applicants"), NX, Golden.textY(y, ROW), Golden.PALE, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.guild.applicants"), NX, Golden.textY(y, ROW), Paper.ON_BLACK_HI, false);
         int ay = y + ROW;
         int rows = Math.max(0, (hintTop - 2 - ay) / ROW);
         if (view.applicants().isEmpty()) {
-            g.drawString(font, Component.translatable("gui.skyabyss.guild.no_applicants"), NX, Golden.textY(ay, ROW), Golden.DIM, false);
+            g.drawString(font, Component.translatable("gui.skyabyss.guild.no_applicants"), NX, Golden.textY(ay, ROW), Paper.ON_BLACK_DIM, false);
         }
         for (int i = 0; i < view.applicants().size() && i < rows; i++) {
             FacilityNetwork.MemberRow m = view.applicants().get(i);
@@ -511,7 +512,7 @@ public class GuildScreen extends Screen {
             int ty = Golden.textY(ry, ROW);
             FitText.draw(g, font, Component.literal(m.name()), NX, ty, NW - 36, Golden.TEXT, false);
             int okx = MINOR.right() - Golden.S5 - 32;
-            g.fill(okx, ry + 1, okx + 15, ry + ROW - 1, 0xFF1A2448);
+            g.fill(okx, ry + 1, okx + 15, ry + ROW - 1, 0xFF2A2232);
             g.drawString(font, "✔", okx + 4, ty, FacilityUi.TEAL, false);
             hit(okx, ry + 1, 15, ROW - 2, () -> send("accept", m.id().toString(), "", "", false));
             int nox = okx + 17;
@@ -526,8 +527,8 @@ public class GuildScreen extends Screen {
         Golden.recess(g, MAJOR);
         Golden.recess(g, MINOR);
         int y = MAJOR.y() + 2;
-        g.drawString(font, Component.translatable("gui.skyabyss.guild.req_head"), MX, Golden.textY(y, ROW), Golden.PALE, false);
-        g.drawString(font, Component.translatable("gui.skyabyss.guild.req_top"), NX, Golden.textY(MINOR.y() + 2, ROW), Golden.PALE, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.guild.req_head"), MX, Golden.textY(y, ROW), Paper.ON_BLACK_HI, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.guild.req_top"), NX, Golden.textY(MINOR.y() + 2, ROW), Paper.ON_BLACK_HI, false);
         if (r.id().isEmpty()) {
             return;
         }
@@ -536,23 +537,23 @@ public class GuildScreen extends Screen {
         g.renderItem(r.icon(), MX, y + 5);
         FitText.draw(g, font, Component.translatable("gui.skyabyss.guild.req." + r.id(), r.target()), MX + 21, Golden.textY(y, ROW), MW - 21, Golden.TEXT, false);
         FitText.draw(g, font, Component.translatable(r.kill() ? "gui.skyabyss.guild.req_how_kill" : "gui.skyabyss.guild.req_how_give"), MX + 21,
-                Golden.textY(y + ROW, ROW), MW - 21, Golden.DIM, false);
+                Golden.textY(y + ROW, ROW), MW - 21, Paper.ON_BLACK_DIM, false);
         y += 2 * ROW + Golden.S8;
         int bw = MW;
-        g.fill(MX, y, MX + bw, y + 5, 0xFF141A34);
+        g.fill(MX, y, MX + bw, y + 5, 0xFF1E1C28);
         int fill = r.target() <= 0 ? 0 : Math.min(bw, bw * r.progress() / r.target());
         g.fill(MX, y, MX + fill, y + 5, r.done() ? FacilityUi.GOLD : FacilityUi.TEAL);
         g.renderOutline(MX - 1, y - 1, bw + 2, 7, FacilityUi.LINE);
         y += 5 + Golden.S5;
         g.drawString(font, Component.translatable(r.done() ? "gui.skyabyss.guild.req_done" : "gui.skyabyss.guild.req_progress", r.progress(), r.target()),
-                MX, Golden.textY(y, ROW), r.done() ? Golden.GOLD : Golden.TEXT, false);
+                MX, Golden.textY(y, ROW), r.done() ? Paper.ON_BLACK_PINK : Golden.TEXT, false);
         Component mine = Component.translatable("gui.skyabyss.guild.req_mine", r.mine());
-        g.drawString(font, mine, MAJOR.right() - Golden.S5 - font.width(mine), Golden.textY(y, ROW), Golden.SOFT, false);
+        g.drawString(font, mine, MAJOR.right() - Golden.S5 - font.width(mine), Golden.textY(y, ROW), Paper.ON_BLACK_SOFT, false);
         List<FormattedCharSequence> reward = JpWrap.split(font, Component.translatable("gui.skyabyss.guild.req_reward"), MW);
         int ry = MAJOR.bottom() - 2 - Math.min(3, reward.size()) * ROW;
         Golden.rule(g, MX, MAJOR.right() - Golden.S5, ry - 2);
         for (int i = 0; i < reward.size() && i < 3; i++) {
-            g.drawString(font, reward.get(i), MX, Golden.textY(ry + i * ROW, ROW), Golden.DIM, false);
+            g.drawString(font, reward.get(i), MX, Golden.textY(ry + i * ROW, ROW), Paper.ON_BLACK_DIM, false);
         }
         // 脇の列: 多く納めた人 (釦の上まで)
         int ty = MINOR.y() + 2 + ROW;
@@ -560,7 +561,7 @@ public class GuildScreen extends Screen {
         for (int i = 0; i < r.topNames().size() && ty + ROW <= bottomY; i++) {
             String n = Integer.toString(r.topCounts().get(i));
             FitText.draw(g, font, Component.literal((i + 1) + ". " + r.topNames().get(i)), NX, Golden.textY(ty, ROW), NW - font.width(n) - 4, Golden.TEXT, false);
-            g.drawString(font, n, MINOR.right() - Golden.S5 - font.width(n), Golden.textY(ty, ROW), Golden.GOLD, false);
+            g.drawString(font, n, MINOR.right() - Golden.S5 - font.width(n), Golden.textY(ty, ROW), Paper.ON_BLACK_PINK, false);
             ty += ROW;
         }
     }
@@ -569,10 +570,10 @@ public class GuildScreen extends Screen {
         Golden.recess(g, MAJOR);
         Golden.recess(g, MINOR);
         // 脇の列: 倉庫と旗の釦 (init)、長は作り直す (印・色)
-        g.drawString(font, Component.translatable("gui.skyabyss.guild.house_head"), NX, Golden.textY(MINOR.y() + 2, ROW), Golden.PALE, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.guild.house_head"), NX, Golden.textY(MINOR.y() + 2, ROW), Paper.ON_BLACK_HI, false);
         if (view.leader()) {
             int ey = emblemRowY();
-            g.drawString(font, Component.translatable("gui.skyabyss.guild.emblem_head"), NX, Golden.textY(ey - ROW, ROW), Golden.DIM, false);
+            g.drawString(font, Component.translatable("gui.skyabyss.guild.emblem_head"), NX, Golden.textY(ey - ROW, ROW), Paper.ON_BLACK_DIM, false);
             int sy = ey + BTN + Golden.S5;
             swatches(g, NX + 1, sy, color, true);
             swatches(g, NX + 1, sy + SW_H + Golden.S3, accent, false);
@@ -585,22 +586,22 @@ public class GuildScreen extends Screen {
         String pl = view.leader() ? plate : view.plate();
         int top = MAJOR.y() + Golden.S5;
         Golden.Box well = new Golden.Box(MX, top, Golden.S55, Golden.S55);
-        g.fill(well.x(), well.y(), well.right(), well.bottom(), 0xFF0A0E1E);
-        Golden.outline(g, well.x(), well.y(), well.right(), well.bottom(), 0xFF364064);
+        g.fill(well.x(), well.y(), well.right(), well.bottom(), 0xFF0E0D14);
+        Paper.edge(g, well.x(), well.y(), well.right(), well.bottom(), 0xFF3A3644);
         bannerItem(g, well.x() + 3, well.y() + 3, 3.0f, pat, c, a);
         GuildEmblems.Emblem em = GuildEmblems.emblem(pat);
         int px = well.right() + Golden.S8;
         int pw = MAJOR.right() - Golden.S5 - px;
-        g.drawString(font, Component.translatable("gui.skyabyss.guild.pattern_head"), px, Golden.textY(top, ROW), Golden.DIM, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.guild.pattern_head"), px, Golden.textY(top, ROW), Paper.ON_BLACK_DIM, false);
         String idx = (GuildEmblems.ALL.indexOf(em) + 1) + " / " + GuildEmblems.ALL.size();
-        g.drawString(font, idx, MAJOR.right() - Golden.S5 - font.width(idx), Golden.textY(top, ROW), Golden.DIM, false);
+        g.drawString(font, idx, MAJOR.right() - Golden.S5 - font.width(idx), Golden.textY(top, ROW), Paper.ON_BLACK_DIM, false);
         boolean locked = em.unlock() != null && !unlocked.contains(em.unlock());
         Component pname = Component.translatable(em.nameKey());
         int py = top + ROW + Golden.S3;
         if (view.leader()) {
             arrow(g, px, py, "◀", mx, my, () -> cyclePattern(-1));
             arrow(g, px + pw - BTN, py, "▶", mx, my, () -> cyclePattern(1));
-            FitText.drawCentered(g, font, pname, px + pw / 2, Golden.textY(py, BTN), pw - 2 * BTN - 4, locked ? Golden.DIM : Golden.TEXT, false);
+            FitText.drawCentered(g, font, pname, px + pw / 2, Golden.textY(py, BTN), pw - 2 * BTN - 4, locked ? Paper.ON_BLACK_DIM : Golden.TEXT, false);
         } else {
             FitText.draw(g, font, pname, px, Golden.textY(py, BTN), pw, Golden.TEXT, false);
         }
@@ -612,11 +613,11 @@ public class GuildScreen extends Screen {
                 g.drawString(font, lines.get(i), px, Golden.textY(ly + i * ROW, ROW), FacilityUi.LACK, false);
             }
         } else if (em.unlock() != null) {
-            g.drawString(font, Component.translatable("gui.skyabyss.guild.special"), px, Golden.textY(ly, ROW), Golden.GOLD, false);
+            g.drawString(font, Component.translatable("gui.skyabyss.guild.special"), px, Golden.textY(ly, ROW), Paper.ON_BLACK_PINK, false);
         }
         // 名札の色 (はじめは旗の地の色。特別な色は功績で開く)
         int cy = well.bottom() + Golden.S8;
-        FitText.draw(g, font, Component.translatable("gui.skyabyss.guild.plate_head"), MX, Golden.textY(cy, ROW), MW, Golden.DIM, false);
+        FitText.draw(g, font, Component.translatable("gui.skyabyss.guild.plate_head"), MX, Golden.textY(cy, ROW), MW, Paper.ON_BLACK_DIM, false);
         int chipY = cy + ROW + 2;
         int cx = MX + 1;
         chip(g, font, cx, chipY, 0xFF000000 | GuildData.textColor(c), pl.isEmpty(), false, "");
@@ -635,7 +636,7 @@ public class GuildScreen extends Screen {
         List<FormattedCharSequence> rule = JpWrap.split(font, Component.translatable("gui.skyabyss.guild.banner_rule"), MW);
         int ry = by + ROW;
         for (int i = 0; i < rule.size() && ry + ROW <= MAJOR.bottom() - 2; i++) {
-            g.drawString(font, rule.get(i), MX, Golden.textY(ry, ROW), Golden.DIM, false);
+            g.drawString(font, rule.get(i), MX, Golden.textY(ry, ROW), Paper.ON_BLACK_DIM, false);
             ry += ROW;
         }
     }
@@ -648,7 +649,7 @@ public class GuildScreen extends Screen {
 
     private void arrow(GuiGraphics g, int x, int y, String s, int mx, int my, Runnable run) {
         boolean hover = mx >= x && mx < x + BTN && my >= y && my < y + BTN;
-        g.fill(x, y, x + BTN, y + BTN, hover ? 0xFF364064 : 0xFF1A2448);
+        g.fill(x, y, x + BTN, y + BTN, hover ? 0xFF3A3644 : 0xFF2A2232);
         g.drawString(font, s, x + (BTN - font.width(s)) / 2, Golden.textY(y, BTN), Golden.TEXT, false);
         hit(x, y, BTN, BTN, run);
     }
@@ -671,7 +672,7 @@ public class GuildScreen extends Screen {
         int w = BODY.w() - 2 * Golden.S5;
         List<Integer> st = view.stats().size() >= 3 ? view.stats() : List.of(0, 0, 0);
         int y = BODY.y() + 2;
-        FitText.draw(g, font, Component.translatable("gui.skyabyss.guild.ach_head", st.get(0), st.get(1), st.get(2)), x, Golden.textY(y, ROW), w, Golden.PALE, false);
+        FitText.draw(g, font, Component.translatable("gui.skyabyss.guild.ach_head", st.get(0), st.get(1), st.get(2)), x, Golden.textY(y, ROW), w, Paper.ON_BLACK_HI, false);
         List<GuildAchievements.Achievement> list = GuildAchievements.ALL;
         // 列: 印 (13)・名前 (主の列の幅まで)・ほうび・進み (右寄せ)
         int nameW = MAJOR.w() - Golden.S5 - 13 - Golden.S5;
@@ -688,8 +689,8 @@ public class GuildScreen extends Screen {
             }
             boolean done = view.unlocked().contains(a.id());
             int v = Math.min(a.target(), st.get(a.kind().ordinal()));
-            g.drawString(font, done ? "✔" : "・", x, ty, done ? Golden.GOLD : Golden.DIM, false);
-            FitText.draw(g, font, Component.translatable(a.nameKey()), x + 13, ty, Math.min(nameW, rewardX - Golden.S5 - x - 13), done ? Golden.TEXT : Golden.DIM, false);
+            g.drawString(font, done ? "✔" : "・", x, ty, done ? Paper.ON_BLACK_PINK : Paper.ON_BLACK_DIM, false);
+            FitText.draw(g, font, Component.translatable(a.nameKey()), x + 13, ty, Math.min(nameW, rewardX - Golden.S5 - x - 13), done ? Golden.TEXT : Paper.ON_BLACK_DIM, false);
             StringBuilder rw = new StringBuilder();
             for (Component r : GuildAchievements.rewards(a.id())) {
                 if (!rw.isEmpty()) {
@@ -699,8 +700,8 @@ public class GuildScreen extends Screen {
             }
             String prog = v + "/" + a.target();
             int progX = x + w - font.width(prog);
-            FitText.draw(g, font, Component.literal(rw.toString()), rewardX, ty, progX - Golden.S8 - rewardX, done ? Golden.GOLD : Golden.DIM, false);
-            g.drawString(font, prog, progX, ty, done ? Golden.TEAL : Golden.TEXT, false);
+            FitText.draw(g, font, Component.literal(rw.toString()), rewardX, ty, progX - Golden.S8 - rewardX, done ? Paper.ON_BLACK_PINK : Paper.ON_BLACK_DIM, false);
+            g.drawString(font, prog, progX, ty, done ? Paper.ON_BLACK_HI : Golden.TEXT, false);
         }
     }
 

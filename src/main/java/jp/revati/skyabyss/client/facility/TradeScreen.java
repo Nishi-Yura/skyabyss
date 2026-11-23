@@ -18,6 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 取引所の画面 (docs/design/35 の 6.11)。黄金比の大きい板 (docs/design/56): 見出しの帯に題と手持ちの鐘銭、中身の一行目につまみ 5 つ、
 // その下に一覧 (行 26)、下の段 21 の左に手引き (一行。重ねると全文)、右に釦。
@@ -131,13 +132,13 @@ public class TradeScreen extends Screen {
                 coinsBox.setResponder(s -> coinsText = s);
                 addRenderableWidget(coinsBox);
                 Golden.Box gb = footButton(0, Golden.S89);
-                Button go = Button.builder(Component.translatable(offerFor >= 0 ? "gui.skyabyss.trade.do_offer" : "gui.skyabyss.trade.do_list"),
-                        b -> submit()).bounds(gb.x(), gb.y(), gb.w(), gb.h()).build();
+                Button go = Paper.tag(Component.translatable(offerFor >= 0 ? "gui.skyabyss.trade.do_offer" : "gui.skyabyss.trade.do_list"),
+                        b -> submit()).bounds(gb.x(), gb.y(), gb.w(), gb.h()).primary().build();
                 go.active = view.atKeeper();
                 addRenderableWidget(go);
                 if (offerFor >= 0) {
                     Golden.Box bb = footButton(Golden.S89 + Golden.S5, Golden.S55);
-                    addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.trade.back"), b -> {
+                    addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.trade.back"), b -> {
                         offerFor = -1;
                         picked.clear();
                         tab = 0;
@@ -149,7 +150,7 @@ public class TradeScreen extends Screen {
                 TradeNetwork.MineRow m = mineSelected();
                 if (m != null) {
                     Golden.Box cb = footButton(0, Golden.S89);
-                    cancelButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.trade.cancel"), b -> {
+                    cancelButton = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.trade.cancel"), b -> {
                         if (confirmed("cancel", m.row().id())) {
                             send(TradeNetwork.Action.simple("cancel", m.row().id(), ""));
                         }
@@ -158,7 +159,7 @@ public class TradeScreen extends Screen {
             }
             case 4 -> {
                 Golden.Box cb = footButton(0, Golden.S89);
-                Button claim = Button.builder(Component.translatable("gui.skyabyss.trade.claim"), b -> send(TradeNetwork.Action.simple("claim", 0, "")))
+                Button claim = Paper.tag(Component.translatable("gui.skyabyss.trade.claim"), b -> send(TradeNetwork.Action.simple("claim", 0, "")))
                         .bounds(cb.x(), cb.y(), cb.w(), cb.h()).build();
                 claim.active = !view.mail().isEmpty();
                 addRenderableWidget(claim);
@@ -239,7 +240,7 @@ public class TradeScreen extends Screen {
     // ---------------------------------------------------------------- 描く
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fillGradient(0, 0, width, height, 0x800A0E1E, 0xA00A0E1E);
+        g.fill(0, 0, width, height, 0xA00E0D14);
     }
 
     // 板は窓に合わせて一様に大きく描く (描くのと当たりは同じ変換: fit)
@@ -264,11 +265,11 @@ public class TradeScreen extends Screen {
         hover = ItemStack.EMPTY;
         hoverText = null;
         int ty = Golden.textY(HEAD.y(), HEAD.h());
-        g.drawString(font, title, HEAD.x() + Golden.S5, ty, Golden.GOLD, false);
+        g.drawString(font, title, HEAD.x() + Golden.S5, ty, Paper.ON_BLACK_PINK, false);
         // 手持ちの鐘銭 (見出しの帯の右)
         String coins = coinText(view.coins());
         int cx = HEAD.right() - Golden.S5 - font.width(coins);
-        g.drawString(font, coins, cx, ty, Golden.GOLD, false);
+        g.drawString(font, coins, cx, ty, Paper.ON_BLACK_PINK, false);
         g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), cx - 18, HEAD.y() + 2);
         // つまみ (中身の一行目)
         int tx = BAR.x();
@@ -300,7 +301,7 @@ public class TradeScreen extends Screen {
         int buttonsW = tab == 1 ? (offerFor >= 0 ? Golden.S89 + Golden.S5 + Golden.S55 : Golden.S89) : tab == 2 && cancelButton != null || tab == 4 ? Golden.S89 : 0;
         int fw = FOOT.w() - Golden.S5 - (buttonsW > 0 ? buttonsW + Golden.S8 : Golden.S5);
         int fy = Golden.textY(FOOT.y(), FOOT.h());
-        FitText.draw(g, font, foot, FOOT.x() + Golden.S5, fy, fw, away ? FacilityUi.LACK : Golden.DIM, false);
+        FitText.draw(g, font, foot, FOOT.x() + Golden.S5, fy, fw, away ? FacilityUi.LACK : Paper.ON_BLACK_DIM, false);
         if (font.width(foot) > fw && mx >= FOOT.x() && mx < FOOT.x() + Golden.S5 + fw && my >= FOOT.y() && my < FOOT.bottom()) {
             hoverText = foot;
         }
@@ -366,7 +367,7 @@ public class TradeScreen extends Screen {
                     hover = s.copyWithCount(1);
                 }
                 String t = coinText(s.getCount());
-                g.drawString(font, t, px + 18, y + 4, Golden.GOLD, false);
+                g.drawString(font, t, px + 18, y + 4, Paper.ON_BLACK_PINK, false);
                 px += 18 + font.width(t) + 2;
                 continue;
             }
@@ -374,7 +375,7 @@ public class TradeScreen extends Screen {
             px += step;
         }
         if (list.size() > max) {
-            g.drawString(font, "+", px, y + 4, Golden.DIM, false);
+            g.drawString(font, "+", px, y + 4, Paper.ON_BLACK_DIM, false);
             px += 6;
         }
         return px;
@@ -391,8 +392,8 @@ public class TradeScreen extends Screen {
     // 行の中の小さな釦 (高さ 13)
     private void button(GuiGraphics g, int x, int y, int w, Component label, int bg, int fg, int mx, int my, Runnable run) {
         boolean hv = mx >= x && mx < x + w && my >= y && my < y + BTN;
-        g.fill(x, y, x + w, y + BTN, hv ? 0xFF364064 : bg);
-        Golden.outline(g, x, y, x + w, y + BTN, FacilityUi.LINE);
+        g.fill(x, y, x + w, y + BTN, hv ? 0xFF3A3644 : bg);
+        Paper.edge(g, x, y, x + w, y + BTN, FacilityUi.LINE);
         g.drawString(font, label, x + (w - font.width(label)) / 2, Golden.textY(y, BTN), fg, false);
         hit(x, y, w, BTN, run, null);
     }
@@ -421,7 +422,7 @@ public class TradeScreen extends Screen {
         int bx = right - BUY_W - Golden.S3 - BID_W;
         int nx = bx - Golden.S8 - Golden.S55;
         if (rows.isEmpty()) {
-            g.drawCenteredString(font, Component.translatable("gui.skyabyss.trade.market_empty"), CONTENT.cx(), CONTENT.y() + CONTENT.h() / 2 - 4, Golden.DIM);
+            g.drawCenteredString(font, Component.translatable("gui.skyabyss.trade.market_empty"), CONTENT.cx(), CONTENT.y() + CONTENT.h() / 2 - 4, Paper.ON_BLACK_DIM);
         }
         for (int i = 0; i < ROWS && i + scroll[0] < rows.size(); i++) {
             TradeNetwork.Row r = rows.get(i + scroll[0]);
@@ -434,17 +435,17 @@ public class TradeScreen extends Screen {
             FacilityUi.tag(g, lx - 2, iy - 2, stacksWidth(r.want(), 18, 4) + 4, 20);
             int ex = stacks(g, r.want(), lx, iy, 18, 4, mx, my);
             int ax = Math.max(ex, lx + Golden.S89 - 13);
-            g.drawString(font, "→", ax, iy + 4, Golden.TEAL, false);
+            g.drawString(font, "→", ax, iy + 4, Paper.ON_BLACK_HI, false);
             stacks(g, r.give(), ax + 10, iy, 18, Math.max(1, (nx - Golden.S5 - ax - 10) / 18), mx, my);
             FitText.draw(g, font, Component.literal(r.seller()), nx, Golden.textY(ry, ROW), Golden.S55, Golden.TEXT, false);
-            g.drawString(font, left(r.left()), nx, Golden.textY(ry + ROW, ROW), Golden.DIM, false);
+            g.drawString(font, left(r.left()), nx, Golden.textY(ry + ROW, ROW), Paper.ON_BLACK_DIM, false);
             int by = ry + (ROW_H - BTN) / 2;
             if (r.applied()) {
-                g.drawString(font, Component.translatable("gui.skyabyss.trade.applied"), bx, Golden.textY(by, BTN), Golden.GOLD, false);
+                g.drawString(font, Component.translatable("gui.skyabyss.trade.applied"), bx, Golden.textY(by, BTN), Paper.ON_BLACK_PINK, false);
             } else {
-                button(g, bx, by, BUY_W, Component.translatable("gui.skyabyss.trade.apply"), 0xFF1A2448, r.canPay() ? Golden.TEXT : FacilityUi.LACK, mx, my,
+                button(g, bx, by, BUY_W, Component.translatable("gui.skyabyss.trade.apply"), 0xFF2A2232, r.canPay() ? Golden.TEXT : FacilityUi.LACK, mx, my,
                         () -> send(TradeNetwork.Action.simple("apply", r.id(), "")));
-                button(g, bx + BUY_W + Golden.S3, by, BID_W, Component.translatable("gui.skyabyss.trade.counter"), 0xFF22262E, Golden.SOFT, mx, my, () -> {
+                button(g, bx + BUY_W + Golden.S3, by, BID_W, Component.translatable("gui.skyabyss.trade.counter"), 0xFF22262E, Paper.ON_BLACK_SOFT, mx, my, () -> {
                     offerFor = r.id();
                     picked.clear();
                     coinsText = "";
@@ -465,7 +466,7 @@ public class TradeScreen extends Screen {
             int full = ROWS * ROW_H;
             int barH = Math.max(12, full * ROWS / n);
             int barY = box.y() + 2 + (full - barH) * s / Math.max(1, n - ROWS);
-            g.fill(box.right() - 4, barY, box.right() - 2, barY + barH, Golden.TEAL | 0xFF000000);
+            g.fill(box.right() - 4, barY, box.right() - 2, barY + barH, Paper.ON_BLACK_HI | 0xFF000000);
         }
     }
 
@@ -481,23 +482,23 @@ public class TradeScreen extends Screen {
         int lw = MAJOR_L.w() - 2 * Golden.S5;
         int y = MAJOR_L.y() + 2;
         g.drawString(font, Component.translatable(offerFor >= 0 ? "gui.skyabyss.trade.offer_head" : "gui.skyabyss.trade.give_head"), lx, Golden.textY(y, ROW),
-                Golden.PALE, false);
+                Paper.ON_BLACK_HI, false);
         y += ROW + Golden.S3;
         List<ItemStack> inv = Minecraft.getInstance().player == null ? List.of() : Minecraft.getInstance().player.getInventory().items;
         if (target != null) {
             // 申し出は鐘銭の額だけ (持ち物の品は出せない)。左は相手の出品
             for (net.minecraft.util.FormattedCharSequence line : jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.trade.coins_only"), lw)) {
-                g.drawString(font, line, lx, Golden.textY(y, ROW), Golden.DIM, false);
+                g.drawString(font, line, lx, Golden.textY(y, ROW), Paper.ON_BLACK_DIM, false);
                 y += ROW;
             }
             y += Golden.S5;
-            FitText.draw(g, font, Component.translatable("gui.skyabyss.trade.for", target.seller()), lx, Golden.textY(y, ROW), lw, Golden.SOFT, false);
+            FitText.draw(g, font, Component.translatable("gui.skyabyss.trade.for", target.seller()), lx, Golden.textY(y, ROW), lw, Paper.ON_BLACK_SOFT, false);
             y += ROW + Golden.S3;
-            g.drawString(font, Component.translatable("gui.skyabyss.trade.they_give"), lx, Golden.textY(y, ROW), Golden.DIM, false);
+            g.drawString(font, Component.translatable("gui.skyabyss.trade.they_give"), lx, Golden.textY(y, ROW), Paper.ON_BLACK_DIM, false);
             y += ROW;
             stacks(g, target.give(), lx, y, 18, 8, mx, my);
             y += 18 + Golden.S5;
-            g.drawString(font, Component.translatable("gui.skyabyss.trade.they_want"), lx, Golden.textY(y, ROW), Golden.DIM, false);
+            g.drawString(font, Component.translatable("gui.skyabyss.trade.they_want"), lx, Golden.textY(y, ROW), Paper.ON_BLACK_DIM, false);
             y += ROW;
             stacks(g, target.want(), lx, y, 18, 8, mx, my);
         } else {
@@ -521,7 +522,7 @@ public class TradeScreen extends Screen {
             }
             y += 18 + Golden.S5;
             // 持ち物 (上 3 段 = 9..35、下の段 = ホットバー 0..8)
-            g.drawString(font, Component.translatable("gui.skyabyss.trade.inventory"), lx, Golden.textY(y, ROW), Golden.DIM, false);
+            g.drawString(font, Component.translatable("gui.skyabyss.trade.inventory"), lx, Golden.textY(y, ROW), Paper.ON_BLACK_DIM, false);
             int gy = y + ROW;
             for (int k = 0; k < 36; k++) {
                 int slot = k < 27 ? k + 9 : k - 27;
@@ -537,7 +538,7 @@ public class TradeScreen extends Screen {
                         stack(g, s.copyWithCount(rest), sx, sy, mx, my);
                     } else {
                         stack(g, s, sx, sy, mx, my);
-                        g.fill(sx, sy, sx + 17, sy + 17, 0xA00A0E1E);
+                        g.fill(sx, sy, sx + 17, sy + 17, 0xA00E0D14);
                     }
                     if (!ok) {
                         g.fill(sx, sy, sx + 17, sy + 17, 0x90401020);
@@ -552,7 +553,7 @@ public class TradeScreen extends Screen {
         int nw = MINOR_R.w() - 2 * Golden.S5;
         int ny = MINOR_R.y() + 2;
         g.drawString(font, Component.translatable(target != null ? "gui.skyabyss.trade.coins_offer" : "gui.skyabyss.trade.want_head"), nx, Golden.textY(ny, ROW),
-                Golden.PALE, false);
+                Paper.ON_BLACK_HI, false);
         ny += ROW + Golden.S3;
         g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), nx, ny);
         ny += 18 + Golden.S8;
@@ -561,7 +562,7 @@ public class TradeScreen extends Screen {
                 if (ny + ROW > MINOR_R.bottom() - 2) {
                     break;
                 }
-                g.drawString(font, line, nx, Golden.textY(ny, ROW), Golden.DIM, false);
+                g.drawString(font, line, nx, Golden.textY(ny, ROW), Paper.ON_BLACK_DIM, false);
                 ny += ROW;
             }
         }
@@ -607,7 +608,7 @@ public class TradeScreen extends Screen {
         int lx = MINOR_L.x() + Golden.S3;
         int lw = MINOR_L.w() - Golden.S3 - 6;
         if (rows.isEmpty()) {
-            g.drawCenteredString(font, Component.translatable("gui.skyabyss.trade.mine_empty"), MINOR_L.cx(), MINOR_L.y() + MINOR_L.h() / 2 - 4, Golden.DIM);
+            g.drawCenteredString(font, Component.translatable("gui.skyabyss.trade.mine_empty"), MINOR_L.cx(), MINOR_L.y() + MINOR_L.h() / 2 - 4, Paper.ON_BLACK_DIM);
         }
         for (int i = 0; i < ROWS && i + scroll[2] < rows.size(); i++) {
             TradeNetwork.MineRow m = rows.get(i + scroll[2]);
@@ -623,12 +624,12 @@ public class TradeScreen extends Screen {
             int nx = lx + lw - font.width(n);
             int iy = itemY(ry);
             int ex = stacks(g, m.row().give(), lx, iy, 17, 3, mx, my);
-            g.drawString(font, "→", ex + Golden.S3, iy + 4, Golden.TEAL, false);
+            g.drawString(font, "→", ex + Golden.S3, iy + 4, Paper.ON_BLACK_HI, false);
             stacks(g, m.row().want(), ex + Golden.S13, iy, 17, 2, mx, my);
             if (!m.apps().isEmpty()) {
                 g.fill(nx - 3, iy + 2, nx + font.width(n) + 2, iy + 14, 0xFF5A4A20);
             }
-            g.drawString(font, n, nx, iy + 4, m.apps().isEmpty() ? Golden.DIM : Golden.GOLD, false);
+            g.drawString(font, n, nx, iy + 4, m.apps().isEmpty() ? Paper.ON_BLACK_DIM : Paper.ON_BLACK_PINK, false);
             int id = m.row().id();
             hit(rb.x(), ry, rb.w(), ROW_H, () -> {
                 if (selected != id) {
@@ -645,24 +646,24 @@ public class TradeScreen extends Screen {
         int ax = MAJOR_R.x() + Golden.S5;
         int aw = MAJOR_R.w() - 2 * Golden.S5;
         FitText.draw(g, font, Component.translatable("gui.skyabyss.trade.apps_head", sel.apps().size(), left(sel.row().left())), ax,
-                Golden.textY(MAJOR_R.y() + 2, ROW), aw, Golden.PALE, false);
+                Golden.textY(MAJOR_R.y() + 2, ROW), aw, Paper.ON_BLACK_HI, false);
         int ay = MAJOR_R.y() + 2 + ROW + Golden.S3;
         int appRows = (MAJOR_R.bottom() - 2 - ay) / ROW_H;
         if (sel.apps().isEmpty()) {
-            g.drawString(font, Component.translatable("gui.skyabyss.trade.no_apps"), ax, Golden.textY(ay, ROW), Golden.DIM, false);
+            g.drawString(font, Component.translatable("gui.skyabyss.trade.no_apps"), ax, Golden.textY(ay, ROW), Paper.ON_BLACK_DIM, false);
         }
         for (int i = 0; i < sel.apps().size() && i < appRows; i++) {
             TradeNetwork.AppRow a = sel.apps().get(i);
             int ry = ay + i * ROW_H;
-            g.fill(ax, ry + 5, ax + 3, ry + 8, a.online() ? FacilityUi.TEAL : 0xFF3A3F48);
-            int col = !a.online() ? Golden.DIM : a.ok() ? Golden.TEXT : FacilityUi.LACK;
+            g.fill(ax, ry + 5, ax + 3, ry + 8, a.online() ? FacilityUi.TEAL : 0xFF3A3644);
+            int col = !a.online() ? Paper.ON_BLACK_DIM : a.ok() ? Golden.TEXT : FacilityUi.LACK;
             String state = Component.translatable(!a.online() ? "gui.skyabyss.trade.away" : a.ok() ? "gui.skyabyss.trade.ready" : "gui.skyabyss.trade.short")
                     .getString();
             int okx = ax + aw - 32;
             FitText.draw(g, font, Component.literal(a.name() + "  " + state), ax + 7, Golden.textY(ry, ROW), okx - Golden.S5 - ax - 7, col, false);
             stacks(g, a.offer(), ax + 7, ry + ROW - 2, 17, 5, mx, my);
-            g.fill(okx, ry + 1, okx + 15, ry + ROW - 1, a.online() ? 0xFF1A2448 : 0xFF1A1E24);
-            g.drawString(font, "✔", okx + 4, Golden.textY(ry, ROW), a.online() ? Golden.TEAL : Golden.DIM, false);
+            g.fill(okx, ry + 1, okx + 15, ry + ROW - 1, a.online() ? 0xFF2A2232 : 0xFF1A1E24);
+            g.drawString(font, "✔", okx + 4, Golden.textY(ry, ROW), a.online() ? Paper.ON_BLACK_HI : Paper.ON_BLACK_DIM, false);
             hit(okx, ry + 1, 15, ROW - 2, () -> send(TradeNetwork.Action.simple("accept", sel.row().id(), a.who().toString())), null);
             int nox = okx + 17;
             g.fill(nox, ry + 1, nox + 15, ry + ROW - 1, 0xFF2A1C22);
@@ -681,7 +682,7 @@ public class TradeScreen extends Screen {
         int bx = right - Golden.S55;
         int nx = bx - Golden.S8 - Golden.S55;
         if (rows.isEmpty()) {
-            g.drawCenteredString(font, Component.translatable("gui.skyabyss.trade.applied_empty"), CONTENT.cx(), CONTENT.y() + CONTENT.h() / 2 - 4, Golden.DIM);
+            g.drawCenteredString(font, Component.translatable("gui.skyabyss.trade.applied_empty"), CONTENT.cx(), CONTENT.y() + CONTENT.h() / 2 - 4, Paper.ON_BLACK_DIM);
         }
         for (int i = 0; i < ROWS && i + scroll[3] < rows.size(); i++) {
             TradeNetwork.Row r = rows.get(i + scroll[3]);
@@ -693,11 +694,11 @@ public class TradeScreen extends Screen {
             int iy = itemY(ry);
             int ex = stacks(g, r.want(), lx, iy, 18, 4, mx, my);
             int ax = Math.max(ex, lx + Golden.S89 - 13);
-            g.drawString(font, "→", ax, iy + 4, Golden.TEAL, false);
+            g.drawString(font, "→", ax, iy + 4, Paper.ON_BLACK_HI, false);
             stacks(g, r.give(), ax + 10, iy, 18, Math.max(1, (nx - Golden.S5 - ax - 10) / 18), mx, my);
             FitText.draw(g, font, Component.literal(r.seller()), nx, Golden.textY(ry, ROW), Golden.S55, Golden.TEXT, false);
             g.drawString(font, Component.translatable(r.canPay() ? "gui.skyabyss.trade.ready" : "gui.skyabyss.trade.short"), nx, Golden.textY(ry + ROW, ROW),
-                    r.canPay() ? Golden.TEAL : FacilityUi.LACK, false);
+                    r.canPay() ? Paper.ON_BLACK_HI : FacilityUi.LACK, false);
             button(g, bx, ry + (ROW_H - BTN) / 2, Golden.S55, Component.translatable("gui.skyabyss.trade.withdraw"), 0xFF2A1C22, FacilityUi.LACK, mx, my,
                     () -> send(TradeNetwork.Action.simple("withdraw", r.id(), "")));
         }
@@ -712,7 +713,7 @@ public class TradeScreen extends Screen {
         int lx = CONTENT.x() + (CONTENT.w() - cols * 18) / 2;
         int ly = CONTENT.y() + Golden.S5;
         if (view.mail().isEmpty()) {
-            g.drawCenteredString(font, Component.translatable("gui.skyabyss.trade.mail_empty"), CONTENT.cx(), CONTENT.y() + CONTENT.h() / 2 - 4, Golden.DIM);
+            g.drawCenteredString(font, Component.translatable("gui.skyabyss.trade.mail_empty"), CONTENT.cx(), CONTENT.y() + CONTENT.h() / 2 - 4, Paper.ON_BLACK_DIM);
         }
         for (int i = 0; i < view.mail().size() && i < cols * rows; i++) {
             stack(g, view.mail().get(i), lx + 1 + (i % cols) * 18, ly + 1 + (i / cols) * 18, mx, my);

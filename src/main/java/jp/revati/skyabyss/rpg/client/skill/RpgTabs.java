@@ -49,10 +49,17 @@ public final class RpgTabs {
 
     // 黄金比の板 (client/ui/Golden) の見出しの帯の中に、左から並べる (幅 34・高さ 13・あいだ 3)。docs/design/56
     public static void addHead(Consumer<AbstractButton> add, jp.revati.skyabyss.client.ui.Golden.Box head, int active) {
+        addHead(add, head, active, false);
+    }
+
+    // つまみはどれも切り絵の札 (Paper.tab)。paper は前の呼び方の名残で、描き方は変わらない
+    public static void addHead(Consumer<AbstractButton> add, jp.revati.skyabyss.client.ui.Golden.Box head, int active, boolean paper) {
         int[] slot = {0};
         Consumer<Integer> put = which -> {
             int x = head.x() + slot[0] * (HEAD_TAB_W + jp.revati.skyabyss.client.ui.Golden.S3);
-            add.accept(new Tab(x, head.y() + 4, HEAD_TAB_W, jp.revati.skyabyss.client.ui.Golden.BTN, which, active == which, true));
+            Tab t = new Tab(x, head.y() + 4, HEAD_TAB_W, jp.revati.skyabyss.client.ui.Golden.BTN, which, active == which, true);
+            t.paper = paper;
+            add.accept(t);
             slot[0]++;
         };
         put.accept(STATUS);
@@ -122,6 +129,7 @@ public final class RpgTabs {
         private final int which;
         private final boolean selected;
         private final boolean golden;
+        boolean paper;
 
         Tab(int x, int y, int which, boolean selected) {
             this(x, y, TAB_W, TAB_H, which, selected, false);
@@ -144,20 +152,8 @@ public final class RpgTabs {
 
         @Override
         protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-            if (golden) {
-                jp.revati.skyabyss.client.ui.Golden.tab(g, Minecraft.getInstance().font,
-                        new jp.revati.skyabyss.client.ui.Golden.Box(getX(), getY(), getWidth(), getHeight()), getMessage(), selected, isHoveredOrFocused());
-                return;
-            }
-            int u = selected ? 116 : 0;
-            g.pose().pushPose();
-            // 選んでいるつまみは画面の縁より手前に描き、縁とつながって見えるようにする
-            g.pose().translate(0, 0, selected ? 50 : 0);
-            g.blit(SkillHud.TEXTURE, getX(), getY(), TAB_W, TAB_H, u, 470, 112, 32, SkillHud.TEX_W, SkillHud.TEX_H);
-            int color = selected ? 0xE9C46A : isHoveredOrFocused() ? 0xECE8DC : 0xB4BBD6;
-            var font = Minecraft.getInstance().font;
-            g.drawString(font, getMessage(), getX() + (TAB_W - font.width(getMessage())) / 2, getY() + 5, color, false);
-            g.pose().popPose();
+            // 切り絵の札 (Paper.tab)。どの画面でも同じ
+            jp.revati.skyabyss.client.ui.Paper.tab(g, Minecraft.getInstance().font, getX(), getY(), getWidth(), getHeight(), getMessage(), selected, isHoveredOrFocused());
         }
 
         @Override

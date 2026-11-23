@@ -1,0 +1,64 @@
+# 切り絵のジョブ選び (docs/design/56 の「切り絵」) を 3 つの窓の大きさで撮る
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/paper_job.txt -PshotsName=paper_job
+world paper_job flat
+size 1920 1080
+timeout 600
+render 4
+clouds off
+guiscale 4
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss playtest skip opening
+cmd skyabyss cinematic stop
+cmd skyabyss level set @p 12
+cmd skyabyss job choose mage
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+
+window 1920 1080
+guiscale 4
+wait 10
+open job_choice
+wait 8
+overlap none_1920_g4
+shot none_1920_g4
+close
+open job_choice_archer
+wait 8
+overlap archer_1920_g4
+shot archer_1920_g4
+close
+open job_room_archer
+wait 8
+overlap room_1920_g4
+shot room_1920_g4
+close
+
+guiscale 2
+wait 10
+open job_choice_archer
+wait 8
+overlap archer_1920_g2
+shot archer_1920_g2
+close
+
+window 1280 720
+wait 10
+guiscale 3
+wait 10
+open job_choice_archer
+wait 8
+overlap archer_1280_g3
+shot archer_1280_g3
+close
+open job_room_archer
+wait 8
+overlap room_1280_g3
+shot room_1280_g3
+close
+quit

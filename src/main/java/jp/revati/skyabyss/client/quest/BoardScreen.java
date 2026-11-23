@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.neoforged.neoforge.network.PacketDistributor;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 言伝ての板の画面。今日の頼みごと (日替わり) と、今週の頼みごと (週替わり) を紙の札のように並べる。
 // 受けられるものには「受ける」。まだ物語が届かないものは題を伏せる (「？？？」と、何をすれば開くか)。
@@ -30,11 +31,11 @@ public class BoardScreen extends Screen implements jp.revati.skyabyss.client.ui.
     private static final int ROW_H = Golden.S34;
     private static final int EDGE_IN = 0xFF3A2E1C;
     private static final int PAPER = 0x30F0E2C0;
-    private static final int TEAL = 0xFF000000 | Golden.TEAL;
-    private static final int GOLD = 0xFF000000 | Golden.GOLD;
+    private static final int TEAL = 0xFF000000 | Paper.ON_BLACK_HI;
+    private static final int GOLD = 0xFF000000 | Paper.ON_BLACK_PINK;
     private static final int TEXT = 0xFF000000 | Golden.TEXT;
-    private static final int SOFT = 0xFF000000 | Golden.SOFT;
-    private static final int DIM = 0xFF000000 | Golden.DIM;
+    private static final int SOFT = 0xFF000000 | Paper.ON_BLACK_SOFT;
+    private static final int DIM = 0xFF000000 | Paper.ON_BLACK_DIM;
     private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
 
     private BoardNetwork.Open data;
@@ -78,10 +79,10 @@ public class BoardScreen extends Screen implements jp.revati.skyabyss.client.ui.
         for (int i = 0; i < data.lines().size(); i++) {
             Board.Line line = data.lines().get(i);
             if (line.state() == Board.OPEN) {
-                Button b = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.board.accept"), x -> {
+                Button b = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.board.accept"), x -> {
                     x.active = false;
                     PacketDistributor.sendToServer(new BoardNetwork.Accept(line.quest()));
-                }).bounds(LIST.right() - Golden.S8 - Golden.S55 - 4, LIST.y(), Golden.S55, Golden.BTN).build());
+                }).bounds(LIST.right() - Golden.S8 - Golden.S55 - 4, LIST.y(), Golden.S55, Golden.BTN).primary().build());
                 accepts.add(b);
                 acceptRow.add(i);
             }
@@ -156,7 +157,7 @@ public class BoardScreen extends Screen implements jp.revati.skyabyss.client.ui.
             drawLine(g, font, data.lines().get(i), y, mouseX, mouseY);
         }
         rows.end(g);
-        rows.drawBar(g, EDGE_IN, 0x888FD0FF);
+        rows.drawBar(g, EDGE_IN, 0x88E45A9C);
         // 受ける釦は、その札の所へ動かす (枠の外のものは隠す)
         for (int k = 0; k < accepts.size(); k++) {
             Button b = accepts.get(k);

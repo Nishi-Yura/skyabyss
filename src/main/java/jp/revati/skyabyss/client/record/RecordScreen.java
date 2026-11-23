@@ -70,13 +70,13 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
     static final Sprite RIBBON = new Sprite(0, 184, 256, 22);
 
     // 墨の色 (伝承の書と同じ)
-    static final int INK = 0xFF3B2A1C;
-    static final int FADED = 0xFF8E7B5E;
-    static final int TEAL = 0xFF2E4A86;
-    static final int TITLE = 0xFF184F55;
+    static final int INK = 0xFF181722;
+    static final int FADED = 0xFF6E6468;
+    static final int TEAL = 0xFF8C2C60;
+    static final int TITLE = 0xFFB0326E;
     static final int AMBER = 0xFFA06A0E;
     static final int LOST = 0xFF8A2A3C;
-    static final int PAPER = 0xFFF2E6C8;
+    static final int PAPER = 0xFFECE4D6;
 
     static final int BW = 304;
     static final int BH = 192;
@@ -417,7 +417,7 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
             int y = on ? top - 14 : top - 10;
             g.pose().pushPose();
             g.pose().translate(0, 0, on ? 60 : 0);
-            g.drawString(font, name, x + (TAB_W - font.width(name)) / 2, y, on ? TITLE : hover ? INK : 0xFF5E5040, false);
+            g.drawString(font, name, x + (TAB_W - font.width(name)) / 2, y, on ? INK : hover ? INK : 0xFF6E6468, false);
             // 変わった値があるつまみには、きらめきを
             if (!on && hasChangedIn(id)) {
                 MARK_CHANGED.draw(g, x + TAB_W - 11, y - 1);
@@ -495,11 +495,11 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
             int x1 = chipX(i + 1, n) - 1;
             boolean on = c.id().equals(current);
             boolean hover = !on && mouseX >= x0 && mouseX < x1 && mouseY >= y && mouseY < y + CHIP_H;
-            g.fill(x0, y, x1, y + CHIP_H, on ? 0x502E4A86 : hover ? 0x30000000 : 0x18000000);
+            g.fill(x0, y, x1, y + CHIP_H, on ? 0x50E45A9C : hover ? 0x30000000 : 0x18000000);
             if (on) {
                 g.fill(x0, y + CHIP_H - 1, x1, y + CHIP_H, TEAL);
             }
-            int color = on ? TITLE : c.mark() == RecordSnapshot.MARK_LOCKED ? FADED : hover ? INK : 0xFF5E5040;
+            int color = on ? TITLE : c.mark() == RecordSnapshot.MARK_LOCKED ? FADED : hover ? INK : 0xFF6E6468;
             FormattedCharSequence label = c.title().getVisualOrderText();
             if (font.width(label) > x1 - x0 - 3) {
                 jp.revati.skyabyss.client.ui.Marquee.draw(g, font, label, x0 + 2, y + 2, x1 - x0 - 3, color, false);
@@ -544,7 +544,7 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
         boolean inside = mouseY >= Math.max(y, top + listTop()) && mouseY < Math.min(y + rowHeight(r), top + LIST_BOTTOM);
         if (r.kind() == Kind.HEADER) {
             g.drawString(font, r.label(), x, y + 3, TEAL, false);
-            g.fill(x + font.width(r.label()) + 4, y + 7, left + LX + LW - 2, y + 8, 0x402E4A86);
+            g.fill(x + font.width(r.label()) + 4, y + 7, left + LX + LW - 2, y + 8, 0x40E45A9C);
             return hover;
         }
         boolean rowHover = inside && mouseX >= x - 2 && mouseX < x + LW;

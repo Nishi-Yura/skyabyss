@@ -14,6 +14,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 旅袋の画面 (docs/design/22 の 9 章 A つまみ・56 の 4 章)。持ち物 / 旅袋 / 封印の箱 のつまみの二つ目。持ち物と同じ組み方 (client/inventory/GearPanel) で、
 //   左の板: ページの栞 (大事な物・巨神の素材・土地の素材・細工)
@@ -23,9 +24,9 @@ import net.minecraft.world.item.ItemStack;
 // 枠の並び (pouch/PouchLayout) は幅 176 の升目のまま、真ん中の板に置く
 public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final int TEXT = 0xFF000000 | Golden.TEXT;
-    private static final int DIM = 0xFF000000 | Golden.SOFT;
-    private static final int GOLD = 0xFF000000 | Golden.GOLD;
-    private static final int OK = 0xFF000000 | Golden.PALE;
+    private static final int DIM = 0xFF000000 | Paper.ON_BLACK_SOFT;
+    private static final int GOLD = 0xFF000000 | Paper.ON_BLACK_PINK;
+    private static final int OK = 0xFF000000 | Paper.ON_BLACK_HI;
     static final int CORE_H = PouchLayout.H;
     private static final Golden.Box LEFT = GearPanel.left(CORE_H);
     private static final Golden.Box RIGHT = GearPanel.right(CORE_H);
@@ -140,9 +141,9 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
                 if (seen(e)) {
                     // いちど手に入れた品: 暗い影 (今は手もとにない)
                     g.renderItem(new ItemStack(e.item()), sx, sy);
-                    g.fill(sx, sy, sx + 16, sy + 16, 0xC80A0E1E);
+                    g.fill(sx, sy, sx + 16, sy + 16, 0xC80E0D14);
                 } else {
-                    g.drawString(font, "?", sx + 8 - font.width("?") / 2, sy + 4, 0xFF000000 | Golden.DIM, false);
+                    g.drawString(font, "?", sx + 8 - font.width("?") / 2, sy + 4, 0xFF000000 | Paper.ON_BLACK_DIM, false);
                 }
             }
         }
@@ -152,7 +153,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
     private static void frame(GuiGraphics g, int x, int y, int state) {
         Golden.slot(g, x - 1, y - 1, 18);
         if (state > 0) {
-            Golden.outline(g, x - 1, y - 1, x + 17, y + 17, state == 2 ? GOLD : 0xFF5A8FC0);
+            Paper.edge(g, x - 1, y - 1, x + 17, y + 17, state == 2 ? GOLD : 0xFF5A5460);
         }
     }
 
@@ -180,14 +181,14 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
             if (label.page() != menu.page()) {
                 continue;
             }
-            g.drawString(font, Component.translatable("skyabyss_pouch.category." + label.category().id), label.x() + DX, label.y() + DY, Golden.PALE, false);
+            g.drawString(font, Component.translatable("skyabyss_pouch.category." + label.category().id), label.x() + DX, label.y() + DY, Paper.ON_BLACK_HI, false);
         }
         if (menu.page() == PouchConfig.Page.PARTS) {
-            g.drawString(font, Component.translatable("skyabyss_pouch.category.parts"), PouchLayout.X0 + DX, PouchLayout.TOP + DY, Golden.PALE, false);
+            g.drawString(font, Component.translatable("skyabyss_pouch.category.parts"), PouchLayout.X0 + DX, PouchLayout.TOP + DY, Paper.ON_BLACK_HI, false);
         }
         if (menu.spareCount() > 0 && menu.page() == PouchConfig.Page.KEEP) {
             int[] at = menu.layout().spareLabel();
-            g.drawString(font, Component.translatable("skyabyss_pouch.category.spare"), at[0] + DX, at[1] + DY, Golden.PALE, false);
+            g.drawString(font, Component.translatable("skyabyss_pouch.category.spare"), at[0] + DX, at[1] + DY, Paper.ON_BLACK_HI, false);
         }
         renderInfo(g);
     }
@@ -327,9 +328,9 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
                 g.fill(at.x(), at.y(), at.right(), at.bottom(), 0x18FFFFFF);
             }
             g.renderItem(new ItemStack(bookmarkIcon(p)), at.x() + 5, at.y() + 2);
-            g.drawString(font, Component.translatable("skyabyss_pouch.page." + p.id), at.x() + 26, Golden.textY(at.y(), at.h()), on ? Golden.GOLD : Golden.SOFT, false);
+            g.drawString(font, Component.translatable("skyabyss_pouch.page." + p.id), at.x() + 26, Golden.textY(at.y(), at.h()), on ? Paper.ON_BLACK_PINK : Paper.ON_BLACK_SOFT, false);
             if (pageFresh(p)) {
-                g.fill(at.right() - 6, at.y() + 9, at.right() - 3, at.y() + 12, 0xFF000000 | Golden.PALE);
+                g.fill(at.right() - 6, at.y() + 9, at.right() - 3, at.y() + 12, 0xFF000000 | Paper.ON_BLACK_HI);
             }
         }
     }

@@ -21,6 +21,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 持ち物・旅袋・封印の箱の画面の共通の組み方 (docs/design/56 の 4 章。2026-11-11 に組み直し):
 //   真ん中 = バニラと同じ幅 176 の板 (持ち物はバニラと同じ枠の位置)。左右 = 幅 118 の横の板 (MOD の要素)。
@@ -71,12 +72,12 @@ public final class GearPanel {
         int y = b.y() + PAD + 1;
         GrowthData data = Growth.get(p);
         SkillData sd = SkillManager.get(p);
-        g.drawString(font, p.getName(), x, y, Golden.GOLD, false);
+        g.drawString(font, p.getName(), x, y, Paper.ON_BLACK_PINK, false);
         y += Golden.ROW;
         Job job = sd.curJob == null || sd.curJob.isEmpty() ? null : Job.byId(sd.curJob);
         Component lv = job == null ? Component.translatable("gui.skyabyss.growth.hud_level", data.level)
                 : Component.translatable("gui.skyabyss.growth.hud_level", data.level).append(" ").append(Component.translatable(job.nameKey()));
-        g.drawString(font, lv, x, y, Golden.SOFT, false);
+        g.drawString(font, lv, x, y, Paper.ON_BLACK_SOFT, false);
         y += Golden.ROW + 2;
         Golden.rule(g, x, x + w, y);
         y += 6;
@@ -91,12 +92,12 @@ public final class GearPanel {
                 (int) Math.floor(mana) + " / " + (int) Math.ceil(maxMana));
         y += Golden.ROW + 2;
         boolean top = data.level >= GrowthRules.MAX_LEVEL;
-        g.drawString(font, Component.translatable("gui.skyabyss.gear.xp"), x, y + 1, Golden.SOFT, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.gear.xp"), x, y + 1, Paper.ON_BLACK_SOFT, false);
         int bx = x + BAR_LABEL;
         int bw = w - BAR_LABEL;
         g.fill(bx, y + 3, bx + bw, y + 7, Golden.OUTLINE);
         float xf = top ? 1f : (float) data.xp / Math.max(1, data.xpNeed());
-        g.fill(bx + 1, y + 4, bx + 1 + Math.round((bw - 2) * Mth.clamp(xf, 0f, 1f)), y + 6, 0xFF000000 | Golden.GOLD);
+        g.fill(bx + 1, y + 4, bx + 1 + Math.round((bw - 2) * Mth.clamp(xf, 0f, 1f)), y + 6, 0xFF000000 | Paper.ON_BLACK_PINK);
         y += Golden.ROW + 2;
         Golden.rule(g, x, x + w, y);
         y += 6;
@@ -108,7 +109,7 @@ public final class GearPanel {
     static final int BAR_LABEL = 26;
 
     private static void bar(GuiGraphics g, Font font, String key, int x, int y, int w, float frac, int color, String text) {
-        g.drawString(font, Component.translatable(key), x, y + 1, Golden.SOFT, false);
+        g.drawString(font, Component.translatable(key), x, y + 1, Paper.ON_BLACK_SOFT, false);
         int bx = x + BAR_LABEL;
         int bw = w - BAR_LABEL;
         g.fill(bx, y, bx + bw, y + 10, Golden.OUTLINE);
@@ -121,7 +122,7 @@ public final class GearPanel {
     }
 
     private static void stat(GuiGraphics g, Font font, String key, int value, int x, int y, int w) {
-        g.drawString(font, Component.translatable(key), x, y, Golden.SOFT, false);
+        g.drawString(font, Component.translatable(key), x, y, Paper.ON_BLACK_SOFT, false);
         String v = Integer.toString(value);
         g.drawString(font, v, x + w - font.width(v), y, Golden.TEXT, false);
     }
@@ -134,7 +135,7 @@ public final class GearPanel {
     public static void drawSkills(GuiGraphics g, Font font, Player p, int coreH) {
         Golden.Box b = right(coreH);
         int x = b.x() + PAD;
-        g.drawString(font, Component.translatable("gui.skyabyss.gear.skills"), x, b.y() + PAD + 1, Golden.PALE, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.gear.skills"), x, b.y() + PAD + 1, Paper.ON_BLACK_HI, false);
         SkillData sd = SkillManager.get(p);
         for (int i = 0; i < sd.slotCount(); i++) {
             int sx = x + 1 + (i % 2) * SKILL_PITCH_X;
@@ -149,7 +150,7 @@ public final class GearPanel {
                 if (k.length() > 4) {
                     k = k.substring(0, 4);
                 }
-                g.drawString(font, "[" + k + "]", sx + 21, sy + 4, s == null ? Golden.DIM : Golden.TEXT, false);
+                g.drawString(font, "[" + k + "]", sx + 21, sy + 4, s == null ? Paper.ON_BLACK_DIM : Golden.TEXT, false);
             }
         }
     }
@@ -233,25 +234,8 @@ public final class GearPanel {
             int y0 = getY();
             int x1 = x0 + getWidth();
             Font font = Minecraft.getInstance().font;
-            if (selected) {
-                // 板とつながるつまみ: 板の縁の線を下の辺で消す
-                int y1 = top.getAsInt() + CORE_Y + 3;
-                g.fillGradient(x0 + 1, y0 + 1, x1 - 1, y1, Golden.GLASS_TOP, Golden.GLASS_TOP);
-                g.fill(x0, y0, x1, y0 + 1, Golden.OUTLINE);
-                g.fill(x0, y0, x0 + 1, y1 - 2, Golden.OUTLINE);
-                g.fill(x1 - 1, y0, x1, y1 - 2, Golden.OUTLINE);
-                g.fill(x0 + 2, y0 + 2, x1 - 2, y0 + 3, Golden.LINE);
-                g.fill(x0 + 2, y0 + 2, x0 + 3, y1, Golden.LINE);
-                g.fill(x1 - 3, y0 + 2, x1 - 2, y1, Golden.LINE);
-                g.fill(x0 + 3, y1 - 3, x1 - 3, y1, Golden.GLASS_TOP);
-            } else {
-                int y1 = y0 + getHeight();
-                g.fill(x0 + 1, y0 + 1, x1 - 1, y1, isHoveredOrFocused() ? 0xE0182040 : 0xD00A0E1E);
-                Golden.outline(g, x0, y0, x1, y1 + 1, Golden.RECESS_EDGE);
-            }
-            Component label = getMessage();
-            int color = selected ? Golden.GOLD : isHoveredOrFocused() ? Golden.TEXT : Golden.SOFT;
-            g.drawString(font, label, x0 + (getWidth() - font.width(label)) / 2, top.getAsInt() + 5, color, false);
+            // 切り絵のつまみ (Paper.tab)。選んでいれば桃色
+            Paper.tab(g, font, x0, top.getAsInt() + 1, getWidth(), TAB_H - 2, getMessage(), selected, isHoveredOrFocused());
         }
 
         @Override

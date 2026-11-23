@@ -23,6 +23,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.neoforged.neoforge.network.PacketDistributor;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // K 画面の「転生」パネル (docs/design/31、見取り図は docs/review/rebirth/index.html)。
 // 板は黄金比の大きい板 (client/ui/Golden。docs/design/56)。見出しの帯に記録・技・転生・旅のつまみと、右の列の頁のつまみ (魂盤 / 残るもの)。
@@ -37,13 +38,13 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
     static final Golden.Box RIGHT = LAYOUT.body().major(false);
     static final int ROW = Golden.ROW;
 
-    static final int TITLE = Golden.PALE;
+    static final int TITLE = Paper.ON_BLACK_HI;
     static final int TEXT = Golden.TEXT;
-    static final int SOFT = Golden.SOFT;
-    static final int GOLD = Golden.GOLD;
+    static final int SOFT = Paper.ON_BLACK_SOFT;
+    static final int GOLD = Paper.ON_BLACK_PINK;
     static final int DENY = Golden.DENY;
-    static final int OK = Golden.TEAL;
-    static final int DIM = Golden.DIM;
+    static final int OK = Paper.ON_BLACK_HI;
+    static final int DIM = Paper.ON_BLACK_DIM;
 
     // 左の列の中の字の左と幅
     static final int C1 = LEFT.x() + Golden.S5;
@@ -102,8 +103,8 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
         for (int i = 0; i < 3; i++) {
             boons.add(addRenderableWidget(new BoonButton(C1, BOON_Y + i * (BOON_H + Golden.S3), i)));
         }
-        go = addRenderableWidget(Button.builder(Component.empty(), b -> press()).bounds(C1, GO_Y, C1W, Golden.BTN).build());
-        shardButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.rebirth.shard_btn"), b -> claimShard())
+        go = addRenderableWidget(Paper.tag(Component.empty(), b -> press()).bounds(C1, GO_Y, C1W, Golden.BTN).build());
+        shardButton = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.rebirth.shard_btn"), b -> claimShard())
                 .bounds(RIGHT.right() - Golden.S5 - Golden.S55, RIGHT.bottom() - Golden.S5 - Golden.BTN, Golden.S55, Golden.BTN).build());
         RpgTabs.addHead(this::addRenderableWidget, LAYOUT.head(), RpgTabs.REBIRTH);
         refresh();
@@ -320,7 +321,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
         }
         go.visible = true;
         // 経験値の帯 (Lv 50 は満ちている)
-        g.fill(x, y + 1, x + C1W, y + 3, 0xFF2E7F85);
+        g.fill(x, y + 1, x + C1W, y + 3, 0xFFE45A9C);
         y += Golden.S5;
         // 転生後
         int after = n + 1;
@@ -373,7 +374,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
         }
         terms.end(g);
         terms.setContentHeight(y - terms.top());
-        terms.drawBar(g, 0xFF10151D, 0xAA3E5A6B);
+        terms.drawBar(g, 0xFF0E0D14, 0xAAE45A9C);
     }
 
     private boolean fx(GuiGraphics g, int x, int y, String key, double value, int decimals) {
@@ -420,7 +421,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
             int color = 0xFF000000 | a.color;
             // 腕に沿った点線
             for (int r = 9; r <= 36; r += 3) {
-                g.fill(cx + (int) Math.round(dx * r), cy + (int) Math.round(dy * r), cx + (int) Math.round(dx * r) + 1, cy + (int) Math.round(dy * r) + 1, 0xFF2E3644);
+                g.fill(cx + (int) Math.round(dx * r), cy + (int) Math.round(dy * r), cx + (int) Math.round(dx * r) + 1, cy + (int) Math.round(dy * r) + 1, 0xFF3A3644);
             }
             // 節 (転生した順に外へ。要の節は大きく)
             int k = 0;
@@ -512,8 +513,8 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
         protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
             boolean sel = selArm == arm.ordinal();
             int color = 0xFF000000 | arm.color;
-            g.fill(getX(), getY(), getX() + 18, getY() + 18, sel ? 0xFF26303D : isHoveredOrFocused() ? 0xFF1F2733 : 0xFF141922);
-            g.renderOutline(getX(), getY(), 18, 18, sel ? 0xFFE9C46A : isHoveredOrFocused() ? 0xFFECE8DC : color & 0xFF8A8A8A | 0xFF303030);
+            g.fill(getX(), getY(), getX() + 18, getY() + 18, sel ? 0xFF2E2A38 : isHoveredOrFocused() ? 0xFF24202E : 0xFF16151E);
+            g.renderOutline(getX(), getY(), 18, 18, sel ? 0xFFF89CD2 : isHoveredOrFocused() ? 0xFFECE8DC : color & 0xFF8A8A8A | 0xFF303030);
             Component name = getMessage();
             g.drawString(font, name, getX() + (18 - font.width(name)) / 2, getY() + 5, color, false);
         }
@@ -547,8 +548,8 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
             }
             Boon boon = offer.get(index);
             boolean sel = selBoon == index;
-            g.fill(getX(), getY(), getX() + width, getY() + height, sel ? 0xFF2A3342 : isHoveredOrFocused() ? 0xFF222A37 : 0xFF161B24);
-            g.renderOutline(getX(), getY(), width, height, sel ? 0xFFE9C46A : 0xFF303846);
+            g.fill(getX(), getY(), getX() + width, getY() + height, sel ? 0xFF2E2A38 : isHoveredOrFocused() ? 0xFF24202E : 0xFF16151E);
+            g.renderOutline(getX(), getY(), width, height, sel ? 0xFFF89CD2 : 0xFF3A3644);
             jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(Component.translatable(boon.nameKey()).getString()), getX() + 4,
                     Golden.textY(getY(), ROW), width - 6, sel ? GOLD : TEXT, false);
             jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(Component.translatable(boon.descKey()).getString()), getX() + 4,

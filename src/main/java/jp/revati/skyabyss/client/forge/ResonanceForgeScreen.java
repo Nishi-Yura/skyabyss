@@ -24,6 +24,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import jp.revati.skyabyss.client.ui.Paper;
 
 // 共鳴の炉の画面。左の板に装備の枠・材料の枠・特性・持ち物、右の板に四つのつまみ (強化・粉・再鍛造・交換)。
 // 再鍛造のつまみの中に、再鍛造・抽出・刻印の三頁 (2026-11-05 の粉と炉の頁 2-3)。町の鍛冶師で開いたときは粉のつまみだけ (menu.powderOnly)。
@@ -51,11 +52,11 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     // 交換の欄は 4 行ずつの頁 (専用の逸品は巨神ごとに 7〜8 品。2026-11-21 に「3 つまで」の決まりを外した)
     private static final int EXCHANGE_ROWS = 4;
 
-    private static final int TEXT = 0xFFD8DCE6;
-    private static final int DIM = 0xFF7A8090;
-    private static final int OK = 0xFF8FD0FF;
+    private static final int TEXT = 0xFFECE4D6;
+    private static final int DIM = 0xFF7C7480;
+    private static final int OK = 0xFFFFF6EA;
     private static final int LACK = 0xFFD9779A;
-    private static final int GOLD = 0xFFF2B53A;
+    private static final int GOLD = 0xFFF89CD2;
     private static final int INFO_X = 72;
 
     private enum Tab {
@@ -124,10 +125,10 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         // 細工の板が左の端からはみ出さない (2026-11-15 の見直し)
         leftPos = (width - imageWidth - PANEL_GAP - PART_W) / 2 + PANEL_GAP + PART_W;
         int sx = leftPos + SIDE_X;
-        enhanceButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.enhance"),
+        enhanceButton = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.forge.enhance"),
                 b -> press(ForgeRules.canMerge(menu.gear()) ? ResonanceForgeMenu.BUTTON_MERGE : ResonanceForgeMenu.BUTTON_ENHANCE))
-                .bounds(sx + 10, topPos + 60, 60, 16).build());
-        dismantleButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.dismantle"), b -> {
+                .bounds(sx + 10, topPos + 60, 60, 16).primary().build());
+        dismantleButton = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.forge.dismantle"), b -> {
             if (!dismantleArmed) {
                 dismantleArmed = true;
             } else {
@@ -135,15 +136,15 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                 press(ResonanceForgeMenu.BUTTON_DISMANTLE);
             }
         }).bounds(sx + 10, topPos + 138, 60, 16).build());
-        trialButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.trial"), b -> press(ResonanceForgeMenu.BUTTON_TRIAL))
+        trialButton = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.forge.trial"), b -> press(ResonanceForgeMenu.BUTTON_TRIAL))
                 .bounds(sx + 96, topPos + 38, 46, 14).build());
-        confirmButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.pick"), b -> {
+        confirmButton = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.forge.pick"), b -> {
             if (selected >= 0) {
                 press(ResonanceForgeMenu.BUTTON_PICK + selected);
                 selected = -1;
             }
-        }).bounds(sx + 10, topPos + 147, 62, 15).build());
-        keepButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.keep"), b -> {
+        }).bounds(sx + 10, topPos + 147, 62, 15).primary().build());
+        keepButton = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.forge.keep"), b -> {
             if (!keepArmed) {
                 keepArmed = true;
             } else {
@@ -154,7 +155,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         }).bounds(sx + 76, topPos + 147, 66, 15).build());
         for (int i = 0; i < exchangeButtons.length; i++) {
             int index = i;
-            exchangeButtons[i] = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.exchange_pick"), b -> {
+            exchangeButtons[i] = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.forge.exchange_pick"), b -> {
                 if (exchangeArmed != index) {
                     exchangeArmed = index;
                 } else {
@@ -163,14 +164,14 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                 }
             }).bounds(sx + 98, topPos + EXCHANGE_Y + i * EXCHANGE_STEP, 44, 16).build());
         }
-        titanButton = addRenderableWidget(Button.builder(Component.empty(), b -> {
+        titanButton = addRenderableWidget(Paper.tag(Component.empty(), b -> {
             titan = (titan + 1) % Math.max(1, TitanGearSets.exchangeable().size());
             lastTitan = titan;
             exchangeArmed = -1;
             exchangePage = 0;
             updateButtons();
         }).bounds(sx + 10, topPos + 140, 96, 16).build());
-        exchangePageButton = addRenderableWidget(Button.builder(Component.empty(), b -> {
+        exchangePageButton = addRenderableWidget(Paper.tag(Component.empty(), b -> {
             exchangePage = (exchangePage + 1) % exchangePages();
             exchangeArmed = -1;
             updateButtons();
@@ -178,10 +179,10 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         String[] subKeys = {"gui.skyabyss.forge.sub_reforge", "gui.skyabyss.forge.sub_extract", "gui.skyabyss.forge.sub_imprint"};
         for (int i = 0; i < subButtons.length; i++) {
             Sub target = Sub.values()[i];
-            subButtons[i] = addRenderableWidget(Button.builder(Component.translatable(subKeys[i]), b -> setSub(target))
+            subButtons[i] = addRenderableWidget(Paper.tag(Component.translatable(subKeys[i]), b -> setSub(target))
                     .bounds(sx + 8 + i * 46, topPos + SUB_Y, 44, 14).build());
         }
-        extractDestroyButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.extract_destroy"), b -> {
+        extractDestroyButton = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.forge.extract_destroy"), b -> {
             if (!extractDestroyArmed) {
                 extractDestroyArmed = true;
                 extractKeepArmed = false;
@@ -190,7 +191,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                 press(ResonanceForgeMenu.BUTTON_EXTRACT_DESTROY);
             }
         }).bounds(sx + 10, topPos + 122, 60, 16).build());
-        extractKeepButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.extract_keep"), b -> {
+        extractKeepButton = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.forge.extract_keep"), b -> {
             if (!extractKeepArmed) {
                 extractKeepArmed = true;
                 extractDestroyArmed = false;
@@ -199,15 +200,15 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                 press(ResonanceForgeMenu.BUTTON_EXTRACT_KEEP);
             }
         }).bounds(sx + 76, topPos + 122, 66, 16).build());
-        imprintButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.imprint"), b -> press(ResonanceForgeMenu.BUTTON_IMPRINT))
+        imprintButton = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.forge.imprint"), b -> press(ResonanceForgeMenu.BUTTON_IMPRINT))
                 .bounds(sx + 10, topPos + 138, 132, 16).build());
-        insertButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.insert"), b -> press(ResonanceForgeMenu.BUTTON_INSERT))
+        insertButton = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.forge.insert"), b -> press(ResonanceForgeMenu.BUTTON_INSERT))
                 .bounds(sx + 10, topPos + POWDER_BUTTON_Y, 64, 16).build());
-        combineButton = addRenderableWidget(Button.builder(Component.translatable("gui.skyabyss.forge.combine"), b -> press(ResonanceForgeMenu.BUTTON_COMBINE))
+        combineButton = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.forge.combine"), b -> press(ResonanceForgeMenu.BUTTON_COMBINE))
                 .bounds(sx + 78, topPos + POWDER_BUTTON_Y, 64, 16).build());
         for (int i = 0; i < removeButtons.length; i++) {
             int index = i;
-            removeButtons[i] = addRenderableWidget(Button.builder(Component.literal("×"), b -> press(ResonanceForgeMenu.BUTTON_REMOVE + index))
+            removeButtons[i] = addRenderableWidget(Paper.tag(Component.literal("×"), b -> press(ResonanceForgeMenu.BUTTON_REMOVE + index))
                     .bounds(sx + 130, topPos + SOCKET_ROW_Y - 2 + i * SOCKET_ROW_STEP, 12, 12)
                     .tooltip(Tooltip.create(Component.translatable("gui.skyabyss.forge.remove_hint"))).build());
         }
@@ -465,7 +466,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         // 材料の枠の縁 (絵に焼き込まれていないので描く)
         int mx = x + ResonanceForgeMenu.MATERIAL_X - 1;
         int my = y + ResonanceForgeMenu.MATERIAL_Y - 1;
-        jp.revati.skyabyss.client.ui.Golden.outline(g, mx, my, mx + 18, my + 18, jp.revati.skyabyss.client.ui.Golden.LINE);
+        Paper.edge(g, mx, my, mx + 18, my + 18, Paper.EDGE);
         if (shownTab() == Tab.REFORGE && sub == Sub.REFORGE && AffixRules.eligible(menu.gear())) {
             int count = AffixRules.offers(menu.gear()).size();
             for (int i = 0; i < AffixRules.MAX_TRIALS; i++) {
@@ -478,9 +479,9 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                 jp.revati.skyabyss.client.ui.Golden.recess(g, card);
                 if (state == 2) {
                     jp.revati.skyabyss.client.ui.Golden.selected(g, card);
-                    jp.revati.skyabyss.client.ui.Golden.outline(g, cx, cy, cx + CARD_W, cy + CARD_H - 1, 0xFF000000 | jp.revati.skyabyss.client.ui.Golden.GOLD);
+                    Paper.edge(g, cx, cy, cx + CARD_W, cy + CARD_H - 1, 0xFF000000 | Paper.ON_BLACK_PINK);
                 } else if (state == 1) {
-                    jp.revati.skyabyss.client.ui.Golden.outline(g, cx, cy, cx + CARD_W, cy + CARD_H - 1, jp.revati.skyabyss.client.ui.Golden.LINE);
+                    Paper.edge(g, cx, cy, cx + CARD_W, cy + CARD_H - 1, Paper.EDGE);
                 } else if (i >= count) {
                     g.fill(cx + 1, cy + 1, cx + CARD_W - 1, cy + CARD_H - 2, 0x60000000);
                 }
@@ -740,7 +741,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         }
         int x = leftPos - PANEL_GAP - PART_W;
         jp.revati.skyabyss.client.ui.Golden.panel(g, new jp.revati.skyabyss.client.ui.Golden.Box(x, topPos, PART_W, H));
-        g.drawString(font, Component.translatable("skyabyss_pouch.category.parts"), x + 6, topPos + 6, jp.revati.skyabyss.client.ui.Golden.PALE, false);
+        g.drawString(font, Component.translatable("skyabyss_pouch.category.parts"), x + 6, topPos + 6, Paper.ON_BLACK_HI, false);
         jp.revati.skyabyss.pouch.PouchData d = jp.revati.skyabyss.pouch.Pouch.data(minecraft.player);
         int hover = partAt(mouseX, mouseY);
         for (int k = 0; k < parts.size(); k++) {
@@ -750,7 +751,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                 break;
             }
             ItemStack s = d.part(parts.get(k));
-            g.fill(px, py, px + 17, py + 17, parts.get(k) == hover ? 0x60E9C46A : 0x40000000);
+            g.fill(px, py, px + 17, py + 17, parts.get(k) == hover ? 0x60E45A9C : 0x40000000);
             g.renderItem(s, px, py);
             g.renderItemDecorations(font, s, px, py);
         }
