@@ -20,7 +20,7 @@ public final class RaijuSetup {
     // 判定は 1.8 x 2.4 (模型は鼻先から尾の付け根まで約 4.5 ブロック。尾を入れると 7.6)。跳び移りを滑らかに見せるため毎 tick 送る
     public static final DeferredHolder<EntityType<?>, EntityType<Raiju>> RAIJU = ENTITIES.register("raiju",
             () -> EntityType.Builder.<Raiju>of(Raiju::new, MobCategory.MONSTER)
-                    .sized(1.8f, 2.4f)
+                    .sized(1.8f, 3.2f).eyeHeight(2.04f)
                     .clientTrackingRange(10)
                     .updateInterval(1)
                     .fireImmune()

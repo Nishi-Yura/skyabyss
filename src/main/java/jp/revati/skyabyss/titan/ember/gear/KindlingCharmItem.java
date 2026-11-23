@@ -71,13 +71,13 @@ public class KindlingCharmItem extends Item implements ModGear, Accessory {
             double a = Math.PI * 2 * i / 48;
             double cx = Math.cos(a);
             double cz = Math.sin(a);
-            level.sendParticles(ParticleTypes.FLAME, player.getX() + cx * 1.2, player.getY() + 0.15, player.getZ() + cz * 1.2, 0, cx, 0.02, cz, 0.3);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX() + cx * 1.2, player.getY() + 0.15, player.getZ() + cz * 1.2, 0, cx, 0.02, cz, 0.3);
             if (i % 3 == 0) {
-                level.sendParticles(ParticleTypes.LAVA, player.getX() + cx * r * 0.8, player.getY() + 0.3, player.getZ() + cz * r * 0.8, 1, 0.1, 0.1, 0.1, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), player.getX() + cx * r * 0.8, player.getY() + 0.3, player.getZ() + cz * r * 0.8, 1, 0.1, 0.1, 0.1, 0);
             }
         }
-        level.sendParticles(ParticleTypes.SMOKE, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.6, 0.4, 0.02);
-        level.sendParticles(ParticleTypes.SMALL_FLAME, player.getX(), player.getY() + 1.2, player.getZ(), sparks, 0.5, 0.7, 0.5, 0.04);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.4, 0.6, 0.4, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1.2, player.getZ(), sparks, 0.5, 0.7, 0.5, 0.04);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 0.9f, 0.6f);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.7f, 0.8f);
         player.getCooldowns().addCooldown(this, EmberGear.CHARM_COOLDOWN);
@@ -112,5 +112,10 @@ public class KindlingCharmItem extends Item implements ModGear, Accessory {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         ModGear.tooltip(stack, tooltip, tier(), "item.skyabyss.kindling_charm.desc", false);
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

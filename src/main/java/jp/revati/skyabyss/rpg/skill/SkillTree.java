@@ -40,9 +40,6 @@ public enum SkillTree {
         return "skilltree.skyabyss." + id + ".desc";
     }
 
-    public String sealedKey() {
-        return "skilltree.skyabyss." + id + ".sealed";
-    }
 
     // 天職にできる木 (5 つの系統)
     public boolean callable() {

@@ -34,7 +34,8 @@ public final class WipeReturn {
         if (titan == null) {
             return;
         }
-        boolean replay = !FirstRun.isFirstRun(back, group);
+        // 祠から始めた順路は、一度目でも祠へ帰す (2026-11-10 の声「祠で死んだのに、巨神が元居た場所から降ろされた」)
+        boolean replay = !FirstRun.isFirstRun(back, group) || jp.revati.skyabyss.trial.TrialRoute.fromShrine(back, group);
         // 順路は終わる (物語の一度目も周回も。次に挑むときは最初の部屋から。2026-11-09 の声「レイドは死んだら最初からスタート」)
         jp.revati.skyabyss.trial.TrialRoute.end(back, group);
         for (UUID id : fallen) {

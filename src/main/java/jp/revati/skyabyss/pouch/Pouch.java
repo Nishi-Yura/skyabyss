@@ -120,7 +120,7 @@ public final class Pouch {
         if (first && !(player instanceof FakePlayer)) {
             // 墓からまとめて取り戻すあいだは、品ごとの知らせを出さない (左に並びすぎた。2026-10-21 の試遊)
             if (!quiet) {
-                Notice.gain(player, "skyabyss_pouch.first", Component.translatable("skyabyss_pouch.name"), e.item().getDescription());
+                Notice.gainItem(player, new net.minecraft.world.item.ItemStack(e.item()), jp.revati.skyabyss.ModText.progress("skyabyss_pouch.first", Component.translatable("skyabyss_pouch.name"), e.item().getDescription()));
             }
             Beats.fire(player, "pouch:" + e.id().getPath());
         }
@@ -242,6 +242,70 @@ public final class Pouch {
         return PouchConfig.withdrawEnabled(player.server) && e.withdrawable();
     }
 
+    // ---------------------------------------------------------------- 細工の枠 (部品つきの品。2026-11-10 の選び p_parts)
+    // 名残の芯・粉・スキルの修飾ルーン。中身 (部品) ごとそのまま入れる
+    public static boolean isPart(ItemStack stack) {
+        net.minecraft.world.item.Item i = stack.getItem();
+        return i instanceof jp.revati.skyabyss.item.extra.GearFreedomItems.AspectCore
+                || i instanceof jp.revati.skyabyss.item.extra.GearFreedomItems.SkillRune
+                || i instanceof jp.revati.skyabyss.item.extra.GearFreedomItems.ElementShard;
+    }
+
+    // 細工の枠へ入れる (同じ品・同じ中身の枠に重ね、残りは空いた枠へ)。入れた数を返し、stack を減らす
+    public static int addPart(ServerPlayer player, ItemStack stack) {
+        if (stack.isEmpty() || !isPart(stack) || !PouchConfig.enabled(player.server)) {
+            return 0;
+        }
+        ItemStack in = stack.copy();
+        in.remove(PouchSetup.LOAN.get());
+        PouchData d = data(player);
+        int before = in.getCount();
+        for (int i = 0; i < PouchData.PARTS && !in.isEmpty(); i++) {
+            ItemStack have = d.part(i);
+            if (!have.isEmpty() && ItemStack.isSameItemSameComponents(have, in)) {
+                int room = have.getMaxStackSize() - have.getCount();
+                int n = Math.min(room, in.getCount());
+                if (n > 0) {
+                    ItemStack grown = have.copy();
+                    grown.grow(n);
+                    d.setPart(i, grown);
+                    in.shrink(n);
+                }
+            }
+        }
+        for (int i = 0; i < PouchData.PARTS && !in.isEmpty(); i++) {
+            if (d.part(i).isEmpty()) {
+                d.setPart(i, in.copy());
+                in.setCount(0);
+            }
+        }
+        int moved = before - in.getCount();
+        if (moved > 0) {
+            stack.shrink(moved);
+            sync(player);
+        } else {
+            noteFull(player, stack);
+        }
+        return moved;
+    }
+
+    // 細工の枠 i から n 個まで取り出す (取り出し済みの印つき。掃除が戻さない)
+    public static ItemStack takePart(ServerPlayer player, int i, int n) {
+        PouchData d = data(player);
+        ItemStack have = d.part(i);
+        if (have.isEmpty() || n <= 0) {
+            return ItemStack.EMPTY;
+        }
+        int c = Math.min(n, have.getCount());
+        ItemStack out = have.copyWithCount(c);
+        ItemStack left = have.copy();
+        left.shrink(c);
+        d.setPart(i, left.isEmpty() ? ItemStack.EMPTY : left);
+        sync(player);
+        out.set(PouchSetup.LOAN.get(), Unit.INSTANCE);
+        return out;
+    }
+
     // ---------------------------------------------------------------- 掃除
     // 持ち物 (メイン・左手) の袋の品を袋へ移す。印のある (取り出し済みの) 品は移さない。移した数を返す
     public static int sweep(ServerPlayer player) {
@@ -275,7 +339,13 @@ public final class Pouch {
     }
 
     private static int sweepStack(ServerPlayer player, ItemStack s) {
-        if (s.isEmpty() || s.has(PouchSetup.LOAN.get()) || PouchEntries.entry(s) == null) {
+        if (s.isEmpty() || s.has(PouchSetup.LOAN.get())) {
+            return 0;
+        }
+        if (isPart(s)) {
+            return addPart(player, s);
+        }
+        if (PouchEntries.entry(s) == null) {
             return 0;
         }
         return add(player, s);

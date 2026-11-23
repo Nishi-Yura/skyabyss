@@ -154,7 +154,7 @@ public final class LampIsle {
             Notice.hint(p, "message.skyabyss.isle2.caught");
         }
         if (held % 6 == 0) {
-            level.sendParticles(ParticleTypes.WAX_ON, p.getX(), p.getY() + 1.0, p.getZ(), 3, 0.3, 0.5, 0.3, 0.01);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1.0, p.getZ(), 3, 0.3, 0.5, 0.3, 0.01);
         }
         if (held > hold && held % 20 == 0 && !p.isCreative()) {
             p.hurt(source != null ? level.damageSources().indirectMagic(source, source) : level.damageSources().magic(), burn);
@@ -183,7 +183,7 @@ public final class LampIsle {
         double ground = mark("center").getY();
         for (double d = 1; d <= RANGE - 10; d += 1.6) {
             double t = d / (RANGE - 10);
-            level.sendParticles(BEAM, s.x + Math.cos(a) * d, s.y + (ground - s.y) * t, s.z + Math.sin(a) * d, 1, 0, 0, 0, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), s.x + Math.cos(a) * d, s.y + (ground - s.y) * t, s.z + Math.sin(a) * d, 1, 0, 0, 0, 0);
         }
     }
 
@@ -305,7 +305,7 @@ public final class LampIsle {
         }
         LAMP_ON.put(pos, level.getGameTime() + LAMP_TICKS);
         level.playSound(null, pos, CloudMobsSetup.LAMP_LIT.get(), SoundSource.BLOCKS, 1.4f, 1.0f);
-        level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 20, 0.4, 0.6, 0.4, 0.04);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 20, 0.4, 0.6, 0.4, 0.04);
     }
 
     // ---------------------------------------------------------------- 右クリック (漁の灯・扉・帰りの台)
@@ -380,5 +380,10 @@ public final class LampIsle {
         HELD.clear();
         LIT.clear();
         LAMP_ON.clear();
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

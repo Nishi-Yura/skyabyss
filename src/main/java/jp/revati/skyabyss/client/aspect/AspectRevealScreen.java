@@ -29,9 +29,9 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public class AspectRevealScreen extends Screen {
     private static final int[] RARITY = {0x6FA8E0, 0xB48AE6, 0xEF8A5C};
-    private static final int GOLD = 0xF2C14E;
+    private static final int GOLD = 0xE9C46A;
     private static final int TEXT = 0xE6E8EE;
-    private static final int DIM = 0x8C98A4;
+    private static final int DIM = 0x9AA4C4;
     private static final int CARD_W = 132;
     private static final int CARD_H = 172;
     private static final int GAP = 21;
@@ -149,7 +149,7 @@ public class AspectRevealScreen extends Screen {
     public void render(GuiGraphics g, int mx, int my, float pt) {
         float t = age + pt;
         float dim = Mth.clamp(t / 8f, 0, 1);
-        g.fill(0, 0, width, height, argb(0.82f * dim, 0x07090E));
+        g.fill(0, 0, width, height, argb(0.82f * dim, 0x05070F));
         g.fillGradient(0, 0, width, height / 2, argb(0.20f * dim, accent), argb(0f, accent));
         // 題字
         float ta = Mth.clamp((t - T_TITLE) / 10f, 0, 1);
@@ -292,7 +292,7 @@ public class AspectRevealScreen extends Screen {
         // 次の Lv までの帯
         int next = Aspects.nextCopies(got.after());
         int barW = CARD_W - 16;
-        g.fill(8, CARD_H - 12, 8 + barW, CARD_H - 9, argb(alpha, 0x2A2E38));
+        g.fill(8, CARD_H - 12, 8 + barW, CARD_H - 9, argb(alpha, 0x222A48));
         double fr = next < 0 ? 1 : (got.after() - Aspects.copiesFor(after)) / (double) Math.max(1, next - Aspects.copiesFor(after));
         g.fill(8, CARD_H - 12, 8 + (int) Math.round(barW * fr), CARD_H - 9, argb(alpha, line));
     }

@@ -1,0 +1,46 @@
+# 領域の空を本物の心臓の間で撮る (2026-11-15 の声: 肋が空の前に残る・見た目がおかしい)
+# ./gradlew runShots --no-daemon -Pscript=tools/shots/domain_sky_real.txt
+world domain_sky_real continent
+size 1280 720
+timeout 5000
+render 8
+waitchunks 200
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd gamemode creative
+cmd skyabyss play boss whale
+wait 2400
+cmd skyabyss play boss whale
+wait 600
+cmd skyabyss play boss whale
+wait 1800
+cmd skyabyss cinematic stop
+close
+cmd gamemode survival
+cmd effect give @s minecraft:resistance 1000000 4 true
+hud off
+wait 120
+cmd skyabyss cinematic stop
+hud off
+shot real_before
+cmd skyabyss dev force @e[type=skyabyss:stone_whale_heart,limit=1] DOMAIN
+wait 44
+shot real_rift
+wait 22
+shot real_spread
+wait 30
+shot real_covered
+look 90 -25
+wait 2
+shot real_left
+look 270 -25
+wait 2
+shot real_right
+look 180 -55
+wait 2
+shot real_up
+look 0 -20
+wait 2
+shot real_back
+quit

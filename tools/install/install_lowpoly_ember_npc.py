@@ -3,7 +3,7 @@
 ash_thrall A (shell + flared atlases, poker), ember_moth A, cinder_roller B, ash_smith A (hammer + tongs), ember_heart C p1-p3,
 storyteller A, whale_chaser (Isana) A, watcher A.
 Inputs: docs/review/lowpoly_roughs/<folder>/<option>/. Run from the repository root: python tools/install/install_lowpoly_ember_npc.py
-The original cube geos, textures and animations are never touched (LowPoly.enabled = false brings the cubes back)."""
+The original cube geos, textures and animations are never touched."""
 import os
 import shutil
 import subprocess

@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import net.minecraft.core.particles.ParticleTypes;
@@ -76,11 +77,10 @@ public class OxSmith extends DungeonBoss {
             lastSlam = tickCount;
             begin(target, "slam");
             cue("ox_smith", "slam", SLAM_WARN);
-            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), SLAM_RADIUS))
+            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), SLAM_RADIUS)).prop(PropFx.ring("lava_pillar", 8))
                     .floor(getY()).warn(SLAM_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
-                        server.sendParticles(ParticleTypes.LAVA, getX(), getY() + 0.3, getZ(), 30, SLAM_RADIUS * 0.4, 0.1, SLAM_RADIUS * 0.4, 0.1);
                         server.playSound(null, getX(), getY(), getZ(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 1.4f, 0.5f);
                     })
                     .onHit((server, player) -> {
@@ -134,11 +134,16 @@ public class OxSmith extends DungeonBoss {
             if (look.dot(toSource) > 0.5) {
                 amount *= FRONT_TAKEN;
                 level().playSound(null, getX(), getY(), getZ(), SoundEvents.ANVIL_PLACE, SoundSource.HOSTILE, 0.6f, 1.4f);
-                ((net.minecraft.server.level.ServerLevel) level()).sendParticles(ParticleTypes.LAVA, getX() + look.x * 1.4, getY() + 1.6, getZ() + look.z * 1.4, 4,
+                ((net.minecraft.server.level.ServerLevel) level()).sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX() + look.x * 1.4, getY() + 1.6, getZ() + look.z * 1.4, 4,
                         0.3, 0.3, 0.3, 0.02);
             }
         }
         return super.hurt(source, amount);
+    }
+
+    @Override
+    protected boolean midBoss() {
+        return true;
     }
 
     @Override

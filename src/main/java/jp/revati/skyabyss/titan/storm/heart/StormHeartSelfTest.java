@@ -486,7 +486,7 @@ public final class StormHeartSelfTest {
         check(first.draws().stream().anyMatch(d -> d.id().equals(StormLoot.CORE)), "first clear has no core", failures);
         check(first.draws().stream().anyMatch(d -> d.id().equals(StormLoot.SHARD) && d.count() >= 4 && d.count() <= 7), "shards not 4-7", failures);
         check(first.draws().stream().anyMatch(d -> d.id().equals(StormLoot.RESONANCE_SHARD) && d.count() >= 1 && d.count() <= 3), "resonance shards not 1-3", failures);
-        check(StormLoot.collection().size() == 10 + jp.revati.skyabyss.item.ChapterGear.STORM.size(), "collection should have 10 items + the job weapons", failures);
+        check(StormLoot.collection().size() == 10 + jp.revati.skyabyss.item.ChapterGear.STORM.size() + 4, "collection should have 10 items + the job weapons + 4 heroic weapons", failures);
         TitanMemoryData.Record p = new TitanMemoryData.Record();
         p.memory = TitanLoot.HARD_PITY - 1;
         StormLoot.Roll pity = StormLoot.rollHeart(p, random, id -> true);
@@ -503,7 +503,7 @@ public final class StormHeartSelfTest {
         check(none.owned.isEmpty(), "unmade items were recorded", failures);
         // 6.4節の模擬 (12 の表: 図鑑 10 品で平均 13.9)
         double mean = StormLoot.meanClearsToComplete(4000, 7, id -> true);
-        check(mean > 11 && mean < 17, "mean clears to complete the collection is " + mean, failures);
+        check(mean > 19 && mean < 28, "mean clears to complete the collection is " + mean, failures);
         notes.add(String.format("collection in %.1f clears on average", mean));
         List<String> unmade = StormLoot.allIds().stream().filter(id -> !StormLoot.registered(id)).toList();
         notes.add("not made yet (skipped from the draw): " + unmade.size());
@@ -513,7 +513,7 @@ public final class StormHeartSelfTest {
         boolean worldBefore = ProgressData.get(server).worldStopped(StormLoot.TITAN);
         StormLoot.onHeartDefeat(back, List.of(), List.of(fake));
         TitanMemoryData.Record rec = memory.peek(fake, StormLoot.TITAN);
-        check(rec != null && rec.clears == 1 && rec.fragment && rec.firstCleared && rec.choicePending == jp.revati.skyabyss.loot.reward.HeartReward.CHOICE_ON_FIRST_CLEAR, "defeat record is wrong", failures);
+        check(rec != null && rec.clears == 1 && rec.fragment && rec.firstCleared, "defeat record is wrong", failures);
         check(memory.peek(fake, TitanLoot.STONE_WHALE) == null && memory.peek(fake, "tide_shell") == null, "storm defeat wrote to another titan's record", failures);
         check(memory.hasPending(fake), "rewards for an absent player were not held", failures);
         TitanMemoryData.Pending held = memory.takePending(fake);

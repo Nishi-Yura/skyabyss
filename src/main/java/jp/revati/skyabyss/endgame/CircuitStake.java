@@ -84,7 +84,7 @@ public class CircuitStake extends CloudMob {
         bar.removeAllPlayers();
         if (level() instanceof ServerLevel sl) {
             playSound(CloudMobsSetup.STAKE_BREAK.get(), 1.4f, 0.7f);
-            sl.sendParticles(VOID, getX(), getY() + 1.4, getZ(), 40, 0.5, 1.0, 0.5, 0.05);
+            sl.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.4, getZ(), 24, 0.5, 1.0, 0.5, 0.05);
         }
     }
 
@@ -118,7 +118,7 @@ public class CircuitStake extends CloudMob {
         updateBar(sl);
         // 割れ目から漏れる淵の粒 (崩れるほど多く)
         if (tickCount % 6 == 0) {
-            sl.sendParticles(VOID, getX(), getY() + 1.0 + random.nextDouble() * 1.4, getZ(), stage(), 0.35, 0.4, 0.35, 0.01);
+            sl.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.0 + random.nextDouble() * 1.4, getZ(), stage(), 0.35, 0.4, 0.35, 0.01);
         }
         pulseAt--;
         if (pulseAt == TELL) {
@@ -128,7 +128,7 @@ public class CircuitStake extends CloudMob {
             // 予告: 当たる輪を地面に見せる
             for (int i = 0; i < 24; i++) {
                 double a = i * Math.PI * 2 / 24;
-                sl.sendParticles(VOID, getX() + Math.cos(a) * PULSE_R, getY() + 0.2, getZ() + Math.sin(a) * PULSE_R, 1, 0, 0, 0, 0);
+                sl.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Math.cos(a) * PULSE_R, getY() + 0.2, getZ() + Math.sin(a) * PULSE_R, 1, 0, 0, 0, 0);
             }
         } else if (pulseAt <= 0) {
             pulseAt = PULSE;
@@ -140,7 +140,7 @@ public class CircuitStake extends CloudMob {
 
     // 脈: 足もとの人に傷と、外へ押す力
     void pulse(ServerLevel sl) {
-        sl.sendParticles(VOID, getX(), getY() + 0.3, getZ(), 30, PULSE_R * 0.5, 0.1, PULSE_R * 0.5, 0.02);
+        sl.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.3, getZ(), 24, PULSE_R * 0.5, 0.1, PULSE_R * 0.5, 0.02);
         for (ServerPlayer p : sl.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(PULSE_R, 2, PULSE_R))) {
             if (p.isSpectator() || p.isCreative() || p.distanceToSqr(this) > PULSE_R * PULSE_R + 1) {
                 continue;

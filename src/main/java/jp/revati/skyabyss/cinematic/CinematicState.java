@@ -39,7 +39,4 @@ public final class CinematicState {
         seen.clear();
     }
 
-    public Set<String> seenSet() {
-        return Set.copyOf(seen);
-    }
 }

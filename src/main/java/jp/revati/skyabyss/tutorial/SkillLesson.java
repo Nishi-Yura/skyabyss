@@ -138,7 +138,7 @@ public final class SkillLesson {
                     Item coin = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "bell_coin"));
                     if (coin != Items.AIR) {
                         Quests.give(player, new ItemStack(coin, REWARD_COINS));
-                        Notice.gain(player, "message.skyabyss.lesson.reward");
+                        Notice.gainLog(player, "message.skyabyss.lesson.reward");
                     }
                 }
             }
@@ -239,10 +239,10 @@ public final class SkillLesson {
         List<TrainingDummy> near = level.getEntities(FacilitySetup.TRAINING_DUMMY.get(), new AABB(player.blockPosition()).inflate(DUMMY_RANGE), LivingEntity::isAlive);
         for (TrainingDummy dummy : near) {
             if (st.equals("cast")) {
-                level.sendParticles(player, ParticleTypes.HAPPY_VILLAGER, false, dummy.getX(), dummy.getY() + 3.1, dummy.getZ(), 3, 0.2, 0.1, 0.2, 0);
+                level.sendParticles(player, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), false, dummy.getX(), dummy.getY() + 3.1, dummy.getZ(), 3, 0.2, 0.1, 0.2, 0);
             } else {
                 Vec3 back = dummy.position().subtract(facing(dummy).scale(1.3));
-                level.sendParticles(player, ParticleTypes.END_ROD, false, back.x, dummy.getY() + 0.2, back.z, 4, 0.25, 0.05, 0.25, 0.01);
+                level.sendParticles(player, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), false, back.x, dummy.getY() + 0.2, back.z, 4, 0.25, 0.05, 0.25, 0.01);
             }
         }
     }
@@ -279,11 +279,11 @@ public final class SkillLesson {
             Long last = LAST_CAST.put(player.getUUID(), cast);
             if (last == null || last != cast) {
                 Quests.signal(player, SIG_DUMMY);
-                level.sendParticles(ParticleTypes.ENCHANTED_HIT, dummy.getX(), dummy.getY() + 2.2, dummy.getZ(), 14, 0.3, 0.4, 0.3, 0.2);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), dummy.getX(), dummy.getY() + 2.2, dummy.getZ(), 14, 0.3, 0.4, 0.3, 0.2);
             }
         } else if (st.equals("behind") && behind(dummy, player)) {
             Quests.signal(player, SIG_BEHIND);
-            level.sendParticles(ParticleTypes.CRIT, dummy.getX(), dummy.getY() + 2.0, dummy.getZ(), 20, 0.3, 0.5, 0.3, 0.3);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), dummy.getX(), dummy.getY() + 2.0, dummy.getZ(), 20, 0.3, 0.5, 0.3, 0.3);
             level.playSound(null, dummy.getX(), dummy.getY() + 1, dummy.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 0.9f, 1.1f);
             Notice.send(player, Notice.Kind.BAR, net.minecraft.network.chat.Component.translatable("message.skyabyss.lesson.behind"));
         }

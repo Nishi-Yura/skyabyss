@@ -10,7 +10,6 @@ import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.opening.OpeningSites;
 import jp.revati.skyabyss.opening.site.Blueprint;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -142,10 +141,6 @@ public final class SongChamber {
         return Ch1Data.get(level.getServer().overworld()).chamber == 2;
     }
 
-    // 戸を開ける (世界に一度)。鐘が応えたとき SongStones.answer から呼ぶ
-    public static void onBellAnswered(ServerLevel level) {
-        open(level);
-    }
 
     static boolean open(ServerLevel level) {
         Ch1Data data = Ch1Data.get(level.getServer().overworld());
@@ -162,9 +157,14 @@ public final class SongChamber {
         level.setBlock(door, ladder, 3);
         level.playSound(null, door, SoundEvents.STONE_BREAK, SoundSource.BLOCKS, 1.2f, 0.6f);
         level.playSound(null, door, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.0f, 0.7f);
-        level.sendParticles(ParticleTypes.POOF, door.getX() + 0.5, door.getY() + 0.6, door.getZ() + 0.5, 10, 0.4, 0.2, 0.4, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), door.getX() + 0.5, door.getY() + 0.6, door.getZ() + 0.5, 10, 0.4, 0.2, 0.4, 0.02);
         data.chamber = 2;
         data.setDirty();
         return true;
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

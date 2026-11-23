@@ -234,7 +234,7 @@ public final class WhaleTilesRoom extends RaidRoom {
                 for (int r = 0; r < ROWS; r++) {
                     if (target[c][r] != 0) {
                         BlockPos p = tileCenter(ctx, c, r);
-                        ctx.level().sendParticles(ParticleTypes.END_ROD, p.getX() + 0.5, p.getY() + 1.2, p.getZ() + 0.5, 1, 0.3, 0.1, 0.3, 0.01);
+                        ctx.level().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX() + 0.5, p.getY() + 1.2, p.getZ() + 0.5, 1, 0.3, 0.1, 0.3, 0.01);
                     }
                 }
             }
@@ -266,7 +266,7 @@ public final class WhaleTilesRoom extends RaidRoom {
         drawTile(ctx, c, r);
         BlockPos p = tileCenter(ctx, c, r);
         ctx.level().playSound(null, p, SoundEvents.STONE_PLACE, SoundSource.BLOCKS, 1.0f, 0.6f + 0.1f * ((c + r) % 4));
-        ctx.level().sendParticles(ParticleTypes.CRIT, p.getX() + 0.5, p.getY() + 1.1, p.getZ() + 0.5, 4, 0.5, 0.05, 0.5, 0.02);
+        ctx.level().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX() + 0.5, p.getY() + 1.1, p.getZ() + 0.5, 4, 0.5, 0.05, 0.5, 0.02);
         if (allSolved()) {
             solved = true;
             solvedAt = ctx.now();
@@ -356,5 +356,10 @@ public final class WhaleTilesRoom extends RaidRoom {
 
     public BlockPos balconySpot(RaidCtx ctx) {
         return ctx.origin().offset(0, BALCONY_Y + 1, 10);
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

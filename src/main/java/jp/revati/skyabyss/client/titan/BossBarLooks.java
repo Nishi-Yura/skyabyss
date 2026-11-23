@@ -94,7 +94,7 @@ public final class BossBarLooks {
     // チームの色付け (Component.empty() + 名前) などで包まれることがあり、外側のキーだけ見ると型が外れて、ときどきバニラの帯に戻っていた
     // (2026-11-08 の声「ボスバーがたまに既存デザインになる」)。包みの引数と子をたどって、いちばん内側の entity.skyabyss.* を返す
     @Nullable
-    static String entityKey(Component c, int depth) {
+    public static String entityKey(Component c, int depth) {
         if (c == null || depth > 6) {
             return null;
         }

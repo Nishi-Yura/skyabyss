@@ -1,0 +1,55 @@
+# あいだに座すもの: 登場の名前の札と顔のアップ (BossIntro.card)、塗り直した体を近くから撮る (2026-11-12)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/tower_master_paint.txt -PshotsName=tower_master_paint
+world shots flat
+size 1280 720
+timeout 1800
+render 14
+cmd gamemode creative
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 200
+cmd skyabyss cinematic stop
+close
+wait 20
+hud on
+cmd skyabyss tower start
+wait 90
+shot i01_card
+wait 14
+shot i02_card
+wait 20
+shot i03_closeup
+wait 20
+shot i04_closeup
+wait 20
+shot i05_closeup
+wait 40
+shot i06_back
+waitchunks 300
+hud off
+cmd gamemode spectator
+cmd skyabyss tower act hold
+wait 380
+cmd skyabyss cinematic stop
+camera skyabyss:tower 0 134 14 180 -22
+wait 20
+shot m01_front
+camera skyabyss:tower 0 150 -14 180 -6
+wait 20
+shot m02_chest_close
+camera skyabyss:tower 14 140 -20 150 0
+wait 20
+shot m03_right_arm
+camera skyabyss:tower -14 140 -20 210 0
+wait 20
+shot m04_left_arm
+camera skyabyss:tower 0 168 -24 180 4
+wait 20
+shot m05_head
+camera skyabyss:tower 0 128 -14 180 -30
+wait 20
+shot m06_roots
+camera skyabyss:tower -75 150 -46 -105 4
+wait 20
+shot m07_side

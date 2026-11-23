@@ -19,7 +19,6 @@ import jp.revati.skyabyss.lore.LoreState;
 import jp.revati.skyabyss.npc.Affinity;
 import jp.revati.skyabyss.npc.NpcBonds;
 import jp.revati.skyabyss.npc.NpcSetup;
-import jp.revati.skyabyss.npc.WorldLoop;
 import jp.revati.skyabyss.progress.ProgressRules;
 import jp.revati.skyabyss.progress.Progression;
 import jp.revati.skyabyss.progress.Titans;
@@ -34,7 +33,6 @@ import jp.revati.skyabyss.rpg.Growth;
 import jp.revati.skyabyss.rpg.GrowthData;
 import jp.revati.skyabyss.rpg.GrowthRules;
 import jp.revati.skyabyss.rpg.GrowthRules.Stat;
-import jp.revati.skyabyss.rpg.MemoryFragments;
 import jp.revati.skyabyss.rpg.skill.Skill;
 import jp.revati.skyabyss.rpg.skill.SkillData;
 import jp.revati.skyabyss.readiness.BoardReadiness;
@@ -224,29 +222,6 @@ public final class RecordBuilder {
 
         rows.add(header("rights"));
         TitanMemoryData.Record r = memory(p);
-        for (String titan : Titans.all()) {
-            if (TitanPages.page(titan) == null || !revealed(p, titan)) {
-                continue;
-            }
-            TitanMemoryData.Record tr = memory(p, titan);
-            Component choiceValue;
-            int choiceMark;
-            if (tr.choicePending) {
-                choiceValue = t("v.choice_ready");
-                choiceMark = RecordSnapshot.MARK_ATTENTION;
-            } else if (tr.firstCleared) {
-                choiceValue = t("v.choice_done");
-                choiceMark = RecordSnapshot.MARK_SAFE;
-            } else {
-                choiceValue = t("v.choice_locked");
-                choiceMark = RecordSnapshot.MARK_LOCKED;
-            }
-            // 岩鯨の行は前からの名前 (choice) のまま。選ぶボタンは、選べる遺物のある巨神ぜんぶ (遺物の選択画面を開く。docs/design/30)
-            boolean whale = titan.equals(TitanLoot.STONE_WHALE);
-            rows.add(new Row(whale ? "choice" : "choice." + titan, Kind.VALUE, ItemStack.EMPTY, t("r.choice_of", Progression.titanName(titan)),
-                    choiceValue, choiceMark, -1, List.of(t(whale ? "d.choice" : "d.choice_other", Progression.titanName(titan))),
-                    self && tr.choicePending && !jp.revati.skyabyss.loot.reward.HeartReward.options(titan).isEmpty() ? RecordSnapshot.ACTION_CHOOSE : RecordSnapshot.ACTION_NONE));
-        }
         ForgeRules.ExchangeState exchange = TitanLoot.exchangeState(r.clears > 0 ? r : null);
         int exchangeMark = switch (exchange) {
             case READY -> RecordSnapshot.MARK_ATTENTION;
@@ -669,7 +644,7 @@ public final class RecordBuilder {
             int v = d.stat(stat);
             rows.add(value("stat." + stat.id, Component.translatable(stat.nameKey()), Component.literal(String.valueOf(v)),
                     v >= GrowthRules.STAT_CAP ? RecordSnapshot.MARK_SAFE : RecordSnapshot.MARK_NONE,
-                    List.of(effect(stat, v), Component.translatable("gui.skyabyss.growth.desc." + stat.id),
+                    List.of(effect(stat, v, d.level), Component.translatable("gui.skyabyss.growth.desc." + stat.id),
                             Component.translatable("gui.skyabyss.growth.cap", GrowthRules.STAT_CAP))));
         }
         rows.add(header("skills"));
@@ -699,24 +674,20 @@ public final class RecordBuilder {
             }
         }
         rows.add(value("respecs", t("r.respecs"), t("v.times", s.respecs), RecordSnapshot.MARK_NONE, List.of(t("d.respecs"))));
-        rows.add(header("fragments"));
-        List<Component> fragLines = new ArrayList<>();
-        fragLines.add(Component.translatable("gui.skyabyss.growth.fragments_desc"));
-        for (Map.Entry<String, Integer> e : d.fragments.entrySet()) {
-            fragLines.add(t("d.list_item", Component.translatable(MemoryFragments.nameKey(e.getKey())), e.getValue()));
-        }
-        rows.add(value("fragments", t("r.fragments"), t("v.of", d.fragmentCount(), d.fragmentCapacity), RecordSnapshot.MARK_NONE, fragLines));
         return rows;
     }
 
     // ステータス画面 (GrowthScreen.effect) と同じ文
-    static Component effect(Stat stat, int value) {
+    // 耐久の行は、レベルで増えた体力も足して出す (2026-11-11「耐久は、レベルアップで HP 増えるから、それを適用して」)
+    static Component effect(Stat stat, int value, int level) {
         return switch (stat) {
             case STRENGTH -> Component.translatable("gui.skyabyss.growth.effect.strength", pct(GrowthRules.meleeMultiplier(value)));
             case AGILITY -> Component.translatable("gui.skyabyss.growth.effect.agility",
                     pct(GrowthRules.moveMultiplier(value)), pct(GrowthRules.projectileMultiplier(value)));
             case SPIRIT -> Component.translatable("gui.skyabyss.growth.effect.spirit", (int) Math.round(GrowthRules.BASE_MANA + GrowthRules.bonusMana(value)));
-            case VITALITY -> Component.translatable("gui.skyabyss.growth.effect.vitality", jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(value)));
+            case VITALITY -> Component.translatable("gui.skyabyss.growth.effect.vitality_level",
+                    jp.revati.skyabyss.Hp.of(GrowthRules.bonusHealth(value) + GrowthRules.levelHealth(level)),
+                    jp.revati.skyabyss.Hp.of(GrowthRules.levelHealth(level)));
         };
     }
 
@@ -800,7 +771,6 @@ public final class RecordBuilder {
                     List.of(t("d.lore_chapter"))));
         }
         rows.add(header("world"));
-        rows.add(value("loop", t("r.loop"), t("v.times", WorldLoop.count(p.server)), RecordSnapshot.MARK_NONE, List.of(t("d.loop"))));
         return rows;
     }
 

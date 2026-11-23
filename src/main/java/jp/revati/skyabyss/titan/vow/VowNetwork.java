@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.client.vow.VowHud;
@@ -120,10 +119,6 @@ public final class VowNetwork {
         }
     }
 
-    @Nullable
-    static String lastKey(UUID player) {
-        return LAST.get(player);
-    }
 
     @SubscribeEvent
     static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {

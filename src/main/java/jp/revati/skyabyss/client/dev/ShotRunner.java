@@ -360,6 +360,17 @@ public final class ShotRunner {
                 jp.revati.skyabyss.client.titan.MarkerArt.shotCommand(line.rest());
                 return true;
             }
+            case "rift" -> {
+                // rift pass <theme> / rift world <theme> x y z [高さ] [宣言 tick] / rift clear / rift freeze <tick|off> (client/fx/RiftFx)
+                jp.revati.skyabyss.client.fx.RiftFx.shotCommand(line.rest());
+                return true;
+            }
+            case "lightring" -> {
+                // lightring x y z <半径> <色 16 進> : 当たりの光の輪を一つ (client/combat/AttackLightFx)
+                jp.revati.skyabyss.client.combat.AttackLightFx.testRing(Double.parseDouble(line.arg(0)), Double.parseDouble(line.arg(1)),
+                        Double.parseDouble(line.arg(2)), Double.parseDouble(line.arg(3)), Integer.parseInt(line.arg(4), 16));
+                return true;
+            }
             case "stareffect" -> {
                 // stareffect <current|a|b|c>: 星が欠ける見せ方を、設定を書き換えずに切り替える (選定用)
                 jp.revati.skyabyss.client.opening.StarEffect.override =
@@ -368,13 +379,6 @@ public final class ShotRunner {
             }
             case "wait" -> {
                 return stepTicks + 1 >= line.intArg(0);
-            }
-            case "heartreward" -> {
-                // heartreward <focus N|confirm|later|done> : 心臓の遺物の選択画面を、その見せ場まで進める (確かめ用。選ぶ決まりはサーバー)
-                if (mc.screen instanceof jp.revati.skyabyss.client.reward.HeartRewardScreen screen) {
-                    screen.devPhase(line.arg(0), line.rest().contains(" ") ? Integer.parseInt(line.arg(1)) : 0);
-                }
-                return true;
             }
             case "echo" -> {
                 return true;
@@ -590,16 +594,9 @@ public final class ShotRunner {
                 }
                 return false;
             }
-            case "lowpoly" -> {
-                // lowpoly on|off|debug|nodebug : 低ポリ描画の切り替え (off = 元のキューブ。debug = 骨の箱を半透明の赤で重ねる)
-                switch (line.arg(0).toLowerCase(java.util.Locale.ROOT)) {
-                    case "on" -> jp.revati.skyabyss.client.lowpoly.LowPoly.enabled = true;
-                    case "off" -> jp.revati.skyabyss.client.lowpoly.LowPoly.enabled = false;
-                    case "debug" -> jp.revati.skyabyss.client.lowpoly.LowPoly.debug = true;
-                    case "armoroff" -> jp.revati.skyabyss.client.lowpoly.LowPolyArmor.enabled = false;
-                    case "armoron" -> jp.revati.skyabyss.client.lowpoly.LowPolyArmor.enabled = true;
-                    default -> jp.revati.skyabyss.client.lowpoly.LowPoly.debug = false;
-                }
+            case "splat" -> {
+                // splat cpu|gpu : 点の模型 (client/splat) の描き方 (比べと計測用)
+                jp.revati.skyabyss.client.splat.SplatGpu.enabled = !line.arg(0).equalsIgnoreCase("cpu");
                 return true;
             }
             case "skycircle" -> {
@@ -671,9 +668,11 @@ public final class ShotRunner {
                 jp.revati.skyabyss.client.lowpoly.LowPolyArmor.forcedLevel = line.arg(0).equalsIgnoreCase("auto") ? -1 : line.intArg(0);
                 return true;
             }
-            case "weaponmesh" -> {
-                // weaponmesh on|off : プレイヤーの武器を低ポリ (on) / 元のボクセル (off) で描く
-                jp.revati.skyabyss.client.lowpoly.LowPoly.weaponMeshes = !line.arg(0).equalsIgnoreCase("off");
+            case "gearlook" -> {
+                // gearlook weapon|armor|skill|all 0|a|b|c : 自分の武器・防具・技の見せ方の試作 (client/look/GearLook)
+                if (!jp.revati.skyabyss.client.look.GearLook.set(line.arg(0), line.arg(1))) {
+                    throw new IllegalArgumentException("gearlook: " + line.arg(0) + " " + line.arg(1));
+                }
                 return true;
             }
             case "weapontier" -> {
@@ -685,16 +684,6 @@ public final class ShotRunner {
                 // acctier common|rare|legend|off : 装飾品のメッシュの階級を固定する (品の階級を使うのは off)
                 String t = line.arg(0).toLowerCase(java.util.Locale.ROOT);
                 jp.revati.skyabyss.client.lowpoly.LowPoly.accessoryTier = t.equals("off") ? null : t;
-                return true;
-            }
-            case "accmesh" -> {
-                // accmesh on|off : 装飾品を低ポリ (on) / 元の平絵 (off) で描く (手・地面・額縁)
-                jp.revati.skyabyss.client.lowpoly.LowPoly.accessoryMeshes = !line.arg(0).equalsIgnoreCase("off");
-                return true;
-            }
-            case "accworn" -> {
-                // accworn on|off : 体に付けた装飾の描画 (AccessoryWornLayer) の入り切り
-                jp.revati.skyabyss.client.lowpoly.LowPoly.accessoryWorn = !line.arg(0).equalsIgnoreCase("off");
                 return true;
             }
             case "accequip" -> {
@@ -910,8 +899,8 @@ public final class ShotRunner {
                 return true;
             }
             case "openacc" -> {
-                // openacc : 装飾の画面を開く (つまみを押したのと同じ)
-                net.neoforged.neoforge.network.PacketDistributor.sendToServer(new jp.revati.skyabyss.item.accessory.AccessorySetup.OpenPayload());
+                // openacc : 持ち物の画面を開く (装飾の枠は持ち物の画面の中。前の装飾の画面はなくなった)
+                mc.setScreen(new net.minecraft.client.gui.screens.inventory.InventoryScreen(mc.player));
                 return true;
             }
             case "trail" -> {
@@ -963,6 +952,11 @@ public final class ShotRunner {
             }
             case "close" -> {
                 mc.setScreen(null);
+                return true;
+            }
+            case "hitboxaudit" -> {
+                // hitboxaudit <ファイル名> : mod の生き物の当たり判定と描く体の大きさを比べて、撮影のフォルダに書く (client/dev/HitboxAudit)
+                say("  " + HitboxAudit.write(out.resolve(line.arg(0))));
                 return true;
             }
             case "overlap" -> {
@@ -1175,6 +1169,27 @@ public final class ShotRunner {
     }
 
     // 開ける画面の名前。足りなければ、画面のクラスの完全な名前 (引数なしで作れるもの) でもよい
+    // 祠の画面・試練の板の見本 (岩鯨。札は図鑑の試練から 3 枚、一枚は深淵の印つき。誓いは登録の全部)
+    private static jp.revati.skyabyss.trial.TrialBoardNet.Open trialDemo(boolean shrine) {
+        String titan = jp.revati.skyabyss.progress.Titans.STONE_WHALE;
+        java.util.List<jp.revati.skyabyss.trial.TrialBoardNet.Card> cards = new java.util.ArrayList<>();
+        java.util.List<jp.revati.skyabyss.trial.TrialBoardNet.Row> rows = new java.util.ArrayList<>();
+        int i = 0;
+        for (jp.revati.skyabyss.trial.Trial.Def d : jp.revati.skyabyss.trial.TrialCatalog.of(titan)) {
+            java.util.List<jp.revati.skyabyss.trial.TrialBoardNet.Chip> chips = i == 2
+                    ? java.util.List.of(new jp.revati.skyabyss.trial.TrialBoardNet.Chip("abyss", "", false, jp.revati.skyabyss.trial.Trial.Rarity.ABYSS.ordinal()))
+                    : java.util.List.of();
+            cards.add(new jp.revati.skyabyss.trial.TrialBoardNet.Card(d.id(), Math.min(i, 3), false, chips, i == 0, i % 4));
+            rows.add(new jp.revati.skyabyss.trial.TrialBoardNet.Row(d.id(), true, i, i, i, 3));
+            i++;
+        }
+        java.util.List<jp.revati.skyabyss.trial.TrialBoardNet.VowLine> vows = new java.util.ArrayList<>();
+        for (jp.revati.skyabyss.titan.vow.Vow v : jp.revati.skyabyss.titan.vow.Vows.all()) {
+            vows.add(new jp.revati.skyabyss.trial.TrialBoardNet.VowLine(v.id(), v.points(), vows.size() % 2 == 0));
+        }
+        return new jp.revati.skyabyss.trial.TrialBoardNet.Open(titan, 2, cards, 7, 4, 1_234_000L, rows, java.util.List.of(), true, false, shrine, "", vows, 12);
+    }
+
     private static Screen screen(Minecraft mc, String name) {
         // creative_<つまみの名前>: クリエイティブの欄をその Mod のつまみで開く (main / weapons / gear / eggs / blocks)
         if (name.toLowerCase(Locale.ROOT).startsWith("creative_")) {
@@ -1233,13 +1248,16 @@ public final class ShotRunner {
             case "party" -> jp.revati.skyabyss.party.client.PartyScreen::new;
             // パーティー募集の画面 (開いてから 2 秒ほどで一覧が届く)
             case "party_finder" -> () -> new jp.revati.skyabyss.party.client.PartyFinderScreen(null);
+            // 祠の画面・背の試練の板を見本の中身で (ふだんはサーバーが大陸の世界で送る。重なり検査のため)
+            case "shrine_demo" -> () -> new jp.revati.skyabyss.client.trial.TrialBoardScreen(trialDemo(true));
+            case "trial_board_demo" -> () -> new jp.revati.skyabyss.client.trial.TrialBoardScreen(trialDemo(false));
             case "deep_choice" -> () -> new jp.revati.skyabyss.client.dungeon.DeepChoiceScreen(new jp.revati.skyabyss.dungeon.DeepChoice.Open("deep_fort",
                     jp.revati.skyabyss.dungeon.DungeonMood.values()[0].nameKey(), jp.revati.skyabyss.dungeon.DungeonMood.values()[0].descKey()));
             // 転生の画面 (魂盤・ビルドを組み直す)。開くまえに cmd skyabyss dev rebirth <n> で転生の数を入れておく
             case "rebirth" -> () -> new jp.revati.skyabyss.client.rebirth.RebirthScreen(null);
             case "wheel" -> () -> jp.revati.skyabyss.client.wheel.WheelScreen.forShots(2);
             case "notices", "noticelog" -> jp.revati.skyabyss.client.notice.NoticeLogScreen::new;
-            // 旅嚢の輪 (札 2 / 5 / 9 枚。窓の大きさで半径と札の大きさが変わるかを見る)
+            // 旅袋の輪 (札 2 / 5 / 9 枚。窓の大きさで半径と札の大きさが変わるかを見る)
             case "pouchwheel_2" -> () -> jp.revati.skyabyss.client.pouch.PouchWheelScreen.demo(2);
             case "pouchwheel_5" -> () -> jp.revati.skyabyss.client.pouch.PouchWheelScreen.demo(5);
             case "pouchwheel_9" -> () -> jp.revati.skyabyss.client.pouch.PouchWheelScreen.demo(9);

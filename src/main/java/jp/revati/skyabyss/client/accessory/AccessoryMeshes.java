@@ -12,7 +12,6 @@ import jp.revati.skyabyss.item.GearTier;
 import jp.revati.skyabyss.item.ModGear;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -94,15 +93,8 @@ public final class AccessoryMeshes {
 
     // mythic: 神器の装飾は光る画素が脈打つ (WeaponItemRenderer.mythicPulse と同じ拍)
     public static void draw(LowPolyMesh mesh, PoseStack pose, MultiBufferSource buffers, int light, int overlay, boolean mythic) {
-        ResourceLocation[] tex = variant(mesh.texture);
-        LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(tex[0])), mesh, light, overlay, WHITE);
-        if (tex[1] != null) {
-            LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, WHITE);
-            if (mythic) {
-                int a = (int) (40 + 150 * jp.revati.skyabyss.client.weapon.WeaponItemRenderer.mythicPulse());
-                LowPoly.drawAll(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex[1])), mesh, FULL_BRIGHT, overlay, (a << 24) | 0xFFFFFF);
-            }
-        }
+        // 点の模型 (client/splat)。光る画素は光る点になる
+        jp.revati.skyabyss.client.splat.SplatDraw.mesh(mesh, null, null, pose.last().pose(), buffers, light, overlay, WHITE);
     }
 
     private static ResourceLocation[] variant(ResourceLocation atlas) {

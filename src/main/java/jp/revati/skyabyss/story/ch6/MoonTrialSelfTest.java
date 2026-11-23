@@ -91,13 +91,13 @@ public final class MoonTrialSelfTest {
                 check(f, boss.getHealth() == boss.getMaxHealth(), "the trial lord did not start at full health");
                 check(f, MoonTrial.lordOf(boss).equals("valley"), "lordOf did not name the valley");
                 p.setPos(boss.getX() + 3, boss.getY(), boss.getZ());
-                int before = p.getInventory().countItem(MoonGearSetup.SHARD.get());
+                int before = jp.revati.skyabyss.pouch.Pouch.countAll(p, MoonGearSetup.SHARD.get()); // 月の欠片は旅袋へ入る (2026-11-10 から)
                 boss.kill();
                 check(f, !boss.isAlive(), "the trial lord did not die");
                 // 偽の人は世界の人の一覧に入らないので、倒れた時の配りを直に呼ぶ
                 MoonTrial.finish(moon, boss, "valley", List.of(p));
                 check(f, MoonTrial.best(p, "valley") == 2 && MoonTrial.next(p, "valley") == 3, "clearing tier 2 was not recorded: " + MoonTrial.best(p, "valley"));
-                int got = p.getInventory().countItem(MoonGearSetup.SHARD.get()) - before;
+                int got = jp.revati.skyabyss.pouch.Pouch.countAll(p, MoonGearSetup.SHARD.get()) - before;
                 check(f, got >= 5, "the tier 2 lord gave " + got + " moon fragments (want 3-5 + 2)");
                 check(f, p.getInventory().countItem(MoonGearSetup.HELMET.get()) >= 1, "the first valley clear did not give the hood: " + inv(p));
             }

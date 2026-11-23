@@ -3,12 +3,9 @@ package jp.revati.skyabyss.titan.storm.back;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.StairBlock;
 import jp.revati.skyabyss.tablet.Tablets;
 import net.minecraft.world.level.block.state.BlockState;
@@ -53,9 +50,6 @@ public final class StormKit {
         return level;
     }
 
-    public LongOpenHashSet carved() {
-        return carved;
-    }
 
     public void set(int x, int y, int z, BlockState s) {
         level.setBlock(new BlockPos(x, y, z), s, FLAGS);

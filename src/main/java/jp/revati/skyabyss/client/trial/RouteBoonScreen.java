@@ -23,13 +23,13 @@ import net.neoforged.neoforge.network.PacketDistributor;
 @net.neoforged.fml.common.EventBusSubscriber(modid = jp.revati.skyabyss.SkyAbyss.MODID, value = net.neoforged.api.distmarker.Dist.CLIENT)
 public class RouteBoonScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final Golden.Layout LAYOUT = Golden.Layout.medium(Golden.FOOT);
-    private static final int BG = 0x07090E;
-    private static final int PANEL = 0x10131A;
-    private static final int CARD = 0x171B25;
-    private static final int GOLD = 0xF2C14E;
-    private static final int TEAL = 0x7FD6D0;
+    private static final int BG = 0x05070F;
+    private static final int PANEL = 0x0C1022;
+    private static final int CARD = 0x101630;
+    private static final int GOLD = 0xE9C46A;
+    private static final int TEAL = 0x8FD0FF;
     private static final int TEXT = 0xE6E8EE;
-    private static final int DIM = 0x8C98A4;
+    private static final int DIM = 0x9AA4C4;
 
     private static final int W = Golden.M_W;
     private static final int H = Golden.M_H;

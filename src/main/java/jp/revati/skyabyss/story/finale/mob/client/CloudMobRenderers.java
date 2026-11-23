@@ -1,7 +1,6 @@
 package jp.revati.skyabyss.story.finale.mob.client;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.story.finale.mob.BellMourner;
 import jp.revati.skyabyss.story.finale.mob.CloudMob;
@@ -18,7 +17,6 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 // 雲海の敵と主の描画 (素材は tools/gen/finale/gen_cloud_mobs.py)。姿の段 (1〜3) で絵を替える: <id>・<id>_s1・<id>_s2
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class CloudMobRenderers {
-    private static final ResourceLocation DEBUG = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/lowpoly/debug.png");
     private static final String[] STAGE_SUFFIX = {"", "_s1", "_s2"};
 
     private CloudMobRenderers() {
@@ -62,10 +60,7 @@ public final class CloudMobRenderers {
         public ResourceLocation getTextureResource(T mob) {
             ResourceLocation low = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID,
                     "textures/lowpoly/" + name + STAGE_SUFFIX[Math.max(0, Math.min(2, mob.stage() - 1))] + ".png");
-            if (LowPoly.enabled) {
-                return LowPoly.debug ? DEBUG : low;
-            }
-            return LowPoly.cubeOr(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/entity/" + name + ".png"), low);
+            return low;
         }
     }
 

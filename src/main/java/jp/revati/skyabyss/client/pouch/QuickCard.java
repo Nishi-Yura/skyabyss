@@ -39,9 +39,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
-// 一枚札 (docs/design/22 の 10.5): ホットバーの左 (左手の枠のある側) に、旅嚢の短押し (Y) で使う道具を 1 枚だけ出す。
+// 一枚札 (docs/design/22 の 10.5): ホットバーの左 (左手の枠のある側) に、旅袋の短押し (Y) で使う道具を 1 枚だけ出す。
 // 場面に合わせて自動で入れ替わる (QuickPick): 巨神の乗り場・巨神のそば = 呼び笛・呼び貝、海の上 = 潮見の貝、嵐 = 風見鶏、そのほか = 前回の道具。
-// 旅嚢の画面で右クリックして置いた道具 (pin) と、輪で選んだ道具は、はずすまで自動より優先する。
+// 旅袋の画面で右クリックして置いた道具 (pin) と、輪で選んだ道具は、はずすまで自動より優先する。
 // 場面の最中・画面を開いている間・F1・デバッグ画面では出さない。設定 pouchQuickCard で消せる (消すと短押しは前回の道具)
 public final class QuickCard {
     private static final ResourceLocation SPRITE_LEFT = ResourceLocation.withDefaultNamespace("hud/hotbar_offhand_left");
@@ -53,7 +53,7 @@ public final class QuickCard {
     // 入れ替わりの強調 (ms) と、名前を出している間
     private static final long HIGHLIGHT_MS = 1600;
     private static final long NAME_MS = 2600;
-    private static final int GOLD = 0xF2C14E;
+    private static final int GOLD = 0xE9C46A;
     // 見回りの間隔 (tick) と、巨神・乗り場・嵐を探す範囲
     private static final int SCAN_INTERVAL = 10;
     private static final double TITAN_RANGE = 128;
@@ -188,7 +188,7 @@ public final class QuickCard {
         Config.POUCH_QUICK_PIN.save();
     }
 
-    // 旅嚢の画面の「この札に置く」。置いていれば外す。置いたら true
+    // 旅袋の画面の「この札に置く」。置いていれば外す。置いたら true
     static boolean togglePin(ResourceLocation id) {
         if (isPinned(id)) {
             pin(null);
@@ -209,7 +209,7 @@ public final class QuickCard {
         if (cardShown(mc)) {
             out.add(jp.revati.skyabyss.hud.HudLayout.Request.side(jp.revati.skyabyss.hud.HudLayout.Id.QUICK_CARD, side, SPRITE_W, 31, 0));
         } else if (PouchNew.any()) {
-            // 札が出ていないときの小さな「[I] 旅嚢 NEW」の一行 (同じ置き場を使う)
+            // 札が出ていないときの小さな「[I] 旅袋 NEW」の一行 (同じ置き場を使う)
             out.add(jp.revati.skyabyss.hud.HudLayout.Request.side(jp.revati.skyabyss.hud.HudLayout.Id.QUICK_CARD, side, openHintWidth(mc), 10, 10));
         }
     }
@@ -241,7 +241,7 @@ public final class QuickCard {
         }
     }
 
-    // 札が出ていないとき (設定で消した・使える道具がまだない) も、新しい品があることだけ小さく知らせる: [I] 旅嚢 NEW
+    // 札が出ていないとき (設定で消した・使える道具がまだない) も、新しい品があることだけ小さく知らせる: [I] 旅袋 NEW
     private static void renderOpenHint(GuiGraphics g, Minecraft mc) {
         jp.revati.skyabyss.hud.HudLayout.Rect r = jp.revati.skyabyss.client.hud.HudManager.rect(jp.revati.skyabyss.hud.HudLayout.Id.QUICK_CARD);
         if (r == null) {
@@ -280,7 +280,8 @@ public final class QuickCard {
         long age = Util.getMillis() - changedAt;
         float glow = age < HIGHLIGHT_MS ? 1f - age / (float) HIGHLIGHT_MS : 0f;
 
-        g.blitSprite(leftSide ? SPRITE_LEFT : SPRITE_RIGHT, spriteX, spriteY, SPRITE_W, SPRITE_H);
+        // 枠は下の一枚の帯 (client/hud/BandHud) と同じ絵柄
+        jp.revati.skyabyss.client.ui.Golden.hudFrame(g, itemX - 3, h - 23, itemX + 19, h - 1);
         if (glow > 0f) {
             int a = (int) (glow * 150) << 24;
             // 縁にそった金の線 (ホットバーの絵に合わせた細い角ばった枠)
@@ -291,7 +292,7 @@ public final class QuickCard {
         ItemStack stack = new ItemStack(e.item(), count);
         g.renderItem(stack, itemX, h - 19);
         g.renderItemDecorations(mc.font, stack, itemX, h - 19);
-        // 袋に新しく入ってまだ見ていない品があれば "NEW" (札を出しただけでは見たことにしない。旅嚢の画面で外れる)
+        // 袋に新しく入ってまだ見ていない品があれば "NEW" (札を出しただけでは見たことにしない。旅袋の画面で外れる)
         if (PouchNew.any()) {
             PouchNew.badge(g, mc.font, itemX, h - 19);
         }

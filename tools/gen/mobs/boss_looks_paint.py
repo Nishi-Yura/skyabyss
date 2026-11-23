@@ -4,8 +4,11 @@ B 切り絵 (2026-11-08 に外した) を全員に揃えるのをやめ、ボス
   淵の主 (lord_*)   : A 金継ぎの漆。黒漆の体、割れ目を継いだ金の筋が巨神の色に光る (灰=熾の橙、塩=潮の青緑、肋=骨の金白、嵐=紫)
   月の主 (moon_*)   : A 螺鈿の月。月の岩に、貝の内側のような虹の螺鈿。光る所は冷たい白青
   終章の主たち      : C 雲の喪章 (始祖 founder は形から作り直した。tools/rough/lowpoly/abyss/founder_pilgrim.py)。最後の鐘守・巡礼者 (目・手・月・羽)・
-                      巻き戻す者・灯の目は形はそのまま、灰白の雲の体に、いちばん暗い所を黒いレース (織り目) に、光る所を白い光に塗る。
-                      段の絵 (_s1・_s2) は雲が曇るように一段ずつ暗く
+                      巻き戻す者・灯の目は形はそのまま、灰白の雲の体を明るさのなめらかな段で塗り、光る所を白い光に塗る。
+                      段の絵 (_s1・_s2) は、段 1 の元の絵から雲が曇るように一段ずつ暗く
+                      (2026-11-11: 11/08 の「黒いレース (画素の織り目)」と「明るさの段の境の黒い線」は、低ポリの細かく切れたアトラスの上で
+                       黒いまだらと雑音になり、壊れた絵に見えた (声「黒色入っていてバグってるみたい」)。どちらもやめた。
+                       段の元の絵 (_s1・_s2) はほぼ暗い色だけで、塗ると二色の織り目だけになっていたので、段 1 の元から塗る)
 体のまわりの後光・漂うもの (輪・三日月・熾の粉・星屑) はゲームの描き手 (client/entity/PaperCutLayer の見せ方) が足す。
 元の絵は tools/sources/paper_bosses/<名前>.png (切り絵に塗る前の絵) から塗る。光の型 (<名前>_glowmask.png) は、金の筋の分を足して書き直す。
 
@@ -64,31 +67,17 @@ def kintsugi(a, glow, color):
 
 
 def pearl(a, glow):
-    rgb = gradient_map(a, [(0, (30, 34, 50)), (0.5, (150, 160, 182)), (1, (242, 246, 252))])
-    h, w = a.shape[:2]
-    yy, xx = np.mgrid[0:h, 0:w]
-    t = (xx / w * 3.0 + yy / h * 2.0) * math.pi
-    tint = np.stack([np.sin(t) * 0.5 + 0.5, np.sin(t + 2.1) * 0.5 + 0.5, np.sin(t + 4.2) * 0.5 + 0.5], -1) * 60
-    rgb = np.clip(rgb + tint - 30, 0, 255)
+    # 螺鈿: 明るさで色味が移る (暗い所は藍、中ほどは薄紫、明るい所は青白)。
+    # (2026-11-11: 前はアトラスの上の位置で虹の色を付けていて、細かく切れた低ポリの絵では隣の面どうしが無関係な色になり、
+    #  緑と紫の継ぎはぎに見えた。位置ではなく明るさだけで色を決める)
+    rgb = gradient_map(a, [(0, (28, 30, 52)), (0.3, (86, 84, 122)), (0.55, (156, 150, 190)), (0.8, (206, 214, 236)), (1, (244, 248, 255))])
     rgb[glow] = (210, 240, 255)
     return rgb, glow
 
 
 def cloud(a, glow, stage=0):
-    L = lum(a)
-    rgb = gradient_map(a, [(0, (98, 100, 116)), (0.35, (150, 154, 170)), (0.65, (200, 204, 216)), (1, (244, 244, 250))])
-    h, w = a.shape[:2]
-    yy, xx = np.mgrid[0:h, 0:w]
-    solid = a[..., 3] > 0
-    dark = (L < np.percentile(L[solid], 34)) & solid if solid.any() else np.zeros(L.shape, bool)
-    weave = ((xx + yy) % 3 == 0) | ((xx - yy) % 5 == 0)
-    rgb[dark] = np.where(weave[dark][:, None], np.array((40, 36, 46), float), np.array((10, 8, 12), float))
-    # 明るさの段の境に黒い細い線 (縫い目・縁取り。白一色で形が溶けないように)
-    band = np.digitize(L, np.percentile(L[solid], [34, 60, 82])) if solid.any() else np.zeros(L.shape, int)
-    edge = np.zeros(L.shape, bool)
-    edge[:-1] |= band[:-1] != band[1:]
-    edge[:, :-1] |= band[:, :-1] != band[:, 1:]
-    rgb[edge & solid & ~dark] = (26, 22, 30)
+    # 元の絵の明るさを、暗い所は深い灰青・明るい所は雲の白へ、なめらかに写す (画素ごとの模様は付けない)
+    rgb = gradient_map(a, [(0, (46, 48, 62)), (0.3, (112, 116, 134)), (0.6, (182, 186, 200)), (1, (244, 244, 250))])
     k = (1.0, 0.84, 0.66)[stage]
     rgb = rgb * k
     rgb[glow] = (232, 240, 255)
@@ -115,6 +104,9 @@ def run(name):
     GLOW_SRC.mkdir(parents=True, exist_ok=True)
     for p in files:
         src = SRC / p.name
+        if name in CLOUDS:
+            # 段の絵も段 1 の元から塗る (段の元の絵はほぼ暗い色だけ)
+            src = SRC / (name + ".png")
         if not src.exists():
             print("  no source for", p.name, "(paint the paper version first)")
             continue

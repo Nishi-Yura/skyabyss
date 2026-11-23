@@ -55,13 +55,4 @@ shot ui_boss
 cmd kill @e[type=!minecraft:player,distance=..40]
 wait 20
 
-echo === heart reward (invulnerable while open)
-cmd skyabyss dev heartreward stone_whale
-waitscreen 100 HeartRewardScreen
-wait 120
-heartreward focus 1
-wait 6
-shot ui_reward
-close
-cmd skyabyss dev heartreward reset
 echo done

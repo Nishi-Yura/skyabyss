@@ -1,0 +1,40 @@
+# 新しい絵柄の確かめ (帯の HUD・得た品の絵・持ち物・装飾・ツールチップ)。
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/ui_glass.txt -PshotsName=ui_glass
+world ui_glass flat
+size 1920 1080
+timeout 900
+render 6
+clouds off
+guiscale 4
+
+cmd time set noon
+cmd gamemode survival
+cmd skyabyss level set @p 32
+cmd skyabyss job choose mage
+cmd give @s skyabyss:storm_staff
+cmd give @s skyabyss:dried_fish 12
+cmd give @s skyabyss:iron_lump 20
+cmd give @s skyabyss:storm_charm
+cmd item replace entity @s armor.chest with skyabyss:ember_chestplate
+cmd item replace entity @s armor.head with skyabyss:ember_helmet
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 1500
+cmd skyabyss facility coins 120
+wait 12
+shot hud_gain_g4
+open inventory
+wait 10
+hover slot 36
+wait 5
+overlap inventory_g4
+shot inventory_g4
+close
+wait 5
+openacc
+wait 20
+overlap accessory_g4
+shot accessory_g4
+close

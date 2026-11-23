@@ -28,10 +28,6 @@ public class HeartCinematicEvent extends Event {
         return kind;
     }
 
-    // 演出の長さ (tick)
-    public int durationTicks() {
-        return durationTicks;
-    }
 
     // カメラが狙う点 (イベントの時点の核のあたり)
     public Vec3 focusPoint() {

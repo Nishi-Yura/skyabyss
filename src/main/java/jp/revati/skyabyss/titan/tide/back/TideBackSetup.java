@@ -25,7 +25,7 @@ public final class TideBackSetup {
 
     // 中ボス 潮招き (片方のはさみだけが大きな、山のような蟹)
     public static final DeferredHolder<EntityType<?>, EntityType<TideBeckoner>> TIDE_BECKONER = ENTITIES.register("tide_beckoner",
-            () -> EntityType.Builder.of(TideBeckoner::new, MobCategory.MONSTER).sized(4.0f, 3.0f).eyeHeight(2.4f)
+            () -> EntityType.Builder.of(TideBeckoner::new, MobCategory.MONSTER).sized(4.0f, 4.2f).eyeHeight(2.4f)
                     .clientTrackingRange(10).fireImmune().build(SkyAbyss.MODID + ":tide_beckoner"));
 
     // ---------------------------------------------------------------- 音 (tools/gen/mobs/gen_tide_back_assets.py、独自合成)

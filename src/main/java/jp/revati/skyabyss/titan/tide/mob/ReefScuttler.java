@@ -51,6 +51,13 @@ public class ReefScuttler extends TideMob {
     static final double PACK_RADIUS = 10;
     static final int BITE_INTERVAL = 28;
 
+    // 潮に乗っている (潮殻の TR3 の満ち潮): 水の中でも鈍らない
+    private boolean tideRider;
+
+    public void rideTide(boolean on) {
+        tideRider = on;
+    }
+
     public ReefScuttler(EntityType<? extends Monster> type, Level level) {
         super(type, level, "reef_scuttler", "attack");
         this.xpReward = 3;
@@ -118,7 +125,7 @@ public class ReefScuttler extends TideMob {
             }
             // 水の中では鈍る
             AttributeInstance speed = getAttribute(Attributes.MOVEMENT_SPEED);
-            boolean wet = isInWater();
+            boolean wet = isInWater() && !tideRider;
             if (speed != null && wet != speed.hasModifier(WADING)) {
                 if (wet) {
                     speed.addTransientModifier(new AttributeModifier(WADING, WATER_SLOW, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
@@ -148,7 +155,7 @@ public class ReefScuttler extends TideMob {
         setDeltaMovement(getDeltaMovement().x * 0.3, 0.3, getDeltaMovement().z * 0.3);
         if (level() instanceof ServerLevel server) {
             server.playSound(null, getX(), getY(), getZ(), TideMobSetup.SCUTTLER_FLIP.get(), SoundSource.HOSTILE, 1f, 1f);
-            server.sendParticles(ParticleTypes.CRIT, getX(), getY() + 0.4, getZ(), 10, 0.3, 0.2, 0.3, 0.2);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.4, getZ(), 10, 0.3, 0.2, 0.3, 0.2);
         }
     }
 
@@ -211,5 +218,10 @@ public class ReefScuttler extends TideMob {
     @Override
     protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
         playSound(TideMobSetup.SCUTTLER_STEP.get(), 0.25f, 1f + random.nextFloat() * 0.3f);
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

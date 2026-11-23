@@ -33,6 +33,22 @@ public abstract class LowPolyArmorRenderer<T extends Item & GeoItem> extends Geo
         addRenderLayer(new AutoGlowingGeoLayer<>(this));
     }
 
+    // 今の描画が光の層の描き直しか (preRender で覚える)
+    private boolean reRendering;
+    private net.minecraft.client.renderer.MultiBufferSource splatSource;
+
+    @Override
+    public void preRender(com.mojang.blaze3d.vertex.PoseStack poseStack, T animatable, software.bernie.geckolib.cache.object.BakedGeoModel model,
+                          @javax.annotation.Nullable net.minecraft.client.renderer.MultiBufferSource bufferSource,
+                          @javax.annotation.Nullable com.mojang.blaze3d.vertex.VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight,
+                          int packedOverlay, int colour) {
+        reRendering = isReRender;
+        if (bufferSource != null) {
+            splatSource = bufferSource;
+        }
+        super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
+    }
+
     private boolean lowPoly() {
         return currentSlot != null && LowPolyArmor.usable(set, currentSlot);
     }
@@ -54,13 +70,27 @@ public abstract class LowPolyArmorRenderer<T extends Item & GeoItem> extends Geo
             super.renderCubesOfBone(poseStack, bone, buffer, packedLight, packedOverlay, colour);
             return;
         }
-        if (bone.isHidden()) {
+        // 光の層 (AutoGlowingGeoLayer) の描き直しでは描かない (点の模型は光る点を自分で描く)
+        if (bone.isHidden() || reRendering) {
+            return;
+        }
+        // 試作 (client/look/GearLook): 立方体の模型があればそれを描く
+        // look5 の防具 (tools/gen/pixel/bb_armor_import.py): 階級の模型 (<部位>_rare / _legend) が無ければ無印
+        String cubeName = "armor/" + set + "/" + LowPolyArmor.pieceName(currentSlot);
+        LowPolyMesh cube = jp.revati.skyabyss.client.look.GearLookDraw.cube(jp.revati.skyabyss.client.look.GearLook.armor, cubeName + (currentStack != null ? LowPolyArmor.tierSuffix(currentStack) : ""));
+        if (cube == null) {
+            cube = jp.revati.skyabyss.client.look.GearLookDraw.cube(jp.revati.skyabyss.client.look.GearLook.armor, cubeName);
+        }
+        if (cube != null) {
+            if (cube.bones.containsKey(bone.getName())) {
+                jp.revati.skyabyss.client.look.GearLookDraw.mesh(cube, bone.getName(), poseStack, splatSource, packedLight, packedOverlay);
+            }
             return;
         }
         LowPolyMesh mesh = LowPolyMeshes.get(LowPolyArmor.meshName(set, currentSlot, currentStack));
-        LowPolyMesh.Bone meshBone = mesh == null ? null : mesh.bones.get(bone.getName());
-        if (meshBone != null) {
-            LowPoly.drawBone(poseStack, buffer, meshBone, packedLight, packedOverlay, colour, SHADE_FLATTEN);
+        if (mesh != null && mesh.bones.containsKey(bone.getName())) {
+            jp.revati.skyabyss.client.splat.SplatDraw.mesh(mesh, LowPolyArmor.atlas(set, currentSlot, currentStack), bone.getName(), poseStack.last().pose(), splatSource,
+                    packedLight, packedOverlay, colour);
         }
     }
 

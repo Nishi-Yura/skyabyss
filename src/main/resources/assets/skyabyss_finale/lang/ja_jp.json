@@ -520,7 +520,7 @@
   "item.skyabyss.divine_promise_chime.desc": "四つの灯を連れた金の小鈴。倒れた仲間を起こす速さ ×1.5。起こした仲間は 3 秒の守り (受けるダメージ ×0.7)。",
   "item.skyabyss.divine_promise_chime.story": "「鳴らせば、前の自分たちが手を貸す。」",
   "item.skyabyss.box_cloud": "雲上の箱",
-  "item.skyabyss.box.kind_cloud": "雲上の箱 · 終章の神器 (武器・防具・アクセサリーのどれか一つ)",
+  "item.skyabyss.box.kind_cloud": "雲上の箱 · 終章の神器 (武器・防具・装飾のどれか一つ)",
   "message.skyabyss.divine.box": "雲上の箱を受け取った。封切り師で開ける。",
   "message.skyabyss.divine.given_box": "雲上の箱と雲上の心核を受け取った。箱は封切り師で開ける (中は神器のどれか一つ)。",
   "item.skyabyss.divine_bellkeeper_helmet.story": "「兜の鐘は、鳴らす者がいなくても鳴った。」",

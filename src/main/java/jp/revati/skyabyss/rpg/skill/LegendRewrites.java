@@ -21,6 +21,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
+// 形 (2026-11-12): どの書き換えも、巨神の系統の模型 (lg_<岩鯨 whale|潮殻 tide|雷翼 storm|余燼 ember|月 moon|神器 light>_<rise|wave|fall>) を出す。
+// 雷はどれも bolt() が雷の形を落とす。神器の手・羽根・巻き戻しは大きな能力の形 (my_*) を使う。
 // 巨神ごとの 6 職の伝説 (abyss/LegendGear の 20 本) の「技の書き換え」(Rune の 4 番目。2026-10-27)。
 // 技の中身はそのまま動き、そのあとに巨神の色の上乗せが続く (岩鯨 = 岩と打ち上げ、潮殻 = 水と押し引き・癒し、雷翼 = 雷と連なり、余燼 = 火と燃え残り)。
 // 効くのは、その技を極めて書き換えを選び、その伝説を主の手に持っているときだけ (SkillManager.legendRune)。
@@ -54,7 +56,8 @@ public final class LegendRewrites {
                     push(e, c, 1.2);
                     e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1), player);
                 }
-                wall(level, c.add(f.scale(2.0)), f, ParticleTypes.SPLASH);
+                wall(level, c.add(f.scale(2.0)), f, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE));
+                propLine(level, player, "lg_tide_rise", c.add(f.scale(2.0)), f, 5, 1.2, 0.5f, 14);
                 level.playSound(null, c.x, c.y, c.z, SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 1f, 0.8f);
             });
             case STORM_CLEAVE -> {
@@ -69,7 +72,8 @@ public final class LegendRewrites {
                 Vec3 c = player.position();
                 for (int k = 0; k < 3; k++) {
                     SkillEffects.later(level, 20 * k + 10, () -> {
-                        ring(level, c, 3.5, ParticleTypes.FLAME, 24);
+                        ring(level, c, 3.5, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 24);
+                        prop(level, player, "lg_ember_wave", c, 2.6f, 14);
                         for (LivingEntity e : around(player, c, 3.5)) {
                             SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.2), skill);
                             e.igniteForSeconds(3);
@@ -81,8 +85,10 @@ public final class LegendRewrites {
             case WHALE_STOMP -> {
                 Vec3 c = player.position();
                 SkillEffects.later(level, 16, () -> {
-                    level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE.defaultBlockState()), c.x, c.y + 0.2, c.z, 50, 2.5, 0.3, 2.5, 0.2);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), c.x, c.y + 0.2, c.z, 24, 2.5, 0.3, 2.5, 0.2);
                     level.playSound(null, c.x, c.y, c.z, SoundEvents.DRIPSTONE_BLOCK_BREAK, SoundSource.PLAYERS, 1.2f, 0.6f);
+                    prop(level, player, "lg_whale_wave", c, 2.6f, 16);
+                    prop(level, player, "lg_whale_rise", c, 0.9f, 16);
                     for (LivingEntity e : around(player, c, 5.0)) {
                         SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.7), skill);
                         e.setDeltaMovement(e.getDeltaMovement().add(0, 0.55, 0));
@@ -92,8 +98,9 @@ public final class LegendRewrites {
             }
             case TIDE_HAMMER -> {
                 Vec3 c = aimPoint(player, 5.0);
-                level.sendParticles(ParticleTypes.SPLASH, c.x, c.y + 0.3, c.z, 40, 1.5, 0.3, 1.5, 0.1);
-                level.sendParticles(ParticleTypes.HEART, c.x, c.y + 1.0, c.z, 4, 1.2, 0.3, 1.2, 0.0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, c.y + 0.3, c.z, 24, 1.5, 0.3, 1.5, 0.1);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 1.0, c.z, 4, 1.2, 0.3, 1.2, 0.0);
+                prop(level, player, "lg_tide_wave", c, 2.2f, 16);
                 for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, new AABB(c, c).inflate(5.0), ServerPlayer::isAlive)) {
                     ally.heal((float) (JobActions.weaponDamage(player) * 0.5));
                 }
@@ -121,7 +128,8 @@ public final class LegendRewrites {
                     Vec3 a = first.position().add(0, first.getBbHeight() * 0.6, 0);
                     for (LivingEntity e : next.subList(0, Math.min(2, next.size()))) {
                         Vec3 b = e.position().add(0, e.getBbHeight() * 0.6, 0);
-                        line(level, a, b, ParticleTypes.ELECTRIC_SPARK);
+                        line(level, a, b, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
+                        prop(level, player, "lg_storm_rise", e.position(), 0.7f, 10);
                         SkillActions.hit(player, e, JobActions.spell(player, 0.5), skill);
                     }
                 }
@@ -132,8 +140,9 @@ public final class LegendRewrites {
                     for (int k = 0; k < 3; k++) {
                         double a = k * Math.PI * 2 / 3 + player.getYRot() * Math.PI / 180;
                         Vec3 p = c.add(Math.cos(a) * 2.5, 0, Math.sin(a) * 2.5);
-                        level.sendParticles(ParticleTypes.FLAME, p.x, p.y + 0.5, p.z, 16, 0.6, 0.4, 0.6, 0.03);
-                        level.sendParticles(ParticleTypes.LAVA, p.x, p.y + 0.5, p.z, 3, 0.3, 0.2, 0.3, 0.0);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 0.5, p.z, 16, 0.6, 0.4, 0.6, 0.03);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), p.x, p.y + 0.5, p.z, 3, 0.3, 0.2, 0.3, 0.0);
+                        prop(level, player, "lg_ember_rise", p, 0.7f, 14);
                         for (LivingEntity e : around(player, p, 1.8)) {
                             SkillActions.hit(player, e, JobActions.spell(player, 0.4), skill);
                             e.igniteForSeconds(3);
@@ -145,7 +154,8 @@ public final class LegendRewrites {
             case HIGH_TIDE -> SkillEffects.later(level, 20, () -> {
                 Vec3 c = player.position();
                 Vec3 look = flatLook(player);
-                wall(level, c.add(look.scale(3.0)), look, ParticleTypes.SPLASH);
+                wall(level, c.add(look.scale(3.0)), look, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE));
+                propLine(level, player, "lg_tide_rise", c.add(look.scale(3.0)), look, 7, 1.2, 0.6f, 16);
                 for (LivingEntity e : cone(player, c, look, 7.0, 50)) {
                     SkillActions.hit(player, e, JobActions.spell(player, 0.6), skill);
                     push(e, c, 0.9);
@@ -153,10 +163,12 @@ public final class LegendRewrites {
                 level.playSound(null, c.x, c.y, c.z, SoundEvents.GENERIC_SPLASH, SoundSource.PLAYERS, 1.2f, 0.6f);
             });
             case STONE_DOUBLE -> {
-                level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()), from.x, from.y + 1, from.z, 30, 0.3, 0.6, 0.3, 0.05);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), from.x, from.y + 1, from.z, 24, 0.3, 0.6, 0.3, 0.05);
                 SkillEffects.later(level, 20, () -> {
-                    level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()), from.x, from.y + 1, from.z, 60, 1.5, 0.8, 1.5, 0.2);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), from.x, from.y + 1, from.z, 24, 1.5, 0.8, 1.5, 0.2);
                     level.playSound(null, from.x, from.y, from.z, SoundEvents.STONE_BREAK, SoundSource.PLAYERS, 1.4f, 0.6f);
+                    prop(level, player, "lg_whale_rise", from, 1.0f, 16);
+                    prop(level, player, "lg_whale_wave", from, 2.2f, 14);
                     for (LivingEntity e : around(player, from, 3.0)) {
                         SkillActions.hit(player, e, JobActions.spell(player, 0.8), skill);
                     }
@@ -165,7 +177,8 @@ public final class LegendRewrites {
             // ---- 弓使い
             case WHALE_CAGE -> {
                 Vec3 c = aimPoint(player, 12.0);
-                ring(level, c, 3.0, new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), 20);
+                ring(level, c, 3.0, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), 20);
+                prop(level, player, "lg_whale_wave", c, 2.4f, 40);
                 for (LivingEntity e : around(player, c, 4.0)) {
                     e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 6), player);
                     SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.3), skill);
@@ -173,7 +186,8 @@ public final class LegendRewrites {
             }
             case TIDE_RAIN -> {
                 Vec3 c = aimPoint(player, 24.0);
-                level.sendParticles(ParticleTypes.SPLASH, c.x, c.y + 0.5, c.z, 60, 3.0, 0.4, 3.0, 0.1);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, c.y + 0.5, c.z, 24, 3.0, 0.4, 3.0, 0.1);
+                prop(level, player, "lg_tide_wave", c, 2.6f, 20);
                 for (LivingEntity e : around(player, c, 5.0)) {
                     Vec3 d = c.subtract(e.position()).multiply(1, 0, 1);
                     if (d.lengthSqr() > 0.01) {
@@ -184,7 +198,8 @@ public final class LegendRewrites {
                 }
             }
             case FIRE_LEAP -> {
-                level.sendParticles(ParticleTypes.FLAME, from.x, from.y + 0.3, from.z, 40, 1.5, 0.3, 1.5, 0.05);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), from.x, from.y + 0.3, from.z, 24, 1.5, 0.3, 1.5, 0.05);
+                prop(level, player, "lg_ember_wave", from, 2.2f, 16);
                 level.playSound(null, from.x, from.y, from.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1f, 0.8f);
                 for (LivingEntity e : around(player, from, 3.0)) {
                     SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.7), skill);
@@ -194,9 +209,10 @@ public final class LegendRewrites {
             // ---- 暗殺者
             case TIDE_VEIL -> {
                 Vec3 c = player.position();
+                prop(level, player, "lg_tide_wave", c, 2.6f, 80);
                 for (int k = 1; k <= 4; k++) {
                     SkillEffects.later(level, 20 * k, () -> {
-                        level.sendParticles(ParticleTypes.FALLING_WATER, c.x, c.y + 1.5, c.z, 20, 2.0, 0.4, 2.0, 0.0);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), c.x, c.y + 1.5, c.z, 20, 2.0, 0.4, 2.0, 0.0);
                         for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, new AABB(c, c).inflate(4.0), ServerPlayer::isAlive)) {
                             ally.heal((float) (JobActions.weaponDamage(player) * 0.15));
                         }
@@ -205,7 +221,8 @@ public final class LegendRewrites {
             }
             case WHALE_FANG -> SkillEffects.later(level, 8, () -> {
                 Vec3 c = player.position();
-                level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE.defaultBlockState()), c.x, c.y + 0.2, c.z, 30, 1.5, 0.2, 1.5, 0.2);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), c.x, c.y + 0.2, c.z, 24, 1.5, 0.2, 1.5, 0.2);
+                prop(level, player, "lg_whale_wave", c, 1.8f, 12);
                 for (LivingEntity e : around(player, c, 2.5)) {
                     SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.6), skill);
                     e.setDeltaMovement(e.getDeltaMovement().add(0, 0.5, 0));
@@ -213,7 +230,7 @@ public final class LegendRewrites {
                 }
             });
             case STORM_MARK -> {
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, from.x, from.y + 0.2, from.z, 20, 0.6, 0.1, 0.6, 0.1);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), from.x, from.y + 0.2, from.z, 20, 0.6, 0.1, 0.6, 0.1);
                 SkillEffects.later(level, 20, () -> {
                     bolt(level, from);
                     for (LivingEntity e : around(player, from, 2.5)) {
@@ -229,7 +246,8 @@ public final class LegendRewrites {
                 SkillEffects.later(level, 20, () -> {
                     for (LivingEntity e : cut) {
                         if (e.isAlive()) {
-                            level.sendParticles(ParticleTypes.FLAME, e.getX(), e.getY() + 1, e.getZ(), 10, 0.3, 0.4, 0.3, 0.02);
+                            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.getX(), e.getY() + 1, e.getZ(), 10, 0.3, 0.4, 0.3, 0.02);
+                            prop(level, player, "lg_ember_rise", e.position(), 0.6f, 12);
                             SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.4), skill);
                         }
                     }
@@ -238,7 +256,8 @@ public final class LegendRewrites {
             // ---- 呪術師
             case ROCK_SONG -> {
                 Vec3 c = player.position();
-                ring(level, c, 6.0, new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()), 30);
+                ring(level, c, 6.0, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), 30);
+                prop(level, player, "lg_whale_wave", c, 2.6f, 30);
                 for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, new AABB(c, c).inflate(6.0), ServerPlayer::isAlive)) {
                     ally.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 100, 0), player);
                 }
@@ -255,7 +274,7 @@ public final class LegendRewrites {
                         List<LivingEntity> near = around(player, mark.position(), 4.0);
                         near.remove(mark);
                         for (LivingEntity e : near.subList(0, Math.min(2, near.size()))) {
-                            line(level, mark.position().add(0, 1, 0), e.position().add(0, 1, 0), ParticleTypes.ELECTRIC_SPARK);
+                            line(level, mark.position().add(0, 1, 0), e.position().add(0, 1, 0), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
                             SkillActions.hit(player, e, JobActions.spell(player, 0.4), skill);
                         }
                     });
@@ -263,9 +282,10 @@ public final class LegendRewrites {
             }
             case EMBER_LAMP -> {
                 Vec3 c = player.position();
+                prop(level, player, "lg_ember_wave", c, 2.6f, 100);
                 for (int k = 1; k <= 5; k++) {
                     SkillEffects.later(level, 20 * k, () -> {
-                        ring(level, c, 4.0, ParticleTypes.SMALL_FLAME, 20);
+                        ring(level, c, 4.0, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 20);
                         for (LivingEntity e : around(player, c, 4.0)) {
                             SkillActions.hit(player, e, JobActions.spell(player, 0.2), skill);
                             e.igniteForSeconds(2);
@@ -276,7 +296,8 @@ public final class LegendRewrites {
             // ---- 巨神のヒロイック武器 (2026-10-28)
             case WHALE_TEMPER -> {
                 Vec3 c = player.position();
-                ring(level, c, 6.0, new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()), 24);
+                ring(level, c, 6.0, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), 24);
+                prop(level, player, "lg_whale_wave", c, 2.6f, 20);
                 level.playSound(null, c.x, c.y, c.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2f, 0.6f);
                 for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, new AABB(c, c).inflate(6.0), ServerPlayer::isAlive)) {
                     ally.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 100, 0), player);
@@ -285,8 +306,9 @@ public final class LegendRewrites {
             case WHALE_STARFALL -> {
                 LivingEntity first = aimFoe(player, SkillRules.BOLT_RANGE);
                 Vec3 c = first != null ? first.position() : aimPoint(player, SkillRules.BOLT_RANGE);
+                propFall(level, player, "lg_whale_fall", c, 20, 1.4f);
                 SkillEffects.later(level, 20, () -> {
-                    level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE.defaultBlockState()), c.x, c.y + 0.3, c.z, 40, 1.2, 0.3, 1.2, 0.2);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), c.x, c.y + 0.3, c.z, 24, 1.2, 0.3, 1.2, 0.2);
                     level.playSound(null, c.x, c.y, c.z, SoundEvents.DRIPSTONE_BLOCK_BREAK, SoundSource.PLAYERS, 1.2f, 0.7f);
                     for (LivingEntity e : around(player, c, 2.5)) {
                         SkillActions.hit(player, e, JobActions.spell(player, 0.6), skill);
@@ -297,7 +319,8 @@ public final class LegendRewrites {
             }
             case WHALE_RIB_PIERCE -> {
                 for (LivingEntity e : cone(player, player.position(), f, 14.0, 10)) {
-                    level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), e.getX(), e.getY() + 0.2, e.getZ(), 14, 0.4, 0.2, 0.4, 0.1);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), e.getX(), e.getY() + 0.2, e.getZ(), 14, 0.4, 0.2, 0.4, 0.1);
+                    prop(level, player, "lg_whale_rise", e.position(), 0.6f, 12);
                     SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.4), skill);
                     e.setDeltaMovement(e.getDeltaMovement().add(0, 0.45, 0));
                     e.hurtMarked = true;
@@ -305,7 +328,8 @@ public final class LegendRewrites {
             }
             case WHALE_DEEP_WARD -> {
                 Vec3 c = player.position();
-                ring(level, c, 5.0, new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE.defaultBlockState()), 24);
+                ring(level, c, 5.0, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), 24);
+                prop(level, player, "lg_whale_wave", c, 2.6f, 40);
                 level.playSound(null, c.x, c.y, c.z, SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 1.2f, 0.5f);
                 for (LivingEntity e : around(player, c, 5.0)) {
                     e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 6), player);
@@ -313,16 +337,18 @@ public final class LegendRewrites {
             }
             case TIDE_STOMP -> SkillEffects.later(level, 8, () -> {
                 Vec3 c = player.position();
-                level.sendParticles(ParticleTypes.SPLASH, c.x, c.y + 0.3, c.z, 50, 2.5, 0.3, 2.5, 0.1);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, c.y + 0.3, c.z, 24, 2.5, 0.3, 2.5, 0.1);
+                prop(level, player, "lg_tide_wave", c, 2.6f, 16);
                 for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, new AABB(c, c).inflate(5.0), ServerPlayer::isAlive)) {
                     ally.heal((float) (JobActions.weaponDamage(player) * 0.4));
                 }
             });
             case TIDE_BUBBLE -> {
                 Vec3 c = aimPoint(player, 20.0);
+                prop(level, player, "lg_tide_rise", c, 0.8f, 60);
                 for (int k = 1; k <= 3; k++) {
                     SkillEffects.later(level, 20 * k, () -> {
-                        level.sendParticles(ParticleTypes.BUBBLE_POP, c.x, c.y + 1.0, c.z, 24, 1.5, 0.6, 1.5, 0.02);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, c.y + 1.0, c.z, 24, 1.5, 0.6, 1.5, 0.02);
                         for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, new AABB(c, c).inflate(4.0), ServerPlayer::isAlive)) {
                             ally.heal(JobActions.spell(player, 0.15));
                         }
@@ -331,7 +357,8 @@ public final class LegendRewrites {
             }
             case TIDE_CORAL_TRAP -> {
                 Vec3 c = aimPoint(player, 12.0);
-                level.sendParticles(ParticleTypes.SPLASH, c.x, c.y + 0.3, c.z, 30, 2.0, 0.3, 2.0, 0.1);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, c.y + 0.3, c.z, 24, 2.0, 0.3, 2.0, 0.1);
+                prop(level, player, "lg_tide_wave", c, 2.6f, 40);
                 for (LivingEntity e : around(player, c, 4.0)) {
                     Vec3 d = c.subtract(e.position()).multiply(1, 0, 1);
                     if (d.lengthSqr() > 0.01) {
@@ -343,9 +370,10 @@ public final class LegendRewrites {
             }
             case TIDE_SURF_LAMP -> {
                 Vec3 c = player.position();
+                prop(level, player, "lg_tide_wave", c, 2.6f, 100);
                 for (int k = 1; k <= 5; k++) {
                     SkillEffects.later(level, 20 * k, () -> {
-                        ring(level, c, 4.0, ParticleTypes.FALLING_WATER, 20);
+                        ring(level, c, 4.0, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), 20);
                         for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, new AABB(c, c).inflate(4.0), ServerPlayer::isAlive)) {
                             ally.heal(JobActions.spell(player, 0.12));
                         }
@@ -365,13 +393,15 @@ public final class LegendRewrites {
                 List<LivingEntity> ahead = cone(player, player.position(), flatLook(player), 7.0, 50);
                 ahead.sort(Comparator.comparingDouble(e -> e.distanceToSqr(player)));
                 for (LivingEntity e : ahead.subList(0, Math.min(3, ahead.size()))) {
-                    line(level, player.position().add(0, 1, 0), e.position().add(0, 1, 0), ParticleTypes.ELECTRIC_SPARK);
+                    line(level, player.position().add(0, 1, 0), e.position().add(0, 1, 0), jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
+                    prop(level, player, "lg_storm_rise", e.position(), 0.6f, 10);
                     SkillActions.hit(player, e, JobActions.spell(player, 0.4), skill);
                 }
             });
             case STORM_GALE_RAIN -> {
                 Vec3 c = aimPoint(player, 24.0);
-                level.sendParticles(ParticleTypes.CLOUD, c.x, c.y + 0.5, c.z, 40, 3.0, 0.4, 3.0, 0.2);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, c.y + 0.5, c.z, 24, 3.0, 0.4, 3.0, 0.2);
+                prop(level, player, "lg_storm_wave", c, 2.6f, 16);
                 for (LivingEntity e : around(player, c, 5.0)) {
                     push(e, c, 1.1);
                 }
@@ -388,7 +418,8 @@ public final class LegendRewrites {
                 Vec3 to = player.position();
                 for (int k = 0; k <= 4; k++) {
                     Vec3 p = from.lerp(to, k / 4.0);
-                    level.sendParticles(ParticleTypes.FLAME, p.x, p.y + 0.2, p.z, 8, 0.6, 0.1, 0.6, 0.01);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 0.2, p.z, 8, 0.6, 0.1, 0.6, 0.01);
+                    prop(level, player, "lg_ember_rise", p, 0.5f, 12);
                     for (LivingEntity e : around(player, p, 2.0)) {
                         if (e.getRemainingFireTicks() <= 0) {
                             SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.3), skill);
@@ -399,14 +430,16 @@ public final class LegendRewrites {
             }
             case EMBER_ASH_VEIL -> {
                 Vec3 c = player.position();
-                level.sendParticles(ParticleTypes.WHITE_ASH, c.x, c.y + 1, c.z, 60, 2.5, 0.8, 2.5, 0.02);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, c.y + 1, c.z, 24, 2.5, 0.8, 2.5, 0.02);
+                prop(level, player, "lg_ember_wave", c, 2.6f, 20);
                 for (LivingEntity e : around(player, c, 4.0)) {
                     e.igniteForSeconds(4);
                 }
             }
             case EMBER_KILN_BLINK -> {
-                level.sendParticles(ParticleTypes.FLAME, from.x, from.y + 0.6, from.z, 40, 1.2, 0.5, 1.2, 0.05);
-                level.sendParticles(ParticleTypes.LAVA, from.x, from.y + 0.6, from.z, 6, 0.6, 0.3, 0.6, 0.0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), from.x, from.y + 0.6, from.z, 24, 1.2, 0.5, 1.2, 0.05);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), from.x, from.y + 0.6, from.z, 6, 0.6, 0.3, 0.6, 0.0);
+                prop(level, player, "lg_ember_rise", from, 1.0f, 16);
                 level.playSound(null, from.x, from.y, from.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1f, 0.7f);
                 for (LivingEntity e : around(player, from, 3.0)) {
                     SkillActions.hit(player, e, JobActions.spell(player, 0.6), skill);
@@ -417,7 +450,8 @@ public final class LegendRewrites {
                 LivingEntity first = aimFoe(player, 24.0);
                 if (first != null) {
                     Vec3 c = first.position();
-                    level.sendParticles(ParticleTypes.FLAME, c.x, c.y + 1, c.z, 24, 1.2, 0.6, 1.2, 0.03);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 1, c.z, 24, 1.2, 0.6, 1.2, 0.03);
+                    prop(level, player, "lg_ember_rise", c, 0.9f, 14);
                     for (LivingEntity e : around(player, c, 2.5)) {
                         SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.3), skill);
                         e.igniteForSeconds(4);
@@ -426,7 +460,8 @@ public final class LegendRewrites {
             }
             case EMBER_CENSER_SONG -> {
                 Vec3 c = player.position();
-                level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, c.x, c.y + 1, c.z, 20, 3.0, 0.5, 3.0, 0.01);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, c.y + 1, c.z, 20, 3.0, 0.5, 3.0, 0.01);
+                prop(level, player, "lg_ember_wave", c, 2.6f, 40);
                 for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, new AABB(c, c).inflate(6.0), ServerPlayer::isAlive)) {
                     ally.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 160, 0), player);
                     ally.heal(JobActions.spell(player, 0.2));
@@ -436,7 +471,8 @@ public final class LegendRewrites {
             case MOON_WANING_SPIN -> {
                 Vec3 c = player.position();
                 SkillEffects.later(level, 30, () -> {
-                    ring(level, c, 3.5, ParticleTypes.END_ROD, 24);
+                    ring(level, c, 3.5, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 24);
+                    prop(level, player, "lg_moon_wave", c, 2.6f, 14);
                     level.playSound(null, c.x, c.y, c.z, SoundEvents.AMETHYST_BLOCK_HIT, SoundSource.PLAYERS, 1f, 0.8f);
                     for (LivingEntity e : around(player, c, 3.5)) {
                         SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.5), skill);
@@ -447,10 +483,11 @@ public final class LegendRewrites {
             case DIVINE_SKY_HAND -> {
                 // 巡礼者の手: 斬った先へ、0.6 秒後に光の手が叩きつける (まわり 3)
                 Vec3 c = player.position().add(f.scale(3.0));
-                level.sendParticles(ParticleTypes.END_ROD, c.x, c.y + 6, c.z, 20, 0.6, 1.0, 0.6, 0.02);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 6, c.z, 20, 0.6, 1.0, 0.6, 0.02);
+                propFall(level, player, "my_sky_hand", c, 12, 1.6f);
                 SkillEffects.later(level, 12, () -> {
-                    level.sendParticles(ParticleTypes.FLASH, c.x, c.y + 0.5, c.z, 1, 0, 0, 0, 0);
-                    level.sendParticles(ParticleTypes.CLOUD, c.x, c.y + 0.2, c.z, 30, 1.6, 0.1, 1.6, 0.05);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 0.5, c.z, 1, 0, 0, 0, 0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, c.y + 0.2, c.z, 24, 1.6, 0.1, 1.6, 0.05);
                     level.playSound(null, c.x, c.y, c.z, SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.PLAYERS, 1.0f, 1.2f);
                     for (LivingEntity e : around(player, c, 3.0)) {
                         SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.8), skill);
@@ -466,7 +503,8 @@ public final class LegendRewrites {
                 for (int k = 1; k <= 3; k++) {
                     double rad = 2.0 * k;
                     SkillEffects.later(level, 4 * k, () -> {
-                        ring(level, c, rad, ParticleTypes.WAX_ON, (int) (rad * 8));
+                        ring(level, c, rad, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), (int) (rad * 8));
+                        prop(level, player, "lg_light_wave", c, (float) Math.min(2.6, rad * 0.6), 10);
                         for (LivingEntity e : around(player, c, rad)) {
                             if (hit.add(e.getId())) {
                                 SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.5), skill);
@@ -479,13 +517,14 @@ public final class LegendRewrites {
             case DIVINE_DAWN_GAZE -> {
                 // 灯の目: 落ちた所に光の筋が 2 秒回り、筋の中の敵を焼く
                 Vec3 c = aimPoint(player, 24.0);
+                prop(level, player, "lg_light_rise", c, 1.0f, 44);
                 for (int k = 0; k < 8; k++) {
                     int step = k;
                     SkillEffects.later(level, 5 * k + 4, () -> {
                         double a = step * Math.PI / 4;
                         Vec3 d = new Vec3(Math.cos(a), 0, Math.sin(a));
                         for (double t = 0.5; t <= 6.0; t += 0.7) {
-                            level.sendParticles(ParticleTypes.END_ROD, c.x + d.x * t, c.y + 0.8, c.z + d.z * t, 1, 0, 0, 0, 0);
+                            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x + d.x * t, c.y + 0.8, c.z + d.z * t, 1, 0, 0, 0, 0);
                         }
                         for (LivingEntity e : cone(player, c, d, 6.0, 22)) {
                             SkillActions.hit(player, e, JobActions.spell(player, 0.18), skill);
@@ -498,9 +537,10 @@ public final class LegendRewrites {
                 Vec3 c0 = player.position();
                 for (int k = 1; k <= 8; k++) {
                     Vec3 p = c0.add(f.scale(2.0 * k));
-                    level.sendParticles(ParticleTypes.END_ROD, p.x, p.y + 5, p.z, 2, 0.2, 0.3, 0.2, 0.01);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 5, p.z, 2, 0.2, 0.3, 0.2, 0.01);
+                    jp.revati.skyabyss.combat.prop.AttackProps.fall(level, "my_feather", player, p, 10 + k, 6, 5f, 1.0f, 8);
                     SkillEffects.later(level, 10 + k, () -> {
-                        level.sendParticles(ParticleTypes.CRIT, p.x, p.y + 0.4, p.z, 6, 0.3, 0.2, 0.3, 0.05);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 0.4, p.z, 6, 0.3, 0.2, 0.3, 0.05);
                         for (LivingEntity e : around(player, p, 1.5)) {
                             SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.3), skill);
                         }
@@ -515,10 +555,11 @@ public final class LegendRewrites {
                     Vec3 d = a1.subtract(a0);
                     double len = Math.max(1.0, d.length());
                     level.playSound(null, a0.x, a0.y, a0.z, SoundEvents.RESPAWN_ANCHOR_DEPLETE.value(), SoundSource.PLAYERS, 0.6f, 1.6f);
+                    prop(level, player, "my_rewind", a0, 1.0f, 16);
                     java.util.Set<Integer> hit = new java.util.HashSet<>();
                     for (double t = 0; t <= len; t += 0.8) {
                         Vec3 p = a0.add(d.normalize().scale(t));
-                        level.sendParticles(ParticleTypes.FLAME, p.x, p.y + 1, p.z, 2, 0.1, 0.3, 0.1, 0.01);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 1, p.z, 2, 0.1, 0.3, 0.1, 0.01);
                         for (LivingEntity e : around(player, p, 1.6)) {
                             if (hit.add(e.getId())) {
                                 SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.6), skill);
@@ -531,15 +572,18 @@ public final class LegendRewrites {
                 // 盾の円: 唄った所に 6 秒、半径 4 の円。円の内の仲間は受ける傷 ×0.6 (story/finale/gear/DivineGearEvents)
                 Vec3 c = player.position();
                 jp.revati.skyabyss.story.finale.gear.DivineGearEvents.addCircle(level, c, 4.0, 120);
+                prop(level, player, "lg_light_wave", c, 2.6f, 120);
                 for (int k = 0; k < 6; k++) {
-                    SkillEffects.later(level, 20 * k, () -> ring(level, c, 4.0, ParticleTypes.END_ROD, 28));
+                    SkillEffects.later(level, 20 * k, () -> ring(level, c, 4.0, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 28));
                 }
                 level.playSound(null, c.x, c.y, c.z, SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.0f, 1.4f);
             }
             case MOON_FULL_BURST -> SkillEffects.later(level, 6, () -> {
                 Vec3 c = player.position();
-                ring(level, c, 5.0, ParticleTypes.END_ROD, 32);
-                level.sendParticles(ParticleTypes.FLASH, c.x, c.y + 1, c.z, 1, 0, 0, 0, 0);
+                ring(level, c, 5.0, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 32);
+                prop(level, player, "lg_moon_wave", c, 2.6f, 14);
+                prop(level, player, "lg_moon_rise", c, 1.0f, 14);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 1, c.z, 1, 0, 0, 0, 0);
                 level.playSound(null, c.x, c.y, c.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2f, 0.6f);
                 for (LivingEntity e : around(player, c, 5.0)) {
                     SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.4), skill);
@@ -548,7 +592,8 @@ public final class LegendRewrites {
             });
             case MOON_NEW_DUST -> {
                 Vec3 c = aimPoint(player, 20.0);
-                level.sendParticles(ParticleTypes.SQUID_INK, c.x, c.y + 0.2, c.z, 40, 2.0, 0.1, 2.0, 0.01);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), c.x, c.y + 0.2, c.z, 24, 2.0, 0.1, 2.0, 0.01);
+                prop(level, player, "lg_moon_wave", c, 2.6f, 30);
                 for (LivingEntity e : around(player, c, 4.0)) {
                     SkillActions.hit(player, e, JobActions.spell(player, 0.3), skill);
                     e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 3), player);
@@ -557,9 +602,10 @@ public final class LegendRewrites {
             case MOON_STARFALL_SNARE -> {
                 LivingEntity first = aimFoe(player, 24.0);
                 Vec3 c = first != null ? first.position() : aimPoint(player, 24.0);
-                level.sendParticles(ParticleTypes.END_ROD, c.x, c.y + 6, c.z, 8, 0.2, 0.5, 0.2, 0.01);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 6, c.z, 8, 0.2, 0.5, 0.2, 0.01);
+                propFall(level, player, "lg_moon_fall", c, 16, 1.2f);
                 SkillEffects.later(level, 16, () -> {
-                    level.sendParticles(ParticleTypes.FIREWORK, c.x, c.y + 0.3, c.z, 30, 1.0, 0.2, 1.0, 0.06);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y + 0.3, c.z, 24, 1.0, 0.2, 1.0, 0.06);
                     level.playSound(null, c.x, c.y, c.z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 1f, 1.2f);
                     for (LivingEntity e : around(player, c, 2.5)) {
                         SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.5), skill);
@@ -571,15 +617,17 @@ public final class LegendRewrites {
                 ahead.sort(Comparator.comparingDouble(e -> e.distanceToSqr(player)));
                 if (!ahead.isEmpty()) {
                     LivingEntity e = ahead.get(0);
-                    level.sendParticles(ParticleTypes.SMOKE, e.getX(), e.getY(0.5), e.getZ(), 16, 0.3, 0.4, 0.3, 0.02);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), e.getX(), e.getY(0.5), e.getZ(), 16, 0.3, 0.4, 0.3, 0.02);
+                    prop(level, player, "lg_moon_rise", e.position(), 0.8f, 12);
                     SkillActions.hit(player, e, (float) (JobActions.weaponDamage(player) * 0.6), skill);
                 }
             });
             case MOON_HALO_CURSE -> {
                 Vec3 c = player.position();
+                prop(level, player, "lg_moon_wave", c, 2.6f, 90);
                 for (int k = 1; k <= 4; k++) {
                     SkillEffects.later(level, 20 * k, () -> {
-                        ring(level, c, 6.0, ParticleTypes.END_ROD, 20);
+                        ring(level, c, 6.0, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), 20);
                         for (ServerPlayer ally : level.getEntitiesOfClass(ServerPlayer.class, new AABB(c, c).inflate(6.0), ServerPlayer::isAlive)) {
                             ally.heal(JobActions.spell(player, 0.15));
                         }
@@ -588,6 +636,23 @@ public final class LegendRewrites {
             }
             default -> {
             }
+        }
+    }
+
+    // ---------------------------------------------------------------- 形 (2026-11-12。巨神の系統ごとの模型 lg_<系統>_<rise|wave|fall>)
+    static void prop(ServerLevel level, ServerPlayer p, String kind, Vec3 at, float size, int linger) {
+        jp.revati.skyabyss.combat.prop.AttackProps.here(level, kind, p, at, size, linger);
+    }
+
+    static void propFall(ServerLevel level, ServerPlayer p, String kind, Vec3 at, int warn, float size) {
+        jp.revati.skyabyss.combat.prop.AttackProps.fall(level, kind, p, at, warn, 8, 7f, size, 10);
+    }
+
+    // 向き dir に直交する横一列に n 本 (水の壁など)
+    static void propLine(ServerLevel level, ServerPlayer p, String kind, Vec3 c, Vec3 dir, int n, double gap, float size, int linger) {
+        Vec3 side = new Vec3(-dir.z, 0, dir.x);
+        for (int k = 0; k < n; k++) {
+            prop(level, p, kind, c.add(side.scale((k - (n - 1) / 2.0) * gap)), size, linger);
         }
     }
 
@@ -638,6 +703,7 @@ public final class LegendRewrites {
     }
 
     static void bolt(ServerLevel level, Vec3 at) {
+        jp.revati.skyabyss.combat.prop.AttackProps.here(level, "lg_storm_rise", null, at, 0.8f, 10);
         LightningBolt b = EntityType.LIGHTNING_BOLT.create(level);
         if (b != null) {
             b.moveTo(at.x, at.y, at.z);
@@ -649,7 +715,7 @@ public final class LegendRewrites {
     static void ring(ServerLevel level, Vec3 c, double r, ParticleOptions p, int n) {
         for (int i = 0; i < n; i++) {
             double a = i * Math.PI * 2 / n;
-            level.sendParticles(p, c.x + Math.cos(a) * r, c.y + 0.2, c.z + Math.sin(a) * r, 1, 0.05, 0.05, 0.05, 0.01);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x + Math.cos(a) * r, c.y + 0.2, c.z + Math.sin(a) * r, 1, 0.05, 0.05, 0.05, 0.01);
         }
     }
 
@@ -658,7 +724,7 @@ public final class LegendRewrites {
         int n = Math.max(1, (int) (d.length() / 0.4));
         for (int i = 0; i <= n; i++) {
             Vec3 q = a.add(d.scale(i / (double) n));
-            level.sendParticles(p, q.x, q.y, q.z, 1, 0.02, 0.02, 0.02, 0.0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 1, 0.02, 0.02, 0.02, 0.0);
         }
     }
 
@@ -667,7 +733,7 @@ public final class LegendRewrites {
         Vec3 side = new Vec3(-dir.z, 0, dir.x);
         for (int i = -6; i <= 6; i++) {
             Vec3 q = c.add(side.scale(i * 0.4));
-            level.sendParticles(p, q.x, q.y + 0.5, q.z, 4, 0.1, 0.6, 0.1, 0.05);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y + 0.5, q.z, 4, 0.1, 0.6, 0.1, 0.05);
         }
     }
 }

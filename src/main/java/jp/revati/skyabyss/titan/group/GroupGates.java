@@ -112,7 +112,7 @@ public final class GroupGates {
             if (open && !was) {
                 for (var player : Groups.online(level, group)) {
                     if (player.distanceToSqr(p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5) < 48 * 48) {
-                        level.sendParticles(player, ParticleTypes.REVERSE_PORTAL, false, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 6, 0.3,
+                        level.sendParticles(player, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), false, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 6, 0.3,
                                 0.3, 0.3, 0.02);
                     }
                 }

@@ -13,7 +13,7 @@ import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
-// 旅嚢の画面のメニュー (docs/design/22 の 9 章 A つまみ)。品ごとに決まった枠 (固定枠) だけを持ち、持ち物の枠は出さない。
+// 旅袋の画面のメニュー (docs/design/22 の 9 章 A つまみ)。品ごとに決まった枠 (固定枠) だけを持ち、持ち物の枠は出さない。
 // 枠の中身は袋 (PouchData) の個数を直接読む見かけ上の品で、中身の入れ替えはぜんぶこのメニューの clicked が決める (サーバーが決め、クライアントは何もしない):
 //   - カーソルに品を持って枠を左クリック = その品が袋の品なら全部入れる、右クリック = 一つ入れる (枠と違う品は入らない)
 //   - カーソルが空で枠を左クリック = 一スタック取り出す、右クリック = その半分 (取り出し可のとき。ゲームルール skyabyssPouchWithdraw が 0 なら何も起きない)
@@ -24,6 +24,8 @@ public class PouchMenu extends AbstractContainerMenu {
     private final PouchLayout.Result layout;
     // 取り出せるか (サーバー → クライアント。ゲームルールはクライアントにないので 1 つの値で送る)
     private final DataSlot withdrawFlag = DataSlot.standalone();
+    // 開いているページ (PouchConfig.Page の番号)。画面の左の栞で替える (clickMenuButton)。見えないページの枠は働かない
+    private final DataSlot page = DataSlot.standalone();
     // 転生の余白の枠の数 (開いたときの回数で決める。docs/design/31 の B13)。枠の番号は区分の枠のあとに続く
     private final int spare;
 
@@ -35,12 +37,17 @@ public class PouchMenu extends AbstractContainerMenu {
         Container view = new View(player, layout.spots(), spare);
         for (int i = 0; i < layout.spots().size(); i++) {
             PouchLayout.Spot spot = layout.spots().get(i);
-            addSlot(new PouchSlot(view, i, spot.x(), spot.y()));
+            addSlot(new PouchSlot(view, i, spot.x(), spot.y(), spot.page()));
         }
         for (int i = 0; i < spare; i++) {
-            addSlot(new PouchSlot(view, layout.spots().size() + i, layout.spare().get(i)[0], layout.spare().get(i)[1]));
+            addSlot(new PouchSlot(view, layout.spots().size() + i, layout.spare().get(i)[0], layout.spare().get(i)[1], PouchConfig.Page.KEEP));
+        }
+        for (int i = 0; i < PouchData.PARTS; i++) {
+            int[] at = PouchLayout.part(i);
+            addSlot(new PouchSlot(view, layout.spots().size() + spare + i, at[0], at[1], PouchConfig.Page.PARTS));
         }
         addDataSlot(withdrawFlag);
+        addDataSlot(page);
         refreshFlag();
     }
 
@@ -59,6 +66,27 @@ public class PouchMenu extends AbstractContainerMenu {
     // 余白の枠の数 (画面が枠を描くため)
     public int spareCount() {
         return spare;
+    }
+
+    public PouchConfig.Page page() {
+        PouchConfig.Page[] all = PouchConfig.Page.values();
+        int i = page.get();
+        return i >= 0 && i < all.length ? all[i] : PouchConfig.Page.KEEP;
+    }
+
+    // クライアントでも先に替える (返事を待たずに画面が替わる)
+    public void setPage(PouchConfig.Page p) {
+        page.set(p.ordinal());
+    }
+
+    // 栞を押した (クライアントの handleInventoryButtonClick から)。id = ページの番号
+    @Override
+    public boolean clickMenuButton(Player p, int id) {
+        if (id >= 0 && id < PouchConfig.Page.values().length) {
+            page.set(id);
+            return true;
+        }
+        return false;
     }
 
     // 画面が枠を「取り出せる」と見せてよいか (サーバーの決まりを写した値)
@@ -90,11 +118,17 @@ public class PouchMenu extends AbstractContainerMenu {
         if (!(p instanceof ServerPlayer sp)) {
             return;
         }
+        if (slotId < slots.size() && !slots.get(slotId).isActive()) {
+            // ほかのページの枠
+            return;
+        }
         if (slotId >= layout.spots().size()) {
             if (slotId < layout.spots().size() + spare) {
                 clickedSpare(sp, slotId - layout.spots().size(), button, clickType);
-                broadcastChanges();
+            } else if (slotId < layout.spots().size() + spare + PouchData.PARTS) {
+                clickedPart(sp, slotId - layout.spots().size() - spare, button, clickType);
             }
+            broadcastChanges();
             return;
         }
         Entry entry = entryAt(slotId);
@@ -156,6 +190,40 @@ public class PouchMenu extends AbstractContainerMenu {
         }
     }
 
+    // 細工の枠: 部品つきの品を置く (左 = 全部、右 = 1 つ)、空の手で取り出す (左 = 一山、右 = 半分)、シフト = 持ち物へ。取り出しの決まりには掛けない (自分の品)
+    private void clickedPart(ServerPlayer sp, int index, int button, ClickType clickType) {
+        ItemStack carried = getCarried();
+        switch (clickType) {
+            case PICKUP -> {
+                if (!carried.isEmpty()) {
+                    if (Pouch.isPart(carried)) {
+                        ItemStack part = carried.copyWithCount(button == 1 ? 1 : carried.getCount());
+                        int moved = Pouch.addPart(sp, part);
+                        carried.shrink(moved);
+                        if (carried.isEmpty()) {
+                            setCarried(ItemStack.EMPTY);
+                        }
+                    }
+                } else {
+                    ItemStack have = Pouch.data(sp).part(index);
+                    int want = button == 1 ? Math.max(1, have.getCount() / 2) : have.getCount();
+                    ItemStack out = Pouch.takePart(sp, index, want);
+                    if (!out.isEmpty()) {
+                        setCarried(out);
+                    }
+                }
+            }
+            case QUICK_MOVE -> {
+                ItemStack out = Pouch.takePart(sp, index, 64);
+                if (!out.isEmpty()) {
+                    sp.getInventory().placeItemBackInInventory(out);
+                }
+            }
+            default -> {
+            }
+        }
+    }
+
     // カーソルの品 n 個を袋へ入れる (枠の品と同じものだけ)。入れた数を返す
     public int deposit(ServerPlayer sp, Entry entry, ItemStack carried, int n) {
         if (!carried.is(entry.item()) || n <= 0) {
@@ -185,8 +253,16 @@ public class PouchMenu extends AbstractContainerMenu {
 
     // 枠: 見かけの品を映すだけ。置く・取るは clicked が決めるので、標準の動きは全部断る
     private final class PouchSlot extends Slot {
-        PouchSlot(Container container, int index, int x, int y) {
+        private final PouchConfig.Page on;
+
+        PouchSlot(Container container, int index, int x, int y, PouchConfig.Page on) {
             super(container, index, x, y);
+            this.on = on;
+        }
+
+        @Override
+        public boolean isActive() {
+            return on == page();
         }
 
         @Override
@@ -219,7 +295,7 @@ public class PouchMenu extends AbstractContainerMenu {
 
         @Override
         public int getContainerSize() {
-            return spots.size() + spare;
+            return spots.size() + spare + PouchData.PARTS;
         }
 
         @Override
@@ -229,6 +305,9 @@ public class PouchMenu extends AbstractContainerMenu {
 
         @Override
         public ItemStack getItem(int slot) {
+            if (slot >= spots.size() + spare) {
+                return Pouch.data(player).part(slot - spots.size() - spare);
+            }
             if (slot >= spots.size()) {
                 return jp.revati.skyabyss.rebirth.RebirthSpare.view(player, slot - spots.size());
             }

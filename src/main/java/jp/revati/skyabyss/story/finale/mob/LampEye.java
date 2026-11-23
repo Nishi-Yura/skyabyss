@@ -170,7 +170,7 @@ public class LampEye extends CloudMob {
                 for (int b = 0; b < beams(); b++) {
                     double a = beamAngle + b * Math.PI;
                     for (double d = 1.5; d <= BEAM_RANGE; d += 1.0) {
-                        sl.sendParticles(BEAM, getX() + Math.cos(a) * d, eye().y, getZ() + Math.sin(a) * d, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Math.cos(a) * d, eye().y, getZ() + Math.sin(a) * d, 1, 0, 0, 0, 0);
                     }
                 }
             }
@@ -310,7 +310,7 @@ public class LampEye extends CloudMob {
                     int n = (int) Math.max(4, from.distanceTo(to) * (1.0 - t / (double) STARE_TELL) * 3);
                     for (int i = 0; i <= n; i++) {
                         Vec3 q = from.lerp(to, i / (double) n);
-                        sl.sendParticles(ParticleTypes.WAX_ON, q.x, q.y, q.z, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 1, 0, 0, 0, 0);
                     }
                 }
                 return;
@@ -321,9 +321,11 @@ public class LampEye extends CloudMob {
                 Vec3 end = seen ? to : from.add(to.subtract(from).normalize().scale(4));
                 for (double d = 0; d <= from.distanceTo(end); d += 0.5) {
                     Vec3 q = from.add(end.subtract(from).normalize().scale(d));
-                    sl.sendParticles(ParticleTypes.END_ROD, q.x, q.y, q.z, 2, 0.05, 0.05, 0.05, 0.01);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y, q.z, 2, 0.05, 0.05, 0.05, 0.01);
                 }
                 if (seen) {
+                    // 技の形: 見据えた人へ光の柱
+                    jp.revati.skyabyss.combat.prop.AttackProps.rise(sl, "light_pillar", LampEye.this, mark.position(), random.nextFloat() * 360f, 1.0f, 12);
                     strike(mark, dmg(1.6));
                     Vec3 away = new Vec3(to.x - from.x, 0, to.z - from.z).normalize();
                     mark.push(away.x * 0.8, 0.3, away.z * 0.8);
@@ -345,12 +347,18 @@ public class LampEye extends CloudMob {
 
         // 灯の雨: 足もとの光の円 (RAIN_TELL) → 光が落ちる
         private void rain(ServerLevel sl) {
+            if (t == 1) {
+                // 技の形: 光の円へ光の珠が落ちてくる (打つ瞬間に着く)
+                for (Vec3 s : spots) {
+                    jp.revati.skyabyss.combat.prop.AttackProps.fall(sl, "pearl", LampEye.this, s, RAIN_TELL - 1, 12, 14f, 0.9f, 10);
+                }
+            }
             if (t < RAIN_TELL) {
                 if (t % 3 == 0) {
                     for (Vec3 s : spots) {
                         for (int i = 0; i < 14; i++) {
                             double a = i / 14.0 * Math.PI * 2;
-                            sl.sendParticles(ParticleTypes.END_ROD, s.x + Math.cos(a) * RAIN_R, s.y + 0.15, s.z + Math.sin(a) * RAIN_R, 1, 0, 0, 0, 0);
+                            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), s.x + Math.cos(a) * RAIN_R, s.y + 0.15, s.z + Math.sin(a) * RAIN_R, 1, 0, 0, 0, 0);
                         }
                     }
                 }
@@ -359,8 +367,8 @@ public class LampEye extends CloudMob {
             if (t == RAIN_TELL) {
                 playSound(CloudMobsSetup.EYE_RAIN.get(), 1.6f, 1.0f);
                 for (Vec3 s : spots) {
-                    sl.sendParticles(ParticleTypes.FLASH, s.x, s.y + 0.5, s.z, 1, 0, 0, 0, 0);
-                    sl.sendParticles(ParticleTypes.END_ROD, s.x, s.y + 4, s.z, 16, 0.3, 2.0, 0.3, 0.02);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), s.x, s.y + 0.5, s.z, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), s.x, s.y + 4, s.z, 16, 0.3, 2.0, 0.3, 0.02);
                     for (ServerPlayer p : LampArena.present(sl)) {
                         if (p.position().subtract(s).horizontalDistance() <= RAIN_R + 0.3 && Math.abs(p.getY() - s.y) < 2) {
                             strike(p, dmg(0.9));
@@ -377,5 +385,10 @@ public class LampEye extends CloudMob {
         public void stop() {
             move = "";
         }
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

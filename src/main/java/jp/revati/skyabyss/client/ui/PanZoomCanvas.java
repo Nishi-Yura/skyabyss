@@ -68,9 +68,6 @@ public final class PanZoomCanvas {
         clampPan();
     }
 
-    public float zoom() {
-        return zoom;
-    }
 
     // 最初の大きさの下限を決める (既定は MIN_ZOOM)。盤が枠に入らないときは、下限まで拡げて上から見せる
     public void setStartMin(float z) {

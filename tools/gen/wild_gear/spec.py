@@ -197,7 +197,7 @@ W("wild_saltcrow_bow", "archer", "bow", "rare", 32, "abyss_upper", 0, 0.10, [("S
 W("wild_bonestring_bow", "archer", "bow", "epic", 35, "abyss_upper", 0, 0.10, [("PIERCE", 2, 0.15)],
   "骨弦の弓", "Bonestring Bow", "矢が 2 体貫き、貫くたび +15%", "Arrows pierce 2 enemies, +15% per enemy pierced")
 W("wild_lantern_bow", "archer", "bow", "epic", 38, "abyss_upper", 0, 0.10, [("MARK", 0.10, 120)],
-  "灯籠の弓", "Lantern Bow", "当たった相手を 6 秒光らせる（仲間全員の与えるダメージ +10%）", "Arrows light the target for 6s (+10% damage from everyone)")
+  "坑灯の弓", "Lantern Bow", "当たった相手を 6 秒光らせる（仲間全員の与えるダメージ +10%）", "Arrows light the target for 6s (+10% damage from everyone)")
 W("wild_hanged_longbow", "archer", "longbow", "heroic", 40, "abyss_upper", 0, 0.22, [("FALL_TAKEN", -0.5), ("HANG", 30, 0.30)],
   "逆さ吊りの長弓", "Hanged Longbow", "常に 落下ダメージ −50%。満ちた矢で 1.5 秒吊る（主は遅く III）、吊った相手に +30%",
   "Always: -50% fall damage. Fully drawn arrows hang the target for 1.5s (bosses: Slowness III); +30% against hanged targets")
@@ -253,7 +253,7 @@ W("wild_hourglass_staff", "mage", "staff", "epic", 44, "abyss_lower", 1.2, 0.15,
 W("wild_deep_eye_staff", "mage", "staff", "epic", 46, "abyss_lower", 1.2, 0.15, [("CRIT", 0.25, 0.6)],
   "深みの眼杖", "Deep Eye Staff", "会心 25%（×1.6）", "25% critical chance (x1.6)")
 W("wild_starchart_staff", "mage", "staff", "heroic", 48, "moon", 1.2, 0.30, [("MANA_REGEN", 0.25), ("CONSTELLATION", 5, 2.0, 5)],
-  "星図の杖", "Starchart Staff", "常に マナの戻り +25%。打つたびに星を描き、5 つで星座（まわり 5 の敵に 200%）",
+  "星秤の杖", "Starchart Staff", "常に マナの戻り +25%。打つたびに星を描き、5 つで星座（まわり 5 の敵に 200%）",
   "Always: +25% mana regeneration. Each hit draws a star; at 5 the constellation strikes (200% within 5)")
 W("wild_prism_staff", "mage", "staff", "heroic", 50, "cloud", 1.2, 0.22, [("COOLDOWN", 0.10), ("PRISM", 7)],
   "虹の端の杖", "Rainbow's End Staff", "常に クールダウン −10%。打つたびに七色を順に（燃やす・凍え・雷・毒・縛り・癒し・印）",
@@ -276,7 +276,7 @@ W("wild_ash_sickle_claw", "assassin", "claw", "epic", 44, "abyss_lower", 2.0, 0.
 W("wild_fishhook_knife", "assassin", "dagger", "epic", 46, "abyss_lower", 2.0, 0.12, [("HOOK", 1.5, 0.25)],
   "深みの釣り針", "Deepwater Fishhook Knife", "打った相手を手前へ引き、次の一撃 +25%", "Hits reel the target in; your next hit deals +25%")
 W("wild_mirror_dagger", "assassin", "dagger", "heroic", 48, "moon", 2.0, 0.22, [("REFLECT", 0.10), ("MIRROR", 10, 1.0)],
-  "鏡写しの短剣", "Mirror Dagger", "常に 受けたダメージの 10% を相手へ返す。背後からの一撃の 0.5 秒後に、分身がもう一度",
+  "月鏡の短剣", "Mirror Dagger", "常に 受けたダメージの 10% を相手へ返す。背後からの一撃の 0.5 秒後に、分身がもう一度",
   "Always: reflects 10% of damage taken. Backstabs are repeated by your reflection 0.5s later")
 W("wild_cloudveil_claw", "assassin", "claw", "heroic", 50, "cloud", 2.0, 0.20, [("MOVE_SPEED", 0.08), ("VANISH", 0.08, 20, 1.0)],
   "雲隠れの爪", "Cloudveil Claw", "常に 移動の速さ +8%。打つたびに 8% で 1 秒姿を消し、次の一撃 ×2",
@@ -290,7 +290,7 @@ W("wild_effigy_totem", "shaman", "totem", "epic", 46, "abyss_lower", 1.4, 0.0, [
   "身代わりの人形柱", "Effigy Totem", "まわり 6 の仲間の受けるダメージの 15% を肩代わりし、自分の受けるダメージ −20%",
   "Takes 15% of the damage dealt to allies within 6; you take -20% damage")
 W("wild_starbell_totem", "shaman", "totem", "heroic", 48, "moon", 1.4, 0.10, [("TEAM_HEALTH_AURA", 4, 8), ("STAR_FRUIT", 6, 4, 0.10, 120, 6)],
-  "星鈴の木", "Starbell Tree", "常に まわり 8 の仲間の体力の上限 +40。6 回目ごとに星の実が弾ける（まわり 6 の仲間の体力 +40・6 秒 与えるダメージ +10%）",
+  "星鈴の揺りかご", "Starbell Tree", "常に まわり 8 の仲間の体力の上限 +40。6 回目ごとに星の実が弾ける（まわり 6 の仲間の体力 +40・6 秒 与えるダメージ +10%）",
   "Always: allies within 8 gain +40 max health. Every 6th hit bursts a star fruit (allies within 6 heal 40 and deal +10% for 6s)")
 W("wild_cloudhymn_bell_staff", "shaman", "bell", "heroic", 50, "cloud", 1.4, 0.05, [("REVIVE_SPEED", 2.0), ("HYMN", 0.10, 0.25, 80, 8)],
   "雲上の祝詞の鈴杖", "Cloudhymn Bell Staff", "常に 倒れた仲間を起こす速さ ×2。打つと 10% で祝詞（まわり 8 の仲間に 4 秒 受けるダメージ −25%・体力の回復 20/秒）",
@@ -423,25 +423,25 @@ EAR = ("HEAD", -4.3, -5.2, 1.2, 25, 0, 22, 0.6, 0, 0, 0)
 BELT_BACK = ("BODY", 3.6, 10.6, 3.1, 0, 0, 0, 0.4, 0, 6.0, 0)
 
 # 帯 I
-X("wild_guard_badge", "trinket", "uncommon", 3, "meadow", [("MAX_HEALTH", 2)],
-  "衛士の鐘章", "Bell Guard's Badge", "体力 +20", "+20 max health", mount=CHEST)
-X("wild_mossball_netsuke", "trinket", "rare", 8, "hills", [("REGEN_TICK", 1, 100)],
-  "苔玉の根付", "Mossball Netsuke", "5 秒ごとに体力 +10", "Restores 10 health every 5s", mount=HIP_R)
+X("wild_guard_badge", "trinket", "uncommon", 3, "meadow", [("MAX_HEALTH", 2), ("LAST_STAND", 0.35, 60, 900)],
+  "衛士の鐘章", "Bell Guard's Badge", "体力 +20。体力が 35% を切ると 3 秒 耐性 II（待ち 45 秒）", "+20 max health; below 35% health, Resistance II for 3s (45s cooldown)", mount=CHEST)
+X("wild_mossball_netsuke", "trinket", "rare", 8, "hills", [("REGEN_TICK", 1, 100), ("MOSS_STILL", 2)],
+  "苔玉の根付", "Mossball Netsuke", "5 秒ごとに体力 +10。止まっていると倍", "Restores 10 health every 5s, doubled while standing still", mount=HIP_R)
 X("wild_herb_vial", "charm", "uncommon", 5, "meadow", [("CHARM_HEAL", 6)],
   "草薬の小瓶", "Herbal Vial", "使うと体力 +60（クールダウン 45 秒）", "Use: heal 60 (45s cooldown)", cd=45)
 # 帯 II
-X("wild_float_netsuke", "trinket", "uncommon", 12, "coast", [("SWIM", 0.4), ("BREATH", 1), ("MOVE_SPEED", 0.03)],
-  "浮き玉の根付", "Glass Float Netsuke", "水の中の移動が速い、息が長い、移動 +3%", "Faster swimming, longer breath, +3% speed", mount=HIP_L)
-X("wild_wolf_tooth_necklace", "trinket", "rare", 16, "heights", [("CRIT", 0.08, 0.5)],
-  "雷狼の牙の首飾り", "Stormwolf Tooth Necklace", "会心 8%（×1.5）", "8% critical chance (x1.5)", mount=CHEST)
+X("wild_float_netsuke", "trinket", "uncommon", 12, "coast", [("SWIM", 0.4), ("BREATH", 1), ("MOVE_SPEED", 0.03), ("WATER_EXIT", 1, 60)],
+  "浮き玉の根付", "Glass Float Netsuke", "水の中の移動が速い、息が長い、移動 +3%。水から上がると 3 秒 速さ II", "Faster swimming, longer breath, +3% speed; Speed II for 3s after leaving water", mount=HIP_L)
+X("wild_wolf_tooth_necklace", "trinket", "rare", 16, "heights", [("CRIT", 0.08, 0.5), ("CRIT_RUSH", 0, 40)],
+  "雷狼の牙の首飾り", "Stormwolf Tooth Necklace", "会心 8%（×1.5）。会心のあと 2 秒 速さ I", "8% critical chance (x1.5); Speed I for 2s after a critical", mount=CHEST)
 X("wild_crab_backplate", "trinket", "epic", 19, "coast", [("TOUGHNESS", 2), ("THORNS", 0.15, 3)],
   "大蟹の甲羅の背当て", "Crab Shell Backplate", "強靭 +2、打たれると 15% で棘 3 を返す", "+2 toughness; 15% chance to return 3 damage when hit", mount=BACK)
 X("wild_fog_handbell", "charm", "rare", 15, "coast", [("CHARM_FOG", 8, 60)],
   "霧鐘の小鈴", "Foghorn Handbell", "使うとまわり 8 の敵を 3 秒、霧で遅く II・目くらみ（クールダウン 40 秒）",
   "Use: enemies within 8 are slowed and blinded by fog for 3s (40s cooldown)", cd=40)
 # 帯 III
-X("wild_weave_bracelet", "trinket", "rare", 22, "heights", [("MOVE_SPEED", 0.05), ("FALL_TAKEN", -0.3)],
-  "織り紐の腕輪", "Woven Cord Bracelet", "移動 +5%、落下 −30%", "+5% speed, -30% fall damage", mount=WRIST)
+X("wild_weave_bracelet", "trinket", "rare", 22, "heights", [("MOVE_SPEED", 0.05), ("FALL_TAKEN", -0.3), ("FALL_SHOCK", 3, 4)],
+  "織り紐の腕輪", "Woven Cord Bracelet", "移動 +5%、落下 −30%。高く落ちて着地すると、まわり 3 の敵に 40", "+5% speed, -30% fall damage; a hard landing deals 40 to foes within 3", mount=WRIST)
 X("wild_emberbug_amber", "trinket", "epic", 26, "wastes", [("BURN_BONUS_SET", 0.10), ("FIRE_TAKEN", -0.15)],
   "熾り蟲の琥珀", "Emberbug Amber", "燃えている相手に +10%、火のダメージ −15%", "+10% against burning targets, -15% fire damage taken", mount=HIP_R)
 X("wild_ramhorn_bugle", "trinket", "heroic", 30, "heights", [("BERSERK", 0.5, 0.15), ("TOUGHNESS", 2)],
@@ -452,10 +452,10 @@ X("wild_signal_fire", "charm", "heroic", 29, "heights", [("CHARM_RALLY", 8, 0.15
   "峰の狼煙筒", "Summit Signal Fire", "使うと 8 秒、まわり 8 の仲間（自分も）の与えるダメージ +15%（クールダウン 60 秒）",
   "Use: you and allies within 8 deal +15% damage for 8s (60s cooldown)", cd=60)
 # 帯 IV
-X("wild_plumb_line_ring", "trinket", "rare", 32, "abyss_upper", [("FALL_TAKEN", -0.5), ("NIGHT_VISION", 1)],
-  "測り縄の輪", "Plumb Line Coil", "落下 −50%、暗い所で暗視", "-50% fall damage; night vision in the dark", mount=BELT_BACK)
-X("wild_salttear_earring", "trinket", "epic", 35, "abyss_upper", [("MANA_REGEN", 0.15), ("MAX_MANA", 6)],
-  "塩の涙の耳飾り", "Salt Tear Earring", "マナの戻り +15%、マナの上限 +6", "+15% mana regeneration, +6 max mana", mount=EAR)
+X("wild_plumb_line_ring", "trinket", "rare", 32, "abyss_upper", [("FALL_TAKEN", -0.5), ("NIGHT_VISION", 1), ("DARK_GLOW", 12)],
+  "測り縄の輪", "Plumb Line Coil", "落下 −50%、暗い所で暗視。暗い所では、まわり 12 の敵が光って見える", "-50% fall damage; night vision in the dark, where foes within 12 glow", mount=BELT_BACK)
+X("wild_salttear_earring", "trinket", "epic", 35, "abyss_upper", [("MANA_REGEN", 0.15), ("MAX_MANA", 6), ("HURT_MANA", 3, 100)],
+  "塩の涙の耳飾り", "Salt Tear Earring", "マナの戻り +15%、マナの上限 +6。打たれるとマナ +3（待ち 5 秒）", "+15% mana regeneration, +6 max mana; taking a hit restores 3 mana (5s cooldown)", mount=EAR)
 X("wild_bonepipe_necklace", "trinket", "epic", 38, "abyss_upper", [("DARK_BONUS", 7, 0.10)],
   "骨笛の首飾り", "Bonepipe Necklace", "暗い所で与えるダメージ +10%", "+10% damage in darkness", mount=CHEST)
 X("wild_hangman_knot", "trinket", "heroic", 40, "abyss_upper", [("NOOSE", 5, 4800), ("MOVE_SPEED", 0.04)],
@@ -469,15 +469,15 @@ X("wild_mimic_heart_charm", "charm", "heroic", 39, "abyss_upper", [("CHARM_HEART
 # 帯 V
 X("wild_fulgurite_necklace", "trinket", "rare", 42, "abyss_lower", [("LIGHTNING_TAKEN", -0.3), ("THORN_BOLT", 0.10, 5)],
   "雷管石の首飾り", "Fulgurite Necklace", "雷のダメージ −30%、打たれると 10% で雷を返す", "-30% lightning damage taken; 10% chance to return lightning when hit", mount=CHEST)
-X("wild_ash_hourglass_charm", "trinket", "epic", 44, "abyss_lower", [("COOLDOWN", 0.08)],
-  "灰の砂時計の飾り", "Ash Hourglass Pendant", "クールダウン −8%", "-8% skill cooldowns", mount=HIP_R)
-X("wild_deep_eye_charm", "trinket", "epic", 46, "abyss_lower", [("CRIT", 0.12, 0.6)],
-  "深みの眼の護り", "Deep Eye Ward", "会心 12%（×1.6）", "12% critical chance (x1.6)", mount=CHEST)
-X("wild_meteor_ring", "trinket", "heroic", 48, "moon", [("MAX_HEALTH", 6), ("TOUGHNESS", 2), ("GRIT", 0.05, 0.10)],
-  "隕鉄の環", "Meteoric Iron Ring", "体力 +60、強靭 +2、受けるダメージ −5%（体力半分未満で −10%）",
-  "+60 max health, +2 toughness, -5% damage taken (-10% below half health)", mount=HIP_L)
-X("wild_skylark_plume", "trinket", "heroic", 50, "cloud", [("FALL_TAKEN", -1.0), ("MOVE_SPEED", 0.08)],
-  "雲雀の羽根飾り", "Skylark Plume", "落下ダメージなし、移動 +8%", "No fall damage, +8% speed", mount=EAR)
+X("wild_ash_hourglass_charm", "trinket", "epic", 44, "abyss_lower", [("COOLDOWN", 0.08), ("KILL_COOLDOWN", 20)],
+  "灰の砂時計の飾り", "Ash Hourglass Pendant", "クールダウン −8%。敵を倒すとクールダウンが 1 秒縮む", "-8% skill cooldowns; each kill shortens skill cooldowns by 1s", mount=HIP_R)
+X("wild_deep_eye_charm", "trinket", "epic", 46, "abyss_lower", [("CRIT", 0.12, 0.6), ("CRIT_CHAIN", 1)],
+  "深みの眼の護り", "Deep Eye Ward", "会心 12%（×1.6）。会心の次の一撃も会心", "12% critical chance (x1.6); the hit after a critical is also critical", mount=CHEST)
+X("wild_meteor_ring", "trinket", "heroic", 48, "moon", [("MAX_HEALTH", 6), ("TOUGHNESS", 2), ("GRIT", 0.05, 0.10), ("HURT_BURST", 4, 6, 1200)],
+  "隕鉄の環", "Meteoric Iron Ring", "体力 +60、強靭 +2、受けるダメージ −5%（体力半分未満で −10%）。体力が半分を切ると、まわり 4 の敵に 60 と押し返し（待ち 60 秒）",
+  "+60 max health, +2 toughness, -5% damage taken (-10% below half health); dropping below half health blasts foes within 4 for 60 (60s cooldown)", mount=HIP_L)
+X("wild_skylark_plume", "trinket", "heroic", 50, "cloud", [("FALL_TAKEN", -1.0), ("MOVE_SPEED", 0.08), ("AIR_STRIKE", 0.15)],
+  "雲雀の羽根飾り", "Skylark Plume", "落下ダメージなし、移動 +8%。空中から打つと与えるダメージ +15%", "No fall damage, +8% speed; +15% damage while airborne", mount=EAR)
 X("wild_starchart_compass", "charm", "epic", 45, "abyss_lower", [("CHARM_BLINK", 8)],
   "星図の羅針盤", "Starchart Compass", "使うと向いた方へ 8 ブロック跳ぶ（クールダウン 20 秒）", "Use: blink 8 blocks forward (20s cooldown)", cd=20)
 X("wild_moon_hourglass", "charm", "heroic", 49, "moon", [("CHARM_STOP", 10, 60, 20)],

@@ -149,7 +149,6 @@
 
   キーは `cinematic.skyabyss.end.<巨神>.1`〜`.3`。
 - 場面のあと: 章の余韻の札（`ChapterCards.aftermath`。場面の間は預かる）と、次の章の引き（[18](18_notices.md) の 9 章）。四章は、そのあとに天の鍵が一つになる場面（`SkyKey`。巨神の背中にいる間・場面の最中は待つ）、`EmberAftermath` が続く。
-- 遺物の選択画面: 場面が終わる（最後まで・スキップ・打ち切り）と、`HeartReward` の聞き手が 50 tick あとに、心臓を初めて止めた人へ専用の画面を開かせる（[30](30_heart_reward_ui.md)）。場面のない降ろしは 110 tick あと。
 - コマンド: `/skyabyss cinematic play titan_end_<巨神>`（巨神の本体を狙う）。眠りの動きは `/skyabyss titan end <巨神> sleep` を一緒に流すと見られる。
 
 ### 3.6 あいだの塔を越えた `tower_clear`（13.5 秒、スキップ可。越えるたび）
@@ -220,3 +219,16 @@
 - 絵の作り方: `tools/story/pixel/`（`pxkit.py` = 描く道具。ゲームの低ポリの形を小さく描き、一枚 10 色ほどの表に網目で落とす。`opening.py`・`opening_more.py` = 開幕の 9 枚。`install_reels.py` = ゲームへ入れる）。選んだ頁 https://claude.ai/artifact/N55M3A1Hwh8127tLLPqggq
 - 章の変わり目: 一〜四章の題字の前に 5 枚ずつ（前の章で何が起きたか → 次の巨神 → なぜ行くのか）。`ChapterCards` が題字を出す代わりに `chapter_<章の ID>` を流し、見終わると題字（`StoryReels.onDone`）。絵は `tools/story/pixel/chapters.py`（部品は `parts.py`）。命令で見直したときは題字を出さない。頁 https://claude.ai/artifact/PY2HadDQ291LSqozdhC16X
 
+
+## 空間の裂け目と光の表現
+
+足し合わせの光だけで描く（シェーダーや追加のライブラリは使わない。共通の描き方は `client/fx/LightDraw`、絵はゲームの中で作る）。色は巨神ごとの色で、縁と中身は巨神の形の言葉に合わせる。
+
+- **裂け目**（`client/fx/RiftFx`）: 縦に細い光の線が走り、太り、向こうにその場所の内側の空がのぞく。縁は割れ目（ぎざぎざの縁・内側のもう一本の縁・上下の先から走るひび・縁から飛ぶ光の欠片）。内側の空: 岩鯨 = 光る鉱脈の闇、潮殻 = 水面越しの光、雷翼 = 雷雲と閃き、余燼 = 昇る熾、深淵 = 底のない闇に骨色の光、月 = 銀の星。
+  - 領域の始まり: 宣言のあいだ心臓の体の上に開く（天井が低くても切られない。奥行きを見ずに描く）。宣言の後半、裂け目の向こうの空が光る前線とともに広がって、部屋の壁と天井を覆う（`client/fx/DomainSkyFx`。始まりに部屋の壁と天井を測り、そのすぐ内側に張る。床・心臓・人・予告は覆わない）。領域のあいだ覆ったまま、砕かれたらすぐ・時間切れならゆっくり部屋が戻る。
+  - 渡るとき: 順路の部屋から次へ運ばれるとき・深淵の門・月の門。目の前に開いて画面を覆い（`fx/RiftPayload.LEAD` = 26 tick）、覆った中で運ばれ、まぶたが閉じるように細くなって新しい場所が見える。運ぶ側はその間だけ待つ（試験の偽の人だけなら待たない）。
+- **光線と溜め**（`client/combat/AttackLightFx`）: 溜めが GATHER の技は、予告のあいだ光の筋が体の外から技の元へ吸い込まれ、元が明るくなる。運びが BEAM の技は放つと芯の白い光の帯（6 tick 満ちて 8 tick で薄れる。床から出る範囲の模型の上を通す）。振り回しは元から先端への帯と通った跡の弧。
+- **当たりの輪**: 心臓・領域の技と心臓のあとの主の技が当たった瞬間、床を走って広がる二重の輪と、床が一瞬明るむ光。
+- **核の光**（`client/fx/CoreGlowFx`）: 崩れている間（崩しゲージが割れて傷が大きく通る時）だけ、心臓の核の骨を追うにじみと回る十字の光の筋が出る。ふだんは光らない。殻の外までにじむ（ブロックの壁の向こうでは描かない）。確かめは `tools/shots/light_fx_room.txt`（天井の低い閉じた部屋。`/skyabyss dev force <心臓> BREAK` で崩す）。
+- **軌道の線**: 月の主（技の動作の始まりを `fx/OrbitCuePayload` で知らせる）と塔の主（予告から）の足もとに、三本の輪が向きを違えて回る。弧の進む先が明るく、放つ瞬間に外へ散る。
+- 撮影: `python -I tools/gen/shots/gen_light_fx_shots.py` → `./gradlew runShots -Pscript=tools/shots/light_fx.txt` → `python -I tools/sheets/light_fx_sheet.py`（`docs/review/light_fx/final.png`）。台本の `rift pass|world|freeze|clear` と `lightring` で単独に出せる。選んだ頁 https://claude.ai/artifact/JFtcddTCNNwteFqGSq51Uh

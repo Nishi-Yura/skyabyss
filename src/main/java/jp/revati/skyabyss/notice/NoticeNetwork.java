@@ -18,6 +18,7 @@ public final class NoticeNetwork {
     static void register(RegisterPayloadHandlersEvent event) {
         // ラムダの中身はクライアントで受信したときにだけ実行される
         event.registrar(PROTOCOL_VERSION)
-                .playToClient(NoticePayload.TYPE, NoticePayload.STREAM_CODEC, (payload, context) -> NoticeClient.receive(payload));
+                .playToClient(NoticePayload.TYPE, NoticePayload.STREAM_CODEC, (payload, context) -> NoticeClient.receive(payload))
+                .playToClient(GainItemsPayload.TYPE, GainItemsPayload.STREAM_CODEC, (payload, context) -> NoticeClient.receiveItems(payload));
     }
 }

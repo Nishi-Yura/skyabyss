@@ -316,9 +316,6 @@ public final class BackBuildJobs {
             return longest + " " + longestNanos / 1_000_000L + " ms";
         }
 
-        public long longestMs() {
-            return longestNanos / 1_000_000L;
-        }
 
         @Override
         public int placed() {

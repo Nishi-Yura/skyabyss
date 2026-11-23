@@ -84,7 +84,7 @@ public final class CorePuzzles {
             return;
         }
         level.playSound(null, pos, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 1.2f, 1.2f);
-        level.sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 40, 0.4, 1.2, 0.4, 0.05);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1, p.getZ(), 24, 0.4, 1.2, 0.4, 0.05);
         BlockPos to = MoonCore.mark("arena_entry");
         BlockPos c = MoonCore.mark("arena_center");
         float yaw = (float) Math.toDegrees(Math.atan2(-(c.getX() - to.getX()), c.getZ() - to.getZ()));
@@ -92,5 +92,10 @@ public final class CorePuzzles {
         Quests.signal(p, GATE);
         p.addTag(CoreArena.TAG);
         CoreArena.arrive(level, p);
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

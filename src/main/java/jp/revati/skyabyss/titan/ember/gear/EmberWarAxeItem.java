@@ -10,7 +10,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
 
-// 余燼の戦斧 (レア): 玄武岩の刃に熾火の割れ目が走る斧。命中した相手を 4 秒くすぶらせる (燃える相手は燃やし、
+// 熾火の戦斧 (レア): 玄武岩の刃に熾火の割れ目が走る斧。命中した相手を 4 秒くすぶらせる (燃える相手は燃やし、
 // 火に強い相手にも「くすぶり」の印を付ける)。燃えている・くすぶる相手への傷 +10% (EmberGearEvents)。
 // 余燼の背の敵は火に強いので、バニラの燃焼だけだと効かなくなる。そのため印を別に持つ (03 の 13.1節)
 public class EmberWarAxeItem extends EmberWeaponItem {
@@ -23,10 +23,15 @@ public class EmberWarAxeItem extends EmberWeaponItem {
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (attacker.level() instanceof ServerLevel level && GearLevel.proc(attacker, stack)) {
             EmberGearEvents.smolder(target, EmberGear.WAR_AXE_SMOLDER_TICKS);
-            level.sendParticles(ParticleTypes.LAVA, target.getX(), target.getY(0.6), target.getZ(), 3, 0.25, 0.25, 0.25, 0.0);
-            level.sendParticles(ParticleTypes.SMALL_FLAME, target.getX(), target.getY(0.5), target.getZ(), 10, 0.3, 0.4, 0.3, 0.02);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), target.getX(), target.getY(0.6), target.getZ(), 3, 0.25, 0.25, 0.25, 0.0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), target.getX(), target.getY(0.5), target.getZ(), 10, 0.3, 0.4, 0.3, 0.02);
             level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.35f, 1.5f);
         }
         return super.hurtEnemy(stack, target, attacker);
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

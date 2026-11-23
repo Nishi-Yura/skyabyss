@@ -8,7 +8,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.client.entity.GearLayer;
-import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.titan.ember.EmberIds;
 import jp.revati.skyabyss.titan.ember.mob.AshThrall;
@@ -47,7 +46,7 @@ public final class EmberMobRenderers {
     }
 
     // 低ポリ (client/lowpoly): 骨・アニメは GeckoLib、骨ごとのメッシュは自前。発光層 (熾・割れ目・目) は LowPolyGeoRenderer が付ける。
-    // LowPoly.enabled = false で元のキューブの geo / GearLayer に戻る
+    //。
     static class MobRenderer<T extends EmberMob> extends LowPolyGeoRenderer<T> {
         MobRenderer(EntityRendererProvider.Context ctx, String name, float shadow) {
             super(ctx, name, 1.0f);
@@ -72,7 +71,6 @@ public final class EmberMobRenderers {
     static final List<String> FLARE = List.of("flare_body", "flare_head");
 
     static final class ThrallModel extends LowPolyGeoRenderer.Model<AshThrall> {
-        private static final ResourceLocation FLARED = id("textures/entity/ash_thrall_flared.png");
         // 低ポリ: 同じメッシュ・UV で、燃え上がった姿は別のアトラス (と発光マスク)
         private static final ResourceLocation FLARED_LOW = id("textures/lowpoly/ash_thrall_flared.png");
 
@@ -82,17 +80,13 @@ public final class EmberMobRenderers {
 
         @Override
         public ResourceLocation getTextureResource(AshThrall thrall) {
-            if (LowPoly.enabled && !LowPoly.debug) {
-                return thrall.isFlared() ? FLARED_LOW : super.getTextureResource(thrall);
-            }
-            return thrall.isFlared() && LowPoly.cubeHere(FLARED) ? FLARED : super.getTextureResource(thrall);
+            return thrall.isFlared() ? FLARED_LOW : super.getTextureResource(thrall);
         }
     }
 
     static final class ThrallRenderer extends MobRenderer<AshThrall> {
         ThrallRenderer(EntityRendererProvider.Context ctx) {
             super(ctx, new ThrallModel(), EmberIds.ASH_THRALL, 0.45f);
-            addRenderLayer(new GearLayer<>(this, "socket_main", "ash_poker", mob -> "idle").activeWhen(() -> !LowPoly.enabled));
             addRenderLayer(GearLayer.lowPoly(this, "socket_main", "ash_poker"));
         }
 

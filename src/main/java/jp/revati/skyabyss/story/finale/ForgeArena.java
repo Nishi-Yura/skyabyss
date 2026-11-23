@@ -76,11 +76,13 @@ public final class ForgeArena {
         e.tuneCloud(1, Rewinder.HP, Rewinder.DMG);
         e.addTag(TAG);
         level.addFreshEntity(e);
+        // 登場 (combat/BossEmerge): 出方と、名前の札と顔のアップ
+        jp.revati.skyabyss.combat.BossEmerge.stage(e, "erupt", 44, "rewinder");
         // 人数で強く (受ける傷を割る。47 の 2.6)
         jp.revati.skyabyss.combat.PartyScale.apply(e, present(level).size());
         jp.revati.skyabyss.combat.PartyScale.resist(e, 3.64);
         e.playAction("call");
-        level.sendParticles(ParticleTypes.FLAME, at.getX() + 0.5, at.getY() + 2, at.getZ() + 0.5, 60, 1.0, 2.0, 1.0, 0.04);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 2, at.getZ() + 0.5, 24, 1.0, 2.0, 1.0, 0.04);
         level.playSound(null, at, CloudMobsSetup.REWINDER_ROAR.get(), SoundSource.HOSTILE, 2.0f, 0.9f);
         empty = 0;
         return e;
@@ -95,7 +97,7 @@ public final class ForgeArena {
             CloudMob m = put(level, CloudMobsSetup.ASH_STRIKER.get(), at);
             if (m != null) {
                 m.addTag(TAG);
-                level.sendParticles(ParticleTypes.LARGE_SMOKE, at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 16, 0.4, 0.8, 0.4, 0.02);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 16, 0.4, 0.8, 0.4, 0.02);
             }
         }
     }
@@ -199,5 +201,10 @@ public final class ForgeArena {
         }
         level.addFreshEntity(m);
         return m;
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

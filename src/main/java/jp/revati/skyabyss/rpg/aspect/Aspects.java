@@ -194,7 +194,7 @@ public final class Aspects {
         if (reset > 0 && p.getRandom().nextDouble() < Math.min(0.9, reset)) {
             SkillManager.get(p).cooldowns.put(skill.id, 1);
             ServerLevel level = p.serverLevel();
-            level.sendParticles(ParticleTypes.ENCHANT, p.getX(), p.getY() + 1.2, p.getZ(), 16, 0.4, 0.5, 0.4, 0.2);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1.2, p.getZ(), 16, 0.4, 0.5, 0.4, 0.2);
             level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8f, 1.6f);
             SkillManager.sync(p);
         }
@@ -208,7 +208,7 @@ public final class Aspects {
                 try {
                     jp.revati.skyabyss.item.mythic.MythicAbilities.withPowerScale(echo,
                             () -> jp.revati.skyabyss.rpg.skill.SkillActions.perform(p, skill, rank));
-                    level.sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 14, 0.4, 0.6, 0.4, 0.04);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1, p.getZ(), 14, 0.4, 0.6, 0.4, 0.04);
                     level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.5f, 1.3f);
                 } finally {
                     echoing = false;

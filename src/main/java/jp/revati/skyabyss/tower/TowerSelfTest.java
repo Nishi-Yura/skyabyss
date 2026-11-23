@@ -132,7 +132,9 @@ public final class TowerSelfTest {
                 && Math.abs(TowerFight.masterHp(20) - TowerFight.masterHp(12)) < 1, "the master's HP does not follow the squad size");
         check(f, Math.abs(m.getMaxHealth() / jp.revati.skyabyss.combat.Hardness.total(m) - TowerFight.masterHp(1)) < 2, "the master was not tuned to its HP (" + m.getMaxHealth() + " / " + jp.revati.skyabyss.combat.Hardness.total(m) + ")");
         check(f, !m.hurt(level.damageSources().generic(), 50), "the master can be hurt while it wakes");
-        long now = level.getGameTime();
+        // 目覚めを過ぎたことにする。新しい世界では時刻が小さく、start が負になると「始まっていない」と見なされて tick が何もしない
+        // (2026-11-12 まで、ここから下の四つが落ちていた)。時刻を目覚めの分だけ先へ置く
+        long now = level.getGameTime() + TowerFight.INTRO + 1;
         fg.start = now - TowerFight.INTRO - 1;
         fg.tick(level, now);
         check(f, !m.shielded(), "the master stays shielded after waking");

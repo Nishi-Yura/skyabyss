@@ -102,11 +102,11 @@ public class BellMourner extends CloudMob {
             }
             if (t < RING_TELL && t % 3 == 0) {
                 // 振り上げた鐘のまわりに朝の光の粒 (予告)
-                sl.sendParticles(ParticleTypes.WAX_OFF, getX(), getY() + 2.4, getZ(), 4, 0.5, 0.3, 0.5, 0.02);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 2.4, getZ(), 4, 0.5, 0.3, 0.5, 0.02);
             }
             if (t == RING_TELL) {
                 playSound(CloudMobsSetup.MOURNER_RING.get(), 1.6f, 0.8f);
-                sl.sendParticles(ParticleTypes.SONIC_BOOM, getX(), getY() + 1.6, getZ(), 1, 0, 0, 0, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 1.6, getZ(), 1, 0, 0, 0, 0);
                 BellIsle.silence(sl, blockPosition(), SILENCE_NEAR);
             }
         }
@@ -116,5 +116,10 @@ public class BellMourner extends CloudMob {
             t = -1;
             cooldown = RING_COOLDOWN;
         }
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

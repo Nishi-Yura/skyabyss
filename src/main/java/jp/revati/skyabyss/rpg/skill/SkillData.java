@@ -45,9 +45,6 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
             saved = o.saved;
         }
 
-        public boolean sameAs(Loadout o) {
-            return saved == o.saved && Arrays.equals(slots, o.slots) && runes.equals(o.runes) && nodes.equals(o.nodes);
-        }
     }
 
     // 覚えた技と段 (id → 1..maxRank)
@@ -659,18 +656,6 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         return job == null || own == null || own == job;
     }
 
-    // 職の枠: その職の木の使う技を、行の順 (同じ行は列の順) に。覚えていなければ空 (null)
-    public Skill jobSlot(Job job, int i) {
-        if (job == null || i < 0) {
-            return null;
-        }
-        java.util.List<Skill> list = jobActives(job);
-        if (i >= list.size()) {
-            return null;
-        }
-        Skill s = list.get(i);
-        return knows(s) ? s : null;
-    }
 
     // 職の木で、枠に入る使う技の並び
     public static java.util.List<Skill> jobActives(Job job) {
@@ -777,10 +762,6 @@ public final class SkillData implements INBTSerializable<CompoundTag> {
         return skill.maxRank;
     }
 
-    // 刻印が使える状態か (全部の木で使える。点は 1)
-    public boolean runesOpen(Skill skill) {
-        return true;
-    }
 
     // その技の刻印を選べるか (技を極めている。刻印の 4 つ目は熟練 3 から)
     public boolean runeAvailable(Skill skill) {

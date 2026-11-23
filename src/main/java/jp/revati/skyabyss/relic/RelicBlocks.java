@@ -4,7 +4,6 @@ import jp.revati.skyabyss.registry.ModBlocks;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
-import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 
@@ -23,10 +22,6 @@ public final class RelicBlocks {
         return ModBlocks.REST_HEARTH.get().defaultBlockState().setValue(RestHearthBlock.LIT, lit).setValue(RelicStyle.PROP, style);
     }
 
-    public static BlockState lever(RelicStyle style, AttachFace face, Direction facing, boolean powered) {
-        return ModBlocks.RELIC_LEVER.get().defaultBlockState().setValue(LeverBlock.FACE, face).setValue(LeverBlock.FACING, facing)
-                .setValue(LeverBlock.POWERED, powered).setValue(RelicStyle.PROP, style);
-    }
 
     // 向き・面・入切は呼ぶ側が .setValue で足す (バニラの LEVER.defaultBlockState() の差し替え用)
     public static BlockState leverBase(RelicStyle style) {
@@ -46,20 +41,7 @@ public final class RelicBlocks {
         return ModBlocks.RELIC_BELL.get().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, facing).setValue(RelicStyle.PROP, style);
     }
 
-    // ---------------------------------------------------------------- 判定
-    public static boolean isCache(BlockState s) {
-        return s.is(ModBlocks.RELIC_CACHE.get());
-    }
 
-    public static boolean isHearth(BlockState s) {
-        return s.is(ModBlocks.REST_HEARTH.get());
-    }
 
-    public static boolean isLever(BlockState s) {
-        return s.is(ModBlocks.RELIC_LEVER.get());
-    }
 
-    public static boolean isBell(BlockState s) {
-        return s.is(ModBlocks.RELIC_BELL.get());
-    }
 }

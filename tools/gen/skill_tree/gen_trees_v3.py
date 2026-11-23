@@ -54,7 +54,6 @@ RUNES = {
     "thin_arrow": ("cloud_pierce", 1, 2), "heavy_arrow": ("cloud_pierce", 2, 1), "lightning": ("cloud_pierce", 3, 2), "snare_pierce": ("cloud_pierce", 8, 2),
     "thrown_trap": ("bone_trap", 1, 1), "great_trap": ("bone_trap", 2, 1),
     "narrow_rain": ("sky_rain", 1, 1), "long_rain": ("sky_rain", 2, 1),
-    "parting_arrows": ("archer_leap", 1, 1),
     "stardust_bolt": ("thunder_bolt", 1, 2), "branch_bolt": ("thunder_bolt", 2, 1), "heavy_bolt": ("thunder_bolt", 3, 1),
     "triple_orb": ("ember_orb", 1, 1), "ember_bed": ("ember_orb", 2, 1),
     "ice_ring": ("frost_tide", 1, 1), "frost_road": ("frost_tide", 2, 1),
@@ -79,6 +78,9 @@ NEW = {
     ("warrior", "reckless"): ({"attack": 0.15, "damage_taken": 0.06}, 3, "捨て身", "Reckless"),
     ("assassin", "still_dance"): ({"cooldown": -0.12, "move": -0.05}, 2, "静かな舞", "Still Dance"),
     ("shaman", "flood"): ({"skill_power": 0.1, "mana_cost": 0.1}, 2, "上げ潮", "Rising Tide"),
+    # 番の弓霊の数 (2026-11-13。射手の跳び退きを番の弓霊に替え、置き矢と骨の檻の場所に数の節を置いた)
+    ("archer", "spirit_flock"): ({"spirit_count": 1.0}, 1, "霊の群れ", "Spirit Flock"),
+    ("archer", "spirit_host"): ({"spirit_count": 1.0}, 2, "霊の宿り", "Spirit Host"),
 }
 
 # 職ごとの骨組みの中身。actives = ①②③④、passives = 常時 A (3,2)・B (5,2) (B が None なら能力値)、main・sub = 幹の能力値
@@ -176,18 +178,18 @@ JOBS = {
                   blocks=[("big_hammer", "master_eye"), ("thick_plate", "grey_cloud"),
                           ("fire_skin", "cinder"), ("iron_will", "keen_temper"), ("white_ash", "ash_heart")]),
     "archer": dict(archs=["trap", "pierce", "rain"], main="agility", sub="strength",
-                   actives=["cloud_pierce", "archer_leap", "bone_trap", "sky_rain"], passives=["far_shot", "hawk_eye"],
+                   actives=["cloud_pierce", "bow_spirit", "bone_trap", "sky_rain"], passives=["far_shot", "hawk_eye"],
                    grid={
-                       "trap": ["r:parting_arrows n:bone_trap_2 s:agility",
+                       "trap": ["e:spirit_flock n:bone_trap_2 s:agility",
                                 "e:light_pack s:agility r:great_trap",
                                 "e:soft_landing e:hunter_mark r:thrown_trap",
-                                "h:patient n:far_shot_2 e:bone_cage",
+                                "h:patient n:far_shot_2 e:spirit_host",
                                 "m:trap_mine k:still_string .",
                                 ". n:far_shot_3 s:strength"],
                        "pierce": ["r:thin_arrow n:cloud_pierce_2 r:lightning",
                                   "e:quick_nock s:agility e:long_draw",
                                   "h:steady_hand e:sharp_tip r:heavy_arrow",
-                                  "e:last_arrow n:cloud_pierce_3 n:archer_leap_2",
+                                  "e:last_arrow n:cloud_pierce_3 n:bow_spirit_2",
                                   "h:eagle_eye k:lone_string r:snare_pierce",
                                   ". s:agility ."],
                        "rain": ["n:sky_rain_2 s:strength r:narrow_rain",
@@ -426,7 +428,7 @@ class Builder:
         """SP の合計を TARGET にそろえる: 型の奥の常に効く数 (2 SP) から 3 SP に上げ、数も 1.5 倍に (SP あたりの強さはそのまま)"""
         total = sum(n["cost"] for n in self.nodes)
         cands = [n for n in self.nodes if n["kind"] in ("effect", "threshold") and n["cost"] == 2 and n.get("arch") and n["y"] <= 10
-                 and not any(k.split("@")[0] in ("mana_hit", "mana_kill", "low_hp_armor", "armor") for k in n["effect"])]
+                 and not any(k.split("@")[0] in ("mana_hit", "mana_kill", "low_hp_armor", "armor", "spirit_count") for k in n["effect"])]
         cands.sort(key=lambda n: (-n["y"], n["x"]))
         for n in cands:
             if total >= TARGET:
@@ -538,8 +540,10 @@ def main():
             en["node.skyabyss.%s.%s" % (job, id)] = nen
             en["node.skyabyss.%s.%s.effect" % (job, id)] = een
         print(job, len(b.nodes), "nodes", sum(n["cost"] for n in b.nodes), "SP", "dropped:", dropped)
-    put_lang(LANG / "ja_jp.json", ja)
-    put_lang(LANG / "en_us.json", en)
+    # すでにある文は書き直さない (docs/design/57 の読みやすさの書き直しを、この生成の古い言い回しで戻さないため)。新しい節の文だけ足す
+    for lang, entries in (("ja_jp", ja), ("en_us", en)):
+        have = json.loads(io.open(LANG / (lang + ".json"), encoding="utf-8").read())
+        put_lang(LANG / (lang + ".json"), {k: v for k, v in entries.items() if k not in have})
     # 使わなくなった節の文を消す (この木にない node.skyabyss.<職>.*)
     for lang in ("ja_jp", "en_us"):
         path = LANG / (lang + ".json")

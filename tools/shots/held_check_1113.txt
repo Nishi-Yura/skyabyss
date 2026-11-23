@@ -1,0 +1,585 @@
+# 呪術師の杖の向き確認 (11-13)
+world shots flat
+size 960 540
+timeout 3000
+render 6
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+camera 0 -60 8 180 0
+waitchunks
+hud on
+wait 350
+cmd skyabyss cinematic stop
+close
+wait 20
+swingpose off
+weapontier common
+mainhand right
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot abyss_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot abyss_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_ember_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot abyss_ember_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot abyss_ember_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_storm_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot abyss_storm_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot abyss_storm_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_toll_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot abyss_toll_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot abyss_toll_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_whale_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot abyss_whale_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot abyss_whale_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_keeper_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot divine_keeper_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot divine_keeper_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_promise_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot divine_promise_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot divine_promise_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_censer
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot ember_censer_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot ember_censer_front
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_censer_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot ember_censer_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot ember_censer_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_halo_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot moon_halo_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot moon_halo_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_starlight_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot moon_starlight_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot moon_starlight_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot shrine_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot shrine_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot storm_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot storm_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_thunder_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot storm_thunder_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot storm_thunder_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot tide_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot tide_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_surf_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot tide_surf_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot tide_surf_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:tower_clap_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot tower_clap_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot tower_clap_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot whale_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot whale_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_deep_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot whale_deep_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot whale_deep_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_ashsow_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot wild_ashsow_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_ashsow_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_bonebird_totem
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot wild_bonebird_totem_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_bonebird_totem_front
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_calming_censer
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot wild_calming_censer_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_calming_censer_front
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_cloudhymn_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot wild_cloudhymn_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_cloudhymn_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_effigy_totem
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot wild_effigy_totem_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_effigy_totem_front
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_fogbell_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot wild_fogbell_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_fogbell_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_knotted_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot wild_knotted_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_knotted_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_loom_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot wild_loom_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_loom_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_lullaby_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot wild_lullaby_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_lullaby_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_mourning_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot wild_mourning_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_mourning_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_peak_totem
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot wild_peak_totem_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_peak_totem_front
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_raincall_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot wild_raincall_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_raincall_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_saltpillar_totem
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot wild_saltpillar_totem_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_saltpillar_totem_front
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_scarecrow_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot wild_scarecrow_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_scarecrow_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_shell_bell_staff
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot wild_shell_bell_staff_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_shell_bell_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_starbell_totem
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot wild_starbell_totem_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_starbell_totem_front
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_stormdrum_totem
+perspective first
+bodyyaw 0
+hud on
+chat clear
+close
+wait 10
+shot wild_stormdrum_totem_fp
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot wild_stormdrum_totem_front
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_choir_hammer
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot x_whale_choir_hammer_front
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_star_staff
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot x_whale_star_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_reef_hammer
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot x_tide_reef_hammer_front
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_pearl_staff
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot x_tide_pearl_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_anvil_hammer
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot x_storm_anvil_hammer_front
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_cloud_staff
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot x_storm_cloud_staff_front
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_cinder_blade
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot x_ember_cinder_blade_front
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_ash_knife
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot x_ember_ash_knife_front
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_kiln_staff
+perspective front
+bodyyaw 0
+hud off
+close
+wait 10
+shot x_ember_kiln_staff_front

@@ -168,8 +168,8 @@ public final class AbyssGate {
                 if (level.isLoaded(b) && level.getBlockState(b).is(Blocks.IRON_BARS)) {
                     level.setBlock(b, Blocks.CAVE_AIR.defaultBlockState(), 3);
                     if (loud) {
-                        level.sendParticles(ParticleTypes.SCULK_SOUL, b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5, 3, 0.2, 0.2, 0.2, 0.01);
-                        level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5, 2, 0.15, 0.15, 0.15, 0.02);
+                        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5, 3, 0.2, 0.2, 0.2, 0.01);
+                        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), b.getX() + 0.5, b.getY() + 0.5, b.getZ() + 0.5, 2, 0.15, 0.15, 0.15, 0.02);
                     }
                 }
             }
@@ -202,11 +202,30 @@ public final class AbyssGate {
 
     // くぐった人を深淵へ (move が偽なら合図だけ。自己テスト用)
     static void passThrough(ServerPlayer p, boolean move) {
+        if (move && !(p instanceof net.neoforged.neoforge.common.util.FakePlayer)) {
+            // 門の闇が縦に裂け、向こうに深淵がのぞき、広がって覆ってから渡る (2026-11-15 の光の表現。fx/RiftPayload)
+            UUID id = p.getUUID();
+            if (!PASSING.add(id)) {
+                return;
+            }
+            Quests.signalWithParty(p.serverLevel(), List.of(p), SIGNAL_ENTER);
+            jp.revati.skyabyss.fx.RiftPayload.send(p, jp.revati.skyabyss.fx.RiftPayload.ABYSS);
+            later(p.server, jp.revati.skyabyss.fx.RiftPayload.LEAD, () -> {
+                PASSING.remove(id);
+                if (p.isAlive() && !p.hasDisconnected()) {
+                    AbyssWorld.enter(p);
+                }
+            });
+            return;
+        }
         Quests.signalWithParty(p.serverLevel(), List.of(p), SIGNAL_ENTER);
         if (move) {
             AbyssWorld.enter(p);
         }
     }
+
+    // 裂け目が開いて渡るのを待っている人 (門の列に立つあいだ、毎 tick 渡り直さないように)
+    private static final Set<UUID> PASSING = new HashSet<>();
 
     // 門の前の大広間の側への向き (格子の列から離れる向き)。門の印が無ければ null (story/IsanaPost の五章の立つ所)
     @Nullable
@@ -291,7 +310,7 @@ public final class AbyssGate {
         }
         BlockPos heart = AbyssBuild.mark("heart");
         if (heart != null && server.getTickCount() % 40 == 2 && WardenArena.current(abyss) == null && WardenArena.cleared(server) && abyss.isLoaded(heart)) {
-            abyss.sendParticles(ParticleTypes.SCULK_SOUL, heart.getX() + 0.5, heart.getY() + 0.4, heart.getZ() + 0.5, 6, 0.25, 0.2, 0.25, 0.02);
+            abyss.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), heart.getX() + 0.5, heart.getY() + 0.4, heart.getZ() + 0.5, 6, 0.25, 0.2, 0.25, 0.02);
             abyss.playSound(null, heart, SoundEvents.WARDEN_HEARTBEAT, SoundSource.AMBIENT, 1.5f, 0.7f);
         }
     }
@@ -355,5 +374,10 @@ public final class AbyssGate {
         List<Pending> due = new ArrayList<>();
         LATER.removeIf(e -> e.at() <= now && due.add(e));
         due.forEach(e -> e.run().run());
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

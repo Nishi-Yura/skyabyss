@@ -408,12 +408,12 @@ public final class RaidRun {
         long t = ctx.now();
         for (ServerPlayer p : ctx.players()) {
             for (double y = g.getY() + 0.2; y < top; y += 0.7) {
-                ctx.level().sendParticles(p, net.minecraft.core.particles.ParticleTypes.END_ROD, true, x, y, z, 1, 0.04, 0.1, 0.04, 0.0);
+                ctx.level().sendParticles(p, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, x, y, z, 1, 0.04, 0.1, 0.04, 0.0);
             }
             double a = (t % 40) / 40.0 * Math.PI * 2;
             for (int i = 0; i < 6; i++) {
                 double b = a + i * Math.PI / 3;
-                ctx.level().sendParticles(p, net.minecraft.core.particles.ParticleTypes.GLOW, true, x + Math.cos(b) * 1.1, g.getY() + 0.15, z + Math.sin(b) * 1.1, 1, 0, 0, 0, 0);
+                ctx.level().sendParticles(p, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, x + Math.cos(b) * 1.1, g.getY() + 0.15, z + Math.sin(b) * 1.1, 1, 0, 0, 0, 0);
             }
         }
     }
@@ -650,12 +650,6 @@ public final class RaidRun {
         }
     }
 
-    // 最後に送った中身 (自己テスト・撮影用)
-    @Nullable
-    public static RaidHudNet.Hud lastHud(UUID group) {
-        Run run = RUNS.get(group);
-        return run == null ? null : run.lastHud;
-    }
 
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {

@@ -73,7 +73,10 @@ public enum AttackLook {
     DOMAIN_SHELL_SWEEP(Element.WATER, Windup.CREEP, Travel.SWEEP, Impact.NONE, Linger.FOAM, 1f),
     DOMAIN_THUNDER_LINE(Element.STORM, Windup.FLICKER, Travel.BEAM, Impact.PIERCE, Linger.STATIC, 1f),
     DOMAIN_THUNDER_ROD(Element.STORM, Windup.GATHER, Travel.BOLT, Impact.FLASH, Linger.STATIC, 1.1f),
-    DOMAIN_HEARTH_HEAT(Element.EMBER, Windup.RISE, Travel.NONE, Impact.BURST, Linger.SMOLDER, 1f);
+    DOMAIN_HEARTH_HEAT(Element.EMBER, Windup.RISE, Travel.NONE, Impact.BURST, Linger.SMOLDER, 1f),
+    // 潮殻の領域「満ち引き」(2026-11-15): 足もとの渦潮・島のしぶき・外へ広がる引き波
+    DOMAIN_TIDE_WHIRL(Element.WATER, Windup.CREEP, Travel.NONE, Impact.COLUMN, Linger.FOAM, 1f),
+    DOMAIN_TIDE_WAVE(Element.WATER, Windup.NONE, Travel.WAVE, Impact.RING, Linger.FOAM, 1.1f);
 
     public enum Element {
         STONE, WATER, STORM, EMBER
@@ -116,6 +119,20 @@ public enum AttackLook {
         this.impact = impact;
         this.linger = linger;
         this.weight = weight;
+    }
+
+    // 打つ瞬間に、予告の形を埋める範囲の模型 (client/combat/AreaFx) を出すか。咆哮 (押し返すだけ) と、自前の弾が飛ぶ技 (撃ち出す帯・熾の粒) は出さない。
+    // 出す技は、床から一本だけ突き出る形・帯に間をあけて並ぶ形 (combat/prop/AttackProps.lookImpact・PropFx.motion) を出さない
+    public boolean area() {
+        if (this == NONE || roar()) {
+            return false;
+        }
+        return travel != Travel.SHOTS && this != EMBER_PELLET;
+    }
+
+    // 咆哮 (押し返すだけ。攻撃の形を出さない)
+    public boolean roar() {
+        return name().endsWith("_ROAR");
     }
 
     public static AttackLook byId(int id) {

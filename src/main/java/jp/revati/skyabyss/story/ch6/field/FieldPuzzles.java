@@ -56,13 +56,16 @@ public final class FieldPuzzles {
         MomentStop.learn(p);
         if (!MoonHourglassItem.carries(p)) {
             ItemStack glass = new ItemStack(FieldBlocks.MOON_HOURGLASS.get());
+            if (p instanceof net.minecraft.server.level.ServerPlayer gainTo) {
+                jp.revati.skyabyss.notice.GainFeed.note(gainTo, glass);
+            }
             if (!p.getInventory().add(glass)) {
                 p.drop(glass, false);
             }
         }
         Notice.narrate(p, first ? "message.skyabyss.moon.pool.moment_stop" : "message.skyabyss.moon.pool.moment_stop_again");
         level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 1.2f, 1.2f);
-        level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, 30, 0.6, 1.2, 0.6, 0.08);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, 24, 0.6, 1.2, 0.6, 0.08);
         Quests.signal(p, POOL);
     }
 
@@ -74,7 +77,7 @@ public final class FieldPuzzles {
             return;
         }
         level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.5f, 0.6f);
-        level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 40, 0.3, 1.2, 0.3, 0.04);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 24, 0.3, 1.2, 0.3, 0.04);
         Notice.narrate(p, "message.skyabyss.moon.field_shard." + site);
         Quests.signal(p, SHARD + site);
     }
@@ -93,7 +96,7 @@ public final class FieldPuzzles {
             return;
         }
         level.playSound(null, pos, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 1.2f, 1.4f);
-        level.sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 30, 0.4, 0.8, 0.4, 0.05);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1, p.getZ(), 24, 0.4, 0.8, 0.4, 0.05);
         if (up) {
             BlockPos to = MoonField.mark("arena_entry");
             BlockPos c = MoonField.mark("arena_center");
@@ -124,5 +127,10 @@ public final class FieldPuzzles {
             n += e.progress(i) > 0 ? 1 : 0;
         }
         return n;
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

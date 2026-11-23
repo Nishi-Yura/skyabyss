@@ -133,7 +133,7 @@ public class PilgrimPlume extends CloudMob {
             AbyssBossBars.roar(bar, false);
         }
         if (tickCount % 10 == 0) {
-            sl.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 1.9, getZ(), 2, 0.4, 0.4, 0.4, 0.01);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.9, getZ(), 2, 0.4, 0.4, 0.4, 0.01);
         }
         float f = getHealth() / getMaxHealth();
         int want = f <= 0.33f ? 2 : f <= 0.66f ? 1 : 0;
@@ -294,6 +294,13 @@ public class PilgrimPlume extends CloudMob {
         // 羽ばたき: 床に扇の光 (BEAT_TELL) → 風
         private void beat(ServerLevel sl) {
             Vec3 base = new Vec3(getX(), getY() - HOVER, getZ());
+            if (t == 1) {
+                // 技の形: 扇の三方へ風の刃が飛ぶ (打つ瞬間に縁へ着く)
+                for (int k = -1; k <= 1; k++) {
+                    Vec3 to = base.add(dir.yRot((float) Math.toRadians(BEAT_HALF * 0.7 * k)).scale(BEAT_R)).add(0, 0.8, 0);
+                    jp.revati.skyabyss.combat.prop.AttackProps.toss(sl, "wind_blade", PilgrimPlume.this, position().add(0, 0.5, 0), to, BEAT_TELL - 1, Math.min(BEAT_TELL - 1, 10), 0.6f, 1.2f, 4);
+                }
+            }
             if (t < BEAT_TELL) {
                 if (t % 3 == 0) {
                     for (double d = 2; d <= BEAT_R; d += 1.5) {
@@ -301,7 +308,7 @@ public class PilgrimPlume extends CloudMob {
                         for (int i = 0; i <= n; i++) {
                             double a = Math.toRadians(-BEAT_HALF + 2 * BEAT_HALF * i / n);
                             Vec3 q = base.add(dir.yRot((float) a).scale(d));
-                            sl.sendParticles(ParticleTypes.WAX_ON, q.x, q.y + 0.15, q.z, 1, 0, 0, 0, 0);
+                            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), q.x, q.y + 0.15, q.z, 1, 0, 0, 0, 0);
                         }
                     }
                 }
@@ -311,7 +318,7 @@ public class PilgrimPlume extends CloudMob {
                 playSound(CloudMobsSetup.WING_BEAT.get(), 2.0f, 1.0f);
                 for (double d = 2; d <= BEAT_R; d += 1.0) {
                     Vec3 q = base.add(dir.scale(d));
-                    sl.sendParticles(ParticleTypes.CLOUD, q.x, q.y + 0.6, q.z, 4, d * 0.3, 0.3, d * 0.3, 0.05);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), q.x, q.y + 0.6, q.z, 4, d * 0.3, 0.3, d * 0.3, 0.05);
                 }
                 for (ServerPlayer p : PromiseArena.present(sl)) {
                     if (!inBeat(dir, p.position())) {
@@ -333,12 +340,18 @@ public class PilgrimPlume extends CloudMob {
 
         // 羽の雨: 光の円 (RAIN_TELL) → 羽根が落ちる
         private void rain(ServerLevel sl) {
+            if (t == 1) {
+                // 技の形: 光の円へ羽根が降る (打つ瞬間に刺さる)
+                for (Vec3 s : spots) {
+                    jp.revati.skyabyss.combat.prop.AttackProps.fall(sl, "feather", PilgrimPlume.this, s, RAIN_TELL - 1, 12, 14f, 1.0f, 12);
+                }
+            }
             if (t < RAIN_TELL) {
                 if (t % 3 == 0) {
                     for (Vec3 s : spots) {
                         for (int i = 0; i < 14; i++) {
                             double a = i / 14.0 * Math.PI * 2;
-                            sl.sendParticles(ParticleTypes.END_ROD, s.x + Math.cos(a) * RAIN_R, s.y + 0.15, s.z + Math.sin(a) * RAIN_R, 1, 0, 0, 0, 0);
+                            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), s.x + Math.cos(a) * RAIN_R, s.y + 0.15, s.z + Math.sin(a) * RAIN_R, 1, 0, 0, 0, 0);
                         }
                     }
                 }
@@ -347,8 +360,8 @@ public class PilgrimPlume extends CloudMob {
             if (t == RAIN_TELL) {
                 playSound(CloudMobsSetup.WING_RAIN.get(), 1.8f, 1.0f);
                 for (Vec3 s : spots) {
-                    sl.sendParticles(ParticleTypes.END_ROD, s.x, s.y + 4, s.z, 14, 0.3, 2.0, 0.3, 0.02);
-                    sl.sendParticles(ParticleTypes.CRIT, s.x, s.y + 0.3, s.z, 10, RAIN_R * 0.4, 0.1, RAIN_R * 0.4, 0.05);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), s.x, s.y + 4, s.z, 14, 0.3, 2.0, 0.3, 0.02);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), s.x, s.y + 0.3, s.z, 10, RAIN_R * 0.4, 0.1, RAIN_R * 0.4, 0.05);
                     for (ServerPlayer p : PromiseArena.present(sl)) {
                         if (p.position().subtract(s).horizontalDistance() <= RAIN_R + 0.3 && Math.abs(p.getY() - s.y) < 2) {
                             strike(p, dmg(0.9));
@@ -385,22 +398,26 @@ public class PilgrimPlume extends CloudMob {
                 if (t % 3 == 0) {
                     for (int i = 0; i < 10; i++) {
                         double a = i / 10.0 * Math.PI * 2 + t * 0.1;
-                        sl.sendParticles(ParticleTypes.WAX_ON, mark.getX() + Math.cos(a) * 0.6, mark.getY() + mark.getBbHeight() + 0.8, mark.getZ() + Math.sin(a) * 0.6, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), mark.getX() + Math.cos(a) * 0.6, mark.getY() + mark.getBbHeight() + 0.8, mark.getZ() + Math.sin(a) * 0.6, 1, 0, 0, 0, 0);
                     }
                     for (int i = 0; i < 18; i++) {
                         double a = i / 18.0 * Math.PI * 2;
-                        sl.sendParticles(t > MARK_LOCK ? ParticleTypes.FLAME : ParticleTypes.WAX_ON, markAt.x + Math.cos(a) * MARK_R, markAt.y + 0.15,
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), markAt.x + Math.cos(a) * MARK_R, markAt.y + 0.15,
                                 markAt.z + Math.sin(a) * MARK_R, 1, 0, 0, 0, 0);
                     }
                 }
                 return;
             }
+            if (t == MARK_LOCK + 1) {
+                // 技の形: 所が決まったら、金の輪へ大きな羽の槍が落ちる
+                jp.revati.skyabyss.combat.prop.AttackProps.fall(sl, "feather", PilgrimPlume.this, markAt, MARK_TELL - MARK_LOCK - 1, 10, 18f, 2.2f, 16);
+            }
             if (t == MARK_TELL) {
                 playSound(CloudMobsSetup.WING_PLUNGE.get(), 2.0f, 1.0f);
                 for (double y = 8; y >= 0; y -= 0.5) {
-                    sl.sendParticles(ParticleTypes.END_ROD, markAt.x, markAt.y + y, markAt.z, 2, 0.05, 0.05, 0.05, 0.01);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), markAt.x, markAt.y + y, markAt.z, 2, 0.05, 0.05, 0.05, 0.01);
                 }
-                sl.sendParticles(ParticleTypes.FLASH, markAt.x, markAt.y + 0.5, markAt.z, 1, 0, 0, 0, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), markAt.x, markAt.y + 0.5, markAt.z, 1, 0, 0, 0, 0);
                 for (ServerPlayer p : PromiseArena.present(sl)) {
                     if (p.position().subtract(markAt).horizontalDistance() <= MARK_R + 0.3 && Math.abs(p.getY() - markAt.y) < 2.5) {
                         strike(p, dmg(1.6));
@@ -428,13 +445,13 @@ public class PilgrimPlume extends CloudMob {
                     for (int i = 0; i < 40; i++) {
                         double a = random.nextDouble() * Math.PI * 2;
                         double d = Math.sqrt(random.nextDouble()) * 12;
-                        sl.sendParticles(ParticleTypes.WAX_ON, c.getX() + 0.5 + Math.cos(a) * d, c.getY() + 0.2, c.getZ() + 0.5 + Math.sin(a) * d, 1, 0, 0.1, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.getX() + 0.5 + Math.cos(a) * d, c.getY() + 0.2, c.getZ() + 0.5 + Math.sin(a) * d, 1, 0, 0.1, 0, 0);
                     }
                     TownGuestEntity valley = PromiseIsle.active(sl, 1);
                     if (valley != null) {
                         for (int i = 0; i < 24; i++) {
                             double a = i / 24.0 * Math.PI * 2;
-                            sl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, valley.getX() + Math.cos(a) * PromiseIsle.SHIELD_R, valley.getY() + 0.3,
+                            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), valley.getX() + Math.cos(a) * PromiseIsle.SHIELD_R, valley.getY() + 0.3,
                                     valley.getZ() + Math.sin(a) * PromiseIsle.SHIELD_R, 1, 0, 0.05, 0, 0);
                         }
                     }
@@ -443,8 +460,8 @@ public class PilgrimPlume extends CloudMob {
             }
             if (t == JUDGE_TELL) {
                 playSound(CloudMobsSetup.WING_JUDGE.get(), 2.4f, 1.0f);
-                sl.sendParticles(ParticleTypes.FLASH, c.getX() + 0.5, c.getY() + 2, c.getZ() + 0.5, 3, 4, 1, 4, 0);
-                sl.sendParticles(ParticleTypes.END_ROD, c.getX() + 0.5, c.getY() + 6, c.getZ() + 0.5, 120, 6, 4, 6, 0.1);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.getX() + 0.5, c.getY() + 2, c.getZ() + 0.5, 3, 4, 1, 4, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.getX() + 0.5, c.getY() + 6, c.getZ() + 0.5, 24, 6, 4, 6, 0.1);
                 for (ServerPlayer p : PromiseArena.present(sl)) {
                     if (!PromiseIsle.shielded(p)) {
                         strike(p, dmg(3.0));
@@ -460,5 +477,10 @@ public class PilgrimPlume extends CloudMob {
         public void stop() {
             move = "";
         }
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

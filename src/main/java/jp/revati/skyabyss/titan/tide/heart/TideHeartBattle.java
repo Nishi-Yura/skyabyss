@@ -166,7 +166,7 @@ public final class TideHeartBattle {
                     p.playNotifySound(TideHeartSetup.ROAR.get(), SoundSource.HOSTILE, 2.5f, 1.1f);
                 }
             }
-            level.sendParticles(ParticleTypes.SPLASH, home.x, home.y + 2, home.z, 120, 2.0, 1.5, 2.0, 0.3);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), home.x, home.y + 2, home.z, 24, 2.0, 1.5, 2.0, 0.3);
             broadcast(level, group, ModText.battle("message.skyabyss.tide_heart.begin"));
             SkyAbyss.LOGGER.info("The heart of the tide shell woke with {} challenger(s)", challengers.size());
             return heart;
@@ -310,8 +310,8 @@ public final class TideHeartBattle {
         Vec3 c = TideHeartArena.heartHome();
         UUID owner = owner();
         if (owner != null && defeated(level, owner)) {
-            level.sendParticles(ParticleTypes.END_ROD, c.x, TideHeartArena.FLOOR + (level.getGameTime() % 12), c.z, 3, 0.25, 0.2, 0.25, 0.02);
-            level.sendParticles(ParticleTypes.BUBBLE_POP, c.x, TideHeartArena.FLOOR + 1, c.z, 2, 0.4, 0.3, 0.4, 0.02);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, TideHeartArena.FLOOR + (level.getGameTime() % 12), c.z, 3, 0.25, 0.2, 0.25, 0.02);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, TideHeartArena.FLOOR + 1, c.z, 2, 0.4, 0.3, 0.4, 0.02);
         }
         for (ServerPlayer player : List.copyOf(level.players())) {
             if (!player.isAlive() || player.isSpectator()) {
@@ -446,5 +446,10 @@ public final class TideHeartBattle {
         ROOMS.clear();
         RoomLocks.release(ROOM_ID);
         TideHeartArena.resetState();
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

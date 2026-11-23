@@ -85,7 +85,7 @@ public final class EmberIds {
     public static final String EMBER_CHESTPLATE = "ember_chestplate";
     public static final String EMBER_LEGGINGS = "ember_leggings";
     public static final String EMBER_BOOTS = "ember_boots";
-    public static final String EMBER_WAR_AXE = "ember_war_axe";     // → G 余燼の戦斧
+    public static final String EMBER_WAR_AXE = "ember_war_axe";     // → G 熾火の戦斧
     public static final String EMBER_MANTLE = "ember_mantle";       // → G 熾火の外套 (装飾の枠)
     public static final String KINDLING_CHARM = "kindling_charm";   // → G 熾りの護符 (護符の枠)
     public static final String SMITH_HAMMER = "smith_hammer";       // → G 鍛え手の大鎚 (専用の逸品。E のモデルと同じ形)
@@ -93,9 +93,11 @@ public final class EmberIds {
     public static final String EMBER_LANTERN = "ember_lantern";     // → G 余燼の灯 (専用の逸品、装飾の枠)
     // 図鑑の並び (EmberLoot・記録の画面・自己テストが使う。順は 6.3節の表)
     public static final List<String> CODEX = List.of(EMBER_HELMET, EMBER_CHESTPLATE, EMBER_LEGGINGS, EMBER_BOOTS, EMBER_WAR_AXE, EMBER_MANTLE,
-            KINDLING_CHARM, "ember_staff", "ember_censer", "ember_greatsword", "ember_bow", "ember_dagger", SMITH_HAMMER, THRALL_POKER, EMBER_LANTERN);
-    // 初回の選択の専用の逸品三つ
-    public static final List<String> FIRST_CLEAR_CHOICES = List.of(SMITH_HAMMER, THRALL_POKER, EMBER_LANTERN);
+            KINDLING_CHARM, "ember_staff", "ember_censer", "ember_greatsword", "ember_bow", "ember_dagger", SMITH_HAMMER, THRALL_POKER, EMBER_LANTERN,
+            "ember_cinder_blade", "ember_ash_knife", "ember_kiln_staff", "ember_flare_bow", "ember_censer_bell_staff");
+    // 専用の逸品 (初回の選択。残りの職のヒロイック武器 5 本も同じ入り方。2026-11-21)
+    public static final List<String> FIRST_CLEAR_CHOICES = List.of(SMITH_HAMMER, THRALL_POKER, EMBER_LANTERN,
+            "ember_cinder_blade", "ember_ash_knife", "ember_kiln_staff", "ember_flare_bow", "ember_censer_bell_staff");
     // 天の鍵の欠片は共通の ModItems.SKY_KEY_FRAGMENT (四つ目)。天の鍵は story.SkyKey がそろえる (14 の 4章)
 
     // ================================================================ 音 (SoundEvent の名前。assets/skyabyss/sounds.json の鍵も同じ。音の絵は tools/gen/sound/gen_ember_sounds.py → A)

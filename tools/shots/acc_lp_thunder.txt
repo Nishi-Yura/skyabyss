@@ -56,7 +56,6 @@ wait 10
 chat clear
 shot storm_charm_tp_legend
 acctier off
-accmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:storm_charm
 perspective first
 hud on
@@ -70,7 +69,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot storm_charm_tp_flat
-accmesh on
 cmd item replace entity @s weapon.mainhand with minecraft:air
 cmd execute if entity @e[type=item] run kill @e[type=item]
 cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
@@ -128,7 +126,6 @@ wait 10
 chat clear
 shot storm_anklet_tp_legend
 acctier off
-accmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:storm_anklet
 perspective first
 hud on
@@ -142,7 +139,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot storm_anklet_tp_flat
-accmesh on
 cmd item replace entity @s weapon.mainhand with minecraft:air
 cmd execute if entity @e[type=item] run kill @e[type=item]
 cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
@@ -265,7 +261,6 @@ wait 10
 chat clear
 shot storm_eye_feather_tp_legend
 acctier off
-accmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:storm_eye_feather
 perspective first
 hud on
@@ -279,7 +274,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot storm_eye_feather_tp_flat
-accmesh on
 cmd item replace entity @s weapon.mainhand with minecraft:air
 cmd execute if entity @e[type=item] run kill @e[type=item]
 cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
@@ -402,7 +396,6 @@ wait 10
 chat clear
 shot gale_feather_tp_legend
 acctier off
-accmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:gale_feather
 perspective first
 hud on
@@ -416,7 +409,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot gale_feather_tp_flat
-accmesh on
 cmd item replace entity @s weapon.mainhand with minecraft:air
 cmd execute if entity @e[type=item] run kill @e[type=item]
 cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]

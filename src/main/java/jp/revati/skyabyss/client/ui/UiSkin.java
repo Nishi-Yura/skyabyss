@@ -142,13 +142,12 @@ public final class UiSkin {
         }
 
         @SubscribeEvent
+        // ツールチップは板と同じ絵柄 (藍の地に金の細い縁。docs/design/56 の 2 章)。絵柄のパックの有無によらない。
+        // 品のレア度は縁の色でなく名前の色で見せる (縁が品ごとに変わると板の縁とそろわない)
         static void onTooltipColor(RenderTooltipEvent.Color event) {
-            if (!active) {
-                return;
-            }
-            event.setBackground(tipBg);
-            event.setBorderStart(tipEdge2);
-            event.setBorderEnd(tipEdge);
+            event.setBackground(0xF00C1022);
+            event.setBorderStart(Golden.LINE);
+            event.setBorderEnd(0xFF8A7440);
         }
     }
 

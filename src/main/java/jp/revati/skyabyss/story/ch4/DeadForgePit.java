@@ -22,7 +22,6 @@ import jp.revati.skyabyss.story.ch1.Tasks;
 import jp.revati.skyabyss.tablet.Tablets;
 import jp.revati.skyabyss.titan.ember.EmberTitanSetup;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -210,7 +209,7 @@ public final class DeadForgePit {
             return false;
         }
         jp.revati.skyabyss.npc.NpcBonds.sync(player);
-        level.sendParticles(ParticleTypes.FLAME, at.getX() + 0.5, at.getY() + 1.2, at.getZ() + 0.5, 16, 0.25, 0.2, 0.25, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 1.2, at.getZ() + 0.5, 16, 0.25, 0.2, 0.25, 0.02);
         level.playSound(null, at, SoundEvents.BLAZE_SHOOT, SoundSource.BLOCKS, 0.35f, 0.6f);
         jp.revati.skyabyss.story.ch1.Tasks.later(30, () -> Notice.narrate(player, "message.skyabyss.ch5.forge_fire"));
         jp.revati.skyabyss.quest.Quests.refresh(player, false);
@@ -222,10 +221,6 @@ public final class DeadForgePit {
         level.playSound(null, at, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 0.5f, 1.4f);
     }
 
-    public static boolean warmNow(ServerLevel level, BlockPos at) {
-        Long until = WARM.get(at.asLong());
-        return until != null && until > level.getGameTime();
-    }
 
     // range の内の温まっている台 (なければ null)。熾り蟲が寄る先
     @Nullable
@@ -260,13 +255,18 @@ public final class DeadForgePit {
             BlockPos at = BlockPos.of(key);
             ServerLevel level = inside != null && inside.isLoaded(at) && inside.getBlockState(at).is(net.minecraft.world.level.block.Blocks.SMOOTH_BASALT) ? inside : over;
             if (level.isLoaded(at)) {
-                level.sendParticles(ParticleTypes.SMALL_FLAME, at.getX() + 0.5, at.getY() + 1.1, at.getZ() + 0.5, 2, 0.15, 0.05, 0.15, 0.01);
-                level.sendParticles(ParticleTypes.WHITE_ASH, at.getX() + 0.5, at.getY() + 1.4, at.getZ() + 0.5, 3, 0.4, 0.3, 0.4, 0.01);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 1.1, at.getZ() + 0.5, 2, 0.15, 0.05, 0.15, 0.01);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.getX() + 0.5, at.getY() + 1.4, at.getZ() + 0.5, 3, 0.4, 0.3, 0.4, 0.01);
             }
         }
     }
 
     static void forget() {
         WARM.clear();
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

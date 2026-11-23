@@ -91,11 +91,12 @@ public final class MoonGearSelfTest {
     // ---------------------------------------------------------------- 表
     private static void table(List<String> f) {
         check(f, TitanGearSets.get(MoonGear.DUNGEON) == MoonGear.SET, "moon set is not registered in TitanGearSets");
-        check(f, MoonGear.SET.collection().size() == 12 && MoonGear.SET.exclusives().equals(List.of(MoonGear.BLADE, MoonGear.RING)),
-                "moon codex should hold 12 items with 2 exclusives: " + MoonGear.SET.collection());
-        // 別枠のヒロイック 5 本: 図鑑に入れず、ヒロイック・Lv 50
+        check(f, MoonGear.SET.collection().size() == 17 && MoonGear.SET.exclusives().subList(0, 2).equals(List.of(MoonGear.BLADE, MoonGear.RING))
+                && MoonGear.SET.exclusives().containsAll(MoonGear.HEROICS) && MoonGear.SET.exclusives().size() == 7,
+                "moon codex should hold 17 items with 7 exclusives: " + MoonGear.SET.collection());
+        // 残りの職のヒロイック 5 本: 図鑑の専用の逸品、ヒロイック・Lv 50
         for (String id : MoonGear.HEROICS) {
-            check(f, TitanGearSet.registered(id) && !MoonGear.SET.collection().contains(id), id + " should be registered and outside the codex");
+            check(f, TitanGearSet.registered(id) && MoonGear.SET.isExclusive(id), id + " should be registered and a codex exclusive");
             Item it = item(id);
             check(f, it instanceof ModGear g && g.tier() == GearTier.HEROIC && g.dungeon().equals(MoonGear.DUNGEON) && GearLevel.required(it) == 50,
                     id + " should be a Lv 50 heroic moon weapon");
@@ -251,15 +252,6 @@ public final class MoonGearSelfTest {
         MoonGearLoot.Roll roll = MoonGearLoot.rollCore(c, 0, random, TitanGearSet::registered, stacks);
         check(f, roll.core() && c.firstCleared && count(stacks, MoonGearSetup.CORE.get()) == 1, "the first core clear should give a moon heart");
         check(f, count(stacks, MoonGearSetup.RESONANCE_SHARD.get()) >= 2, "the core should give 2 resonance shards");
-        // 別枠のヒロイック: 一本ずつ 2% (段 5 で 3%)
-        int hero = 0;
-        int hero5 = 0;
-        for (int i = 0; i < 20000; i++) {
-            hero += MoonGearLoot.heroicDrops(0, random, TitanGearSet::registered).size();
-            hero5 += MoonGearLoot.heroicDrops(5, random, TitanGearSet::registered).size();
-        }
-        notes.add("heroic drops per core clear: tier 0 " + fmt(hero / 20000.0) + ", tier 5 " + fmt(hero5 / 20000.0));
-        check(f, hero > 1600 && hero < 2400 && hero5 > hero, "heroic drops should be about 0.1 per clear: " + hero + " / 20000");
         int total = 0;
         int worst = 0;
         for (int i = 0; i < 4000; i++) {

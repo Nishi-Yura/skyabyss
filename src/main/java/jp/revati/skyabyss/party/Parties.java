@@ -323,10 +323,6 @@ public final class Parties {
         return false;
     }
 
-    // 自己テスト用
-    static void clearInvites() {
-        INVITES.clear();
-    }
 
     @SubscribeEvent
     static void onServerStopped(ServerStoppedEvent event) {

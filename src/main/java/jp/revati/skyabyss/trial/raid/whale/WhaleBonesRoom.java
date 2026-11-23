@@ -203,7 +203,7 @@ public final class WhaleBonesRoom extends RaidRoom {
         BlockPos top = ctx.origin().offset(CORNER[bone][0], 5, CORNER[bone][1]);
         ServerLevel level = ctx.level();
         level.playSound(null, top, SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.PLAYERS, 1.6f, PITCH[bone]);
-        level.sendParticles(ParticleTypes.NOTE, top.getX() + 1.0, top.getY() + 0.8, top.getZ() + 1.0, 3, 0.3, 0.2, 0.3, 0.5);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), top.getX() + 1.0, top.getY() + 0.8, top.getZ() + 1.0, 3, 0.3, 0.2, 0.3, 0.5);
     }
 
     // 骨の頭: 鳴っている間は灯る
@@ -277,5 +277,10 @@ public final class WhaleBonesRoom extends RaidRoom {
 
     public int mistakes() {
         return mistakes;
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

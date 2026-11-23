@@ -304,7 +304,7 @@ public final class FacilityActions {
         for (ItemStack s : brewKit()) {
             jp.revati.skyabyss.quest.Quests.give(player, s);
         }
-        Notice.gain(player, "message.skyabyss.apothecary.lesson_kit");
+        Notice.gainLog(player, "message.skyabyss.apothecary.lesson_kit");
         return true;
     }
 

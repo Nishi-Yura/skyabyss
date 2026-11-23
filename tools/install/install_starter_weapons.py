@@ -32,7 +32,12 @@ ITEMS = ["shrine_staff", "shrine_bell_staff", "shrine_dagger"]
 LEVELS = ["", "_plus5", "_plus10"]
 ANALOG = {"shrine_staff": "abyss_bell_staff", "shrine_bell_staff": "abyss_bell_staff", "shrine_dagger": "waterway_fang"}
 # 一人称の手元を直す (鈴杖の B 案は鉤の先に大きな鈴が下がるので、借りた持ち方のままだと鈴が視界をふさぐ)
-FIRST_PERSON = {"shrine_bell_staff": {"scale": [0.5, 0.5, 0.5], "translation": [1.6, 0.2, -0.6]}}
+# 鉤と鈴を前へ向ける (tools/lib/weapon_display.py の HEAD_FORWARD と同じ。y を右手 +90・左手 -90)
+FIRST_PERSON = {"shrine_bell_staff": {
+    "firstperson_righthand": {"rotation": [-8.0, 90.0, 45.0], "scale": [0.5, 0.5, 0.5], "translation": [1.6, 0.2, -0.6]},
+    "firstperson_lefthand": {"rotation": [-8.0, -90.0, -45.0], "scale": [0.5, 0.5, 0.5], "translation": [1.6, 0.2, -0.6]},
+    "thirdperson_righthand": {"rotation": [33.0, 90.0, 45.0]},
+    "thirdperson_lefthand": {"rotation": [33.0, -90.0, -45.0]}}}
 
 
 def bake_glow(atlas: Path, mask: Path):
@@ -70,8 +75,8 @@ def install(item: str, opt: str):
     analog = ANALOG[item]
     models = ASSETS / "models/item"
     data = json.loads((models / f"{analog}.json").read_text(encoding="utf-8").replace(analog, item))
-    for hand in ("firstperson_righthand", "firstperson_lefthand"):
-        data["base"]["display"][hand].update(FIRST_PERSON.get(item, {}))
+    for hand in ("firstperson_righthand", "firstperson_lefthand", "thirdperson_righthand", "thirdperson_lefthand"):
+        data["base"]["display"][hand].update(FIRST_PERSON.get(item, {}).get(hand, {}))
     (models / f"{item}.json").write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     shutil.copyfile(src / "icon.png", ASSETS / "textures/item" / f"{item}.png")
     print(item, "option", opt, "installed")

@@ -27,12 +27,17 @@ public class CinderLampBlock extends LanternBlock {
         double z = pos.getZ() + 0.5;
         // ごくまれに、籠の隙間から火の粉がひとつ昇る (ちらつきの代わり。明るさ自体は変えない)
         if (random.nextInt(14) == 0) {
-            level.addParticle(ParticleTypes.SMALL_FLAME, x + (random.nextDouble() - 0.5) * 0.25, y + 0.1, z + (random.nextDouble() - 0.5) * 0.25,
+            level.addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x + (random.nextDouble() - 0.5) * 0.25, y + 0.1, z + (random.nextDouble() - 0.5) * 0.25,
                     0, 0.004, 0);
         }
         if (random.nextInt(22) == 0) {
-            level.addParticle(ParticleTypes.ASH, x + (random.nextDouble() - 0.5) * 0.4, y - 0.25, z + (random.nextDouble() - 0.5) * 0.4,
+            level.addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), x + (random.nextDouble() - 0.5) * 0.4, y - 0.25, z + (random.nextDouble() - 0.5) * 0.4,
                     0, -0.01, 0);
         }
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

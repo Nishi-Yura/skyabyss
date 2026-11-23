@@ -1,0 +1,43 @@
+# 持ち物の画面の人形の兜の確かめ
+world splatall flat
+size 1280 720
+timeout 600
+render 6
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd gamemode survival
+cmd skyabyss level set @p 50
+cmd tp @s 0 -60 20 180 0
+wait 20
+cmd item replace entity @s armor.chest with minecraft:air
+cmd item replace entity @s armor.legs with minecraft:air
+cmd item replace entity @s armor.feet with minecraft:air
+cmd item replace entity @s weapon.mainhand with minecraft:air
+cmd item replace entity @s armor.head with skyabyss:stone_whale_helmet
+hud on
+wait 40
+perspective front
+wait 20
+shot helm_world
+perspective first
+open inventory
+wait 40
+shot helm_gui
+close
+splat cpu
+open inventory
+wait 20
+shot helm_gui_cpu
+close
+splat gpu
+cmd item replace entity @s armor.head with minecraft:diamond_helmet
+open inventory
+wait 20
+shot helm_gui_vanilla
+close
+quit

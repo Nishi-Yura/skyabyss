@@ -56,7 +56,6 @@ wait 10
 chat clear
 shot kindling_charm_tp_legend
 acctier off
-accmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:kindling_charm
 perspective first
 hud on
@@ -70,7 +69,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot kindling_charm_tp_flat
-accmesh on
 cmd item replace entity @s weapon.mainhand with minecraft:air
 cmd execute if entity @e[type=item] run kill @e[type=item]
 cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
@@ -128,7 +126,6 @@ wait 10
 chat clear
 shot ember_mantle_tp_legend
 acctier off
-accmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:ember_mantle
 perspective first
 hud on
@@ -142,7 +139,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot ember_mantle_tp_flat
-accmesh on
 cmd item replace entity @s weapon.mainhand with minecraft:air
 cmd execute if entity @e[type=item] run kill @e[type=item]
 cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
@@ -265,7 +261,6 @@ wait 10
 chat clear
 shot ember_lantern_tp_legend
 acctier off
-accmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:ember_lantern
 perspective first
 hud on
@@ -279,7 +274,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot ember_lantern_tp_flat
-accmesh on
 cmd item replace entity @s weapon.mainhand with minecraft:air
 cmd execute if entity @e[type=item] run kill @e[type=item]
 cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
@@ -402,7 +396,6 @@ wait 10
 chat clear
 shot ember_horn_tp_legend
 acctier off
-accmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:ember_horn
 perspective first
 hud on
@@ -416,7 +409,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot ember_horn_tp_flat
-accmesh on
 cmd item replace entity @s weapon.mainhand with minecraft:air
 cmd execute if entity @e[type=item] run kill @e[type=item]
 cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
@@ -474,7 +466,6 @@ wait 10
 chat clear
 shot cinder_lamp_tp_legend
 acctier off
-accmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:cinder_lamp
 perspective first
 hud on
@@ -488,7 +479,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot cinder_lamp_tp_flat
-accmesh on
 cmd item replace entity @s weapon.mainhand with minecraft:air
 cmd execute if entity @e[type=item] run kill @e[type=item]
 cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]

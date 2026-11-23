@@ -36,9 +36,6 @@ public enum Job {
         return "job.skyabyss." + id;
     }
 
-    public String roleKey() {
-        return "job.skyabyss." + id + ".role";
-    }
 
     @Nullable
     public static Job byId(String id) {

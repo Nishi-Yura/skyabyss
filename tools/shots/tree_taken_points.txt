@@ -1,0 +1,38 @@
+# 2026-11-13: 取った節の説明に「スキルポイントが足りない」と出ていた不具合の確かめ。残り 0 点で、段がまだ上がる技 (雲穿ち 1/3) の節を開く
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/tree_taken_points.txt -PshotsName=tree_taken_points
+world shots flat
+size 1280 720
+timeout 400
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 2
+cmd skyabyss skill forget @p
+cmd skyabyss job reset
+cmd skyabyss job choose archer
+cmd skyabyss skill node @p cloud_pierce
+cmd skyabyss skill node @p agi_1
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 20
+
+open skills_node:cloud_pierce
+wait 10
+shot taken_no_points
+wheel 320 130 -1
+wheel 320 130 -1
+wheel 320 130 -1
+wheel 320 130 -1
+wheel 320 130 -1
+wheel 320 130 -1
+wheel 320 130 -1
+wheel 320 130 -1
+wait 5
+shot taken_no_points_scrolled
+close

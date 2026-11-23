@@ -64,7 +64,12 @@ public final class TideGear {
             TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.TIDE_DAGGER, jp.revati.skyabyss.item.ChapterGear.CHANCE),
             TitanGearSet.exclusive(CLAW, CLAW_CHANCE),
             TitanGearSet.exclusive(HARPOON, HARPOON_CHANCE),
-            TitanGearSet.exclusive(PEARL, PEARL_CHANCE)));
+            TitanGearSet.exclusive(PEARL, PEARL_CHANCE),
+            // 残りの職のヒロイック武器 (item/HeroicGear。どの職も同じ入り方: 図鑑・天井・交換・初回の選択。後ろへ足す = 交換の番号を変えない)
+            TitanGearSet.exclusive("skyabyss:tide_reef_hammer", CLAW_CHANCE),
+            TitanGearSet.exclusive("skyabyss:tide_pearl_staff", CLAW_CHANCE),
+            TitanGearSet.exclusive("skyabyss:tide_coral_bow", CLAW_CHANCE),
+            TitanGearSet.exclusive("skyabyss:tide_surf_bell_staff", CLAW_CHANCE)));
 
     public static final List<String> ARMOR = List.of(HELMET, CHESTPLATE, LEGGINGS, BOOTS);
 

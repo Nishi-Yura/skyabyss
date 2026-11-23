@@ -159,11 +159,11 @@ public class CliffCreeper extends MoonMob {
             if (t <= DROP_TELL && t % 2 == 0) {
                 for (int i = 0; i < 14; i++) {
                     double a = i / 14.0 * Math.PI * 2;
-                    sl.sendParticles(ParticleTypes.SQUID_INK, spot.x + Math.cos(a) * DROP_RADIUS, spot.y + 0.1, spot.z + Math.sin(a) * DROP_RADIUS, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), spot.x + Math.cos(a) * DROP_RADIUS, spot.y + 0.1, spot.z + Math.sin(a) * DROP_RADIUS, 1, 0, 0, 0, 0);
                 }
                 // 落ちてくる岩の影 (上から下りる粒)
                 double h = 8.0 * (1.0 - t / (double) DROP_TELL);
-                sl.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.TUFF.defaultBlockState()), spot.x, spot.y + 1 + h, spot.z, 3, 0.3, 0.2, 0.3, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), spot.x, spot.y + 1 + h, spot.z, 3, 0.3, 0.2, 0.3, 0);
             }
             if (t == 8) {
                 entityData.set(ROCKLESS, true);
@@ -171,7 +171,7 @@ public class CliffCreeper extends MoonMob {
             }
             if (t == DROP_TELL) {
                 playSound(MoonMobsSetup.CREEPER_ROCK.get(), 1.4f, 0.8f);
-                sl.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.TUFF.defaultBlockState()), spot.x, spot.y + 0.5, spot.z, 40, 0.8, 0.4, 0.8, 0.1);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), spot.x, spot.y + 0.5, spot.z, 24, 0.8, 0.4, 0.8, 0.1);
                 for (Player p : sl.getEntitiesOfClass(Player.class, new AABB(spot, spot).inflate(DROP_RADIUS, 2.5, DROP_RADIUS), e -> e.isAlive())) {
                     if (p.position().subtract(spot).horizontalDistance() <= DROP_RADIUS + 0.3) {
                         strike(p, dmg(1.3));
@@ -191,5 +191,10 @@ public class CliffCreeper extends MoonMob {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.CRESCENT_SHELL.get(), 0.3, 1, 1);
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

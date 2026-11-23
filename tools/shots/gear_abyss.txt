@@ -1,0 +1,595 @@
+# 月のシリーズ（look5）を一人称・近く・全身で撮る
+# ./gradlew runShots --offline --no-daemon -Pscript=tools/shots/gear_abyss.txt -PshotsName=gear_abyss
+world gear_look flat
+size 1280 720
+timeout 4000
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd gamerule doMobLoot false
+camera 0 -60 0 0 0
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 70
+cmd skyabyss level set @p 30
+swingpose off
+gearlook all a
+cmd tp @s 0.5 -60 0.5 0 0
+cmd kill @e[type=!player]
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_ash_scythe
+close
+wait 30
+chat clear
+shot fp_abyss_ash_scythe
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_ash_scythe
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_ash_scythe
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_bell_staff
+close
+wait 30
+chat clear
+shot fp_abyss_bell_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_bell_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_bell_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_depth_bow
+close
+wait 30
+chat clear
+shot fp_abyss_depth_bow
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_depth_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_depth_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_ember_bell_staff
+close
+wait 30
+chat clear
+shot fp_abyss_ember_bell_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_ember_bell_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_ember_bell_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_ember_bow
+close
+wait 30
+chat clear
+shot fp_abyss_ember_bow
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_ember_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_ember_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_ember_dagger
+close
+wait 30
+chat clear
+shot fp_abyss_ember_dagger
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_ember_dagger
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_ember_dagger
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_ember_staff
+close
+wait 30
+chat clear
+shot fp_abyss_ember_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_ember_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_ember_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_ember_sword
+close
+wait 30
+chat clear
+shot fp_abyss_ember_sword
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_ember_sword
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_ember_sword
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_greatsword
+close
+wait 30
+chat clear
+shot fp_abyss_greatsword
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_greatsword
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_greatsword
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_lamp_staff
+close
+wait 30
+chat clear
+shot fp_abyss_lamp_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_lamp_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_lamp_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_lamp_sword
+close
+wait 30
+chat clear
+shot fp_abyss_lamp_sword
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_lamp_sword
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_lamp_sword
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_pulse_dagger
+close
+wait 30
+chat clear
+shot fp_abyss_pulse_dagger
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_pulse_dagger
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_pulse_dagger
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_sinking_anchor
+close
+wait 30
+chat clear
+shot fp_abyss_sinking_anchor
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_sinking_anchor
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_sinking_anchor
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_storm_bell_staff
+close
+wait 30
+chat clear
+shot fp_abyss_storm_bell_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_storm_bell_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_storm_bell_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_storm_bow
+close
+wait 30
+chat clear
+shot fp_abyss_storm_bow
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_storm_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_storm_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_storm_dagger
+close
+wait 30
+chat clear
+shot fp_abyss_storm_dagger
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_storm_dagger
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_storm_dagger
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_storm_hammer
+close
+wait 30
+chat clear
+shot fp_abyss_storm_hammer
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_storm_hammer
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_storm_hammer
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_storm_staff
+close
+wait 30
+chat clear
+shot fp_abyss_storm_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_storm_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_storm_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_storm_sword
+close
+wait 30
+chat clear
+shot fp_abyss_storm_sword
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_storm_sword
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_storm_sword
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_tide_bow
+close
+wait 30
+chat clear
+shot fp_abyss_tide_bow
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_tide_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_tide_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_tide_dagger
+close
+wait 30
+chat clear
+shot fp_abyss_tide_dagger
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_tide_dagger
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_tide_dagger
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_tide_hammer
+close
+wait 30
+chat clear
+shot fp_abyss_tide_hammer
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_tide_hammer
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_tide_hammer
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_tide_staff
+close
+wait 30
+chat clear
+shot fp_abyss_tide_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_tide_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_tide_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_tide_sword
+close
+wait 30
+chat clear
+shot fp_abyss_tide_sword
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_tide_sword
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_tide_sword
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_toll_bell_staff
+close
+wait 30
+chat clear
+shot fp_abyss_toll_bell_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_toll_bell_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_toll_bell_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_whale_bell_staff
+close
+wait 30
+chat clear
+shot fp_abyss_whale_bell_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_whale_bell_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_whale_bell_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_whale_bow
+close
+wait 30
+chat clear
+shot fp_abyss_whale_bow
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_whale_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_whale_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_whale_fang
+close
+wait 30
+chat clear
+shot fp_abyss_whale_fang
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_whale_fang
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_whale_fang
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_whale_hammer
+close
+wait 30
+chat clear
+shot fp_abyss_whale_hammer
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_whale_hammer
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_whale_hammer
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_whale_staff
+close
+wait 30
+chat clear
+shot fp_abyss_whale_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_whale_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_whale_staff

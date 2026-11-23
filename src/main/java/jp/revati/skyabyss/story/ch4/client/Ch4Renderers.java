@@ -8,7 +8,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.client.entity.GearLayer;
-import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import jp.revati.skyabyss.client.opening.SiteTargets;
 import jp.revati.skyabyss.story.ch4.Ch4Ground;
@@ -115,35 +114,24 @@ public final class Ch4Renderers {
 
     static final class VariantModel<T extends AshThrall> extends LowPolyGeoRenderer.Model<T> {
         private final ResourceLocation lowGeo = id("geo/entity/ash_thrall_lowpoly.geo.json");
-        private final ResourceLocation debugGeo = id("geo/entity/ash_thrall_lowpoly_debug.geo.json");
         private final ResourceLocation anim;
         private final ResourceLocation flaredLow;
-        private final ResourceLocation flared;
-        private final ResourceLocation cubeGeo;
 
         VariantModel(String name, String animName) {
             super(name);
             this.anim = id("animations/entity/" + animName + ".animation.json");
             this.flaredLow = id("textures/lowpoly/" + name + "_flared.png");
-            this.flared = id("textures/entity/" + name + "_flared.png");
-            this.cubeGeo = id("geo/entity/" + name + ".geo.json");
         }
 
         // 低ポリの骨は灰の番人の共通の骨 (ash_thrall_lowpoly) を使う。キューブのときも、キューブの素材が無ければ同じ骨
         @Override
         public ResourceLocation getModelResource(T animatable) {
-            if (LowPoly.enabled) {
-                return LowPoly.debug ? debugGeo : lowGeo;
-            }
-            return LowPoly.cubeOr(cubeGeo, lowGeo);
+            return lowGeo;
         }
 
         @Override
         public ResourceLocation getTextureResource(T thrall) {
-            if (LowPoly.enabled && !LowPoly.debug) {
-                return thrall.isFlared() ? flaredLow : super.getTextureResource(thrall);
-            }
-            return !LowPoly.enabled && thrall.isFlared() && LowPoly.cubeHere(flared) ? flared : super.getTextureResource(thrall);
+            return thrall.isFlared() ? flaredLow : super.getTextureResource(thrall);
         }
 
         @Override
@@ -155,7 +143,6 @@ public final class Ch4Renderers {
     static final class ThrallVariant<T extends AshThrall> extends Mob<T> {
         ThrallVariant(EntityRendererProvider.Context ctx, String name, String animName, String gear, float scale, float shadow) {
             super(ctx, new VariantModel<>(name, animName), name, scale, shadow);
-            addRenderLayer(new GearLayer<>(this, "socket_main", "ash_poker", mob -> "idle").activeWhen(() -> !LowPoly.enabled));
             addRenderLayer(GearLayer.lowPoly(this, "socket_main", gear));
         }
 

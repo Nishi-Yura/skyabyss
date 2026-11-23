@@ -8,8 +8,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 OPENS = ["inventory", "travel_map", "lore", "quests", "growth", "journey", "profile", "skills", "skills_node:cheap_thunder_bolt", "skills_build",
-         "skills_tryon", "skills_deep", "skills_past", "skills_ext", "job_choice", "party", "rebirth", "wheel", "notices", "grave",
-         "pouchwheel_9", "tower_desk", "chat"]
+         "skills_tryon", "skills_deep", "skills_past", "skills_ext", "job_choice", "party", "rebirth", "wheel", "notices",
+         "pouchwheel_9", "tower_desk", "chat", "jp.revati.skyabyss.client.box.BoxPouchScreen", "party_finder",
+         "shrine_demo", "trial_board_demo"]
 CMDS = [("shop_" + s, "skyabyss facility shop " + s) for s in ["apothecary", "food_shop", "material_shop", "outfit_shop", "smithy", "tool_shop", "tower",
                                                                  "black_market"]]
 # guide は町の場面 (CinematicScreen) を始めることがあるので最後に。働きのあとは場面を止める
@@ -32,8 +33,17 @@ def main():
         tag = "%s_g%d" % (win.split()[0], gs)
         L += ["", "# ---- %s GUI %d" % (win, gs), "window " + win, "wait 10", "guiscale %d" % gs, "wait 10"]
         for o in OPENS:
-            name = o.replace(":", "_")
+            name = o.replace(":", "_").rsplit(".", 1)[-1]
             L += ["open " + o, "wait 8", "overlap %s_%s" % (name, tag), "shot %s_%s" % (name, tag), "close", "wait 2"]
+        # 装飾の画面はサーバーが開く (つまみを押したのと同じ)
+        L += ["openacc", "wait 12", "overlap accessory_%s" % tag, "shot accessory_%s" % tag, "close", "wait 2"]
+        # 旅袋 (キー) と共鳴の炉 (コマンド) もサーバーが開く
+        L += ["key skyabyss_pouch.key.open", "wait 12", "overlap pouch_%s" % tag, "shot pouch_%s" % tag, "close", "wait 2"]
+        L += ["cmd skyabyss_forge open", "wait 12", "overlap forge_%s" % tag, "shot forge_%s" % tag, "close", "wait 2"]
+        # 会話の帯 (道具屋の付き人を呼んで話しかける)
+        L += ['cmd execute at @s run summon skyabyss:attendant ~ ~ ~3 {NoAI:1b,Role:"tool_merchant",Variant:1,Rotation:[180f,0f],PersistenceRequired:1b}',
+              "wait 5", 'cmd skyabyss dev talk "skyabyss:attendant_tool_merchant"', "wait 12", "overlap dialogue_%s" % tag, "shot dialogue_%s" % tag, "close", "wait 2",
+              "cmd kill @e[type=skyabyss:attendant]"]
         for name, c in CMDS:
             L += ["cmd skyabyss cinematic stop", "cmd " + c, "wait 12", "overlap %s_%s" % (name, tag), "shot %s_%s" % (name, tag), "close", "wait 2"]
     io.open(ROOT / "tools/shots/overlap_audit.txt", "w", encoding="utf-8", newline="\n").write("\n".join(L) + "\n")

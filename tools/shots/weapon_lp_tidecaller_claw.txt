@@ -135,7 +135,6 @@ wait 10
 chat clear
 shot tidecaller_claw_tp_legend_p10
 weapontier off
-weaponmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:tidecaller_claw
 perspective first
 hud on
@@ -149,7 +148,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot tidecaller_claw_tp_voxel
-weaponmesh on
 cmd item replace entity @s weapon.mainhand with minecraft:air
 cmd summon item 0 -59 4 {Item:{id:"skyabyss:tidecaller_claw",count:1},PickupDelay:32767,Age:-32768}
 cmd summon item_frame 3 -59 4 {Facing:3b,Item:{id:"skyabyss:tidecaller_claw",count:1},Invulnerable:1b}

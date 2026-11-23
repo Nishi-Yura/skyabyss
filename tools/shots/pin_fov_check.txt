@@ -1,0 +1,36 @@
+# 2026-11-15: クエストのひし形の標 (ObjectiveMarker) が、走る・速さの効果などで視野が変わると、指す場所からずれるかの確かめ
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/pin_fov_check.txt -PshotsName=pin_fov_check
+# 見本の目的 (HudDemo の OBJECTIVE) は、人の足もとから (+60, +3, -30)。そこに金のブロックを置き、標と重なるかを見る
+world pinfov flat
+size 1280 720
+timeout 400
+render 6
+clouds off
+guiscale 3
+
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd skyabyss playtest skip opening
+cmd skyabyss cinematic stop
+cmd tp @s 0 -60 0
+wait 20
+cmd setblock 60 -57 -30 minecraft:gold_block
+cmd setblock 60 -56 -30 minecraft:gold_block
+cmd tp @s 0 -60 0 facing 60 -57 -5
+hud on
+waitchunks
+chat clear
+wait 200
+cmd skyabyss cinematic stop
+wait 40
+huddemo opening
+wait 40
+shot a_normal_fov
+cmd effect give @s minecraft:speed 60 9 true
+wait 40
+shot b_speed_fov
+cmd effect clear @s
+wait 40
+shot c_back_to_normal
+huddemo off

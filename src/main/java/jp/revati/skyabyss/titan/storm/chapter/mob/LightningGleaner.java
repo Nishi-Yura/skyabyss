@@ -162,7 +162,7 @@ public class LightningGleaner extends GuardMob {
         entityData.set(PACK, false);
         playSound(Ch3Mobs.GLEANER_DROP.get(), 0.9f, 1.0f);
         if (level() instanceof ServerLevel server) {
-            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 1.1, getZ(), 6, 0.2, 0.1, 0.2, 0.05);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.1, getZ(), 6, 0.2, 0.1, 0.2, 0.05);
             Item wire = Ch3Mobs.item(Ch3Mobs.COPPER_WIRE);
             Item feather = Ch3Mobs.item(Ch3Mobs.SCORCHED_FEATHER);
             if (wire != null) {
@@ -313,5 +313,10 @@ public class LightningGleaner extends GuardMob {
     @Override
     protected void playStepSound(BlockPos pos, BlockState state) {
         modStep(Ch3Mobs.GLEANER_STEP.get(), 0.25f);
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

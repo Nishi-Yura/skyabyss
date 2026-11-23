@@ -86,11 +86,13 @@ public final class BellArena {
         e.tuneCloud(1, LastBellkeeper.HP, LastBellkeeper.DMG);
         e.addTag(TAG);
         level.addFreshEntity(e);
+        // 登場: 空から落ちてきて、名前の札と顔のアップ (combat/BossEmerge)
+        jp.revati.skyabyss.combat.BossEmerge.stage(e, "drop", 44, "last_bellkeeper");
         // 人数で強く (受ける傷を割る。47 の 2.6)
         jp.revati.skyabyss.combat.PartyScale.apply(e, present(level).size());
         jp.revati.skyabyss.combat.PartyScale.resist(e, 3.8);
         e.playAction("call");
-        level.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 3, at.getZ() + 0.5, 80, 1.2, 3.0, 1.2, 0.05);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 3, at.getZ() + 0.5, 24, 1.2, 3.0, 1.2, 0.05);
         level.playSound(null, at, CloudMobsSetup.KEEPER_ROAR.get(), SoundSource.HOSTILE, 2.0f, 0.8f);
         empty = 0;
         return e;
@@ -105,7 +107,7 @@ public final class BellArena {
             CloudMob m = put(level, CloudMobsSetup.BELL_MOURNER.get(), at);
             if (m != null) {
                 m.addTag(TAG);
-                level.sendParticles(ParticleTypes.CLOUD, at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 16, 0.4, 0.8, 0.4, 0.02);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 16, 0.4, 0.8, 0.4, 0.02);
             }
         }
     }
@@ -133,7 +135,7 @@ public final class BellArena {
                 }
                 CRUMBLED.put(q.immutable(), was);
                 level.setBlock(q, cloud, 2);
-                level.sendParticles(ParticleTypes.CLOUD, q.getX() + 0.5, q.getY() + 1, q.getZ() + 0.5, 3, 0.3, 0.2, 0.3, 0.02);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), q.getX() + 0.5, q.getY() + 1, q.getZ() + 0.5, 3, 0.3, 0.2, 0.3, 0.02);
             }
         }
         BellIsle.addExtra(CRUMBLED.keySet());
@@ -255,5 +257,10 @@ public final class BellArena {
     static void resetAll() {
         CRUMBLED.clear();
         empty = 0;
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

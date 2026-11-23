@@ -85,7 +85,7 @@ public final class BellIsle {
     public static void ring(ServerLevel level, BlockPos bell) {
         RUNG.put(bell.immutable(), level.getGameTime() + RING_TICKS);
         level.playSound(null, bell, SoundEvents.BELL_RESONATE, SoundSource.BLOCKS, 1.6f, 0.9f);
-        level.sendParticles(ParticleTypes.END_ROD, bell.getX() + 0.5, bell.getY() + 0.5, bell.getZ() + 0.5, 24, 1.5, 0.6, 1.5, 0.03);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), bell.getX() + 0.5, bell.getY() + 0.5, bell.getZ() + 0.5, 24, 1.5, 0.6, 1.5, 0.03);
         update(level);
     }
 
@@ -256,5 +256,10 @@ public final class BellIsle {
     static void reset() {
         RUNG.clear();
         EXTRA.clear();
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

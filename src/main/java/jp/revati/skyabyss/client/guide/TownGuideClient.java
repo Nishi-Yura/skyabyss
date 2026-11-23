@@ -1,6 +1,5 @@
 package jp.revati.skyabyss.client.guide;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
@@ -353,9 +352,4 @@ public final class TownGuideClient {
         return r << 16 | g << 8 | bl;
     }
 
-    // 開発用 (自己テスト・台本): いまの灯りの数
-    public static int lanternCount() {
-        Route r = route;
-        return r == null ? 0 : r.lanterns.size();
-    }
 }

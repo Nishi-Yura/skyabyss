@@ -56,7 +56,6 @@ wait 10
 chat clear
 shot tide_chime_charm_tp_legend
 acctier off
-accmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:tide_chime_charm
 perspective first
 hud on
@@ -70,7 +69,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot tide_chime_charm_tp_flat
-accmesh on
 cmd item replace entity @s weapon.mainhand with minecraft:air
 cmd execute if entity @e[type=item] run kill @e[type=item]
 cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
@@ -128,7 +126,6 @@ wait 10
 chat clear
 shot moontide_pearl_tp_legend
 acctier off
-accmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:moontide_pearl
 perspective first
 hud on
@@ -142,7 +139,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot moontide_pearl_tp_flat
-accmesh on
 cmd item replace entity @s weapon.mainhand with minecraft:air
 cmd execute if entity @e[type=item] run kill @e[type=item]
 cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
@@ -265,7 +261,6 @@ wait 10
 chat clear
 shot tide_watching_shell_tp_legend
 acctier off
-accmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:tide_watching_shell
 perspective first
 hud on
@@ -279,7 +274,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot tide_watching_shell_tp_flat
-accmesh on
 cmd item replace entity @s weapon.mainhand with minecraft:air
 cmd execute if entity @e[type=item] run kill @e[type=item]
 cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
@@ -337,7 +331,6 @@ wait 10
 chat clear
 shot tide_pearl_tp_legend
 acctier off
-accmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:tide_pearl
 perspective first
 hud on
@@ -351,7 +344,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot tide_pearl_tp_flat
-accmesh on
 cmd item replace entity @s weapon.mainhand with minecraft:air
 cmd execute if entity @e[type=item] run kill @e[type=item]
 cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]

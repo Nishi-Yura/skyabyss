@@ -195,7 +195,7 @@ public final class ScorchedWatch {
         level.playSound(null, base, SoundEvents.BEACON_POWER_SELECT, SoundSource.BLOCKS, 0.8f, 1.8f);
         for (int i = 0; i < 16; i++) {
             double a = Math.PI * 2 * i / 16;
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, base.getX() + 0.5 + Math.cos(a) * STRIKE_MOB, base.getY() + 0.2, base.getZ() + 0.5 + Math.sin(a) * STRIKE_MOB,
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), base.getX() + 0.5 + Math.cos(a) * STRIKE_MOB, base.getY() + 0.2, base.getZ() + 0.5 + Math.sin(a) * STRIKE_MOB,
                     2, 0.05, 0.1, 0.05, 0.01);
         }
         for (ServerPlayer p : inside) {
@@ -244,5 +244,10 @@ public final class ScorchedWatch {
 
     static void forget() {
         NEXT.clear();
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

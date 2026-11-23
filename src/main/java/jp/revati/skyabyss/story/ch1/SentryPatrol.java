@@ -79,7 +79,7 @@ public final class SentryPatrol {
         if (!want) {
             for (BoneSentinel s : now) {
                 // 昼は眠る: 静かに消える
-                level.sendParticles(ParticleTypes.POOF, s.getX(), s.getY() + 1.0, s.getZ(), 8, 0.3, 0.5, 0.3, 0.01);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), s.getX(), s.getY() + 1.0, s.getZ(), 8, 0.3, 0.5, 0.3, 0.01);
                 s.discard();
             }
             return 0;
@@ -150,5 +150,10 @@ public final class SentryPatrol {
         if (Lore.unlock(player, Ch1.SENTRY, true)) {
             Notice.narrate(player, "message.skyabyss.ch1.sentry.page");
         }
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

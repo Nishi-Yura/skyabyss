@@ -156,7 +156,7 @@ public class BoardScreen extends Screen implements jp.revati.skyabyss.client.ui.
             drawLine(g, font, data.lines().get(i), y, mouseX, mouseY);
         }
         rows.end(g);
-        rows.drawBar(g, EDGE_IN, 0x887FD6D0);
+        rows.drawBar(g, EDGE_IN, 0x888FD0FF);
         // 受ける釦は、その札の所へ動かす (枠の外のものは隠す)
         for (int k = 0; k < accepts.size(); k++) {
             Button b = accepts.get(k);

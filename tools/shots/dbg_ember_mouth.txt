@@ -19,7 +19,6 @@ cmd skyabyss titan rest ember here
 wait 20
 hud off
 cmd gamemode spectator
-lowpoly on
 cmd execute as @e[type=skyabyss:ember_titan,limit=1] at @s run tp @p ^0 ^8 ^60 facing ^0 ^8 ^110
 wait 12
 shot dbg_g0

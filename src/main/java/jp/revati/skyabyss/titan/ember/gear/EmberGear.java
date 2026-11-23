@@ -15,7 +15,7 @@ import net.minecraft.world.entity.player.Player;
 //
 // | 品              | 種類            | 階級 | 必要 Lv | 1 秒あたり (+0 / +10) | 固有効果 |
 // | 余燼の鎧 4 部位 | 防具 (立体)     | レア | 26 | —             | 防御 4/8/6/4 = 22、強靭 3.25 ×4 = 13。2 部位で強靭 +3。4 部位で熱のたまり方 ×0.7・火照りの攻撃 +10% (背中)、火に触れると筋力 I 10 秒 |
-// | 余燼の戦斧      | 斧 (剣の扱い)   | エピック | 26 | 17.6 / 22.9   | 命中で 4 秒くすぶらせる (燃えない相手にも印)。燃えている・くすぶる相手に +10% |
+// | 熾火の戦斧      | 斧 (剣の扱い)   | エピック | 26 | 17.6 / 22.9   | 命中で 4 秒くすぶらせる (燃えない相手にも印)。燃えている・くすぶる相手に +10% |
 // | 熾火の外套      | 装飾            | エピック | 26 | —             | 熱のたまり方 ×0.75、燃焼・溶岩の傷 −30% (火炎耐性ではない) |
 // | 熾りの護符      | 護符 (H キー)   | エピック | 26 | —             | 自分の熱を 0 に。半径 5 の敵に 6 の傷と 4 秒の燃焼。待ち 50 秒 |
 // | 鍛え手の大鎚    | 両手の大鎚      | ヒロイック | 28 | 17.7 / 24.7   | 3 度に 1 度 (+5 で 2 度に 1 度)、床に亀裂が走り 0.8 秒後に噴く (長さ 5、+10 で 7。攻撃力の 50%) |
@@ -68,7 +68,13 @@ public final class EmberGear {
             TitanGearSet.piece(jp.revati.skyabyss.item.ChapterGear.EMBER_DAGGER, jp.revati.skyabyss.item.ChapterGear.CHANCE),
             TitanGearSet.exclusive(HAMMER, HAMMER_CHANCE),
             TitanGearSet.exclusive(POKER, POKER_CHANCE),
-            TitanGearSet.exclusive(LANTERN, LANTERN_CHANCE)));
+            TitanGearSet.exclusive(LANTERN, LANTERN_CHANCE),
+            // 残りの職のヒロイック武器 (item/HeroicGear。どの職も同じ入り方: 図鑑・天井・交換・初回の選択。後ろへ足す = 交換の番号を変えない)
+            TitanGearSet.exclusive("skyabyss:ember_cinder_blade", HAMMER_CHANCE),
+            TitanGearSet.exclusive("skyabyss:ember_ash_knife", HAMMER_CHANCE),
+            TitanGearSet.exclusive("skyabyss:ember_kiln_staff", HAMMER_CHANCE),
+            TitanGearSet.exclusive("skyabyss:ember_flare_bow", HAMMER_CHANCE),
+            TitanGearSet.exclusive("skyabyss:ember_censer_bell_staff", HAMMER_CHANCE)));
 
     public static final List<String> ARMOR = List.of(HELMET, CHESTPLATE, LEGGINGS, BOOTS);
 

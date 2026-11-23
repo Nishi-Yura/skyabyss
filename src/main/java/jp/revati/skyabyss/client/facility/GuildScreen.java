@@ -267,7 +267,7 @@ public class GuildScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fillGradient(0, 0, width, height, 0x80101418, 0xA0101418);
+        g.fillGradient(0, 0, width, height, 0x800A0E1E, 0xA00A0E1E);
     }
 
     // 板は窓に合わせて一様に大きく描く (描くのと当たりは同じ変換: fit)
@@ -329,7 +329,7 @@ public class GuildScreen extends Screen {
             FitText.draw(g, font, Component.literal(r.name()), bx + 3, ty, cx - Golden.S5 - bx - 3, Golden.TEXT, false);
             g.drawString(font, count, cx, ty, Golden.DIM, false);
             boolean hover = mx >= ax && mx < ax + aw && my >= ry && my < ry + ROW;
-            g.fill(ax, ry, ax + aw, ry + ROW, r.applied() ? 0xFF161B22 : hover ? 0xFF2A5E6A : 0xFF1E3A40);
+            g.fill(ax, ry, ax + aw, ry + ROW, r.applied() ? 0xFF161B22 : hover ? 0xFF364064 : 0xFF1A2448);
             g.drawString(font, act, ax + (aw - font.width(act)) / 2, ty, r.applied() ? Golden.DIM : Golden.TEXT, false);
             if (!r.applied()) {
                 hit(ax, ry, aw, ROW, () -> send("apply", r.id(), "", "", false));
@@ -462,7 +462,7 @@ public class GuildScreen extends Screen {
                 Component o = Component.translatable(m.rank() == 1 ? "gui.skyabyss.guild.demote" : "gui.skyabyss.guild.promote");
                 int ow = font.width(o) + 6;
                 int ox = kx - ow - 2;
-                g.fill(ox, ry + 1, ox + ow, ry + ROW - 1, mx >= ox && mx < ox + ow && my >= ry && my < ry + ROW ? 0xFF2A5E6A : 0xFF1E3A40);
+                g.fill(ox, ry + 1, ox + ow, ry + ROW - 1, mx >= ox && mx < ox + ow && my >= ry && my < ry + ROW ? 0xFF364064 : 0xFF1A2448);
                 g.drawString(font, o, ox + 3, ty, FacilityUi.TEXT, false);
                 hit(ox, ry + 1, ow, ROW - 2, () -> send("officer", m.id().toString(), "", "", m.rank() != 1));
                 // 長を譲る (★。二度押し)
@@ -511,7 +511,7 @@ public class GuildScreen extends Screen {
             int ty = Golden.textY(ry, ROW);
             FitText.draw(g, font, Component.literal(m.name()), NX, ty, NW - 36, Golden.TEXT, false);
             int okx = MINOR.right() - Golden.S5 - 32;
-            g.fill(okx, ry + 1, okx + 15, ry + ROW - 1, 0xFF1E3A40);
+            g.fill(okx, ry + 1, okx + 15, ry + ROW - 1, 0xFF1A2448);
             g.drawString(font, "✔", okx + 4, ty, FacilityUi.TEAL, false);
             hit(okx, ry + 1, 15, ROW - 2, () -> send("accept", m.id().toString(), "", "", false));
             int nox = okx + 17;
@@ -539,7 +539,7 @@ public class GuildScreen extends Screen {
                 Golden.textY(y + ROW, ROW), MW - 21, Golden.DIM, false);
         y += 2 * ROW + Golden.S8;
         int bw = MW;
-        g.fill(MX, y, MX + bw, y + 5, 0xFF1C222C);
+        g.fill(MX, y, MX + bw, y + 5, 0xFF141A34);
         int fill = r.target() <= 0 ? 0 : Math.min(bw, bw * r.progress() / r.target());
         g.fill(MX, y, MX + fill, y + 5, r.done() ? FacilityUi.GOLD : FacilityUi.TEAL);
         g.renderOutline(MX - 1, y - 1, bw + 2, 7, FacilityUi.LINE);
@@ -585,8 +585,8 @@ public class GuildScreen extends Screen {
         String pl = view.leader() ? plate : view.plate();
         int top = MAJOR.y() + Golden.S5;
         Golden.Box well = new Golden.Box(MX, top, Golden.S55, Golden.S55);
-        g.fill(well.x(), well.y(), well.right(), well.bottom(), 0xFF0C0E13);
-        Golden.outline(g, well.x(), well.y(), well.right(), well.bottom(), 0xFF343A48);
+        g.fill(well.x(), well.y(), well.right(), well.bottom(), 0xFF0A0E1E);
+        Golden.outline(g, well.x(), well.y(), well.right(), well.bottom(), 0xFF364064);
         bannerItem(g, well.x() + 3, well.y() + 3, 3.0f, pat, c, a);
         GuildEmblems.Emblem em = GuildEmblems.emblem(pat);
         int px = well.right() + Golden.S8;
@@ -648,7 +648,7 @@ public class GuildScreen extends Screen {
 
     private void arrow(GuiGraphics g, int x, int y, String s, int mx, int my, Runnable run) {
         boolean hover = mx >= x && mx < x + BTN && my >= y && my < y + BTN;
-        g.fill(x, y, x + BTN, y + BTN, hover ? 0xFF2A5E6A : 0xFF1E3A40);
+        g.fill(x, y, x + BTN, y + BTN, hover ? 0xFF364064 : 0xFF1A2448);
         g.drawString(font, s, x + (BTN - font.width(s)) / 2, Golden.textY(y, BTN), Golden.TEXT, false);
         hit(x, y, BTN, BTN, run);
     }

@@ -13,16 +13,17 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 // 巨神のヒロイック武器 (専用の逸品) を全職ぶんへ (2026-10-28 の試遊「なぜ巨神のヒロイック武器、暗殺者と戦士しかないの」。docs/design/03 の 1.1)。
-// 巨神ごとに、まだ専用の逸品のない職の武器を一本ずつ足した 17 本。形は 3 案のラフから選んだもの (tools/rough/lowpoly/weapons/heroic)。
+// 巨神ごとに、まだ専用の逸品のない職の武器を一本ずつ足した 17 本と、五章 (深淵) の 4 本 (2026-11-21)。形は 3 案のラフから選んだもの (tools/rough/lowpoly/weapons/heroic)。
 // 数値は同じ巨神の章の武器 (エピック) の 1.12 倍を目安に置き、その章の最も強いエピック以上・アーティファクトの 1/1.05 以下に収める (自己テスト gear tiers)。
-// 入手は心臓を止めたときの別枠 (heartDrops。一本ずつ CHANCE)。巨神の図鑑の表 (TitanGearSet) には入れない
-// (入れると図鑑がそろうまでの周回が 16 回から 29 回に延びた。2026-10-28)。
+// 入手はどの職も同じ: 各巨神の図鑑の表 (TitanGearSet) の専用の逸品 (心臓で CHANCE、天井・炉の交換も同じ)。
+// 2026-11-21 に「専用の逸品は 3 つまで」の決まりをやめた (別枠の 2% だと、職によって入り方が違った)。
+// 図鑑がそろうまでの平均の周回は延びる (潮殻 15.9 → 25.3・雷翼 13.9 → 23.5・余燼 13.8 → 25.3)。
 // 技の書き換えは一本に一つ (rpg/skill/Rune の英雄の段、効き目は rpg/skill/LegendRewrites)
 public final class HeroicGear {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
     private static final List<DeferredItem<Item>> ALL = new ArrayList<>();
-    // 心臓での確率 (今の専用の逸品の 0.04 より低く。図鑑がそろうまでの周回が延びすぎないように)
-    public static final float CHANCE = 0.02f;
+    // 心臓での確率 (ほかの専用の逸品の武器と同じ)
+    public static final float CHANCE = 0.04f;
 
     public static final String WHALE_HAMMER = id("whale_choir_hammer");
     public static final String WHALE_STAFF = id("whale_star_staff");
@@ -41,6 +42,11 @@ public final class HeroicGear {
     public static final String EMBER_STAFF = id("ember_kiln_staff");
     public static final String EMBER_BOW = id("ember_flare_bow");
     public static final String EMBER_BELL = id("ember_censer_bell_staff");
+    // 五章 深淵 (2026-11-21。番人の別枠。沈め錨 = 鍛冶師・鼓動の短剣 = 暗殺者のほかの 4 職)
+    public static final String ABYSS_SWORD = id("abyss_key_sword");
+    public static final String ABYSS_STAFF = id("abyss_moon_staff");
+    public static final String ABYSS_BOW = id("abyss_fluke_bow");
+    public static final String ABYSS_BELL = id("abyss_grave_bell_staff");
 
     static {
         melee("whale_choir_hammer", "stone_whale", 12.3, 0.9);
@@ -60,6 +66,10 @@ public final class HeroicGear {
         melee("ember_kiln_staff", "ember", 15.2, 1.2);
         bow("ember_flare_bow", "ember", 2.1);
         melee("ember_censer_bell_staff", "ember", 13.0, 1.4);
+        melee("abyss_key_sword", "abyss", 20.5, 1.0);
+        melee("abyss_moon_staff", "abyss", 17.1, 1.2);
+        bow("abyss_fluke_bow", "abyss", 2.35);
+        melee("abyss_grave_bell_staff", "abyss", 14.65, 1.4);
     }
 
     private HeroicGear() {
@@ -93,20 +103,9 @@ public final class HeroicGear {
             case "tide_shell" -> List.of(TIDE_HAMMER, TIDE_STAFF, TIDE_BOW, TIDE_BELL);
             case "thunder_wing" -> List.of(STORM_HAMMER, STORM_STAFF, STORM_BOW, STORM_BELL);
             case "ember" -> List.of(EMBER_BLADE, EMBER_KNIFE, EMBER_STAFF, EMBER_BOW, EMBER_BELL);
+            case "abyss" -> List.of(ABYSS_SWORD, ABYSS_STAFF, ABYSS_BOW, ABYSS_BELL);
             default -> List.of();
         };
-    }
-
-    // 心臓を止めたときの別枠の落とし物 (図鑑の表・天井・交換には入れない。一本ずつ CHANCE)。特性つき
-    public static List<net.minecraft.world.item.ItemStack> heartDrops(String titan, net.minecraft.util.RandomSource random) {
-        List<net.minecraft.world.item.ItemStack> out = new ArrayList<>();
-        for (String id : forTitan(titan)) {
-            if (random.nextFloat() < CHANCE) {
-                net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(net.minecraft.resources.ResourceLocation.parse(id)).ifPresent(item ->
-                        out.add(jp.revati.skyabyss.item.affix.AffixRules.withAffixes(new net.minecraft.world.item.ItemStack(item), random)));
-            }
-        }
-        return out;
     }
 
     public static void register(IEventBus modEventBus) {

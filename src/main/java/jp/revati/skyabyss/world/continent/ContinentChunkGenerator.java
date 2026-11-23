@@ -360,6 +360,28 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
         return out;
     }
 
+    // その場所の、生まれたままの地形のブロック (石・土・草・水・空気。道の上面も)。建物の跡を地形へ戻すのに使う (dungeon/MiniDungeons.restore)。
+    // top を渡すとその高さを上面として土を組む (均した台の下など)。外れの帯の置き物は戻さない (地面だけ)
+    public static BlockState naturalAt(int x, int y, int z, int top) {
+        ContinentMap map = ContinentMap.get();
+        if (y > top) {
+            return y < SEA_LEVEL ? WATER : AIR;
+        }
+        int c = map.surface(x, z);
+        int sl = Math.max(Math.max(Math.abs(c - map.surface(x - 1, z)), Math.abs(c - map.surface(x + 1, z))),
+                Math.max(Math.abs(c - map.surface(x, z - 1)), Math.abs(c - map.surface(x, z + 1))));
+        if (y == top && top == c) {
+            BlockState road = roadAt(x, z);
+            if (road != null) {
+                return road;
+            }
+        }
+        int region = map.region(x, z);
+        double far = FrontierTerrain.weight(region, x, z);
+        BlockState f = far > 0 ? FrontierTerrain.ground(region, far, x, y, z, top, top - y, sl) : null;
+        return f != null ? f : solid(x, y, z, top, sl, map.biome(x, z));
+    }
+
     // その場所の道の上面 (道でなければ null)。建物の地均し (opening/site/SiteJob) が、道の上を草で塗らないために使う
     public static BlockState roadAt(int x, int z) {
         return road(roadSegments(x & ~15, z & ~15), x, z);

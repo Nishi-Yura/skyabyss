@@ -145,9 +145,6 @@ public final class IsanaPost {
         return e != null && !e.done && def != null && e.stage < def.stages().size() && def.stages().get(e.stage).id().equals(stageId);
     }
 
-    public static boolean atHarbor(ServerPlayer p) {
-        return post(p) == Post.HARBOR;
-    }
 
     // NPC の居場所 (印のない鯨追いは鯨見)
     public static Post postOf(NpcEntity npc) {
@@ -200,11 +197,22 @@ public final class IsanaPost {
         return e == null ? null : e.extra(post.mark);
     }
 
-    // この人の話す相手の目印 (章の居場所にいれば、その立つ所。鯨見なら null)
+    // この人の話す相手の目印 (章の居場所にいれば、その立つ所。鯨見なら null)。
+    // 港・焚き火の立つ所は、その町の 192 以内に人が来たときに決まる。決まるまでは、その章の町の真ん中を指す
+    // (前は null を返し、目印が鯨見の町に残った。2026-11-15「ピンが全く違う場所を指す」)
     @Nullable
     public static BlockPos target(MinecraftServer server, ServerPlayer p) {
         Post post = post(p);
-        return post == Post.TOWN ? null : spot(server, post);
+        if (post == Post.TOWN) {
+            return null;
+        }
+        BlockPos spot = spot(server, post);
+        if (spot != null || post.town == null) {
+            return spot;
+        }
+        ServerLevel level = server.overworld();
+        SiteData.Entry town = level == null ? null : town(level, post);
+        return town != null ? town.pos : jp.revati.skyabyss.world.continent.ContinentLayout.get().town(post.town);
     }
 
     // 汐守: 町の中心から 16 方向に海を探し、いちばん近い水際の手前の立てる所。周りが読み込まれていなければ null (あとでもう一度)
@@ -552,6 +560,8 @@ public final class IsanaPost {
     // ---------------------------------------------------------------- 見回りと道しるべ
     // 居場所が変わった人に、話す相手の目印を送り直す (2 秒ごと)
     private static final Map<UUID, Post> LAST = new ConcurrentHashMap<>();
+    // 送った目印 (立つ所が決まったら送り直すため)
+    private static final Map<UUID, Long> LAST_AIM = new ConcurrentHashMap<>();
 
     // 章の居場所のイサナを立たせる・戻す見回りの届く距離 (町の中心から。港は町の外の水際なので、町の見回り 96 より広く)
     static final int KEEP_RADIUS = 192;
@@ -574,14 +584,19 @@ public final class IsanaPost {
             }
         }
         Post before = LAST.put(p.getUUID(), now);
-        if (before != null && before != now) {
-            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(p, jp.revati.skyabyss.opening.site.SiteNetwork.payload(p.server, p));
+        // 居場所が変わったときと、立つ所が決まった・選び直したときに、目印を送り直す (立つ所が決まっても前は送らず、町の真ん中や鯨見を指したままだった)
+        BlockPos aim = target(p.server, p);
+        long aimKey = aim == null ? Long.MIN_VALUE : aim.asLong();
+        Long aimBefore = LAST_AIM.put(p.getUUID(), aimKey);
+        if ((before != null && before != now) || (aimBefore != null && aimBefore != aimKey)) {
+            jp.revati.skyabyss.opening.site.SiteNetwork.sendTo(p);
         }
     }
 
     @SubscribeEvent
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         LAST.remove(event.getEntity().getUUID());
+        LAST_AIM.remove(event.getEntity().getUUID());
     }
 
     // OP の確かめ: /skyabyss dev isana goto (この人にとってのイサナのそばへ。五章は地下の門の前、終章は大鐘楼の門、港・火のそばは立つ所、鯨見は見張り台)

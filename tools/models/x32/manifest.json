@@ -1,0 +1,2252 @@
+{
+ "abyss_ash_scythe": {
+  "series": "abyss",
+  "kind": "scythe",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_bell_staff": {
+  "series": "abyss",
+  "kind": "bell",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_depth_bow": {
+  "series": "abyss",
+  "kind": "bow",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_ember_bell_staff": {
+  "series": "abyss",
+  "kind": "bell",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_ember_bow": {
+  "series": "abyss",
+  "kind": "bow",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_ember_dagger": {
+  "series": "abyss",
+  "kind": "dagger",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_ember_staff": {
+  "series": "abyss",
+  "kind": "staff",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_ember_sword": {
+  "series": "abyss",
+  "kind": "sword",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_fluke_bow": {
+  "series": "abyss",
+  "kind": "bow",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "bb"
+ },
+ "abyss_grave_bell_staff": {
+  "series": "abyss",
+  "kind": "bell",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "bb"
+ },
+ "abyss_greatsword": {
+  "series": "abyss",
+  "kind": "greatsword",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_key_sword": {
+  "series": "abyss",
+  "kind": "sword",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "bb"
+ },
+ "abyss_lamp_staff": {
+  "series": "abyss",
+  "kind": "staff",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_lamp_sword": {
+  "series": "abyss",
+  "kind": "sword",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_moon_staff": {
+  "series": "abyss",
+  "kind": "staff",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "bb"
+ },
+ "abyss_pulse_dagger": {
+  "series": "abyss",
+  "kind": "dagger",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_sinking_anchor": {
+  "series": "abyss",
+  "kind": "hammer",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_stake_hammer": {
+  "series": "abyss",
+  "kind": "hammer",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "bb"
+ },
+ "abyss_storm_bell_staff": {
+  "series": "abyss",
+  "kind": "bell",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_storm_bow": {
+  "series": "abyss",
+  "kind": "bow",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_storm_dagger": {
+  "series": "abyss",
+  "kind": "dagger",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_storm_hammer": {
+  "series": "abyss",
+  "kind": "hammer",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_storm_staff": {
+  "series": "abyss",
+  "kind": "staff",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_storm_sword": {
+  "series": "abyss",
+  "kind": "sword",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_tide_bow": {
+  "series": "abyss",
+  "kind": "bow",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_tide_dagger": {
+  "series": "abyss",
+  "kind": "dagger",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_tide_hammer": {
+  "series": "abyss",
+  "kind": "hammer",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_tide_staff": {
+  "series": "abyss",
+  "kind": "staff",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_tide_sword": {
+  "series": "abyss",
+  "kind": "sword",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_toll_bell_staff": {
+  "series": "abyss",
+  "kind": "bell",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_vial_knife": {
+  "series": "abyss",
+  "kind": "dagger",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "bb"
+ },
+ "abyss_whale_bell_staff": {
+  "series": "abyss",
+  "kind": "bell",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_whale_bow": {
+  "series": "abyss",
+  "kind": "bow",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_whale_fang": {
+  "series": "abyss",
+  "kind": "fang",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_whale_hammer": {
+  "series": "abyss",
+  "kind": "hammer",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "abyss_whale_staff": {
+  "series": "abyss",
+  "kind": "staff",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "captain_pike": {
+  "series": "other",
+  "kind": "spear",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "coral_harpoon": {
+  "series": "tide",
+  "kind": "spear",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "coral_shield": {
+  "series": "tide",
+  "kind": "shield",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "divine_ash_hammer": {
+  "series": "divine",
+  "kind": "hammer",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "divine_bell_hammer": {
+  "series": "divine",
+  "kind": "hammer",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "divine_dawn_staff": {
+  "series": "divine",
+  "kind": "staff",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "divine_eyelid_staff": {
+  "series": "divine",
+  "kind": "staff",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "divine_keeper_bell_staff": {
+  "series": "divine",
+  "kind": "bell",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "divine_mist_bow": {
+  "series": "divine",
+  "kind": "bow",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "divine_moth_dagger": {
+  "series": "divine",
+  "kind": "dagger",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "divine_plume_bow": {
+  "series": "divine",
+  "kind": "bow",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "divine_promise_bell_staff": {
+  "series": "divine",
+  "kind": "bell",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "divine_rewind_dagger": {
+  "series": "divine",
+  "kind": "dagger",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "divine_sky_sword": {
+  "series": "divine",
+  "kind": "sword",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "divine_warden_blade": {
+  "series": "divine",
+  "kind": "greatsword",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "ember_ash_knife": {
+  "series": "ember",
+  "kind": "dagger",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "ember_bow": {
+  "series": "ember",
+  "kind": "bow",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "look5"
+ },
+ "ember_censer": {
+  "series": "ember",
+  "kind": "bell",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "ember_censer_bell_staff": {
+  "series": "ember",
+  "kind": "bell",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "ember_cinder_blade": {
+  "series": "ember",
+  "kind": "greatsword",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "ember_dagger": {
+  "series": "ember",
+  "kind": "dagger",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "ember_flare_bow": {
+  "series": "ember",
+  "kind": "bow",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "look5"
+ },
+ "ember_greatsword": {
+  "series": "ember",
+  "kind": "greatsword",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "ember_kiln_staff": {
+  "series": "ember",
+  "kind": "staff",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "ember_staff": {
+  "series": "ember",
+  "kind": "staff",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "ember_war_axe": {
+  "series": "ember",
+  "kind": "axe",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "moon_crescent_dagger": {
+  "series": "moon",
+  "kind": "dagger",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "moon_full_hammer": {
+  "series": "moon",
+  "kind": "hammer",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "moon_halo_bell_staff": {
+  "series": "moon",
+  "kind": "bell",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "moon_light_sword": {
+  "series": "moon",
+  "kind": "sword",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "moon_new_staff": {
+  "series": "moon",
+  "kind": "staff",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "moon_scale_hammer": {
+  "series": "moon",
+  "kind": "hammer",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "moon_starfall_bow": {
+  "series": "moon",
+  "kind": "bow",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "moon_starlight_bell_staff": {
+  "series": "moon",
+  "kind": "bell",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "moon_tide_staff": {
+  "series": "moon",
+  "kind": "staff",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "moon_umbra_dagger": {
+  "series": "moon",
+  "kind": "dagger",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "moon_waning_blade": {
+  "series": "moon",
+  "kind": "greatsword",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "moon_waning_bow": {
+  "series": "moon",
+  "kind": "bow",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "raiju_claw": {
+  "series": "storm",
+  "kind": "claw",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "shrine_bell_staff": {
+  "series": "shrine",
+  "kind": "bell",
+  "tier": "common",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "polished"
+ },
+ "shrine_bow": {
+  "series": "shrine",
+  "kind": "bow",
+  "tier": "common",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "polished"
+ },
+ "shrine_dagger": {
+  "series": "shrine",
+  "kind": "dagger",
+  "tier": "common",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "polished"
+ },
+ "shrine_hammer": {
+  "series": "shrine",
+  "kind": "hammer",
+  "tier": "common",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "polished"
+ },
+ "shrine_staff": {
+  "series": "shrine",
+  "kind": "staff",
+  "tier": "common",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "polished"
+ },
+ "shrine_sword": {
+  "series": "shrine",
+  "kind": "sword",
+  "tier": "common",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "polished"
+ },
+ "smith_hammer": {
+  "series": "other",
+  "kind": "hammer",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "storm_anvil_hammer": {
+  "series": "storm",
+  "kind": "hammer",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "storm_bell_staff": {
+  "series": "storm",
+  "kind": "bell",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "storm_cloud_staff": {
+  "series": "storm",
+  "kind": "staff",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "storm_dagger": {
+  "series": "storm",
+  "kind": "dagger",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "storm_gale_bow": {
+  "series": "storm",
+  "kind": "bow",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "look5"
+ },
+ "storm_hammer": {
+  "series": "storm",
+  "kind": "hammer",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "storm_staff": {
+  "series": "storm",
+  "kind": "staff",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "storm_sword": {
+  "series": "storm",
+  "kind": "sword",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "storm_thunder_bell_staff": {
+  "series": "storm",
+  "kind": "bell",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "thrall_poker": {
+  "series": "other",
+  "kind": "poker",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "thunder_wing_bow": {
+  "series": "storm",
+  "kind": "bow",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "look5"
+ },
+ "tide_bell_staff": {
+  "series": "tide",
+  "kind": "bell",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "tide_bow": {
+  "series": "tide",
+  "kind": "bow",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "look5"
+ },
+ "tide_coral_bow": {
+  "series": "tide",
+  "kind": "bow",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "look5"
+ },
+ "tide_dagger": {
+  "series": "tide",
+  "kind": "dagger",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "tide_hammer": {
+  "series": "tide",
+  "kind": "hammer",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "tide_pearl_staff": {
+  "series": "tide",
+  "kind": "staff",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "tide_reef_hammer": {
+  "series": "tide",
+  "kind": "hammer",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "tide_shell_trident": {
+  "series": "tide",
+  "kind": "spear",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "tide_staff": {
+  "series": "tide",
+  "kind": "staff",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "tide_surf_bell_staff": {
+  "series": "tide",
+  "kind": "bell",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "tidecaller_claw": {
+  "series": "tide",
+  "kind": "claw",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "tower_balance_sword": {
+  "series": "tower",
+  "kind": "sword",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "tower_clap_bell_staff": {
+  "series": "tower",
+  "kind": "bell",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "tower_eye_bow": {
+  "series": "tower",
+  "kind": "bow",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "tower_moon_staff": {
+  "series": "tower",
+  "kind": "staff",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "tower_pull_hammer": {
+  "series": "tower",
+  "kind": "hammer",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "tower_sigil_dagger": {
+  "series": "tower",
+  "kind": "dagger",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "travel_shield": {
+  "series": "other",
+  "kind": "shield",
+  "tier": "common",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "warden_glaive": {
+  "series": "other",
+  "kind": "glaive",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "waterway_fang": {
+  "series": "whale",
+  "kind": "fang",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "whale_bell_staff": {
+  "series": "whale",
+  "kind": "bell",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "whale_bow": {
+  "series": "whale",
+  "kind": "bow",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "look5"
+ },
+ "whale_choir_hammer": {
+  "series": "whale",
+  "kind": "hammer",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "whale_dagger": {
+  "series": "whale",
+  "kind": "dagger",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "whale_deep_bell_staff": {
+  "series": "whale",
+  "kind": "bell",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "whale_hammer": {
+  "series": "whale",
+  "kind": "hammer",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "whale_rib_longbow": {
+  "series": "whale",
+  "kind": "bow",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "look5"
+ },
+ "whale_staff": {
+  "series": "whale",
+  "kind": "staff",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "whale_star_staff": {
+  "series": "whale",
+  "kind": "staff",
+  "tier": "legend",
+  "level": null,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "whalebone_greatsword": {
+  "series": "whale",
+  "kind": "greatsword",
+  "tier": "rare",
+  "level": null,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "look5"
+ },
+ "wild_abyss_mace": {
+  "series": "wild_abyss_lower",
+  "kind": "mace",
+  "tier": "epic",
+  "level": 46,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_ash_sickle_claw": {
+  "series": "wild_abyss_lower",
+  "kind": "claw",
+  "tier": "epic",
+  "level": 44,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_ashhook_bow": {
+  "series": "wild_wastes",
+  "kind": "bow",
+  "tier": "epic",
+  "level": 26,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_ashrite_maul": {
+  "series": "wild_wastes",
+  "kind": "maul",
+  "tier": "heroic",
+  "level": 30,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_ashsow_bell_staff": {
+  "series": "wild_wastes",
+  "kind": "bell",
+  "tier": "epic",
+  "level": 26,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_ballspark_staff": {
+  "series": "wild_abyss_lower",
+  "kind": "staff",
+  "tier": "rare",
+  "level": 42,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_banner_spear": {
+  "series": "wild_meadow",
+  "kind": "spear",
+  "tier": "rare",
+  "level": 9,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_bellows_hammer": {
+  "series": "wild_wastes",
+  "kind": "hammer",
+  "tier": "epic",
+  "level": 26,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_blasting_axe": {
+  "series": "wild_abyss_upper",
+  "kind": "axe",
+  "tier": "epic",
+  "level": 38,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_bone_needle_dagger": {
+  "series": "wild_abyss_upper",
+  "kind": "dagger",
+  "tier": "epic",
+  "level": 35,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_bonebird_totem": {
+  "series": "wild_hills",
+  "kind": "totem",
+  "tier": "rare",
+  "level": 9,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_bonepipe_staff": {
+  "series": "wild_abyss_upper",
+  "kind": "staff",
+  "tier": "rare",
+  "level": 32,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_bonespike_bow": {
+  "series": "wild_hills",
+  "kind": "bow",
+  "tier": "rare",
+  "level": 9,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_bonestring_bow": {
+  "series": "wild_abyss_upper",
+  "kind": "bow",
+  "tier": "epic",
+  "level": 35,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_calling_bow": {
+  "series": "wild_abyss_lower",
+  "kind": "bow",
+  "tier": "epic",
+  "level": 46,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_calming_censer": {
+  "series": "wild_abyss_lower",
+  "kind": "censer",
+  "tier": "epic",
+  "level": 44,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_ceiling_claw": {
+  "series": "wild_abyss_upper",
+  "kind": "claw",
+  "tier": "epic",
+  "level": 38,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_chain_greatsword": {
+  "series": "wild_abyss_lower",
+  "kind": "greatsword",
+  "tier": "epic",
+  "level": 46,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_cinder_claw": {
+  "series": "wild_wastes",
+  "kind": "claw",
+  "tier": "epic",
+  "level": 26,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_cloudcleaver_greatsword": {
+  "series": "wild_cloud",
+  "kind": "greatsword",
+  "tier": "heroic",
+  "level": 50,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_cloudhymn_bell_staff": {
+  "series": "wild_cloud",
+  "kind": "bell",
+  "tier": "heroic",
+  "level": 50,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_cloudreader_staff": {
+  "series": "wild_heights",
+  "kind": "staff",
+  "tier": "rare",
+  "level": 22,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_cloudveil_claw": {
+  "series": "wild_cloud",
+  "kind": "claw",
+  "tier": "heroic",
+  "level": 50,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_cog_hammer": {
+  "series": "wild_abyss_lower",
+  "kind": "maul",
+  "tier": "epic",
+  "level": 44,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_compass_staff": {
+  "series": "wild_abyss_upper",
+  "kind": "staff",
+  "tier": "epic",
+  "level": 38,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_conductor_axe": {
+  "series": "wild_heights",
+  "kind": "axe",
+  "tier": "epic",
+  "level": 19,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_crab_hammer": {
+  "series": "wild_coast",
+  "kind": "hammer",
+  "tier": "rare",
+  "level": 16,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_crater_longbow": {
+  "series": "wild_wastes",
+  "kind": "longbow",
+  "tier": "heroic",
+  "level": 30,
+  "role": "gear-archer",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_crow_bow": {
+  "series": "wild_meadow",
+  "kind": "bow",
+  "tier": "uncommon",
+  "level": 4,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_deep_eye_staff": {
+  "series": "wild_abyss_lower",
+  "kind": "staff",
+  "tier": "epic",
+  "level": 46,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_delver_sword": {
+  "series": "wild_abyss_upper",
+  "kind": "sword",
+  "tier": "rare",
+  "level": 32,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_dune_sword": {
+  "series": "wild_coast",
+  "kind": "sword",
+  "tier": "rare",
+  "level": 16,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_eaglet_longbow": {
+  "series": "wild_heights",
+  "kind": "longbow",
+  "tier": "epic",
+  "level": 19,
+  "role": "gear-archer",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_effigy_totem": {
+  "series": "wild_abyss_lower",
+  "kind": "totem",
+  "tier": "epic",
+  "level": 46,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_emberbug_staff": {
+  "series": "wild_wastes",
+  "kind": "staff",
+  "tier": "epic",
+  "level": 26,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_fishhook_knife": {
+  "series": "wild_abyss_lower",
+  "kind": "dagger",
+  "tier": "epic",
+  "level": 46,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_flash_bow": {
+  "series": "wild_abyss_lower",
+  "kind": "bow",
+  "tier": "rare",
+  "level": 42,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_fluff_staff": {
+  "series": "wild_heights",
+  "kind": "staff",
+  "tier": "epic",
+  "level": 19,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_fogbell_bell_staff": {
+  "series": "wild_coast",
+  "kind": "bell",
+  "tier": "rare",
+  "level": 16,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_fortress_greatsword": {
+  "series": "wild_wastes",
+  "kind": "greatsword",
+  "tier": "epic",
+  "level": 26,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_frostfang_dagger": {
+  "series": "wild_heights",
+  "kind": "dagger",
+  "tier": "rare",
+  "level": 22,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_fulgurite_sword": {
+  "series": "wild_abyss_lower",
+  "kind": "sword",
+  "tier": "rare",
+  "level": 42,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_gale_glaive": {
+  "series": "wild_heights",
+  "kind": "glaive",
+  "tier": "rare",
+  "level": 22,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_guard_sword": {
+  "series": "wild_meadow",
+  "kind": "sword",
+  "tier": "uncommon",
+  "level": 4,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_gull_bow": {
+  "series": "wild_coast",
+  "kind": "bow",
+  "tier": "uncommon",
+  "level": 12,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_hanged_longbow": {
+  "series": "wild_abyss_upper",
+  "kind": "longbow",
+  "tier": "heroic",
+  "level": 40,
+  "role": "gear-archer",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_hermit_knife": {
+  "series": "wild_coast",
+  "kind": "dagger",
+  "tier": "rare",
+  "level": 16,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_hourglass_staff": {
+  "series": "wild_abyss_lower",
+  "kind": "staff",
+  "tier": "epic",
+  "level": 44,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_inverted_greatsword": {
+  "series": "wild_abyss_upper",
+  "kind": "greatsword",
+  "tier": "heroic",
+  "level": 40,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_knotted_bell_staff": {
+  "series": "wild_abyss_upper",
+  "kind": "bell",
+  "tier": "epic",
+  "level": 38,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_lampeater_hammer": {
+  "series": "wild_abyss_upper",
+  "kind": "hammer",
+  "tier": "heroic",
+  "level": 40,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_lantern_bow": {
+  "series": "wild_abyss_upper",
+  "kind": "bow",
+  "tier": "epic",
+  "level": 38,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_lavajaw_greatsword": {
+  "series": "wild_wastes",
+  "kind": "greatsword",
+  "tier": "heroic",
+  "level": 30,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_lighthouse_longbow": {
+  "series": "wild_moon",
+  "kind": "longbow",
+  "tier": "heroic",
+  "level": 48,
+  "role": "gear-archer",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_loom_bell_staff": {
+  "series": "wild_heights",
+  "kind": "bell",
+  "tier": "epic",
+  "level": 19,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_lullaby_bell_staff": {
+  "series": "wild_abyss_upper",
+  "kind": "bell",
+  "tier": "heroic",
+  "level": 40,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_lure_staff": {
+  "series": "wild_coast",
+  "kind": "staff",
+  "tier": "rare",
+  "level": 16,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_meteor_greatsword": {
+  "series": "wild_moon",
+  "kind": "greatsword",
+  "tier": "heroic",
+  "level": 48,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_mimic_heart_staff": {
+  "series": "wild_abyss_upper",
+  "kind": "staff",
+  "tier": "heroic",
+  "level": 40,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_mirror_dagger": {
+  "series": "wild_moon",
+  "kind": "dagger",
+  "tier": "heroic",
+  "level": 48,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_molten_axe": {
+  "series": "wild_abyss_lower",
+  "kind": "axe",
+  "tier": "rare",
+  "level": 42,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_moss_staff": {
+  "series": "wild_hills",
+  "kind": "staff",
+  "tier": "rare",
+  "level": 9,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_mourning_bell_staff": {
+  "series": "wild_abyss_upper",
+  "kind": "bell",
+  "tier": "rare",
+  "level": 32,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_nacre_bow": {
+  "series": "wild_coast",
+  "kind": "bow",
+  "tier": "rare",
+  "level": 16,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_oar_blade": {
+  "series": "wild_coast",
+  "kind": "greatsword",
+  "tier": "uncommon",
+  "level": 12,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_peak_totem": {
+  "series": "wild_heights",
+  "kind": "totem",
+  "tier": "rare",
+  "level": 22,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_pick_hammer": {
+  "series": "wild_abyss_upper",
+  "kind": "hammer",
+  "tier": "rare",
+  "level": 32,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_prism_staff": {
+  "series": "wild_cloud",
+  "kind": "staff",
+  "tier": "heroic",
+  "level": 50,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_quarry_hammer": {
+  "series": "wild_meadow",
+  "kind": "hammer",
+  "tier": "uncommon",
+  "level": 4,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_raincall_bell_staff": {
+  "series": "wild_abyss_lower",
+  "kind": "bell",
+  "tier": "rare",
+  "level": 42,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_ramhorn_greatsword": {
+  "series": "wild_heights",
+  "kind": "greatsword",
+  "tier": "epic",
+  "level": 19,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_rat_knife": {
+  "series": "wild_meadow",
+  "kind": "dagger",
+  "tier": "uncommon",
+  "level": 4,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_rope_halberd": {
+  "series": "wild_abyss_upper",
+  "kind": "glaive",
+  "tier": "epic",
+  "level": 38,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_ropecut_knife": {
+  "series": "wild_abyss_upper",
+  "kind": "dagger",
+  "tier": "rare",
+  "level": 32,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_saltcrow_bow": {
+  "series": "wild_abyss_upper",
+  "kind": "bow",
+  "tier": "rare",
+  "level": 32,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_saltcrystal_greatsword": {
+  "series": "wild_abyss_upper",
+  "kind": "greatsword",
+  "tier": "epic",
+  "level": 35,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_saltmill_maul": {
+  "series": "wild_abyss_upper",
+  "kind": "maul",
+  "tier": "epic",
+  "level": 35,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_saltpillar_totem": {
+  "series": "wild_abyss_upper",
+  "kind": "totem",
+  "tier": "epic",
+  "level": 35,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_salttear_staff": {
+  "series": "wild_abyss_upper",
+  "kind": "staff",
+  "tier": "epic",
+  "level": 35,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_scarecrow_bell_staff": {
+  "series": "wild_meadow",
+  "kind": "bell",
+  "tier": "uncommon",
+  "level": 4,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_scope_longbow": {
+  "series": "wild_abyss_lower",
+  "kind": "longbow",
+  "tier": "epic",
+  "level": 44,
+  "role": "gear-archer",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_scribe_staff": {
+  "series": "wild_meadow",
+  "kind": "staff",
+  "tier": "uncommon",
+  "level": 4,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_shell_bell_staff": {
+  "series": "wild_coast",
+  "kind": "bell",
+  "tier": "uncommon",
+  "level": 12,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_shell_claw": {
+  "series": "wild_hills",
+  "kind": "claw",
+  "tier": "rare",
+  "level": 9,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_shipwright_maul": {
+  "series": "wild_coast",
+  "kind": "maul",
+  "tier": "uncommon",
+  "level": 12,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_shore_dagger": {
+  "series": "wild_coast",
+  "kind": "dagger",
+  "tier": "uncommon",
+  "level": 12,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_skylark_bow": {
+  "series": "wild_cloud",
+  "kind": "bow",
+  "tier": "heroic",
+  "level": 50,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_skysplit_axe": {
+  "series": "wild_cloud",
+  "kind": "axe",
+  "tier": "heroic",
+  "level": 50,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_snowsplitter_axe": {
+  "series": "wild_heights",
+  "kind": "axe",
+  "tier": "rare",
+  "level": 22,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_snuffer_dagger": {
+  "series": "wild_abyss_upper",
+  "kind": "dagger",
+  "tier": "heroic",
+  "level": 40,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_spark_dagger": {
+  "series": "wild_abyss_lower",
+  "kind": "dagger",
+  "tier": "rare",
+  "level": 42,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_starbell_totem": {
+  "series": "wild_moon",
+  "kind": "totem",
+  "tier": "heroic",
+  "level": 48,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_starchart_staff": {
+  "series": "wild_moon",
+  "kind": "staff",
+  "tier": "heroic",
+  "level": 48,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_starforge_hammer": {
+  "series": "wild_moon",
+  "kind": "hammer",
+  "tier": "heroic",
+  "level": 48,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_stormdrum_totem": {
+  "series": "wild_heights",
+  "kind": "totem",
+  "tier": "heroic",
+  "level": 30,
+  "role": "gear-shaman",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_stormwolf_fang": {
+  "series": "wild_heights",
+  "kind": "fang",
+  "tier": "epic",
+  "level": 19,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_tidewatch_staff": {
+  "series": "wild_coast",
+  "kind": "staff",
+  "tier": "uncommon",
+  "level": 12,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_tusk_axe": {
+  "series": "wild_hills",
+  "kind": "axe",
+  "tier": "rare",
+  "level": 9,
+  "role": "gear-smith",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_twin_spear": {
+  "series": "wild_abyss_lower",
+  "kind": "spear",
+  "tier": "epic",
+  "level": 44,
+  "role": "gear-warrior",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_venom_fang": {
+  "series": "wild_wastes",
+  "kind": "fang",
+  "tier": "heroic",
+  "level": 30,
+  "role": "gear-assassin",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_warden_crown_staff": {
+  "series": "wild_heights",
+  "kind": "staff",
+  "tier": "heroic",
+  "level": 30,
+  "role": "gear-mage",
+  "bow": false,
+  "status": "done",
+  "craft": "none"
+ },
+ "wild_windcutter_bow": {
+  "series": "wild_heights",
+  "kind": "bow",
+  "tier": "rare",
+  "level": 22,
+  "role": "gear-archer",
+  "bow": true,
+  "status": "done",
+  "craft": "none"
+ }
+}

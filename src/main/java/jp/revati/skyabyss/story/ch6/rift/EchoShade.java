@@ -137,7 +137,7 @@ public class EchoShade extends Entity {
                 return;
             }
             if (index % 4 == 0) {
-                sl.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 0.9, getZ(), 1, 0.2, 0.5, 0.2, 0.0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.9, getZ(), 1, 0.2, 0.5, 0.2, 0.0);
             }
             return;
         }
@@ -173,16 +173,16 @@ public class EchoShade extends Entity {
             for (Player p : sl.getEntitiesOfClass(Player.class, getBoundingBox().inflate(0.3), e -> e.isAlive() && !e.isSpectator())) {
                 p.hurt(damageSources().magic(), chaseDamage);
                 hitCooldown = 20;
-                sl.sendParticles(ParticleTypes.SOUL, p.getX(), p.getY() + 1, p.getZ(), 10, 0.3, 0.5, 0.3, 0.02);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX(), p.getY() + 1, p.getZ(), 10, 0.3, 0.5, 0.3, 0.02);
             }
         }
         if (tickCount % 3 == 0) {
-            sl.sendParticles(ParticleTypes.SOUL, getX(), getY() + 0.2, getZ(), 1, 0.2, 0.1, 0.2, 0.0);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.2, getZ(), 1, 0.2, 0.1, 0.2, 0.0);
         }
     }
 
     public void vanish(ServerLevel sl) {
-        sl.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 1, getZ(), 24, 0.3, 0.8, 0.3, 0.04);
+        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1, getZ(), 24, 0.3, 0.8, 0.3, 0.04);
         sl.playSound(null, getX(), getY(), getZ(), RiftBlocks.ECHO_FADE.get(), SoundSource.PLAYERS, 0.8f, 1.2f);
         discard();
     }
@@ -214,5 +214,10 @@ public class EchoShade extends Entity {
 
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

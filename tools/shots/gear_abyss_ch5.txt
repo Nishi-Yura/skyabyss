@@ -1,0 +1,139 @@
+# gokai no nokori no shoku no buki 6 hon (look5): first person / close / full body
+# ./gradlew runShots --offline --no-daemon -Pscript=tools/shots/gear_abyss_ch5.txt -PshotsName=gear_abyss_ch5
+world gear_look flat
+size 1280 720
+timeout 4000
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd gamerule doMobLoot false
+camera 0 -60 0 0 0
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 70
+cmd skyabyss level set @p 30
+swingpose off
+gearlook all a
+cmd tp @s 0.5 -60 0.5 0 0
+cmd kill @e[type=!player]
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_stake_hammer
+close
+wait 30
+chat clear
+shot fp_abyss_stake_hammer
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_stake_hammer
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_stake_hammer
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_vial_knife
+close
+wait 30
+chat clear
+shot fp_abyss_vial_knife
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_vial_knife
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_vial_knife
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_key_sword
+close
+wait 30
+chat clear
+shot fp_abyss_key_sword
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_key_sword
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_key_sword
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_moon_staff
+close
+wait 30
+chat clear
+shot fp_abyss_moon_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_moon_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_moon_staff
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_fluke_bow
+close
+wait 30
+chat clear
+shot fp_abyss_fluke_bow
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_fluke_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_fluke_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_grave_bell_staff
+close
+wait 30
+chat clear
+shot fp_abyss_grave_bell_staff
+hud off
+perspective front
+fov 30
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_grave_bell_staff
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_grave_bell_staff

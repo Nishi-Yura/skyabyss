@@ -55,7 +55,6 @@ public class BoneFootman extends BoneSoldier {
                 .floor(getY()).warn(WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.BANDIT_SWING.get(), 0.7f, 1.4f)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.CRIT, getX() + f.x * 2, getY() + 1.1, getZ() + f.z * 2, 5, 0.2, 0.1, 0.2, 0.05))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage());
                     player.knockback(0.5, -f.x, -f.z);

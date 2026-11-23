@@ -142,7 +142,7 @@ public final class TideRaidSelfTest {
             F.add("TR3 was never solved");
         }
         if (F.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST tide raid PASSED (route TR1 / drawn wit room (TR5 or TR6) / TR3: TR1 dark hall, pearl carry, hand-over, wipe reset; wit room turn, wipe reset, solve; TR3 sapling bites, loss resets, three waves)");
+            SkyAbyss.LOGGER.info("SELFTEST tide raid PASSED (route TR1 / drawn wit room (TR5 or TR6) / TR3: TR1 dark hall, pearl carry, hand-over, wipe reset; wit room turn, wipe reset, solve; TR3 tide floods with the wave, sapling bites, loss resets, three waves, tide ebbs)");
         } else {
             F.forEach(s -> SkyAbyss.LOGGER.error("SELFTEST tide raid FAILED: {}", s));
         }
@@ -443,6 +443,9 @@ public final class TideRaidSelfTest {
                 put(b, c.cell().rest());
                 if (r.secondary() < r.secondaryMax()) {
                     check(!c.aliveMobs().isEmpty(), "saplings were bitten but no foe is alive");
+                    // 波のあいだは潮が満ちている (床の一段上が水)。縁石の外 (戸の前) は濡れない
+                    check(r.flooded() && r.wetCells(c) > 300, "TR3: the tide did not flood the hall during the wave (" + r.wetCells(c) + " wet)");
+                    check(r.doorsDry(c), "TR3: the tide leaked to a door");
                     next();
                 } else if (ticks % 200 == 199) {
                     SkyAbyss.LOGGER.info("SELFTEST tide raid TR3 waiting for a bite: {}", r.debug(c));
@@ -462,6 +465,7 @@ public final class TideRaidSelfTest {
             case 3 -> {
                 if (RaidRun.of(group).phase == RaidRun.Phase.ACTIVE && RaidRun.of(group).wipes > wipesBefore) {
                     check(r.secondary() == r.secondaryMax() && r.wave() == 0, "losing every sapling did not reset the room: hp " + r.secondary() + ", wave " + r.wave());
+                    check(r.wetCells(c) == 0 || r.flooded(), "TR3: the reset left the tide in the hall (" + r.wetCells(c) + " wet)");
                     next();
                 } else if (timedOut("TR3 loss reset")) {
                     return true;
@@ -476,6 +480,8 @@ public final class TideRaidSelfTest {
                 }
                 if (r.isComplete()) {
                     check(r.secondary() == r.secondaryMax(), "saplings lost HP although every foe died on arrival");
+                    check(!r.flooded() && r.wetCells(c) == 0, "TR3: the tide stayed after the last wave (" + r.wetCells(c) + " wet)");
+                    check(r.doorsDry(c), "TR3: the tide leaked to a door");
                     tr3Done = true;
                     ticks = 0;
                     phase = 0;

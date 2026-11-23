@@ -35,13 +35,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -105,7 +102,12 @@ public final class TitanLoot {
     // ---------------------------------------------------------------- 図鑑
     // 岩鯨の専用の逸品 (初回の選択の対象)
     public static List<Item> exclusives() {
-        return List.of(ModItems.CAPTAIN_PIKE.get(), ModItems.WATERWAY_FANG.get(), ModItems.STONE_WHALE_PLATING.get());
+        List<Item> all = new ArrayList<>(List.of(ModItems.CAPTAIN_PIKE.get(), ModItems.WATERWAY_FANG.get(), ModItems.STONE_WHALE_PLATING.get()));
+        // 残りの職のヒロイック武器 (item/HeroicGear。どの職も同じ入り方。2026-11-21 に「専用の逸品は 3 つまで」をやめた)
+        for (String id : jp.revati.skyabyss.item.HeroicGear.forTitan(STONE_WHALE)) {
+            jp.revati.skyabyss.item.TitanGearSet.item(id).ifPresent(all::add);
+        }
+        return all;
     }
 
     public static List<Item> armorSet() {
@@ -150,6 +152,9 @@ public final class TitanLoot {
         }
         if (item == ModItems.STONE_WHALE_PLATING.get()) {
             return PLATING_CHANCE;
+        }
+        if (jp.revati.skyabyss.item.HeroicGear.forTitan(STONE_WHALE).contains(id(item))) {
+            return FANG_CHANCE;
         }
         return 0f;
     }
@@ -365,19 +370,16 @@ public final class TitanLoot {
             } else if (canReceive(player) && jp.revati.skyabyss.record.Keepsakes.fragmentMissing(player)) {
                 // 受け取ったのにどこにも見当たらない欠片は、鼓動のそばで再び見つかる (11 の 4章)
                 items.add(new ItemStack(ModItems.SKY_KEY_FRAGMENT.get()));
-                Notice.gain(player, "skyabyss_record.guard.fragment_restored");
+                Notice.gainLog(player, "skyabyss_record.guard.fragment_restored");
             }
             Roll roll = rollHeart(r, level.random);
             items.addAll(roll.items());
             // 属性の欠片・技の修飾ルーン (item/extra/GearFreedomLoot。装備の確率は変えない)
             items.addAll(jp.revati.skyabyss.item.extra.GearFreedomLoot.heartDrops(STONE_WHALE, level.random));
-            // 巨神のヒロイック武器 (図鑑の表の外。一本ずつまれに。item/HeroicGear)
-            items.addAll(jp.revati.skyabyss.item.HeroicGear.heartDrops(STONE_WHALE, level.random));
             int held = handOver(server, uuid, player, items, 0);
             boolean first = !r.firstCleared;
             if (first) {
                 r.firstCleared = true;
-                r.choicePending = jp.revati.skyabyss.loot.reward.HeartReward.CHOICE_ON_FIRST_CLEAR;
             }
             if (player == null) {
                 continue;
@@ -385,8 +387,8 @@ public final class TitanLoot {
             if (fragment) {
                 Notice.unlock(player, "message.skyabyss.fragment_received");
             }
-            Notice.gain(player, "message.skyabyss.boss_reward");
-            Notice.gain(player, rewardLine(items));
+            Notice.gainLog(player, "message.skyabyss.boss_reward");
+            Notice.gainItems(player, items, rewardLine(items));
             announcePieces(level, player, r, roll);
             if (roll.guaranteed() != null) {
                 Notice.gain(player, "message.skyabyss.memory_guarantee");
@@ -395,9 +397,6 @@ public final class TitanLoot {
             }
             Notice.gain(player, memoryLine(r));
             tellHeld(player, held);
-            if (first) {
-                offerChoice(player);
-            }
         }
     }
 
@@ -414,7 +413,7 @@ public final class TitanLoot {
                 continue;
             }
             Notice.gain(player, "message.skyabyss.mid_boss_reward");
-            Notice.gain(player, rewardLine(roll.items()));
+            Notice.gainItems(player, roll.items(), rewardLine(roll.items()));
             announcePieces(level, player, r, roll);
             tellHeld(player, held);
         }
@@ -561,7 +560,7 @@ public final class TitanLoot {
         }
         Notice.unlock(player, "message.skyabyss.reward_delivered");
         if (!given.isEmpty()) {
-            Notice.gain(player, rewardLine(given));
+            Notice.gainItems(player, given, rewardLine(given));
         }
         tellHeld(player, held);
     }
@@ -651,14 +650,8 @@ public final class TitanLoot {
         return line;
     }
 
-    // 初回クリアの選択報酬: 画面 (loot/reward/HeartReward) が眠りの場面のあとに開く。ここは案内の一行だけ
-    private static void offerChoice(ServerPlayer player) {
-        jp.revati.skyabyss.loot.reward.HeartReward.announce(player, STONE_WHALE);
-    }
-
     // ---------------------------------------------------------------- コマンド
     // /titanmemory                 : 自分の巨神の記憶と図鑑を見る (誰でも)
-    // /titanmemory choose <装備>    : 初回クリアの報酬を選ぶ (チャットの名前を押すと走る)
     // /titanmemory claim           : 預かっている報酬を受け取る
     // /skyabyss memory set <人> <n> : 記憶のカウンタを変える (管理者・テスト用)
     // /skyabyss memory clear <人>   : 記録を消す (管理者・テスト用。天の鍵の欠片の記録は残す)
@@ -670,8 +663,7 @@ public final class TitanLoot {
                 .then(Commands.literal("claim").executes(ctx -> {
                     deliver(ctx.getSource().getPlayerOrException(), false);
                     return 1;
-                }))
-                .then(Commands.literal("choose").then(Commands.argument("item", ResourceLocationArgument.id()).executes(TitanLoot::choose))));
+                })));
         dispatcher.register(Commands.literal(SkyAbyss.MODID)
                 .requires(source -> source.hasPermission(2))
                 .then(Commands.literal("memory")
@@ -689,7 +681,6 @@ public final class TitanLoot {
                             r.clears = 0;
                             r.owned.clear();
                             r.firstCleared = false;
-                            r.choicePending = false;
                             ctx.getSource().sendSuccess(() -> memoryLine(r), true);
                             return 1;
                         })))));
@@ -723,20 +714,6 @@ public final class TitanLoot {
         }
         if (memory(player.server).hasPending(player.getUUID())) {
             player.sendSystemMessage(ModText.hint("message.skyabyss.reward_pending"));
-        }
-        if (r.choicePending) {
-            offerChoice(player);
-        }
-        return 1;
-    }
-
-    private static int choose(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ServerPlayer player = ctx.getSource().getPlayerOrException();
-        ResourceLocation choice = ResourceLocationArgument.getId(ctx, "item");
-        // 決まりは画面と同じ一箇所 (HeartReward.claim)
-        if (jp.revati.skyabyss.loot.reward.HeartReward.claim(player, STONE_WHALE, choice.toString()) != jp.revati.skyabyss.loot.reward.HeartReward.Result.OK) {
-            Notice.warn(player, "message.skyabyss.first_clear_none");
-            return 0;
         }
         return 1;
     }
@@ -852,7 +829,7 @@ public final class TitanLoot {
                         }
                         if (run == 1) {
                             // 初回の選択 (専用の逸品のどれか一つ)
-                            r.owned.add(id(exclusives().get(random.nextInt(3))));
+                            r.owned.add(id(exclusives().get(random.nextInt(exclusives().size()))));
                         }
                         dry[p] = roll.fresh().isEmpty() && !captainFresh ? dry[p] + 1 : 0;
                         longestDry = Math.max(longestDry, dry[p]);

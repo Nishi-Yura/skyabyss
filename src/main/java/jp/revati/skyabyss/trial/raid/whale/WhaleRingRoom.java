@@ -10,9 +10,7 @@ import jp.revati.skyabyss.notice.Notice;
 import jp.revati.skyabyss.trial.raid.RaidCtx;
 import jp.revati.skyabyss.trial.raid.RaidKit;
 import jp.revati.skyabyss.trial.raid.RaidRoom;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -204,7 +202,7 @@ public final class WhaleRingRoom extends RaidRoom {
                     if (m == captain) {
                         m.hurt(level.damageSources().magic(), Math.max(MOB_DAMAGE, m.getMaxHealth() * CAPTAIN_EDGE));
                         m.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 15, 1, false, true));
-                        level.sendParticles(ParticleTypes.CRIMSON_SPORE, m.getX(), m.getY() + 1, m.getZ(), 6, 0.4, 0.6, 0.4, 0);
+                        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), m.getX(), m.getY() + 1, m.getZ(), 6, 0.4, 0.6, 0.4, 0);
                     } else {
                         m.hurt(level.damageSources().magic(), MOB_DAMAGE);
                     }
@@ -228,13 +226,13 @@ public final class WhaleRingRoom extends RaidRoom {
             double a = Math.PI * 2 * i / n + phase;
             double x = cx + Math.cos(a) * (radius + 0.3);
             double z = cz + Math.sin(a) * (radius + 0.3);
-            level.sendParticles(red, x, y, z, 1, 0, 0, 0, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y, z, 1, 0, 0, 0, 0);
             if (i % 3 == 0) {
-                level.sendParticles(red, x, y + 0.9, z, 1, 0, 0.1, 0, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + 0.9, z, 1, 0, 0.1, 0, 0);
             }
         }
         if (now % 20 == 0 && active && now >= startAt && radius > RMIN) {
-            level.sendParticles(ParticleTypes.CRIMSON_SPORE, cx, y + 0.5, cz, 6, radius * 0.5, 0.3, radius * 0.5, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx, y + 0.5, cz, 6, radius * 0.5, 0.3, radius * 0.5, 0);
         }
     }
 
@@ -344,11 +342,13 @@ public final class WhaleRingRoom extends RaidRoom {
         startAt -= ticks;
     }
 
-    public long shrinkStart() {
-        return startAt;
-    }
 
     public boolean outside(RaidCtx ctx, double x, double z) {
         return dist(ctx, x, z) > radius;
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

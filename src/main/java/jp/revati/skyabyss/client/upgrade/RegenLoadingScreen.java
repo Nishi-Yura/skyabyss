@@ -11,10 +11,10 @@ import net.minecraft.util.Mth;
 // 作り直しのあとの読み込み画面 (upgrade/RegenLoading)。サーバーが「終わり」と言い、手元にもまわりのチャンクが届いて描けるまで閉じない。
 // Esc では閉じない。夜空の色に、題・まわりの読み込みの帯・建てている物の数
 public class RegenLoadingScreen extends Screen {
-    private static final int BG = 0xFF07090E;
-    private static final int GOLD = 0xFFF2C14E;
-    private static final int TEAL = 0xFF7FD6D0;
-    private static final int DIM = 0xFF8C98A4;
+    private static final int BG = 0xFF05070F;
+    private static final int GOLD = 0xFFE9C46A;
+    private static final int TEAL = 0xFF8FD0FF;
+    private static final int DIM = 0xFF9AA4C4;
     private static final int RADIUS = 4;
 
     private static RegenLoading.State last = new RegenLoading.State(true, false, 0, 0);
@@ -85,7 +85,7 @@ public class RegenLoadingScreen extends Screen {
         int bx = cx - w / 2;
         int by = y + 48;
         g.fill(bx - 1, by - 1, bx + w + 1, by + 7, 0xFF2A3342);
-        g.fill(bx, by, bx + w, by + 6, 0xFF10131A);
+        g.fill(bx, by, bx + w, by + 6, 0xFF0C1022);
         int fill = Math.round(w * Mth.clamp(last.percent() / 100f, 0f, 1f));
         g.fill(bx, by, bx + fill, by + 6, TEAL);
         String dots = ".".repeat(1 + (age / 10) % 3);

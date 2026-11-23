@@ -39,6 +39,12 @@ public final class BossForceDev {
     private static int run(java.util.Collection<? extends Entity> targets, String action, int party) {
         int n = 0;
         for (Entity e : targets) {
+            // BREAK: 崩しゲージを満たして崩す (撮影・確かめ用。核の光は崩れている間だけ光る)
+            if (action.equalsIgnoreCase("BREAK") && e instanceof net.minecraft.world.entity.LivingEntity le) {
+                jp.revati.skyabyss.combat.BreakGauge.add(le, jp.revati.skyabyss.combat.BreakGauge.size(le, jp.revati.skyabyss.combat.BreakGauge.breaks(le)) + 1);
+                n++;
+                continue;
+            }
             if (forceHeartExtra(e, action)) {
                 n++;
             } else if (e instanceof WhaleboneCaptain captain) {

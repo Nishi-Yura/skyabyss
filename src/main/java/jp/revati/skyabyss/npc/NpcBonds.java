@@ -18,23 +18,19 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 
 // プレイヤーと NPC (役) のあいだの記録 (Data Attachment skyabyss:npc_bonds)。死んでも引き継ぎ、持ち主にだけ同期する。
 //   affinity : 好感度 (-100〜100)
-//   flags    : このループで立った会話の印 (「数え歌を聞いた」など)。ループで echoes へ移って消える
-//   echoes   : 前のループまでに立った印。NPC がループ前の会話を「覚えているような」セリフを言うのに使う
-//   talks    : このループで話した回数、lastDay: 最後に話した日 (一日の最初の会話で好感度が少し上がる)
-//   loopSeen : この記録が最後に合わせた月のループの回数 (ループの間にいなかった人は、入ったときに追いつく)
+//   flags    : 立った会話の印 (「数え歌を聞いた」など)
+//   talks    : 話した回数、lastDay: 最後に話した日 (一日の最初の会話で好感度が少し上がる)
 public final class NpcBonds {
     public static final class Bond {
         static final Codec<Bond> CODEC = RecordCodecBuilder.create(i -> i.group(
                 Codec.INT.optionalFieldOf("affinity", 0).forGetter(b -> b.affinity),
                 Codec.STRING.listOf().optionalFieldOf("flags", List.of()).forGetter(b -> List.copyOf(b.flags)),
-                Codec.STRING.listOf().optionalFieldOf("echoes", List.of()).forGetter(b -> List.copyOf(b.echoes)),
                 Codec.INT.optionalFieldOf("talks", 0).forGetter(b -> b.talks),
                 Codec.LONG.optionalFieldOf("last_day", -1L).forGetter(b -> b.lastDay),
                 Codec.STRING.listOf().optionalFieldOf("seen", List.of()).forGetter(b -> List.copyOf(b.seen))).apply(i, Bond::new));
 
         int affinity;
         final Set<String> flags = new LinkedHashSet<>();
-        final Set<String> echoes = new LinkedHashSet<>();
         // 入口で開いたことのある節 (頭の上の「新しい雑談」の点が、聞いた話にはもう出ないように。NpcMarkers)
         final Set<String> seen = new LinkedHashSet<>();
         int talks;
@@ -43,11 +39,10 @@ public final class NpcBonds {
         Bond() {
         }
 
-        private Bond(int affinity, List<String> flags, List<String> echoes, int talks, long lastDay, List<String> seen) {
+        private Bond(int affinity, List<String> flags, int talks, long lastDay, List<String> seen) {
             this.seen.addAll(seen);
             this.affinity = affinity;
             this.flags.addAll(flags);
-            this.echoes.addAll(echoes);
             this.talks = talks;
             this.lastDay = lastDay;
         }
@@ -60,17 +55,13 @@ public final class NpcBonds {
             return flags;
         }
 
-        public Set<String> echoes() {
-            return echoes;
-        }
-
         public int talks() {
             return talks;
         }
 
         @Override
         public boolean equals(Object o) {
-            return o instanceof Bond b && b.affinity == affinity && b.flags.equals(flags) && b.echoes.equals(echoes) && b.talks == talks
+            return o instanceof Bond b && b.affinity == affinity && b.flags.equals(flags) && b.talks == talks
                     && b.lastDay == lastDay && b.seen.equals(seen);
         }
 
@@ -81,24 +72,21 @@ public final class NpcBonds {
 
         @Override
         public String toString() {
-            return "Bond{" + affinity + " flags=" + flags + " echoes=" + echoes + " talks=" + talks + "}";
+            return "Bond{" + affinity + " flags=" + flags + " talks=" + talks + "}";
         }
     }
 
     public static final Codec<NpcBonds> CODEC = RecordCodecBuilder.create(i -> i.group(
-            Codec.unboundedMap(Codec.STRING, Bond.CODEC).optionalFieldOf("bonds", Map.of()).forGetter(b -> b.bonds),
-            Codec.INT.optionalFieldOf("loop_seen", 0).forGetter(b -> b.loopSeen)).apply(i, NpcBonds::new));
+            Codec.unboundedMap(Codec.STRING, Bond.CODEC).optionalFieldOf("bonds", Map.of()).forGetter(b -> b.bonds)).apply(i, NpcBonds::new));
     public static final StreamCodec<ByteBuf, NpcBonds> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
 
     final Map<String, Bond> bonds = new LinkedHashMap<>();
-    int loopSeen;
 
     public NpcBonds() {
     }
 
-    private NpcBonds(Map<String, Bond> bonds, int loopSeen) {
+    private NpcBonds(Map<String, Bond> bonds) {
         this.bonds.putAll(bonds);
-        this.loopSeen = loopSeen;
     }
 
     public static NpcBonds of(Player player) {
@@ -128,15 +116,10 @@ public final class NpcBonds {
         return b != null && b.flags.contains(flag);
     }
 
-    public boolean hasEcho(String role, String flag) {
-        Bond b = bonds.get(role);
-        return b != null && b.echoes.contains(flag);
-    }
-
     // 何か残っているか (会話の回数・印・好感度)。空の記録は「遊んだ」うちに入らない
     public boolean hasSubstance() {
         for (Bond b : bonds.values()) {
-            if (b.talks > 0 || b.affinity != 0 || !b.flags.isEmpty() || !b.echoes.isEmpty()) {
+            if (b.talks > 0 || b.affinity != 0 || !b.flags.isEmpty()) {
                 return true;
             }
         }
@@ -153,26 +136,9 @@ public final class NpcBonds {
         return java.util.Collections.unmodifiableMap(bonds);
     }
 
-    public int loopSeen() {
-        return loopSeen;
-    }
-
-    // 月のループ: このループの印を「覚えているような記憶」(echoes) へ移し、好感度と回数を戻す。
-    // 01 のループの表で「NPC の状態と会話フラグ」は巻き戻るもの。ただし、留まる者に向けた微かな覚えだけは残る
-    void onLoop() {
-        for (Bond b : bonds.values()) {
-            b.echoes.addAll(b.flags);
-            b.flags.clear();
-            b.seen.clear();
-            b.affinity = 0;
-            b.talks = 0;
-            b.lastDay = -1;
-        }
-    }
-
     @Override
     public boolean equals(Object o) {
-        return o instanceof NpcBonds b && b.bonds.equals(bonds) && b.loopSeen == loopSeen;
+        return o instanceof NpcBonds b && b.bonds.equals(bonds);
     }
 
     @Override
@@ -182,6 +148,6 @@ public final class NpcBonds {
 
     @Override
     public String toString() {
-        return "NpcBonds" + bonds + " loopSeen=" + loopSeen;
+        return "NpcBonds" + bonds;
     }
 }

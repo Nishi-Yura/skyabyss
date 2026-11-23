@@ -9,7 +9,6 @@ import jp.revati.skyabyss.trial.TrialSlot;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 
 // 巨神の心臓の間 (最終ボスの部屋) を、体の中ではなく、背の次元の区画 0 番の枠 (TrialSlot の番号 1 からの枠の手前。順路の部屋はここを使わない) に
 // 一つだけ建てる封じた部屋 (docs/design/32 の 9 章)。心臓の戦いはグループごとの上書き (GroupOwned・RoomLocks) で同じ部屋を分け合うので、
@@ -219,14 +218,4 @@ public final class InstanceArenas {
         return (float) (Math.toDegrees(Math.atan2(in.getZ() - rest.getZ(), in.getX() - rest.getX())) - 90.0);
     }
 
-    // 入口の内側から心臓の居場所への向き (yaw)
-    public static float heartEntryYaw(String titan) {
-        BlockPos p = heartEntry(titan);
-        if (p == null) {
-            return 0f;
-        }
-        Vec3 at = Vec3.atBottomCenterOf(p);
-        Vec3 c = heartArena(titan).getCenter();
-        return (float) (Math.toDegrees(Math.atan2(c.z - at.z, c.x - at.x)) - 90.0);
-    }
 }

@@ -36,7 +36,12 @@ public final class TitanGearSets {
             TitanGearSet.piece(ChapterGear.WHALE_DAGGER, ChapterGear.CHANCE),
             TitanGearSet.exclusive(id("captain_pike"), TitanLoot.PIKE_CHANCE),
             TitanGearSet.exclusive(id("waterway_fang"), TitanLoot.FANG_CHANCE),
-            TitanGearSet.exclusive(id("stone_whale_plating"), TitanLoot.PLATING_CHANCE)));
+            TitanGearSet.exclusive(id("stone_whale_plating"), TitanLoot.PLATING_CHANCE),
+            // 残りの職のヒロイック武器 (item/HeroicGear。どの職も同じ入り方: 図鑑・天井・交換・初回の選択。後ろへ足す = 交換の番号を変えない)
+            TitanGearSet.exclusive("skyabyss:whale_choir_hammer", TitanLoot.FANG_CHANCE),
+            TitanGearSet.exclusive("skyabyss:whale_star_staff", TitanLoot.FANG_CHANCE),
+            TitanGearSet.exclusive("skyabyss:whale_rib_longbow", TitanLoot.FANG_CHANCE),
+            TitanGearSet.exclusive("skyabyss:whale_deep_bell_staff", TitanLoot.FANG_CHANCE)));
 
     private static final List<TitanGearSet> SETS = new ArrayList<>(List.of(STONE_WHALE));
 

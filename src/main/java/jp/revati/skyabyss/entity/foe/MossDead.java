@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity.foe;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
@@ -55,11 +56,10 @@ public class MossDead extends ContinentFoe {
             spores = true;
             lastSpores = tickCount;
             begin(target, "spores");
-            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), SPORE_RADIUS))
+            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), SPORE_RADIUS)).prop(PropFx.scatter("spore", 4))
                     .floor(getY()).warn(SPORE_WARN).danger().owner(this).target(target)
                     .startSound(MobSounds.MOSS_DEAD_SPORES.get(), 1.0f, 1.0f)
                     .victims(this::canHit)
-                    .onImpact(server -> server.sendParticles(ParticleTypes.SPORE_BLOSSOM_AIR, getX(), getY() + 1.0, getZ(), 60, SPORE_RADIUS * 0.45, 0.6, SPORE_RADIUS * 0.45, 0.01))
                     .onHit((server, player) -> {
                         player.hurt(attackSource(), damage() * 0.3f);
                         player.addEffect(new MobEffectInstance(MobEffects.POISON, 60, 0), this);
@@ -81,7 +81,6 @@ public class MossDead extends ContinentFoe {
                 .victims(this::canHit)
                 .onImpact(server -> {
                     server.playSound(null, cx, getY(), cz, MobSounds.MOSS_DEAD_SLAM.get(), SoundSource.HOSTILE, 1.2f, 1f);
-                    server.sendParticles(ParticleTypes.POOF, cx, getY() + 0.2, cz, 10, 0.6, 0.05, 0.6, 0.02);
                 })
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage());

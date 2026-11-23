@@ -72,7 +72,7 @@ public class RecordsScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fillGradient(0, 0, width, height, 0x80101418, 0xA0101418);
+        g.fillGradient(0, 0, width, height, 0x800A0E1E, 0xA00A0E1E);
     }
 
     @Override
@@ -137,7 +137,7 @@ public class RecordsScreen extends Screen {
                 if (r.modsTotal() > 0) {
                     int bx = x + 212;
                     int bw = Golden.S55;
-                    g.fill(bx, ry + 5, bx + bw, ry + 8, 0xFF0A0C12);
+                    g.fill(bx, ry + 5, bx + bw, ry + 8, 0xFF0A0E1E);
                     g.fill(bx, ry + 5, bx + Math.min(bw, bw * r.modsSeen() / r.modsTotal()), ry + 8, FacilityUi.TEAL);
                     g.drawString(font, r.modsSeen() + "/" + r.modsTotal(), bx + bw + 4, Golden.textY(ry, ROW_H), FacilityUi.DIM, false);
                 }
@@ -146,7 +146,7 @@ public class RecordsScreen extends Screen {
                 }
             }
             rows.end(g);
-            rows.drawBar(g, 0xFF0A0C12, FacilityUi.TEAL);
+            rows.drawBar(g, 0xFF0A0E1E, FacilityUi.TEAL);
         }
         fit.end(g);
     }

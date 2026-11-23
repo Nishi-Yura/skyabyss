@@ -90,8 +90,10 @@ public final class GearTierSelfTest {
         row(4, A, "abyss_ash_scythe", "abyss_ember_sword", "abyss_ember_staff", "abyss_ember_bow", "abyss_ember_dagger", "abyss_ember_bell_staff");
         // 五章 深淵
         row(5, R, "abyss_diver_helmet", "abyss_diver_chestplate", "abyss_diver_leggings", "abyss_diver_boots");
-        row(5, E, "abyss_lamp_sword", "abyss_pulse_listener", "abyss_lantern_charm", "abyss_lamp_staff", "abyss_depth_bow", "abyss_toll_bell_staff");
-        row(5, H, "abyss_sinking_anchor", "abyss_pulse_dagger", "abyss_surveyor_plumb");
+        row(5, E, "abyss_lamp_sword", "abyss_pulse_listener", "abyss_lantern_charm", "abyss_lamp_staff", "abyss_depth_bow", "abyss_toll_bell_staff",
+                "abyss_stake_hammer", "abyss_vial_knife");
+        row(5, H, "abyss_sinking_anchor", "abyss_pulse_dagger", "abyss_surveyor_plumb", "abyss_key_sword", "abyss_moon_staff", "abyss_fluke_bow",
+                "abyss_grave_bell_staff");
         // 六章 月 (story/ch6/gear)
         row(6, R, "moon_walker_helmet", "moon_walker_chestplate", "moon_walker_leggings", "moon_walker_boots");
         row(6, R, "moon_light_sword", "moon_scale_hammer", "moon_tide_staff", "moon_waning_bow", "moon_crescent_dagger", "moon_starlight_bell_staff");
@@ -364,10 +366,22 @@ public final class GearTierSelfTest {
                 }
             }
             check(f, maxExclusive < minPiece, set.titan + ": an exclusive drops as often as a codex piece");
-            // 月は専用の逸品が 2 つ (太刀と環。03 の 12.2)
+            // 専用の逸品の武器は 6 職ぶんそろう (どの職も同じ入り方。2026-11-21 に「3 つまで」をやめた)。
             // 終章の神器・あいだの塔は図鑑に品を持たない (燃料のための形だけ)
-            int want = set.titan.equals("moon") ? 2 : set.titan.equals("cloudsea") || set.titan.equals("tower") ? 0 : 3;
-            check(f, set.exclusives().size() == want, set.titan + " should have " + want + " exclusives");
+            if (!set.exclusives().isEmpty()) {
+                java.util.Set<jp.revati.skyabyss.rpg.skill.Job> jobs = java.util.EnumSet.noneOf(jp.revati.skyabyss.rpg.skill.Job.class);
+                for (String id : set.exclusives()) {
+                    jp.revati.skyabyss.rpg.skill.Job j = TitanGearSet.item(id).map(jp.revati.skyabyss.rpg.skill.Job::of).orElse(null);
+                    if (j != null) {
+                        jobs.add(j);
+                    }
+                }
+                check(f, jobs.size() == jp.revati.skyabyss.rpg.skill.Job.values().length, set.titan + " exclusives cover only " + jobs);
+                check(f, set.exclusives().size() <= jp.revati.skyabyss.forge.ResonanceForgeMenu.EXCHANGE_STRIDE, set.titan + " has more exclusives than the forge can list");
+            }
+            for (String id : HeroicGear.forTitan(set.titan)) {
+                check(f, set.isExclusive(id), id + " is a heroic weapon outside its codex");
+            }
         }
         for (String id : AbyssSetup.legends()) {
             check(f, item(id) instanceof ModGear g && g.tier() == GearTier.ARTIFACT, "abyss heart item " + id + " is not an artifact");

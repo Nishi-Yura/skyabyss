@@ -97,7 +97,7 @@ public class PastShadow extends AbyssMobB {
             getNavigation().stop();
             if (--mirrorWind < 0 && distanceTo(t) <= MIRROR_RANGE + 1) {
                 strike(t, dmg());
-                sl.sendParticles(ParticleTypes.SMOKE, getX(), getY() + 1, getZ(), 6, 0.3, 0.4, 0.3, 0.02);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 1, getZ(), 6, 0.3, 0.4, 0.3, 0.02);
                 mirrorCooldown = MIRROR_COOLDOWN;
             }
             return;
@@ -124,5 +124,10 @@ public class PastShadow extends AbyssMobB {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         Ch4Mobs.drop(level, this, source, AbyssMobsBSetup.ECHO_SHARD.get(), 0.5, 1, 1);
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

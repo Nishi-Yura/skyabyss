@@ -262,7 +262,7 @@ public final class BeatTiles extends RaidRoom {
         if (next >= len()) {
             paintAll(ctx, HIT);
             ctx.level().playSound(null, ctx.origin().above(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 1.5f, 1.0f);
-            ctx.level().sendParticles(ParticleTypes.ELECTRIC_SPARK, ctx.origin().getX() + 0.5, ctx.origin().getY() + 2, ctx.origin().getZ() + 0.5, 60, 4.0, 1.0, 4.0, 0.1);
+            ctx.level().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), ctx.origin().getX() + 0.5, ctx.origin().getY() + 2, ctx.origin().getZ() + 0.5, 24, 4.0, 1.0, 4.0, 0.1);
             enter(Phase.PASS);
         }
     }
@@ -270,7 +270,7 @@ public final class BeatTiles extends RaidRoom {
     private void fail(RaidCtx ctx) {
         ServerLevel level = ctx.level();
         level.playSound(null, ctx.origin().above(), SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.BLOCKS, 1.4f, 0.5f);
-        level.sendParticles(ParticleTypes.SMOKE, ctx.origin().getX() + 0.5, ctx.origin().getY() + 1.5, ctx.origin().getZ() + 0.5, 40, 4.0, 0.5, 4.0, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), ctx.origin().getX() + 0.5, ctx.origin().getY() + 1.5, ctx.origin().getZ() + 0.5, 24, 4.0, 0.5, 4.0, 0.02);
         paintAll(ctx, DIM);
         ctx.say(Component.translatable("message.skyabyss.raid.SR5.miss"));
         enter(Phase.FAIL);
@@ -282,7 +282,7 @@ public final class BeatTiles extends RaidRoom {
         BlockPos at = ctx.origin().offset(cx, 1, cz);
         float pitch = 0.6f + 0.15f * tile;
         level.playSound(null, at, SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.BLOCKS, vol * 1.3f, pitch);
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.getX() + 0.5, at.getY() + 0.3, at.getZ() + 0.5, 14, 0.8, 0.2, 0.8, 0.05);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 0.3, at.getZ() + 0.5, 14, 0.8, 0.2, 0.8, 0.05);
     }
 
     @Override
@@ -349,5 +349,10 @@ public final class BeatTiles extends RaidRoom {
 
     public BlockState tileState(RaidCtx ctx, int i) {
         return ctx.level().getBlockState(ctx.origin().offset(tileC(i % N), 0, tileC(i / N)));
+    }
+
+    // 攻撃の粒は mod の storm の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, kind);
     }
 }

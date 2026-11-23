@@ -58,7 +58,6 @@ def script(titan):
                 o.append(f"shot {item}_{view}_{tier}")
         o.append("acctier off")
         # 元の平絵 (比べる用)
-        o.append("accmesh off")
         o.append(f"cmd item replace entity @s weapon.mainhand with skyabyss:{item}")
         for view, persp in (("fp", "first"), ("tp", "front")):
             o.append(f"perspective {persp}")
@@ -67,7 +66,6 @@ def script(titan):
             o.append("wait 10")
             o.append("chat clear")
             o.append(f"shot {item}_{view}_flat")
-        o.append("accmesh on")
         # 地面・額縁 (品の階級のまま)
         o.append("cmd item replace entity @s weapon.mainhand with minecraft:air")
         o.append("cmd execute if entity @e[type=item] run kill @e[type=item]")

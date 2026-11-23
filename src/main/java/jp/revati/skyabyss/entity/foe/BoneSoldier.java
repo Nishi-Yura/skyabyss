@@ -35,7 +35,7 @@ public abstract class BoneSoldier extends ContinentFoe {
             cooldown = 20;
             playAction("rise");
             level().playSound(null, getX(), getY(), getZ(), MobSounds.BONE_SOLDIER_RISE.get(), SoundSource.HOSTILE, 1f, 1f);
-            server().sendParticles(ParticleTypes.SOUL, getX(), getY() + 0.8, getZ(), 14, 0.35, 0.6, 0.35, 0.03);
+            server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.8, getZ(), 14, 0.35, 0.6, 0.35, 0.03);
             invulnerableTime = 20;
             return false;
         }
@@ -53,5 +53,10 @@ public abstract class BoneSoldier extends ContinentFoe {
     @Override
     protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
         modStep(MobSounds.BONE_SOLDIER_STEP.get(), 0.35f);
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

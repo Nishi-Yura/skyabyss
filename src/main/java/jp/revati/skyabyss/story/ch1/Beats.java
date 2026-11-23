@@ -74,13 +74,13 @@ public final class Beats {
             return false;
         }
         ServerLevel level = player.serverLevel();
-        BlockParticleOption grit = new BlockParticleOption(ParticleTypes.FALLING_DUST, Blocks.ANDESITE.defaultBlockState());
+        net.minecraft.core.particles.SimpleParticleType grit = jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD);
         for (int i = 0; i < 28; i++) {
             Tasks.later(i * 6, () -> {
                 if (player.isRemoved() || player.serverLevel() != level) {
                     return;
                 }
-                level.sendParticles(player, grit, true, player.getX(), player.getY() + 6.0, player.getZ(), 10, 4.5, 1.5, 4.5, 0.0);
+                level.sendParticles(player, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, player.getX(), player.getY() + 6.0, player.getZ(), 10, 4.5, 1.5, 4.5, 0.0);
             });
         }
         Notice.narrate(player, "message.skyabyss.ch1.beat.dust");
@@ -163,5 +163,10 @@ public final class Beats {
             Notice.narrate(player, "message.skyabyss.ch1.beat.chain");
         });
         return true;
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

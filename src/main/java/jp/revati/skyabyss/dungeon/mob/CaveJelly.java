@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import net.minecraft.core.particles.ParticleTypes;
@@ -40,11 +41,10 @@ public class CaveJelly extends DungeonFloater {
         }
         begin(target, "pulse");
         double floor = target.getY();
-        Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), RADIUS))
+        Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), RADIUS)).prop(PropFx.ring("lightning", 6).size(0.45f))
                 .floor(floor).warn(WARN).danger().owner(this).target(target)
                 .startSound(SoundEvents.SQUID_SQUIRT, 0.8f, 1.4f)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.GLOW, getX(), getY() + 0.8, getZ(), 24, 1.2, 0.8, 1.2, 0.02))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage());
                     player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1), this);

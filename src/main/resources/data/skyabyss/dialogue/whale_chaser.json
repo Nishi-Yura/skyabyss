@@ -11,26 +11,6 @@
       }
     },
     {
-      "node": "c_deja",
-      "if": [
-        {
-          "type": "loop",
-          "min": 1
-        },
-        {
-          "type": "remembers",
-          "flag": "met"
-        },
-        {
-          "type": "not",
-          "of": {
-            "type": "flag",
-            "flag": "met"
-          }
-        }
-      ]
-    },
-    {
       "node": "c_first",
       "if": {
         "type": "not",
@@ -47,16 +27,6 @@
   "nodes": {
     "c_first": {
       "face": "smile",
-      "do": [
-        {
-          "type": "lore",
-          "entry": "chapter1/whale_chaser"
-        }
-      ],
-      "next": "c_menu"
-    },
-    "c_deja": {
-      "face": "grave",
       "do": [
         {
           "type": "lore",

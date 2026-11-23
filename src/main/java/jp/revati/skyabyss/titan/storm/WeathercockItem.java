@@ -61,7 +61,7 @@ public class WeathercockItem extends Item implements jp.revati.skyabyss.pouch.Po
         }) ? InteractionResultHolder.consume(stack) : InteractionResultHolder.fail(stack);
     }
 
-    // 掲げる (右クリックと、旅嚢の輪・短押しの共通の中身)。条件を満たさなければ false
+    // 掲げる (右クリックと、旅袋の輪・短押しの共通の中身)。条件を満たさなければ false
     @Override
     public boolean usePouch(ServerPlayer sp, Runnable consumeOne) {
         ServerLevel sl = sp.serverLevel();

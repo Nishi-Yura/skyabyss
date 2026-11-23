@@ -7,7 +7,6 @@
       潮の番人は銛の別メッシュ <id>_<案>_harpoon_{mesh.json,atlas.png} も (受け口 socket_main、名前 shore_harpoon)
 出力 (すべて src/main/resources/assets/skyabyss/ の下):
   lowpoly/<id>.json, textures/lowpoly/<id>(.png|_glowmask.png), geo/entity/<id>_lowpoly(.geo|_debug.geo).json   (tools/install/install_lowpoly.py)
-  geo/entity/<id>.geo.json + textures/entity/<id>.png   LowPoly.enabled = false のときの箱の代用 (デバッグ箱)
   animations/entity/<id>.animation.json                 このファイルで作る
   sounds.json の行 (既存の音の出来事 (type event) に高さを付けた別名)、字幕と名前は assets/skyabyss_ch2mob/lang/
   models/item/<id>_spawn_egg.json
@@ -316,12 +315,8 @@ def install():
         if mob == "shore_warden":
             cmd += ["--gear", d + "harpoon_mesh.json:" + d + "harpoon_atlas.png:shore_harpoon:socket_main"]
         subprocess.check_call(cmd, cwd=ROOT)
-        shutil.copyfile(os.path.join(A, "geo", "entity", mob + "_lowpoly_debug.geo.json"), os.path.join(A, "geo", "entity", mob + ".geo.json"))
         os.makedirs(os.path.join(A, "textures", "entity"), exist_ok=True)
-        shutil.copyfile(os.path.join(A, "textures", "lowpoly", mob + ".png"), os.path.join(A, "textures", "entity", mob + ".png"))
         gm = os.path.join(A, "textures", "lowpoly", mob + "_glowmask.png")
-        if os.path.exists(gm):
-            shutil.copyfile(gm, os.path.join(A, "textures", "entity", mob + "_glowmask.png"))
         wjson(os.path.join(A, "models", "item", mob + "_spawn_egg.json"), {"parent": "minecraft:item/template_spawn_egg"})
 
 

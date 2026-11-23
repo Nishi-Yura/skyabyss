@@ -83,7 +83,7 @@ public final class Mechanics {
                 BlockPos p0 = f.at(lo);
                 BlockPos p1 = f.at(box + "_hi");
                 Vec3 c = new Vec3((p0.getX() + p1.getX()) / 2.0 + 0.5, p0.getY() + 0.3, (p0.getZ() + p1.getZ()) / 2.0 + 0.5);
-                level.sendParticles(on ? ParticleTypes.SMOKE : ParticleTypes.LAVA, c.x, c.y, c.z, 8, Math.abs(p1.getX() - p0.getX()) / 3.0 + 0.3, 0.2,
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c.x, c.y, c.z, 8, Math.abs(p1.getX() - p0.getX()) / 3.0 + 0.3, 0.2,
                         Math.abs(p1.getZ() - p0.getZ()) / 3.0 + 0.3, 0.01);
                 if (toNext == WARN) {
                     level.playSound(null, p0, SoundEvents.LAVA_AMBIENT, SoundSource.BLOCKS, 2f, 0.6f);
@@ -170,7 +170,7 @@ public final class Mechanics {
                 return false;
             }
             f.charge.put(k, n + 1);
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, c.getX() + 0.5, c.getY() + 1.0, c.getZ() + 0.5, 20 + 10 * n, 0.4, 0.6, 0.4, 0.2);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.getX() + 0.5, c.getY() + 1.0, c.getZ() + 0.5, 20 + 10 * n, 0.4, 0.6, 0.4, 0.2);
             level.playSound(null, c, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 1.4f, 0.8f + 0.3f * n);
             if (n + 1 >= need) {
                 level.setBlock(c, Blocks.SEA_LANTERN.defaultBlockState(), 3);

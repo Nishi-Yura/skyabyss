@@ -47,7 +47,7 @@ bash tools/dev/selftest_fresh.sh
 | 本体 | `build/libs/skyabyss-<版>.jar` |
 | 必要な mod | GeckoLib（NeoForge 1.21.1 用。開発では `gradle.properties` の `geckolib_version`） |
 | 導入先 | NeoForge 1.21.1（`gradle.properties` の `neo_version`）、Java 21 |
-| 案内 | [docs/beta_how_to_play.md](beta_how_to_play.md)（遊び方・操作・既知の問題・感想の欄）、公式サイト（`site/` を GitHub Pages に） |
+| 案内 | [docs/beta_how_to_play.md](beta_how_to_play.md)（遊び方・操作・既知の問題・感想の欄）、公式サイト（`site/` を GitHub Pages に）。サイトの wiki はゲームの書き出しから作り直す（`tools/site/wiki.py`）。言い換えた言葉（旅嚢・アクセサリーなど）が `site/` に残っていないかを `grep -rl` で見てから出す |
 | 世界 | 新しいワールド。世界の種類は「天と淵の大陸」だけ（専用サーバーは `server.properties` に `level-type=skyabyss\:continent`）。難易度はピースフル以外 |
 | ゲームルール | 順番 `skyabyssStoryGate` とレベル上限 `skyabyssStoryLevelCap` は入れたまま渡す（00 の 178） |
 

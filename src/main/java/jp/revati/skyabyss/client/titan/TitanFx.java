@@ -78,13 +78,13 @@ public final class TitanFx {
             double hi = titan.getY() + c.hi();
             // 雲: 体が雲の高さにかかっている柱。体の動きと逆へ流れる
             if (!Float.isNaN(cloud) && lo - 1.0 <= cloud && hi + 3.0 >= cloud && rnd.nextFloat() < 0.35f) {
-                level.addParticle(ParticleTypes.CLOUD, x, cloud + rnd.nextDouble() * 2.0, z, -vx * 0.5 + (rnd.nextDouble() - 0.5) * 0.04, 0.01, -vz * 0.5 + (rnd.nextDouble() - 0.5) * 0.04);
+                level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, cloud + rnd.nextDouble() * 2.0, z, -vx * 0.5 + (rnd.nextDouble() - 0.5) * 0.04, 0.01, -vz * 0.5 + (rnd.nextDouble() - 0.5) * 0.04);
             }
             // 海: 体が海面にかかっている柱 (喫水の線)。泳いでいるほど派手に
             if (lo <= sea + 0.5 && hi >= sea - 0.5 && rnd.nextFloat() < 0.25f + (float) Math.min(speed * 2.0, 0.5)) {
-                level.addParticle(ParticleTypes.SPLASH, x, sea + 0.1, z, -vx * 0.3 + (rnd.nextDouble() - 0.5) * 0.1, 0.12, -vz * 0.3 + (rnd.nextDouble() - 0.5) * 0.1);
+                level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, sea + 0.1, z, -vx * 0.3 + (rnd.nextDouble() - 0.5) * 0.1, 0.12, -vz * 0.3 + (rnd.nextDouble() - 0.5) * 0.1);
                 if (rnd.nextFloat() < 0.5f) {
-                    level.addParticle(ParticleTypes.BUBBLE, x, sea - 0.3, z, 0, 0.05, 0);
+                    level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, sea - 0.3, z, 0, 0.05, 0);
                 }
             }
             // 地面: 底が地面の近くで、動いているあいだ土ぼこり
@@ -92,7 +92,7 @@ public final class TitanFx {
                 BlockPos below = BlockPos.containing(x, lo - 0.2, z);
                 BlockState state = level.getBlockState(below);
                 if (state.isSolidRender(level, below) || state.canOcclude()) {
-                    level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, state), x, below.getY() + 1.05, z, (rnd.nextDouble() - 0.5) * 0.1, 0.08, (rnd.nextDouble() - 0.5) * 0.1);
+                    level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), x, below.getY() + 1.05, z, (rnd.nextDouble() - 0.5) * 0.1, 0.08, (rnd.nextDouble() - 0.5) * 0.1);
                 }
             }
         }

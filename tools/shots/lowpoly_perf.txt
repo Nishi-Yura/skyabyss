@@ -35,25 +35,18 @@ camera minecraft:overworld 0 -59 13 180 8
 waitchunks
 wait 100
 shot lowpoly_crowd20
-lowpoly on
 wait 40
 perf 300 crowd20_on_0
-lowpoly off
 wait 40
 perf 300 crowd20_off_0
-lowpoly on
 wait 40
 perf 300 crowd20_on_1
-lowpoly off
 wait 40
 perf 300 crowd20_off_1
-lowpoly on
 wait 40
 perf 300 crowd20_on_2
-lowpoly off
 wait 40
 perf 300 crowd20_off_2
-lowpoly on
 wait 40
 shot lowpoly_crowd20_after
 cmd kill @e[type=skyabyss:bone_sentinel]
@@ -95,23 +88,16 @@ cmd summon skyabyss:bone_sentinel 5 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceR
 cmd summon skyabyss:bone_sentinel 7 -60 3 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b}
 wait 100
 shot lowpoly_crowd36
-lowpoly on
 wait 40
 perf 300 crowd36_on_0
-lowpoly off
 wait 40
 perf 300 crowd36_off_0
-lowpoly on
 wait 40
 perf 300 crowd36_on_1
-lowpoly off
 wait 40
 perf 300 crowd36_off_1
-lowpoly on
 wait 40
 perf 300 crowd36_on_2
-lowpoly off
 wait 40
 perf 300 crowd36_off_2
-lowpoly on
 quit

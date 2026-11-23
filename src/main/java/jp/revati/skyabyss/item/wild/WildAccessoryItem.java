@@ -49,6 +49,12 @@ public class WildAccessoryItem extends Item implements WildGear, Accessory {
         return row.region();
     }
 
+    // 地下のダンジョンの装飾品は、そのダンジョンの土地の巨神 (強化・分解の素材)
+    @Override
+    public String dungeon() {
+        return "dungeon".equals(row.region()) ? jp.revati.skyabyss.dungeon.DungeonGear.originTitan(row.id()) : WildGear.super.dungeon();
+    }
+
     @Override
     public int wildLevel() {
         return row.level();
@@ -115,7 +121,7 @@ public class WildAccessoryItem extends Item implements WildGear, Accessory {
             switch (f.kind()) {
                 case CHARM_HEAL -> {
                     player.heal((float) f.p(0));
-                    level.sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 1, player.getZ(), 14, 0.4, 0.6, 0.4, 0.02);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1, player.getZ(), 14, 0.4, 0.6, 0.4, 0.02);
                     WildGearEvents.sound(level, player, SoundEvents.HONEY_DRINK, 1.2f);
                 }
                 case CHARM_FOG -> {
@@ -126,7 +132,7 @@ public class WildAccessoryItem extends Item implements WildGear, Accessory {
                             m.setTarget(null);
                         }
                     }
-                    level.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 0.6, player.getZ(), 60, f.p(0) * 0.4, 0.4, f.p(0) * 0.4, 0.02);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.getX(), player.getY() + 0.6, player.getZ(), 24, f.p(0) * 0.4, 0.4, f.p(0) * 0.4, 0.02);
                     WildGearEvents.sound(level, player, SoundEvents.BELL_BLOCK, 0.7f);
                 }
                 case CHARM_CLEANSE -> {
@@ -137,15 +143,15 @@ public class WildAccessoryItem extends Item implements WildGear, Accessory {
                     }
                     player.clearFire();
                     player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, f.ticks(0), 0, true, true));
-                    level.sendParticles(ParticleTypes.WHITE_ASH, player.getX(), player.getY() + 1, player.getZ(), 40, 0.5, 0.8, 0.5, 0.02);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.getX(), player.getY() + 1, player.getZ(), 24, 0.5, 0.8, 0.5, 0.02);
                     WildGearEvents.sound(level, player, SoundEvents.BOOK_PAGE_TURN, 0.8f);
                 }
                 case CHARM_RALLY -> {
                     for (Player ally : WildGearEvents.withSelf(level, player, f.p(0))) {
                         WildGearEvents.buff(ally, WildGearEvents.BUFF, WildGearEvents.BUFF_AMT, f.p(1), now + f.ticks(2));
-                        level.sendParticles(ParticleTypes.FLAME, ally.getX(), ally.getY() + 2.2, ally.getZ(), 6, 0.2, 0.2, 0.2, 0.01);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), ally.getX(), ally.getY() + 2.2, ally.getZ(), 6, 0.2, 0.2, 0.2, 0.01);
                     }
-                    level.sendParticles(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, player.getX(), player.getY() + 1.5, player.getZ(), 10, 0.2, 0.5, 0.2, 0.04);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.getX(), player.getY() + 1.5, player.getZ(), 10, 0.2, 0.5, 0.2, 0.04);
                     WildGearEvents.sound(level, player, SoundEvents.GOAT_HORN_SOUND_VARIANTS.get(0).value(), 1.0f);
                 }
                 case CHARM_LIGHT -> {
@@ -155,12 +161,12 @@ public class WildAccessoryItem extends Item implements WildGear, Accessory {
                     for (LivingEntity e : WildGearEvents.foes(level, player, player.position(), f.p(0))) {
                         WildGearEvents.mark(level, e, f.p(1), f.ticks(2), now);
                     }
-                    level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1.5, player.getZ(), 40, 1.5, 0.8, 1.5, 0.02);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1.5, player.getZ(), 24, 1.5, 0.8, 1.5, 0.02);
                     WildGearEvents.sound(level, player, SoundEvents.FIRECHARGE_USE, 1.6f);
                 }
                 case CHARM_HEART -> {
                     player.heal((float) (player.getMaxHealth() * f.p(0)));
-                    level.sendParticles(ParticleTypes.HEART, player.getX(), player.getY() + 1.2, player.getZ(), 8, 0.4, 0.5, 0.4, 0.02);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1.2, player.getZ(), 8, 0.4, 0.5, 0.4, 0.02);
                     WildGearEvents.sound(level, player, SoundEvents.WARDEN_HEARTBEAT, 1.0f);
                 }
                 case CHARM_BLINK -> blink(level, player, f.p(0));
@@ -172,7 +178,7 @@ public class WildAccessoryItem extends Item implements WildGear, Accessory {
                             m.setTarget(null);
                             m.getNavigation().stop();
                         }
-                        level.sendParticles(ParticleTypes.REVERSE_PORTAL, e.getX(), e.getY(0.6), e.getZ(), 10, 0.3, 0.4, 0.3, 0.02);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.getX(), e.getY(0.6), e.getZ(), 10, 0.3, 0.4, 0.3, 0.02);
                     }
                     WildGearEvents.sound(level, player, SoundEvents.BEACON_DEACTIVATE, 1.4f);
                 }
@@ -181,7 +187,7 @@ public class WildAccessoryItem extends Item implements WildGear, Accessory {
                         ally.heal((float) f.p(1));
                         WildGearEvents.buff(ally, WildGearEvents.HYMN, WildGearEvents.HYMN_AMT, f.p(2), now + f.ticks(3));
                     }
-                    level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 2.4, player.getZ(), 30, 2.0, 0.3, 2.0, 0.02);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 2.4, player.getZ(), 24, 2.0, 0.3, 2.0, 0.02);
                     WildGearEvents.sound(level, player, SoundEvents.BELL_RESONATE, 1.6f);
                 }
                 default -> {
@@ -205,10 +211,10 @@ public class WildAccessoryItem extends Item implements WildGear, Accessory {
                 net.minecraft.world.level.ClipContext.Fluid.NONE, player));
         double go = Math.max(0, from.distanceTo(hit.getLocation()) - 0.8);
         Vec3 to = player.position().add(dir.scale(go));
-        level.sendParticles(ParticleTypes.PORTAL, player.getX(), player.getY() + 1, player.getZ(), 30, 0.3, 0.6, 0.3, 0.2);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1, player.getZ(), 24, 0.3, 0.6, 0.3, 0.2);
         player.teleportTo(to.x, to.y, to.z);
         player.fallDistance = 0;
-        level.sendParticles(ParticleTypes.END_ROD, to.x, to.y + 1, to.z, 20, 0.3, 0.6, 0.3, 0.05);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), to.x, to.y + 1, to.z, 20, 0.3, 0.6, 0.3, 0.05);
         WildGearEvents.sound(level, player, SoundEvents.ENDERMAN_TELEPORT, 1.4f);
     }
 }

@@ -13,7 +13,6 @@ import jp.revati.skyabyss.story.ch2.Ch2Mobs;
 import jp.revati.skyabyss.titan.group.GroupOwned;
 import jp.revati.skyabyss.util.Players;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -100,9 +99,6 @@ public class DriftHermit extends GuardMob {
         return ahead;
     }
 
-    public void setAhead(@Nullable UUID id) {
-        this.ahead = id;
-    }
 
     @Override
     protected void registerGoals() {
@@ -205,7 +201,7 @@ public class DriftHermit extends GuardMob {
             item = Ch2Mobs.item(Ch2Mobs.SHELL_CHIP);
         }
         if (level() instanceof ServerLevel server) {
-            server.sendParticles(ParticleTypes.BUBBLE_POP, getX(), getY() + 0.4, getZ(), 6, 0.2, 0.1, 0.2, 0.02);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.4, getZ(), 6, 0.2, 0.1, 0.2, 0.02);
             if (item != null) {
                 ItemEntity drop = new ItemEntity(server, getX(), getY() + 0.4, getZ(), new ItemStack(item));
                 Vec3 dir = toward == null ? new Vec3(0, 0, 0) : toward.position().subtract(position()).multiply(1, 0, 1).normalize();
@@ -415,5 +411,10 @@ public class DriftHermit extends GuardMob {
     @Override
     protected void playStepSound(BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
         modStep(MobSounds.DRIFT_HERMIT_STEP.get(), 0.2f);
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

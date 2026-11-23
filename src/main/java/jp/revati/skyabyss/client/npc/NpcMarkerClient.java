@@ -43,8 +43,8 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 public final class NpcMarkerClient {
     public static final double THROUGH_WALLS = 16.0;
     public static final double MAX_RANGE = 64.0;
-    static final int GOLD = 0xF2C14E;
-    static final int CYAN = 0x7FD6D0;
+    static final int GOLD = 0xE9C46A;
+    static final int CYAN = 0x8FD0FF;
     static final int PALE = 0xE9E3D4;
     // 絵は 16 x 24 のドット絵 (tools/gen/mobs/gen_npc_marker_icons.py)。暗い縁取り・明るい縁と影つき。光はやわらかい丸
     private static final String DIR = "textures/gui/npc_marker/";
@@ -88,14 +88,7 @@ public final class NpcMarkerClient {
         return MARKERS.size();
     }
 
-    public static Marker markerOf(int id) {
-        return MARKERS.getOrDefault(id, Marker.NONE);
-    }
 
-    // 開発用 (撮影・自己テスト): 受け取ったものとして印を置く
-    public static void putForTest(int id, Marker marker) {
-        MARKERS.put(id, marker);
-    }
 
     static boolean visible(Minecraft mc) {
         return mc.player != null && mc.level != null && mc.screen == null && !mc.options.hideGui && Config.NPC_MARKERS.get()

@@ -8,7 +8,6 @@
       小物は docs/review/ch4_roughs/items/icons/<品>_<案>_32.png
 出力 (assets/skyabyss/ の下):
   lowpoly/<id>.json, textures/lowpoly/<id>(.png|_glowmask.png|_flared.png), geo/entity/<id>_lowpoly(_debug).geo.json   (tools/install/install_lowpoly.py)
-  geo/entity/<id>.geo.json + textures/entity/<id>.png   LowPoly.enabled = false のときの箱の代用
   animations/entity/<id>.animation.json                 熾り蟲・灰ひきずりはこのファイルで作る。古い灰の番人は灰の番人のアニメに「亀裂」「熱の波」を足す。屑は灰の番人のアニメをそのまま使う
   textures/item/<品>.png・models/item/<品>.json・models/item/<id>_spawn_egg.json
   assets/skyabyss_ch4/sounds.json                        音の出来事 (skyabyss_ch4 の名前空間。既存の音の別名。字幕の文は lang)
@@ -173,34 +172,20 @@ def install():
             # 骨は灰の番人のもの (geo/entity/ash_thrall.geo.json)。道具は別メッシュ (受け口 socket_main)
             gear = "ash_husk_poker" if mob == "ash_husk" else "elder_rake"
             cmd += ["--geo-name", "ash_thrall", "--gear", d + "poker_mesh.json:" + d + "poker_atlas.png:" + gear + ":socket_main"]
-        # --geo-name は灰の番人の骨の geo (ash_thrall_lowpoly*.geo.json) を書き直すので、灰の番人のものを元に戻す (骨は同じ。箱の代用の箱だけ違う)
+        # --geo-name は灰の番人の骨の geo (ash_thrall_lowpoly.geo.json) を書き直すので、灰の番人のものを元に戻す (骨は同じ)
         keep = {}
         if mob in THRALLS:
-            for n in ("ash_thrall_lowpoly.geo.json", "ash_thrall_lowpoly_debug.geo.json"):
+            for n in ("ash_thrall_lowpoly.geo.json",):
                 keep[n] = open(os.path.join(A, "geo", "entity", n), "rb").read()
         subprocess.check_call(cmd, cwd=ROOT)
         for n, data in keep.items():
             open(os.path.join(A, "geo", "entity", n), "wb").write(data)
-        os.makedirs(os.path.join(A, "textures", "entity"), exist_ok=True)
         if mob in THRALLS:
-            # 燃え上がった姿 (同じ UV の別アトラス)。箱の代用は灰の番人の geo と絵
+            # 燃え上がった姿 (同じ UV の別アトラス)
             shutil.copyfile(os.path.join(ROOT, d + "atlas_flared.png"), os.path.join(A, "textures", "lowpoly", mob + "_flared.png"))
             gf = os.path.join(ROOT, d + "glowmask_flared.png")
             if os.path.exists(gf):
                 shutil.copyfile(gf, os.path.join(A, "textures", "lowpoly", mob + "_flared_glowmask.png"))
-            g = json.load(open(os.path.join(ROOT, "tools", "sources", "geo_cube", "geo", "entity", "ash_thrall.geo.json"), encoding="utf-8"))
-            g["minecraft:geometry"][0]["description"]["identifier"] = "geometry." + mob
-            wjson(os.path.join(A, "geo", "entity", mob + ".geo.json"), g, indent=None)
-            for suffix in ("", "_glowmask", "_flared", "_flared_glowmask"):
-                src = os.path.join(A, "textures", "entity", "ash_thrall" + suffix + ".png")
-                if os.path.exists(src):
-                    shutil.copyfile(src, os.path.join(A, "textures", "entity", mob + suffix + ".png"))
-        else:
-            shutil.copyfile(os.path.join(A, "geo", "entity", mob + "_lowpoly_debug.geo.json"), os.path.join(A, "geo", "entity", mob + ".geo.json"))
-            shutil.copyfile(os.path.join(A, "textures", "lowpoly", mob + ".png"), os.path.join(A, "textures", "entity", mob + ".png"))
-            gm = os.path.join(A, "textures", "lowpoly", mob + "_glowmask.png")
-            if os.path.exists(gm):
-                shutil.copyfile(gm, os.path.join(A, "textures", "entity", mob + "_glowmask.png"))
         wjson(os.path.join(A, "models", "item", mob + "_spawn_egg.json"), {"parent": "minecraft:item/template_spawn_egg"})
 
 

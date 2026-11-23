@@ -23,11 +23,13 @@ if [ "${1:-}" != "--no-java" ]; then
 fi
 [ -f tools/audit/check_resources.py ] && run check_resources python -I tools/audit/check_resources.py
 [ -f tools/audit/check_lang_keys.py ] && run check_lang_keys python -I tools/audit/check_lang_keys.py
+[ -f tools/audit/check_ui_terms.py ] && run check_ui_terms python -I tools/audit/check_ui_terms.py
 [ -f tools/audit/mesh_audit.py ] && run mesh_audit python -I tools/audit/mesh_audit.py --check
 [ -f tools/audit/check_generators.py ] && run check_generators python tools/audit/check_generators.py
 [ -f tools/audit/check_text_fit.py ] && run check_text_fit python tools/audit/check_text_fit.py
 [ -f tools/audit/check_dungeon_mouths.py ] && run check_dungeon_mouths python -I tools/audit/check_dungeon_mouths.py
 [ -f tools/audit/check_reach.py ] && run check_reach python -I tools/audit/check_reach.py
+[ -f tools/audit/dungeon_paths.py ] && run dungeon_paths python -I tools/audit/dungeon_paths.py
 for f in tools/audit/check_stairs*.py tools/audit/stairs*.py; do
   [ -f "$f" ] && run "$(basename "$f" .py)" python "$f"
 done

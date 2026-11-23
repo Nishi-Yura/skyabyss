@@ -371,7 +371,7 @@ public final class TideHeartArena {
                 for (int i = 0; i < 6; i++) {
                     double a = level.random.nextDouble() * Math.PI * 2;
                     double d = level.random.nextDouble() * RADIUS;
-                    level.sendParticles(ParticleTypes.SPLASH, CX + 0.5 + Math.cos(a) * d, FLOOR + 0.9, CZ + 0.5 + Math.sin(a) * d, 4, 0.4, 0.05, 0.4, 0.1);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), CX + 0.5 + Math.cos(a) * d, FLOOR + 0.9, CZ + 0.5 + Math.sin(a) * d, 4, 0.4, 0.05, 0.4, 0.1);
                 }
             }
             if (holdTicks == 0) {
@@ -448,7 +448,7 @@ public final class TideHeartArena {
         GroupGates.setDefault(level, gate(), true);
         if (was) {
             for (BlockPos p : gate()) {
-                level.sendParticles(ParticleTypes.BUBBLE_POP, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.02);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.02);
             }
         }
     }
@@ -469,5 +469,10 @@ public final class TideHeartArena {
 
     static void resetState() {
         fillTicks = holdTicks = drainTicks = 0;
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

@@ -54,7 +54,7 @@ public class ResonanceCharmItem extends Item implements ModGear, Accessory {
         player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 600, 0));
         ServerLevel level = player.serverLevel();
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.5f, 1.2f);
-        level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1, player.getZ(), 30, 0.5, 0.8, 0.5, 0.03);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1, player.getZ(), 24, 0.5, 0.8, 0.5, 0.03);
         player.getCooldowns().addCooldown(this, COOLDOWN);
         return true;
     }

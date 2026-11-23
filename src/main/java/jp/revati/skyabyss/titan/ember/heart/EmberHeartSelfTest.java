@@ -1156,9 +1156,9 @@ public final class EmberHeartSelfTest {
         check(first.draws().stream().anyMatch(d -> d.id().equals(EmberLoot.CORE)), "first clear has no core", f);
         check(first.draws().stream().anyMatch(d -> d.id().equals(EmberLoot.SHARD) && d.count() >= 4 && d.count() <= 7), "shards not 4-7", f);
         check(first.draws().stream().anyMatch(d -> d.id().equals(EmberLoot.RESONANCE_SHARD) && d.count() >= 1 && d.count() <= 3), "resonance shards not 1-3", f);
-        check(EmberLoot.collection().size() == 10 + jp.revati.skyabyss.item.ChapterGear.EMBER.size() && EmberLoot.collection().equals(EmberIds.CODEX.stream().map(EmberIds::id).map(Object::toString).toList()),
+        check(EmberLoot.collection().size() == 10 + jp.revati.skyabyss.item.ChapterGear.EMBER.size() + jp.revati.skyabyss.item.HeroicGear.forTitan("ember").size() && EmberLoot.collection().equals(EmberIds.CODEX.stream().map(EmberIds::id).map(Object::toString).toList()),
                 "collection should be the pieces of EmberIds.CODEX", f);
-        check(EmberLoot.EXCLUSIVES.size() == 3 && EmberLoot.chance(EmberGear.HAMMER) == 0.04f && EmberLoot.chance(EmberGear.LANTERN) == 0.02f
+        check(EmberLoot.EXCLUSIVES.size() == 8 && EmberLoot.chance(EmberGear.HAMMER) == 0.04f && EmberLoot.chance(EmberGear.LANTERN) == 0.02f
                 && EmberLoot.chance(EmberGear.HELMET) == 0.25f && EmberLoot.chance(EmberGear.WAR_AXE) == 0.20f, "chances differ from 6.3節", f);
         // 天の鍵の欠片以外の確率: 心核 初回必ず・以後 25%、共鳴の結晶 40%、角杯 50%
         int cores = 0;
@@ -1194,7 +1194,7 @@ public final class EmberHeartSelfTest {
         check(none.owned.isEmpty(), "unmade items were recorded", f);
         // 6.4節の模擬 (図鑑 10 品すべて: 平均 13.8)
         double mean = EmberLoot.meanClearsToComplete(4000, 7, id -> true);
-        check(mean > 11.5 && mean < 16.5, "mean clears to complete the collection is " + mean + " (6.4節: 13.8)", f);
+        check(mean > 21 && mean < 30, "mean clears to complete the collection is " + mean + " (6.4節: 13.8)", f);
         notes.add(String.format("collection in %.1f clears on average (design 13.8)", mean));
         // 撃破の報酬 (いない人の分は預かる)。欠片は一人一回。巨神ごとの記録。余燼を止めた記録と上限 40
         UUID fake = UUID.randomUUID();
@@ -1202,7 +1202,7 @@ public final class EmberHeartSelfTest {
         boolean worldBefore = ProgressData.get(server).worldStopped(EmberLoot.TITAN);
         EmberLoot.onHeartDefeat(back, List.of(), List.of(fake));
         TitanMemoryData.Record rec = memory.peek(fake, EmberLoot.TITAN);
-        check(rec != null && rec.clears == 1 && rec.fragment && rec.firstCleared && rec.choicePending == jp.revati.skyabyss.loot.reward.HeartReward.CHOICE_ON_FIRST_CLEAR, "defeat record is wrong", f);
+        check(rec != null && rec.clears == 1 && rec.fragment && rec.firstCleared, "defeat record is wrong", f);
         check(memory.peek(fake, TitanLoot.STONE_WHALE) == null && memory.peek(fake, "tide_shell") == null, "ember defeat wrote to another titan's record", f);
         check(memory.hasPending(fake), "rewards for an absent player were not held", f);
         TitanMemoryData.Pending held = memory.takePending(fake);

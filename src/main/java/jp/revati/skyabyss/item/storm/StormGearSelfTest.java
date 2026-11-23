@@ -102,8 +102,9 @@ public final class StormGearSelfTest {
     private static void table(List<String> f) {
         check(f, TitanGearSets.get(StormGear.TITAN) == StormGear.SET, "storm set is not registered in TitanGearSets");
         check(f, TitanGearSets.all().get(0) == TitanGearSets.STONE_WHALE, "stone whale should be the first gear set");
-        check(f, StormGear.SET.collection().size() == 10 + jp.revati.skyabyss.item.ChapterGear.STORM.size() && StormGear.SET.exclusives().size() == 3,
-                "storm collection should be 10 + the job weapons, with 3 exclusives");
+        check(f, StormGear.SET.collection().size() == 10 + jp.revati.skyabyss.item.ChapterGear.STORM.size() + jp.revati.skyabyss.item.HeroicGear.forTitan(StormGear.TITAN).size()
+                && StormGear.SET.exclusives().size() == 3 + jp.revati.skyabyss.item.HeroicGear.forTitan(StormGear.TITAN).size(),
+                "storm collection should be 10 + the job weapons + the heroic weapons, with 7 exclusives");
         for (String id : StormGear.SET.collection()) {
             check(f, TitanGearSet.registered(id), id + " is not registered");
             Item it = item(id);

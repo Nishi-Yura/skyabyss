@@ -1,0 +1,42 @@
+# 2026-11-15: 潮殻の心臓の領域「満ち引き」(titan/domain/EbbFlowDomain) を本物の心臓の間 (tide_back) で撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/ebb_flow_domain.txt -PshotsName=ebb_flow_domain
+# 部屋の中心 = (4352, 51, 4096)。半径 24、天井 70。上の高い所から見下ろす
+world ebbflow flat
+size 1280 720
+timeout 2400
+render 8
+clouds off
+
+cmd gamemode creative
+cmd skyabyss playtest skip opening
+cmd effect give @s minecraft:resistance 1000000 4 true
+hud on
+waitchunks
+wait 200
+cmd skyabyss cinematic stop
+cmd skyabyss tideheart go
+wait 400
+cmd skyabyss cinematic stop
+cmd skyabyss tideheart start
+wait 300
+cmd skyabyss cinematic stop
+wait 300
+cmd skyabyss cinematic stop
+wait 40
+camera skyabyss:tide_back 4352.5 66 4119 180 42
+waitchunks 600
+wait 40
+cmd skyabyss dev force @e[type=skyabyss:tide_heart,limit=1] DOMAIN
+wait 40
+shot e1_declare
+wait 60
+# 満ち潮 (一巡目は 3.5 秒)
+shot e2_flood
+wait 50
+shot e3_ebb_start
+wait 60
+shot e4_ebb_waves
+wait 120
+shot e5_flood_again
+wait 30
+shot e6_flood_whirl

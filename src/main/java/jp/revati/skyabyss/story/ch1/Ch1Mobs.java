@@ -160,7 +160,7 @@ public final class Ch1Mobs {
         boolean want = near && haulerHours(level.getDayTime()) && level.getDifficulty() != Difficulty.PEACEFUL;
         if (!want) {
             for (BoneHauler h : now) {
-                level.sendParticles(ParticleTypes.POOF, h.getX(), h.getY() + 0.6, h.getZ(), 6, 0.3, 0.4, 0.3, 0.01);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), h.getX(), h.getY() + 0.6, h.getZ(), 6, 0.3, 0.4, 0.3, 0.01);
                 h.discard();
             }
             return 0;
@@ -221,5 +221,10 @@ public final class Ch1Mobs {
             return true;
         }
         return false;
+    }
+
+    // 攻撃の粒は mod の stone の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, kind);
     }
 }

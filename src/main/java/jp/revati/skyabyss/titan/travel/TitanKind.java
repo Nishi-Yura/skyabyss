@@ -19,7 +19,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.phys.Vec3;
 
 // 巨神での移動に使える巨神の一覧。巨神ごとに、心臓の記録 (解放の条件)、今の個体の探し方、呼び寄せ方、呼び笛、旅の型を持つ。
 // 後の巨神 (雷翼・余燼) は、TravelTitan を実装した巨神と一緒にここへ一行足す (09 の 11 章・16 章)。
@@ -126,9 +125,4 @@ public record TitanKind(
         return key;
     }
 
-    // 巨神の中心を、乗り場の鎖の垂れ口が point の真上に来る位置へ (向き yaw のとき)
-    public static Vec3 centerForChainAt(TravelTitan titan, Vec3 point, float yaw, double centerY) {
-        Vec3 off = titan.boardingChainOffset(yaw);
-        return new Vec3(point.x - off.x, centerY, point.z - off.z);
-    }
 }

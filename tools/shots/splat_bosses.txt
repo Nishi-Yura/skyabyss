@@ -1,0 +1,82 @@
+# 彫り直したボスの並び (tools/gen/splat/resculpt.py)
+world splatboss flat
+size 1280 720
+timeout 900
+render 10
+clouds off
+wait 40
+cmd skyabyss playtest skip opening
+wait 60
+cmd skyabyss cinematic stop
+close
+cmd time set 6000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+cmd fill -60 -61 -40 60 -61 40 minecraft:smooth_stone destroy
+fov 60
+hud off
+chat clear
+cmd tp @s 0 -50 40 180 10
+waitchunks
+wait 20
+cmd summon skyabyss:forge_giant -48 -60 -8 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["b"]}
+cmd summon skyabyss:fort_warlord -36 -60 -8 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["b"]}
+cmd summon skyabyss:ice_lord -24 -60 -8 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["b"]}
+cmd summon skyabyss:jelly_priestess -12 -60 -8 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["b"]}
+cmd summon skyabyss:temple_keeper 0 -60 -8 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["b"]}
+cmd summon skyabyss:thunder_owl 12 -60 -8 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["b"]}
+cmd summon skyabyss:bone_lancer 24 -60 -8 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["b"]}
+cmd summon skyabyss:crystal_lizard 36 -60 -8 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["b"]}
+cmd summon skyabyss:lava_toad 48 -60 -8 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["b"]}
+cmd summon skyabyss:shell_octopus -48 -60 12 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["b"]}
+cmd summon skyabyss:bone_centipede -36 -60 12 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["b"]}
+cmd summon skyabyss:whalebone_captain -24 -60 12 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["b"]}
+cmd summon skyabyss:elder_sentinel -12 -60 12 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["b"]}
+cmd summon skyabyss:heart_warden 0 -60 12 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["b"]}
+cmd summon skyabyss:feather_warden 12 -60 12 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["b"]}
+cmd summon skyabyss:scorched_warden 24 -60 12 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["b"]}
+cmd summon skyabyss:shore_warden 36 -60 12 {NoAI:1b,Rotation:[0f,0f],PersistenceRequired:1b,Invulnerable:1b,Tags:["b"]}
+wait 40
+cmd skyabyss cinematic stop
+close
+wait 60
+camera minecraft:overworld -36 -53 10 180 14
+wait 30
+shot day_0
+camera minecraft:overworld 0 -53 10 180 14
+wait 30
+shot day_1
+camera minecraft:overworld 36 -53 10 180 14
+wait 30
+shot day_2
+camera minecraft:overworld -36 -53 32 180 14
+wait 30
+shot day_3
+camera minecraft:overworld 0 -53 32 180 14
+wait 30
+shot day_4
+camera minecraft:overworld 36 -53 32 180 14
+wait 30
+shot day_5
+cmd time set 18000
+wait 20
+camera minecraft:overworld -36 -53 10 180 14
+wait 30
+shot night_0
+camera minecraft:overworld 0 -53 10 180 14
+wait 30
+shot night_1
+camera minecraft:overworld 36 -53 10 180 14
+wait 30
+shot night_2
+camera minecraft:overworld -36 -53 32 180 14
+wait 30
+shot night_3
+camera minecraft:overworld 0 -53 32 180 14
+wait 30
+shot night_4
+camera minecraft:overworld 36 -53 32 180 14
+wait 30
+shot night_5
+quit

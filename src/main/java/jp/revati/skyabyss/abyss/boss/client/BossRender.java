@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.abyss.boss.BossLook;
-import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.entity.GuardMob;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -26,7 +25,7 @@ public final class BossRender {
 
     public static ResourceLocation geo(int look) {
         String s = BossLook.stem(look);
-        return id("geo/entity/" + s + (LowPoly.enabled && !LowPoly.debug ? "_lowpoly" : "_lowpoly_debug") + ".geo.json");
+        return id("geo/entity/" + s + "_lowpoly" + ".geo.json");
     }
 
     public static ResourceLocation texture(int look) {

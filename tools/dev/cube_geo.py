@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """元のキューブの geo とテクスチャ (geo/entity/<名>.geo.json・textures/entity/<名>.png) を、通常のジャーの外に出す・戻す。
 
-通常は入っていない。低ポリの描画 (LowPoly.enabled = true) は使わないので、ジャーとリソースの読み込みが軽くなる。
-ゲームの中で `lowpoly off` (キューブの比べ) をするとき、または tools/install の生成スクリプトがキューブを書き直すときに使う。
+通常は入っていない (ゲームは低ポリのメッシュから作る点の模型で描く)。生成スクリプトが骨の位置の元として読む。
+tools/install の生成スクリプトがキューブを書き直したあと、`out` でゲームの外へ出す。`back` はゲームに戻すが、ゲームはもう読まない (骨の位置を確かめたいときだけ)。
 
 使い方 (リポジトリ直下で):
     python tools/dev/cube_geo.py status     # 今どちらに何個あるか
@@ -10,7 +10,6 @@
     python tools/dev/cube_geo.py out        # src/main/resources から tools/sources/geo_cube/ へ移す (生成スクリプトが書き戻した分を外す)
 
 back は写すだけ (tools 側は残す)。out は移す (resources 側は消える)。残すもの (KEEP) は両方とも触らない。
-キューブが無い状態で `lowpoly off` にすると、落ちずに低ポリのまま描き、素材ごとに一度だけ警告を出す (LowPoly.cubeOr)。
 """
 import os
 import shutil

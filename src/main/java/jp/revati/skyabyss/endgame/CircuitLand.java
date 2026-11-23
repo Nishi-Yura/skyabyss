@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.endgame;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
@@ -83,17 +84,17 @@ public final class CircuitLand {
                 continue;
             }
             BlockPos at = run.points.get(i);
-            level.sendParticles(new DustParticleOptions(new org.joml.Vector3f(0.95f, 0.88f, 0.62f), 1.2f), at.getX() + 0.5, at.getY() + 0.2, at.getZ() + 0.5, 4, 0.3, 0.05, 0.3, 0);
-            level.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 0.4, at.getZ() + 0.5, 1, 0.1, 0.3, 0.1, 0.01);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 0.2, at.getZ() + 0.5, 4, 0.3, 0.05, 0.3, 0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 0.4, at.getZ() + 0.5, 1, 0.1, 0.3, 0.1, 0.01);
             for (ServerPlayer p : ps) {
                 if (p.isShiftKeyDown() && Circuits.flat(at, p.getX(), p.getZ()) < DIG_REACH) {
                     got++;
                     run.pointProgress.set(i, got);
-                    level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.COARSE_DIRT.defaultBlockState()), at.getX() + 0.5, at.getY() + 0.1, at.getZ() + 0.5, 8, 0.3, 0.1, 0.3, 0);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), at.getX() + 0.5, at.getY() + 0.1, at.getZ() + 0.5, 8, 0.3, 0.1, 0.3, 0);
                     level.playSound(null, at, SoundEvents.ROOTED_DIRT_BREAK, SoundSource.PLAYERS, 0.8f, 0.8f);
                     if (got >= DIG_STEPS) {
                         run.progress++;
-                        level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), at.getX() + 0.5, at.getY() + 0.6, at.getZ() + 0.5, 20, 0.3, 0.3, 0.3, 0.05);
+                        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), at.getX() + 0.5, at.getY() + 0.6, at.getZ() + 0.5, 20, 0.3, 0.3, 0.3, 0.05);
                         level.playSound(null, at, SoundEvents.BONE_BLOCK_BREAK, SoundSource.PLAYERS, 1f, 0.9f);
                         for (ServerPlayer q : ps) {
                             Notice.gain(q, "message.skyabyss.circuit.dug", run.progress, run.need);
@@ -157,13 +158,13 @@ public final class CircuitLand {
             }
         }
         // 沖の杭の目印
-        level.sendParticles(ebb ? ParticleTypes.BUBBLE_POP : ParticleTypes.SPLASH, stake.getX() + 0.5, stake.getY() + 0.5, stake.getZ() + 0.5, 6, 0.3, 0.6, 0.3, 0.05);
-        level.sendParticles(new DustParticleOptions(new org.joml.Vector3f(0.37f, 0.78f, 0.94f), 1.4f), stake.getX() + 0.5, stake.getY() + 1.6, stake.getZ() + 0.5, 3, 0.1, 0.4, 0.1, 0);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), stake.getX() + 0.5, stake.getY() + 0.5, stake.getZ() + 0.5, 6, 0.3, 0.6, 0.3, 0.05);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), stake.getX() + 0.5, stake.getY() + 1.6, stake.getZ() + 0.5, 3, 0.1, 0.4, 0.1, 0);
         if (!ebb) {
             // 満ちている: 柱から離れた人は波に呑まれる
             for (int i = 0; i < 20; i++) {
                 double a = i * Math.PI / 10;
-                level.sendParticles(ParticleTypes.SPLASH, run.spot.getX() + 0.5 + Math.cos(a) * TIDE_SAFE, run.spot.getY() + 0.3, run.spot.getZ() + 0.5 + Math.sin(a) * TIDE_SAFE, 2, 0.2, 0.1, 0.2, 0.05);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), run.spot.getX() + 0.5 + Math.cos(a) * TIDE_SAFE, run.spot.getY() + 0.3, run.spot.getZ() + 0.5 + Math.sin(a) * TIDE_SAFE, 2, 0.2, 0.1, 0.2, 0.05);
             }
             for (ServerPlayer p : ps) {
                 double d = Circuits.flat(run.spot, p.getX(), p.getZ());
@@ -173,7 +174,7 @@ public final class CircuitLand {
                     p.push(back.x, 0.05, back.z);
                     p.hurtMarked = true;
                     p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 1));
-                    level.sendParticles(ParticleTypes.SPLASH, p.getX(), p.getY() + 0.5, p.getZ(), 12, 0.4, 0.3, 0.4, 0.1);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX(), p.getY() + 0.5, p.getZ(), 12, 0.4, 0.3, 0.4, 0.1);
                     if (run.phase == 2 && p.getUUID().equals(run.holder)) {
                         run.phase = 1;
                         run.holder = null;
@@ -203,7 +204,7 @@ public final class CircuitLand {
         // 印を持った人が柱のそばへ戻れば越える
         for (ServerPlayer p : ps) {
             if (p.getUUID().equals(run.holder)) {
-                level.sendParticles(new DustParticleOptions(new org.joml.Vector3f(0.37f, 0.78f, 0.94f), 1.0f), p.getX(), p.getY() + 2.1, p.getZ(), 2, 0.1, 0.1, 0.1, 0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 2.1, p.getZ(), 2, 0.1, 0.1, 0.1, 0);
                 if (Circuits.flat(run.spot, p.getX(), p.getZ()) < TIDE_HOME) {
                     Circuits.complete(level, run);
                 }
@@ -240,7 +241,7 @@ public final class CircuitLand {
         for (int i = 0; i < run.points.size(); i++) {
             BlockPos at = run.points.get(i);
             if (run.pointProgress.get(i) < CRYSTAL_HITS) {
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.getX() + 0.5, at.getY() + 1.1, at.getZ() + 0.5, 3, 0.25, 0.3, 0.25, 0.05);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 1.1, at.getZ() + 0.5, 3, 0.25, 0.3, 0.25, 0.05);
             }
         }
         waves(level, run, ps, now);
@@ -261,7 +262,7 @@ public final class CircuitLand {
                 continue;
             }
             run.pointProgress.set(i, n + 1);
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 16 + 8 * n, 0.4, 0.5, 0.4, 0.2);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 16 + 8 * n, 0.4, 0.5, 0.4, 0.2);
             level.playSound(null, at, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 1.3f, 0.8f + 0.3f * n);
             if (n + 1 >= CRYSTAL_HITS) {
                 level.setBlock(at, Blocks.SEA_LANTERN.defaultBlockState(), 3);
@@ -330,9 +331,9 @@ public final class CircuitLand {
         BlockPos fire = run.points.get(0);
         boolean near = Circuits.nearest(ps, fire, FIRE_R) != null;
         run.progress = near ? run.progress + 10 : Math.max(0, run.progress - 20);
-        level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, fire.getX() + 0.5, fire.getY() + 0.8, fire.getZ() + 0.5, 1, 0.1, 0.2, 0.1, 0.01);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), fire.getX() + 0.5, fire.getY() + 0.8, fire.getZ() + 0.5, 1, 0.1, 0.2, 0.1, 0.01);
         if (!near) {
-            level.sendParticles(ParticleTypes.SMOKE, fire.getX() + 0.5, fire.getY() + 0.5, fire.getZ() + 0.5, 6, 0.3, 0.2, 0.3, 0.01);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), fire.getX() + 0.5, fire.getY() + 0.5, fire.getZ() + 0.5, 6, 0.3, 0.2, 0.3, 0.01);
         }
         if (now >= run.nextWave) {
             run.nextWave = now + WIND_EVERY;
@@ -351,15 +352,10 @@ public final class CircuitLand {
         double sz = fire.getZ() + 0.5 - Math.sin(angle) * len / 2;
         float dmg = (float) Circuits.stakeDamage(run);
         Vec3 push = new Vec3(Math.cos(angle), 0, Math.sin(angle)).scale(0.9);
-        Telegraph.in(level, TelegraphShape.line(sx, sz, angle, len, 1.8)).floor(fire.getY()).warn(WIND_WARN).danger()
+        Telegraph.in(level, TelegraphShape.line(sx, sz, angle, len, 1.8)).prop(PropFx.shots("wind_blade", 2)).floor(fire.getY()).warn(WIND_WARN).danger()
                 .startSound(SoundEvents.ELYTRA_FLYING, 0.5f, 0.6f)
                 .victims(p -> run.members.contains(p.getUUID()))
                 .onImpact(server -> {
-                    for (int i = 0; i <= 20; i++) {
-                        double t = i / 20.0 * len;
-                        server.sendParticles(ParticleTypes.ASH, sx + Math.cos(angle) * t, fire.getY() + 0.8, sz + Math.sin(angle) * t, 6, 0.4, 0.4, 0.4, 0.02);
-                        server.sendParticles(ParticleTypes.LARGE_SMOKE, sx + Math.cos(angle) * t, fire.getY() + 0.6, sz + Math.sin(angle) * t, 1, 0.3, 0.2, 0.3, 0.01);
-                    }
                     server.playSound(null, fire, SoundEvents.BLAZE_SHOOT, SoundSource.HOSTILE, 0.6f, 0.5f);
                 })
                 .onHit((server, player) -> {

@@ -56,8 +56,4 @@ public final class NodeEffects {
         return v;
     }
 
-    // 閾値の節が今効いているか (画面の表示)
-    public static boolean thresholdMet(Player player, AbilityNode n) {
-        return n.kind != AbilityNode.Kind.THRESHOLD || Growth.get(player).stat(n.stat) >= n.at;
-    }
 }

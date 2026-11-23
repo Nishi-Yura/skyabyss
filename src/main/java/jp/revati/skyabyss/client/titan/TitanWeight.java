@@ -136,10 +136,6 @@ public final class TitanWeight {
         return g;
     }
 
-    // 影の描画のために、体がカメラの視界を出ていても描く範囲 (上から見下ろしたとき、真下の影を出すために下へ伸ばす)
-    public static net.minecraft.world.phys.AABB withShadowReach(net.minecraft.world.phys.AABB box, double down) {
-        return box.expandTowards(0, -down, 0);
-    }
 
     // カメラが巨神の近く (この距離以内) か。影を描くかの目安
     public static boolean near(Entity titan, double range) {

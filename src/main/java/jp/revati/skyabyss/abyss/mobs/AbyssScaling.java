@@ -62,10 +62,6 @@ public final class AbyssScaling {
         return base * dmgMul(y);
     }
 
-    // 心臓の下の深さ (心臓の間の底より下へ何ブロック) から上乗せの段 (0〜DEEP_CAP)
-    public static double deepSteps(double beyondHeart) {
-        return Math.max(0, Math.min(DEEP_CAP, beyondHeart / DEEP_STEP));
-    }
 
     public static double hpDeep(double base, double y, double steps) {
         return hp(base, y) * (1 + DEEP_HP_PER_STEP * steps);

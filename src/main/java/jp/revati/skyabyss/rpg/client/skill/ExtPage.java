@@ -161,7 +161,7 @@ final class ExtPage {
             Aspect a = isOpen ? Aspects.get(d.aspectSlots[i]) : null;
             boolean hover = in(mx, my, sx, sy, SLOT, SLOT);
             if (!isOpen) {
-                g.fill(sx, sy, sx + SLOT, sy + SLOT, 0xFF0C0E12);
+                g.fill(sx, sy, sx + SLOT, sy + SLOT, 0xFF05070F);
                 Golden.outline(g, sx, sy, sx + SLOT, sy + SLOT, 0xFF2A2E36);
                 String need = i < 4 ? String.valueOf(new int[] {20, 30, 40, 50}[i]) : "転";
                 g.drawString(font, need, sx + (SLOT - font.width(need)) / 2 + 1, sy + 7, 0xFF4A505C, false);
@@ -173,7 +173,7 @@ final class ExtPage {
             }
             if (a == null) {
                 g.fill(sx, sy, sx + SLOT, sy + SLOT, hover ? 0xFF20242C : 0xFF15181E);
-                Golden.outline(g, sx, sy, sx + SLOT, sy + SLOT, 0xFF4A5060);
+                Golden.outline(g, sx, sy, sx + SLOT, sy + SLOT, 0xFF4A5680);
                 // 空きの印 (小さな菱)
                 diamond(g, sx + SLOT / 2, sy + SLOT / 2, 2, 0xFF3A404C);
                 if (hover) {
@@ -221,7 +221,7 @@ final class ExtPage {
         FitText.draw(g, font, Component.translatable("gui.skyabyss.aspect.title").append(job == null ? Component.empty()
                 : Component.literal("・").append(Component.translatable(job.nameKey()))), rx, Golden.textY(rb.y() + 2, Golden.ROW), rw - cw - Golden.S8, GOLD, false);
         int vy = rb.y() + 2 + Golden.ROW + 3;
-        g.fill(rx, vy - 2, rx + rw, vy - 1, 0xFF2A2E38);
+        g.fill(rx, vy - 2, rx + rw, vy - 1, 0xFF222A48);
         shelf.setViewport(rx, vy, rw, rb.bottom() - 3 - vy);
         int groupH = GROUP_HEAD + 2 * (TILE + PIPS + 1) + GROUP_GAP;
         shelf.setContentHeight(job == null ? 0 : GROUPS.length * groupH - GROUP_GAP);
@@ -242,13 +242,13 @@ final class ExtPage {
                     }
                 }
                 // 段の見出し: 小さな玉・名前・数・細い線
-                diamond(g, tx0 + 2, y + 5, 2, argb(grp.isEmpty() ? 0x7FD6D0 : GOLD));
+                diamond(g, tx0 + 2, y + 5, 2, argb(grp.isEmpty() ? 0x8FD0FF : GOLD));
                 Component n = groupName(grp);
                 String c = have + " / " + list.size();
                 g.drawString(font, n, tx0 + 8, y + 1, have > 0 ? TEXT : SOFT, false);
                 int nw = font.width(n);
                 g.drawString(font, c, tx0 + rowW - font.width(c), y + 1, DIM, false);
-                g.fill(tx0 + 8 + nw + 4, y + 5, tx0 + rowW - font.width(c) - 4, y + 6, 0xFF2A2E38);
+                g.fill(tx0 + 8 + nw + 4, y + 5, tx0 + rowW - font.width(c) - 4, y + 6, 0xFF222A48);
                 int ty = y + GROUP_HEAD;
                 int[] col = new int[2];
                 for (int i = 0; i < list.size(); i++) {
@@ -276,7 +276,7 @@ final class ExtPage {
             }
         }
         shelf.end(g);
-        shelf.drawBar(g, 0xFF1A1D24, 0xFF59606F);
+        shelf.drawBar(g, 0xFF1A1D24, 0xFF5A6690);
         if (job == null) {
             FitText.draw(g, font, Component.translatable("gui.skyabyss.aspect.no_job"), rx, vy + 4, rw, SOFT, false);
         }
@@ -303,7 +303,7 @@ final class ExtPage {
         }
         // 真ん中: 二重の菱と、職の木の絵 (ゆっくり光る)
         float pulse = 0.5f + 0.5f * (float) Math.sin(ticks * 0.08);
-        diamond(g, cx, cy, 11, 0xFF0A0C10);
+        diamond(g, cx, cy, 11, 0xFF0A0E1E);
         diamond(g, cx, cy, 10, alpha(GOLD, 60 + (int) (60 * pulse)));
         diamond(g, cx, cy, 9, 0xFF14171D);
         if (job != null && job.tree != null) {
@@ -352,7 +352,7 @@ final class ExtPage {
         int step = 4;
         int x0 = x + (w - (Aspects.MAX_LEVEL * step - 1)) / 2;
         for (int i = 0; i < Aspects.MAX_LEVEL; i++) {
-            g.fill(x0 + i * step, y, x0 + i * step + 3, y + 2, i < lv ? argb(RARITY[rarity]) : 0xFF2A2E38);
+            g.fill(x0 + i * step, y, x0 + i * step + 3, y + 2, i < lv ? argb(RARITY[rarity]) : 0xFF222A48);
         }
     }
 

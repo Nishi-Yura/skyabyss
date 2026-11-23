@@ -56,7 +56,6 @@ wait 10
 chat clear
 shot resonance_charm_tp_legend
 acctier off
-accmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:resonance_charm
 perspective first
 hud on
@@ -70,7 +69,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot resonance_charm_tp_flat
-accmesh on
 cmd item replace entity @s weapon.mainhand with minecraft:air
 cmd execute if entity @e[type=item] run kill @e[type=item]
 cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
@@ -128,7 +126,6 @@ wait 10
 chat clear
 shot moss_talisman_tp_legend
 acctier off
-accmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:moss_talisman
 perspective first
 hud on
@@ -142,7 +139,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot moss_talisman_tp_flat
-accmesh on
 cmd item replace entity @s weapon.mainhand with minecraft:air
 cmd execute if entity @e[type=item] run kill @e[type=item]
 cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]
@@ -265,7 +261,6 @@ wait 10
 chat clear
 shot stone_whale_plating_tp_legend
 acctier off
-accmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:stone_whale_plating
 perspective first
 hud on
@@ -279,7 +274,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot stone_whale_plating_tp_flat
-accmesh on
 cmd item replace entity @s weapon.mainhand with minecraft:air
 cmd execute if entity @e[type=item] run kill @e[type=item]
 cmd execute if entity @e[type=item_frame] run kill @e[type=item_frame]

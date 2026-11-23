@@ -121,6 +121,6 @@ public class TabletBlock extends BaseEntityBlock {
         double x = pos.getX() + 0.5 + facing.getStepX() * 0.3 + (random.nextDouble() - 0.5) * 0.5;
         double y = pos.getY() + 0.3 + random.nextDouble() * 0.6;
         double z = pos.getZ() + 0.5 + facing.getStepZ() * 0.3 + (random.nextDouble() - 0.5) * 0.5;
-        level.addParticle(ParticleTypes.END_ROD, x, y, z, 0, 0.01, 0);
+        level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y, z, 0, 0.01, 0);
     }
 }

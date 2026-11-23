@@ -58,7 +58,7 @@ public final class AbyssGear {
     public static final float PLUMB_CHANCE = 0.02f;
     public static final float CORE_CHANCE = 0.25f;
 
-    // 図鑑 (13 品。五章の職の武器 3 本を足した)
+    // 図鑑 (19 品。五章の職の武器 5 本と、残りの職のヒロイック武器 4 本を足した)
     public static final TitanGearSet SET = new TitanGearSet(DUNGEON, SHARD, CORE, List.of(
             TitanGearSet.piece(HELMET, ARMOR_CHANCE),
             TitanGearSet.piece(CHESTPLATE, ARMOR_CHANCE),
@@ -67,13 +67,20 @@ public final class AbyssGear {
             TitanGearSet.piece(LAMP_SWORD, BASE_CHANCE),
             TitanGearSet.piece(LISTENER, BASE_CHANCE),
             TitanGearSet.piece(CHARM, BASE_CHANCE),
-            // 五章の職の武器 (魔法使い・弓使い・呪術師。abyss/LegendGear)
+            // 五章の職の武器 (魔法使い・弓使い・呪術師・鍛冶師・暗殺者。abyss/LegendGear)
             TitanGearSet.piece(id("abyss_lamp_staff"), BASE_CHANCE),
             TitanGearSet.piece(id("abyss_depth_bow"), BASE_CHANCE),
             TitanGearSet.piece(id("abyss_toll_bell_staff"), BASE_CHANCE),
+            TitanGearSet.piece(id("abyss_stake_hammer"), BASE_CHANCE),
+            TitanGearSet.piece(id("abyss_vial_knife"), BASE_CHANCE),
             TitanGearSet.exclusive(ANCHOR, EXCLUSIVE_CHANCE),
             TitanGearSet.exclusive(DAGGER, EXCLUSIVE_CHANCE),
-            TitanGearSet.exclusive(PLUMB, PLUMB_CHANCE)));
+            TitanGearSet.exclusive(PLUMB, PLUMB_CHANCE),
+            // 残りの職のヒロイック武器 (item/HeroicGear。どの職も同じ入り方: 図鑑・天井・交換。並びは後ろへ足す = 交換の番号を変えない)
+            TitanGearSet.exclusive(id("abyss_key_sword"), EXCLUSIVE_CHANCE),
+            TitanGearSet.exclusive(id("abyss_moon_staff"), EXCLUSIVE_CHANCE),
+            TitanGearSet.exclusive(id("abyss_fluke_bow"), EXCLUSIVE_CHANCE),
+            TitanGearSet.exclusive(id("abyss_grave_bell_staff"), EXCLUSIVE_CHANCE)));
 
     // 層の主: 初めて倒した人に、その層の鎧の一部位を必ず (骨 = 兜・塩 = 胴・雷 = すね当て・灰 = 靴)
     public static String lordPiece(String layer) {

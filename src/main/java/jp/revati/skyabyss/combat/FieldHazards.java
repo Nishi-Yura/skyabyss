@@ -1,12 +1,11 @@
 package jp.revati.skyabyss.combat;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -87,10 +86,6 @@ public final class FieldHazards {
         }
     }
 
-    // 主のまわりの、当たりうる人
-    public List<ServerPlayer> targetsNear() {
-        return mob.level() instanceof ServerLevel level ? targets(level) : List.of();
-    }
 
     List<ServerPlayer> targets(ServerLevel level) {
         List<ServerPlayer> out = new ArrayList<>(level.getPlayers(p -> p.isAlive() && !p.isSpectator() && !p.isCreative() && p.distanceToSqr(mob) < 28 * 28 && canHit.test(p)));
@@ -121,10 +116,10 @@ public final class FieldHazards {
             double x = c.x;
             double z = c.z;
             double y = c.y;
+            jp.revati.skyabyss.combat.prop.AttackProps.fall(level, jp.revati.skyabyss.combat.prop.AttackProps.fallKind(b), mob, c, RAIN_WARN, 14, 12f, 1.3f, 14);
             Telegraph.in(level, TelegraphShape.circle(x, z, RAIN_RADIUS)).floor(y).warn(RAIN_WARN).danger().owner(mob).victims(canHit::test)
                     .onImpact(s -> {
                         s.playSound(null, x, y, z, SoundEvents.STONE_BREAK, SoundSource.HOSTILE, 1.4f, 0.7f);
-                        s.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, b), x, y + 0.4, z, 30, 1.0, 0.3, 1.0, 0.15);
                     })
                     .onHit((s, player) -> {
                         player.hurt(source.get(), damage.get() * 0.8f);
@@ -144,10 +139,7 @@ public final class FieldHazards {
         }
         if (rainTicks >= RAIN_WARN - 10 && rainTicks % 2 == 0) {
             double drop = (RAIN_WARN - rainTicks) / 10.0;
-            BlockParticleOption opt = new BlockParticleOption(ParticleTypes.BLOCK, block.get());
-            for (Vec3 c : rainSpots) {
-                level.sendParticles(opt, c.x, c.y + 1 + drop * 9, c.z, 3, 0.3, 0.2, 0.3, 0);
-            }
+            net.minecraft.core.particles.SimpleParticleType opt = jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD);
         }
     }
 
@@ -156,21 +148,18 @@ public final class FieldHazards {
         level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.HOSTILE, 1.6f, 0.8f);
         double base = mob.getRandom().nextDouble() * Math.PI * 2;
         double span = Math.toRadians(100);
-        BlockParticleOption opt = new BlockParticleOption(ParticleTypes.BLOCK, block.get());
+        net.minecraft.core.particles.SimpleParticleType opt = jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD);
         double cx = mob.getX();
         double cz = mob.getZ();
         double cy = mob.getY();
         for (int i = 0; i < 2; i++) {
             double start = base + Math.PI * i;
             boolean first = i == 0;
-            Telegraph.in(level, TelegraphShape.sweep(cx, cz, start, span, SWEEP_LENGTH, SWEEP_HALF_WIDTH)).floor(cy).warn(SWEEP_WARN)
+            Telegraph.in(level, TelegraphShape.sweep(cx, cz, start, span, SWEEP_LENGTH, SWEEP_HALF_WIDTH)).prop(PropFx.along(jp.revati.skyabyss.combat.prop.AttackProps.spikeKind(block.get()))).floor(cy).warn(SWEEP_WARN)
                     .active(SWEEP_ACTIVE).danger().owner(mob).victims(canHit::test)
                     .onImpact(s -> {
                         if (first) {
                             s.playSound(null, cx, cy, cz, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.HOSTILE, 1.4f, 1.2f);
-                        }
-                        for (double d = 2; d <= SWEEP_LENGTH; d += 1.5) {
-                            s.sendParticles(opt, cx + Math.cos(start) * d, cy + 0.6, cz + Math.sin(start) * d, 4, 0.3, 0.3, 0.3, 0.1);
                         }
                     })
                     .onHit((s, player) -> {
@@ -187,18 +176,20 @@ public final class FieldHazards {
     void ring(ServerLevel level) {
         cue.send("field_ring", RING_WARN);
         level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 1.4f, 0.7f);
-        BlockParticleOption opt = new BlockParticleOption(ParticleTypes.BLOCK, block.get());
+        net.minecraft.core.particles.SimpleParticleType opt = jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD);
         double cx = mob.getX();
         double cz = mob.getZ();
         double cy = mob.getY();
         Telegraph.in(level, TelegraphShape.ring(cx, cz, RING_IN, RING_OUT)).floor(cy).warn(RING_WARN).danger().owner(mob).victims(canHit::test)
                 .onImpact(s -> {
-                    s.playSound(null, cx, cy, cz, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.0f, 0.6f);
-                    for (int k = 0; k < 24; k++) {
-                        double a = k * Math.PI * 2 / 24;
-                        double r = (RING_IN + RING_OUT) / 2;
-                        s.sendParticles(opt, cx + Math.cos(a) * r, cy + 0.4, cz + Math.sin(a) * r, 8, 1.2, 0.6, 1.2, 0.2);
+                    String spike = jp.revati.skyabyss.combat.prop.AttackProps.spikeKind(block.get());
+                    for (int k = 0; k < 10; k++) {
+                        double a = k * Math.PI * 2 / 10 + 0.3;
+                        double r = (RING_IN + RING_OUT) / 2 + (k % 2 == 0 ? -0.8 : 0.8);
+                        jp.revati.skyabyss.combat.prop.AttackProps.rise(s, spike, mob, new Vec3(cx + Math.cos(a) * r, cy, cz + Math.sin(a) * r),
+                                (float) Math.toDegrees(a), 0.8f + (k % 3) * 0.15f, 16);
                     }
+                    s.playSound(null, cx, cy, cz, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 1.0f, 0.6f);
                 })
                 .onHit((s, player) -> {
                     player.hurt(source.get(), damage.get());

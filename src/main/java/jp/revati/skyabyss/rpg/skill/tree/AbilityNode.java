@@ -196,10 +196,6 @@ public final class AbilityNode {
         return kind == Kind.ACTIVE;
     }
 
-    // 技に関わる節か
-    public boolean aboutSkill() {
-        return skill != null;
-    }
 
     // 名前の翻訳キー (節ごとの文は node.skyabyss.<職>.<id>)
     public String nameKey(String job) {

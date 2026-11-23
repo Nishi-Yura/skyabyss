@@ -141,13 +141,13 @@ public class PushStone extends MoonMob {
                 int n = 8 + (int) (r * 5);
                 for (int i = 0; i < n; i++) {
                     double a = i / (double) n * Math.PI * 2;
-                    sl.sendParticles(ParticleTypes.END_ROD, getX() + Math.cos(a) * r, ground + 0.15, getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX() + Math.cos(a) * r, ground + 0.15, getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
                 }
             }
             if (t == CHARGE) {
                 playAction("push");
                 playSound(MoonMobsSetup.STONE_PUSH.get(), 1.4f, 0.8f);
-                sl.sendParticles(ParticleTypes.CLOUD, getX(), ground + 0.3, getZ(), 24, RANGE * 0.4, 0.1, RANGE * 0.4, 0.05);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), ground + 0.3, getZ(), 24, RANGE * 0.4, 0.1, RANGE * 0.4, 0.05);
                 for (Player p : sl.getEntitiesOfClass(Player.class, new AABB(position(), position()).inflate(RANGE + 0.5, 3, RANGE + 0.5), e -> e.isAlive())) {
                     Vec3 away = p.position().subtract(position());
                     double d = away.horizontalDistance();
@@ -174,5 +174,10 @@ public class PushStone extends MoonMob {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.MOON_DUST.get(), 0.45, 1, 2);
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

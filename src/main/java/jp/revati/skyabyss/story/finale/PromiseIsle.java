@@ -242,7 +242,7 @@ public final class PromiseIsle {
             // 主の間と島のあいだは扉で飛ぶので、離れすぎたらそばへ
             if (g.distanceToSqr(cur) > 20 * 20) {
                 g.teleportTo(cur.getX(), cur.getY(), cur.getZ());
-                level.sendParticles(ParticleTypes.END_ROD, cur.getX(), cur.getY() + 1, cur.getZ(), 12, 0.4, 0.8, 0.4, 0.04);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cur.getX(), cur.getY() + 1, cur.getZ(), 12, 0.4, 0.8, 0.4, 0.04);
             }
         }
     }
@@ -286,7 +286,7 @@ public final class PromiseIsle {
         if (valley != null && now % 10 == 0) {
             for (int i = 0; i < 20; i++) {
                 double a = i / 20.0 * Math.PI * 2 + now * 0.02;
-                level.sendParticles(ParticleTypes.END_ROD, valley.getX() + Math.cos(a) * SHIELD_R, valley.getY() + 0.2, valley.getZ() + Math.sin(a) * SHIELD_R, 1, 0, 0, 0, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), valley.getX() + Math.cos(a) * SHIELD_R, valley.getY() + 0.2, valley.getZ() + Math.sin(a) * SHIELD_R, 1, 0, 0, 0, 0);
             }
         }
         // 淵の私: 癒す
@@ -296,7 +296,7 @@ public final class PromiseIsle {
                     p -> p.isAlive() && !p.isSpectator() && !Downed.isDowned(p))) {
                 if (p.getHealth() < p.getMaxHealth() && Math.hypot(p.getX() - rift.getX(), p.getZ() - rift.getZ()) <= SHIELD_R) {
                     p.heal(1.0f);
-                    level.sendParticles(ParticleTypes.WAX_OFF, p.getX(), p.getY() + 1, p.getZ(), 3, 0.3, 0.5, 0.3, 0.02);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1, p.getZ(), 3, 0.3, 0.5, 0.3, 0.02);
                 }
             }
         }
@@ -307,7 +307,7 @@ public final class PromiseIsle {
             for (int k = 1; k <= 4; k++) {
                 TownGuestEntity g = active(level, k);
                 if (g != null) {
-                    level.sendParticles(ParticleTypes.END_ROD, g.getX(), g.getY() + 1.0, g.getZ(), 2, 0.25, 0.6, 0.25, 0.01);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), g.getX(), g.getY() + 1.0, g.getZ(), 2, 0.25, 0.6, 0.25, 0.01);
                 }
             }
         }
@@ -325,7 +325,7 @@ public final class PromiseIsle {
                         && !(m instanceof jp.revati.skyabyss.story.finale.mob.PilgrimPlume))) {
                     m.setTarget(cliff);
                 }
-                level.sendParticles(ParticleTypes.ANGRY_VILLAGER, cliff.getX(), cliff.getY() + 2.2, cliff.getZ(), 1, 0.2, 0.1, 0.2, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cliff.getX(), cliff.getY() + 2.2, cliff.getZ(), 1, 0.2, 0.1, 0.2, 0);
             }
             if (now + 1 == tauntUntil && tauntLead != null) {
                 cliff.setFollow(tauntLead);
@@ -372,7 +372,7 @@ public final class PromiseIsle {
         tauntUntil = now + TAUNT_TICKS;
         nextTaunt = now + TAUNT_EVERY;
         level.playSound(null, cliff.blockPosition(), CloudMobsSetup.SELF_TAUNT.get(), SoundSource.NEUTRAL, 1.4f, 1.0f);
-        level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 1, at.z, 24, 0.5, 0.8, 0.5, 0.06);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 1, at.z, 24, 0.5, 0.8, 0.5, 0.06);
         for (ServerPlayer o : level.getEntitiesOfClass(ServerPlayer.class, cliff.getBoundingBox().inflate(24), o -> o.isAlive())) {
             Notice.bar(o, Component.translatable("message.skyabyss.isle4.taunt"));
         }
@@ -387,7 +387,7 @@ public final class PromiseIsle {
                 return true;
             }
             if (now % 4 == 0) {
-                level.sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 0.6, p.getZ(), 3, 0.4, 0.3, 0.4, 0.02);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 0.6, p.getZ(), 3, 0.4, 0.3, 0.4, 0.02);
             }
             if (now < e.getValue()) {
                 return false;
@@ -441,7 +441,7 @@ public final class PromiseIsle {
     static void onIncoming(LivingIncomingDamageEvent event) {
         if (event.getEntity() instanceof ServerPlayer p && FinaleWorld.in(p) && event.getSource().getEntity() instanceof Mob && shielded(p)) {
             event.setAmount(event.getAmount() * 0.5f);
-            p.serverLevel().sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 4, 0.4, 0.5, 0.4, 0.04);
+            p.serverLevel().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1, p.getZ(), 4, 0.4, 0.5, 0.4, 0.04);
         }
     }
 
@@ -546,7 +546,7 @@ public final class PromiseIsle {
         TownGuestEntity g = self(level, k);
         if (g != null) {
             g.setFollow(p.getUUID());
-            level.sendParticles(ParticleTypes.END_ROD, g.getX(), g.getY() + 1, g.getZ(), 30, 0.4, 0.9, 0.4, 0.06);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), g.getX(), g.getY() + 1, g.getZ(), 24, 0.4, 0.9, 0.4, 0.06);
         }
         level.playSound(null, p.blockPosition(), CloudMobsSetup.SELF_JOIN.get(), SoundSource.NEUTRAL, 1.2f, 1.0f);
         Notice.bar(p, Component.translatable("message.skyabyss.isle4.joined." + k));
@@ -616,5 +616,10 @@ public final class PromiseIsle {
         SEEN.clear();
         tauntUntil = 0;
         nextTaunt = 0;
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

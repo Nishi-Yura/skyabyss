@@ -58,6 +58,7 @@ public final class TideRaid2SelfTest {
     private static boolean sawTelegraph;
     private static boolean sawClosed;
     private static int holdRow;
+    private static int crushBefore;
     private static int holdLane;
 
     public static List<Step> steps() {
@@ -288,8 +289,8 @@ public final class TideRaid2SelfTest {
             F.add("the script did not finish (stage " + stage + ", phase " + phase + ")");
         }
         if (F.isEmpty()) {
-            SkyAbyss.LOGGER.info("SELFTEST tide raid2 PASSED (draw among registered rooms per slot, TR2 never drawn; TR4 telegraph/hold/at-least-one-open/cross/reset; "
-                    + "TR5 per-run solvable layouts, rotate, reset, beam lit; TR6 mural = dials' target, reset, solve; TR7 decoy pops, mother kill, reset)");
+            SkyAbyss.LOGGER.info("SELFTEST tide raid2 PASSED (draw among registered rooms per slot, TR2 never drawn; TR4 telegraph/crush push-back/current/at-least-one-open/cross/reset; "
+                    + "TR5 per-run solvable layouts, rotate, reset, beam lit; TR6 mural = dials' target, matched dials glow, reset, solve; TR7 decoy pops, mother kill, reset)");
         } else {
             F.forEach(s -> SkyAbyss.LOGGER.error("SELFTEST tide raid2 FAILED: {}", s));
         }
@@ -434,41 +435,50 @@ public final class TideRaid2SelfTest {
                 check(r.counterMax() == TideCoralRoadRoom.ROWS && r.counter() == 0, "TR4: counter should start at 0/" + TideCoralRoadRoom.ROWS);
                 check(!r.isComplete(), "TR4: complete at the start");
                 check(!r.objectiveKey().isEmpty(), "TR4: empty objective");
-                // 押さえ: 行 0 で、いちばん早く閉じ始める戸を探し、その最初の柱に立つ
+                // 挟まる: 行 0 で、いちばん早く閉じ始める戸を探し、閉じる直前にその最初の柱に立つ
                 int best = Integer.MAX_VALUE;
                 for (int lane = 0; lane < TideCoralRoadRoom.LANES; lane++) {
                     int p = r.phase(ctx, 0, lane);
-                    int wait = Math.floorMod(TideCoralRoadRoom.CLOSE_AT - p, TideCoralRoadRoom.CYCLE);
+                    int wait = Math.floorMod(TideCoralRoadRoom.CLOSE_AT - 6 - p, TideCoralRoadRoom.CYCLE);
                     if (wait < best) {
                         best = wait;
                         holdLane = lane;
                     }
                 }
                 holdRow = 0;
+                put(a, ctx.cell().rest());
                 next();
             }
             case 1 -> {
-                // 閉じ始める前に戸の最初の柱へ入り、閉じる時刻を過ぎても伸びないことを見る
-                BlockPos col = r.nextColumn(holdRow, holdLane);
-                put(a, col);
-                if (r.phase(ctx, holdRow, holdLane) >= TideCoralRoadRoom.CLOSE_AT + 40 && r.phase(ctx, holdRow, holdLane) < TideCoralRoadRoom.CLOSE_AT + 80) {
-                    check(r.shownColumns(holdRow, holdLane) == 0, "TR4: the held gate closed anyway (" + r.shownColumns(holdRow, holdLane) + ")");
+                int p = r.phase(ctx, holdRow, holdLane);
+                if (p >= TideCoralRoadRoom.CLOSE_AT - 6 && p < TideCoralRoadRoom.CLOSE_AT) {
+                    put(a, r.nextColumn(holdRow, holdLane));
+                    crushBefore = r.crushes();
                     next();
-                } else if (timedOut("TR4 hold")) {
+                } else if (timedOut("TR4 wait for a closing gate")) {
                     return true;
                 }
             }
             case 2 -> {
-                // 放す (入口へ戻す) → 伸びる
-                put(a, ctx.cell().rest());
-                next();
-            }
-            case 3 -> {
+                // 柱は人がいても伸び、挟まった人は壁の手前 (南) へ押し戻される
                 if (r.shownColumns(holdRow, holdLane) >= 1) {
+                    check(r.crushes() > crushBefore, "TR4: the player in the gate was not crushed");
+                    check(a.getZ() >= ctx.origin().getZ() + r.rowZ(holdRow) + 2, "TR4: the crushed player was not pushed back south (z " + a.getZ() + ")");
                     next();
-                } else if (timedOut("TR4 release")) {
+                } else if (timedOut("TR4 crush")) {
                     return true;
                 }
+            }
+            case 3 -> {
+                // 潮の流れ: 帯の上に立つ人は流れの向きへ押される
+                BlockPos at = ctx.origin().offset(0, 1, TideCoralRoadRoom.CURRENT_Z[0][0] + 1);
+                put(a, at);
+                a.setDeltaMovement(0, 0, 0);
+                r.tick(ctx);
+                check(Math.signum(a.getDeltaMovement().x) == r.currentDir(0), "TR4: the current did not push along its direction (" + a.getDeltaMovement().x + ")");
+                put(a, ctx.cell().rest());
+                a.setDeltaMovement(0, 0, 0);
+                next();
             }
             case 4 -> {
                 check(sawTelegraph, "TR4: no telegraph carpet was ever seen before a gate closed");
@@ -610,6 +620,7 @@ public final class TideRaid2SelfTest {
                     check(java.util.Arrays.equals(r.muralMask(ctx, k), TideMoonRoom.MASK[r.correctOf(k)]), "TR6: the mural " + k + " does not show phase " + r.correctOf(k) + " (seed " + seed + ")");
                     check(java.util.Arrays.equals(r.dialMask(ctx, k), TideMoonRoom.MASK[r.startOf(k)]), "TR6: the dial " + k + " does not show its start phase");
                     check(r.startOf(k) != r.correctOf(k), "TR6: a dial starts on the answer");
+                    check(!r.glowing(ctx, k), "TR6: a wrong dial glows");
                 }
                 check(!r.isComplete(), "TR6: complete at the start");
             }
@@ -640,10 +651,12 @@ public final class TideRaid2SelfTest {
                     check(r.phaseOf(k) == r.startOf(k) && java.util.Arrays.equals(r.dialMask(ctx, k), TideMoonRoom.MASK[r.startOf(k)]), "TR6: the reset left a dial turned");
                 }
                 room.start(ctx);
-                // 五つ合わせても、越えない (合っているかを教えない)
+                // 合わせた台は光る。五つ合わせても、越えない
                 for (int k = 0; k < TideMoonRoom.DIALS - 1; k++) {
                     setDial(r, k);
+                    check(r.glowing(ctx, k), "TR6: a matched dial does not glow (" + k + ")");
                 }
+                check(!r.glowing(ctx, TideMoonRoom.DIALS - 1), "TR6: the wrong dial glows");
                 check(!r.isComplete(), "TR6: complete with one dial wrong");
                 next();
             }

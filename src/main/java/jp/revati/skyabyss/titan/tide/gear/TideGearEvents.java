@@ -94,8 +94,8 @@ public final class TideGearEvents {
         player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, TideGear.PEARL_ABSORB_TICKS, 1));
         player.getCooldowns().addCooldown(TideGearSetup.PEARL.get(), TideGear.PEARL_COOLDOWN);
         ServerLevel level = player.serverLevel();
-        level.sendParticles(ParticleTypes.BUBBLE, player.getX(), player.getY() + 1, player.getZ(), 40, 0.6, 0.8, 0.6, 0.02);
-        level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1, player.getZ(), 12, 0.5, 0.7, 0.5, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.getX(), player.getY() + 1, player.getZ(), 24, 0.6, 0.8, 0.6, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 1, player.getZ(), 12, 0.5, 0.7, 0.5, 0.02);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BUBBLE_COLUMN_UPWARDS_INSIDE, SoundSource.PLAYERS, 1.2f, 1.3f);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0f, 1.5f);
     }
@@ -119,7 +119,7 @@ public final class TideGearEvents {
             attacker.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0), defender);
         }
         if (defender.level() instanceof ServerLevel level) {
-            level.sendParticles(ParticleTypes.CRIT, attacker.getX(), attacker.getY(0.6), attacker.getZ(), 8, 0.3, 0.3, 0.3, 0.1);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), attacker.getX(), attacker.getY(0.6), attacker.getZ(), 8, 0.3, 0.3, 0.3, 0.1);
         }
     }
 
@@ -157,5 +157,10 @@ public final class TideGearEvents {
         } else if (current == null || current.amount() != amount) {
             instance.addOrUpdateTransientModifier(new AttributeModifier(id, amount, op));
         }
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

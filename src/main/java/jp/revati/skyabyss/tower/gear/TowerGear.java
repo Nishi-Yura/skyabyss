@@ -86,7 +86,8 @@ public final class TowerGear {
     public static final double BELL_MANA = 6;
 
     // 防具 (頭・胴・脚・靴の防御と、部位ごとの強靭)
-    public static final int[][] DEFENSE = {{7, 11, 9, 7}, {5, 9, 7, 5}, {5, 8, 6, 5}};
+    // 重の組は 4 部位で 30 (属性の防御の上限。2026-11-24 まで 34 で、超えた 4 は効いていなかった)
+    public static final int[][] DEFENSE = {{6, 10, 8, 6}, {5, 9, 7, 5}, {5, 8, 6, 5}};
     public static final float[] TOUGHNESS = {6f, 4f, 3f};
     public static final double SCALE_TAKEN = 0.90;
     public static final double SCALE_LOW_TOUGHNESS = 12;

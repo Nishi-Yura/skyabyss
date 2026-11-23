@@ -59,7 +59,7 @@ camera minecraft:overworld 0 -60 32 180 -4
 wait 60
 shot wall_far
 
-# 旅嚢の "NEW": 新しく入った品を持ち物に出し、掃除で袋に入るのを待つ。ホットバーの左に [I] 旅嚢 NEW、画面の枠に NEW の札
+# 旅袋の "NEW": 新しく入った品を持ち物に出し、掃除で袋に入るのを待つ。ホットバーの左に [I] 旅袋 NEW、画面の枠に NEW の札
 cmd skyabyss pouch hold false
 cmd fill -8 -60 2 8 -55 2 minecraft:air
 cmd give @s skyabyss:resonance_crystal 3

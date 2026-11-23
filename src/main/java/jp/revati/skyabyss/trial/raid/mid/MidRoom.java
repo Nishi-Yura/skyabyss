@@ -78,6 +78,9 @@ public abstract class MidRoom extends RaidRoom {
         boss = spawnBoss(ctx);
         if (boss == null) {
             SkyAbyss.LOGGER.warn("Raid mid room {}: the boss could not be spawned", ctx.roomId());
+        } else {
+            // 中ボスの登場: 出方と、名前の札と顔のアップ (combat/BossEmerge。潮招き・雷獣は自分の登場の動きのまま札だけ)
+            jp.revati.skyabyss.combat.BossEmerge.chapter(boss);
         }
     }
 

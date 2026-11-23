@@ -1,0 +1,324 @@
+# 技の変化 (ルーンで替わる技) と、近い敵が要る技を撮る (2026-11-12)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/skill_variants.txt -PshotsName=skill_variants
+world skill_props flat
+size 1280 720
+timeout 2400
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd gamerule doMobLoot false
+camera 0 -60 0 0 0
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+perspective back
+fov 60
+cmd skyabyss level set @p 60
+# ---- variant shield_bash = warrior shield_rush
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
+cmd skyabyss skill forget @s
+cmd skyabyss skill points @s 100
+cmd skyabyss skill node @s titan_cleave
+cmd skyabyss skill node @s str_1
+cmd skyabyss skill node @s cheap_titan_cleave
+cmd skyabyss skill node @s stone_stance
+cmd skyabyss skill node @s cheap_shield_rush
+cmd skyabyss skill node @s str_3
+cmd skyabyss skill node @s rock_call
+cmd skyabyss skill node @s vit_6
+cmd skyabyss skill node @s shield_wall
+cmd skyabyss skill node @s rock_return
+cmd skyabyss skill node @s bash_rush
+cmd skyabyss skill learn @s shield_rush 1
+cmd skyabyss skill slot @s 1 shield_rush
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot shield_bash_a
+wait 6
+shot shield_bash_b
+wait 20
+# ---- variant bone_swing = warrior titan_cleave
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
+cmd skyabyss skill forget @s
+cmd skyabyss skill points @s 100
+cmd skyabyss skill node @s titan_cleave
+cmd skyabyss skill node @s str_1
+cmd skyabyss skill node @s shield_rush
+cmd skyabyss skill node @s vit_2
+cmd skyabyss skill node @s str_4
+cmd skyabyss skill node @s titan_cleave_2
+cmd skyabyss skill node @s str_9
+cmd skyabyss skill node @s heavy_blow
+cmd skyabyss skill node @s thirst
+cmd skyabyss skill node @s deep_blade
+cmd skyabyss skill slot @s 1 titan_cleave
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot bone_swing_a
+wait 6
+shot bone_swing_b
+wait 20
+# ---- variant spin_cut = warrior whale_sweep
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose warrior
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_sword
+cmd skyabyss skill forget @s
+cmd skyabyss skill points @s 100
+cmd skyabyss skill node @s titan_cleave
+cmd skyabyss skill node @s str_1
+cmd skyabyss skill node @s quick_titan_cleave
+cmd skyabyss skill node @s riposte
+cmd skyabyss skill node @s quick_shield_rush
+cmd skyabyss skill node @s str_5
+cmd skyabyss skill node @s whale_sweep
+cmd skyabyss skill node @s whale_sweep_2
+cmd skyabyss skill node @s agi_11
+cmd skyabyss skill node @s tail_wind
+cmd skyabyss skill node @s light_foot
+cmd skyabyss skill node @s spin_sweep
+cmd skyabyss skill slot @s 1 whale_sweep
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot spin_cut_a
+wait 6
+shot spin_cut_b
+wait 20
+# ---- variant mist_veil = assassin lunge
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose assassin
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_dagger
+cmd skyabyss skill forget @s
+cmd skyabyss skill points @s 100
+cmd skyabyss skill node @s lunge
+cmd skyabyss skill node @s agi_1
+cmd skyabyss skill node @s cheap_lunge
+cmd skyabyss skill node @s nimble
+cmd skyabyss skill node @s cheap_backstep
+cmd skyabyss skill node @s agi_3
+cmd skyabyss skill node @s twin_fang
+cmd skyabyss skill node @s agi_6
+cmd skyabyss skill node @s twin_fang_2
+cmd skyabyss skill node @s veil_lunge
+cmd skyabyss skill slot @s 1 lunge
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot mist_veil_a
+wait 6
+shot mist_veil_b
+wait 20
+# ---- variant cycle_song = shaman ward_song
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose shaman
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bell_staff
+cmd skyabyss skill forget @s
+cmd skyabyss skill points @s 100
+cmd skyabyss skill node @s ward_song
+cmd skyabyss skill node @s spi_1
+cmd skyabyss skill node @s cheap_ward_song
+cmd skyabyss skill node @s calm_heart
+cmd skyabyss skill node @s cheap_ebb_tide
+cmd skyabyss skill node @s spi_3
+cmd skyabyss skill node @s strong_tide
+cmd skyabyss skill node @s flood
+cmd skyabyss skill node @s cycle_ward
+cmd skyabyss skill slot @s 1 ward_song
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot cycle_song_a
+wait 6
+shot cycle_song_b
+wait 20
+# ---- variant spark_burst = smith forge_stomp
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose smith
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_hammer
+cmd skyabyss skill forget @s
+cmd skyabyss skill points @s 100
+cmd skyabyss skill node @s temper
+cmd skyabyss skill node @s str_1
+cmd skyabyss skill node @s quick_temper
+cmd skyabyss skill node @s forge_memory
+cmd skyabyss skill node @s quick_forge_stomp
+cmd skyabyss skill node @s str_5
+cmd skyabyss skill node @s ash_scatter
+cmd skyabyss skill node @s ash_scatter_2
+cmd skyabyss skill node @s spi_10
+cmd skyabyss skill node @s hot_ash
+cmd skyabyss skill node @s ash_wind
+cmd skyabyss skill node @s spark_stomp
+cmd skyabyss skill learn @s forge_stomp 1
+cmd skyabyss skill slot @s 1 forge_stomp
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot spark_burst_a
+wait 6
+shot spark_burst_b
+wait 20
+# ---- variant snare_shot = archer cloud_pierce
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose archer
+cmd item replace entity @s weapon.mainhand with minecraft:bow
+cmd skyabyss skill forget @s
+cmd skyabyss skill points @s 100
+cmd skyabyss skill node @s cloud_pierce
+cmd skyabyss skill node @s agi_1
+cmd skyabyss skill node @s bow_spirit
+cmd skyabyss skill node @s str_2
+cmd skyabyss skill node @s agi_4
+cmd skyabyss skill node @s cloud_pierce_2
+cmd skyabyss skill node @s agi_9
+cmd skyabyss skill node @s sharp_tip
+cmd skyabyss skill node @s cloud_pierce_3
+cmd skyabyss skill node @s bow_spirit_2
+cmd skyabyss skill node @s snare_pierce
+cmd skyabyss skill slot @s 1 cloud_pierce
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot snare_shot_a
+wait 6
+shot snare_shot_b
+wait 20
+# ---- variant stardust = mage thunder_bolt
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose mage
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_staff
+cmd skyabyss skill forget @s
+cmd skyabyss skill points @s 100
+cmd skyabyss skill node @s thunder_bolt
+cmd skyabyss skill node @s spi_1
+cmd skyabyss skill node @s cheap_thunder_bolt
+cmd skyabyss skill node @s star_reading
+cmd skyabyss skill node @s cheap_blink
+cmd skyabyss skill node @s spi_4
+cmd skyabyss skill node @s stardust_bolt
+cmd skyabyss skill slot @s 1 thunder_bolt
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 7.5 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot stardust_a
+wait 6
+shot stardust_b
+wait 20
+# ---- assassin wind_rend
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose assassin
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_dagger
+cmd skyabyss skill forget @s
+cmd skyabyss skill learn @s lunge 1
+cmd skyabyss skill learn @s backstep 1
+cmd skyabyss skill learn @s nimble 1
+cmd skyabyss skill learn @s foresight 1
+cmd skyabyss skill learn @s wind_rend 3
+cmd skyabyss skill slot @s 1 wind_rend
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 3.0 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot wind_rend_a
+wait 6
+shot wind_rend_b
+wait 20
+# ---- assassin twin_fang
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose assassin
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_dagger
+cmd skyabyss skill forget @s
+cmd skyabyss skill learn @s lunge 1
+cmd skyabyss skill learn @s twin_fang 3
+cmd skyabyss skill slot @s 1 twin_fang
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 3.0 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot twin_fang_a
+wait 6
+shot twin_fang_b
+wait 20
+# ---- smith ash_scatter
+cmd tp @s 0.5 -60 0.5 0 0
+cmd skyabyss cinematic stop
+cmd skyabyss job choose smith
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_hammer
+cmd skyabyss skill forget @s
+cmd skyabyss skill learn @s temper 1
+cmd skyabyss skill learn @s ember_hammer 1
+cmd skyabyss skill learn @s ember_heart 1
+cmd skyabyss skill learn @s forge_memory 1
+cmd skyabyss skill learn @s ash_scatter 3
+cmd skyabyss skill slot @s 1 ash_scatter
+cmd skyabyss skill cooldowns @s
+cmd execute as @e[type=skyabyss:bandit] run tp @s ~ -400 ~
+cmd summon skyabyss:bandit 0.5 -60 3.0 {NoAI:1b,Silent:1b,Health:500f,attributes:[{id:"minecraft:max_health",base:500.0d}]}
+wait 10
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 5
+shot ash_scatter_a
+wait 6
+shot ash_scatter_b
+wait 20

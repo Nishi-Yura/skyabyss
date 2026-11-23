@@ -79,7 +79,7 @@ public final class RiftRemnants {
             it.remove();
             if (StarLamps.inLight(level, r.at.add(0, 0.5, 0))) {
                 // 光の中では残像が形を結ばない
-                level.sendParticles(ParticleTypes.END_ROD, r.at.x, r.at.y + 1, r.at.z, 16, 0.3, 0.6, 0.3, 0.06);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), r.at.x, r.at.y + 1, r.at.z, 16, 0.3, 0.6, 0.3, 0.06);
                 continue;
             }
             rise(level, r);
@@ -106,7 +106,7 @@ public final class RiftRemnants {
         }
         level.addFreshEntity(m);
         level.playSound(null, r.at.x, r.at.y, r.at.z, RiftBlocks.REMNANT_RISE.get(), SoundSource.HOSTILE, 1.2f, 1.0f);
-        level.sendParticles(ParticleTypes.SOUL, r.at.x, r.at.y + 1, r.at.z, 20, 0.3, 0.8, 0.3, 0.03);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), r.at.x, r.at.y + 1, r.at.z, 20, 0.3, 0.8, 0.3, 0.03);
         return m;
     }
 
@@ -114,17 +114,22 @@ public final class RiftRemnants {
     private static void outline(ServerLevel level, Vec3 at) {
         for (int i = 0; i < 8; i++) {
             double a = i / 8.0 * Math.PI * 2;
-            level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, at.x + Math.cos(a) * 0.25, at.y + 1.75, at.z + Math.sin(a) * 0.25, 1, 0, 0, 0, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x + Math.cos(a) * 0.25, at.y + 1.75, at.z + Math.sin(a) * 0.25, 1, 0, 0, 0, 0);
         }
         for (int i = 0; i <= 6; i++) {
             double y = at.y + 1.4 - i * 0.22;
             double w = i < 3 ? 0.4 : 0.22;
-            level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, at.x + w, y, at.z, 1, 0, 0, 0, 0);
-            level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, at.x - w, y, at.z, 1, 0, 0, 0, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x + w, y, at.z, 1, 0, 0, 0, 0);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x - w, y, at.z, 1, 0, 0, 0, 0);
         }
     }
 
     public static void clear() {
         PENDING.clear();
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

@@ -57,17 +57,7 @@ public final class NpcCommands {
                                         .then(Commands.argument("value", IntegerArgumentType.integer(Affinity.MIN, Affinity.MAX))
                                                 .executes(ctx -> affinity(ctx, IntegerArgumentType.getInteger(ctx, "value")))))))
                         .then(Commands.literal("bonds").then(Commands.argument("player", EntityArgument.player()).executes(NpcCommands::bonds)))
-                        .then(Commands.literal("reset").then(Commands.argument("players", EntityArgument.players()).executes(NpcCommands::reset)))
-                        .then(Commands.literal("loop")
-                                .executes(ctx -> loopShow(ctx))
-                                .then(Commands.literal("set").then(Commands.argument("n", IntegerArgumentType.integer(0, 999)).executes(ctx -> {
-                                    WorldLoop.set(ctx.getSource().getServer(), IntegerArgumentType.getInteger(ctx, "n"));
-                                    return loopShow(ctx);
-                                })))
-                                .then(Commands.literal("advance").executes(ctx -> {
-                                    WorldLoop.advance(ctx.getSource().getServer());
-                                    return loopShow(ctx);
-                                })))));
+                        .then(Commands.literal("reset").then(Commands.argument("players", EntityArgument.players()).executes(NpcCommands::reset)))));
     }
 
     private static String roleId(String arg) {
@@ -137,9 +127,9 @@ public final class NpcCommands {
     private static int bonds(CommandContext<CommandSourceStack> ctx) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
         NpcBonds bonds = NpcBonds.of(player);
-        ctx.getSource().sendSuccess(() -> Component.literal(player.getScoreboardName() + " (loop seen " + bonds.loopSeen() + ")"), false);
+        ctx.getSource().sendSuccess(() -> Component.literal(player.getScoreboardName()), false);
         bonds.bonds().forEach((role, b) -> ctx.getSource().sendSuccess(() -> Component.literal(" " + role + ": affinity " + b.affinity()
-                + ", talks " + b.talks() + ", flags " + b.flags() + ", remembered " + b.echoes()), false));
+                + ", talks " + b.talks() + ", flags " + b.flags()), false));
         return bonds.bonds().size();
     }
 
@@ -148,16 +138,9 @@ public final class NpcCommands {
         for (ServerPlayer p : players) {
             NpcBonds b = NpcBonds.of(p);
             b.bonds.clear();
-            b.loopSeen = WorldLoop.count(p.server);
             NpcBonds.sync(p);
         }
         ctx.getSource().sendSuccess(() -> Component.literal("reset npc bonds of " + players.size() + " player(s)"), true);
         return players.size();
-    }
-
-    private static int loopShow(CommandContext<CommandSourceStack> ctx) {
-        int n = WorldLoop.count(ctx.getSource().getServer());
-        ctx.getSource().sendSuccess(() -> Component.literal("loop " + n), false);
-        return n;
     }
 }

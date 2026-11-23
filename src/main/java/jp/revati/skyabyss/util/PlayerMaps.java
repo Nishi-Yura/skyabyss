@@ -33,8 +33,4 @@ public final class PlayerMaps {
         }
     }
 
-    // 自己テスト用: 追いかけている表の数
-    public static int trackedCount() {
-        return TRACKED.size();
-    }
 }

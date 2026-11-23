@@ -55,7 +55,7 @@ public class LowPolyGearLayer<T extends Entity & GeoAnimatable> extends GeoRende
     @Override
     public void renderForBone(PoseStack poseStack, T animatable, GeoBone bone, RenderType renderType, MultiBufferSource bufferSource,
                               VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
-        if (!LowPoly.enabled || !bone.getName().equals(socketBone)) {
+        if (!bone.getName().equals(socketBone)) {
             return;
         }
         LowPolyMesh mesh = LowPolyMeshes.get(meshName);
@@ -70,11 +70,8 @@ public class LowPolyGearLayer<T extends Entity & GeoAnimatable> extends GeoRende
             state.current = animation.apply(animatable);
             animated.render(poseStack, state, bufferSource, null, null, packedLight, partialTick);
         } else {
-            int white = 0xFFFFFFFF;
-            LowPoly.drawAll(poseStack, bufferSource.getBuffer(RenderType.entityCutoutNoCull(mesh.texture)), mesh, packedLight, packedOverlay, white);
-            if (mesh.glowMask != null) {
-                LowPoly.drawAll(poseStack, bufferSource.getBuffer(RenderType.entityTranslucentEmissive(mesh.glowMask)), mesh, 0xF000F0, packedOverlay, white);
-            }
+            // 点の模型 (client/splat。光る画素は光る点になるので、光の重ね描きは要らない)
+            jp.revati.skyabyss.client.splat.SplatDraw.mesh(mesh, null, null, poseStack.last().pose(), bufferSource, packedLight, packedOverlay, 0xFFFFFFFF);
         }
         poseStack.popPose();
     }
@@ -157,7 +154,7 @@ public class LowPolyGearLayer<T extends Entity & GeoAnimatable> extends GeoRende
             LowPolyMesh mesh = LowPolyMeshes.get(name);
             LowPolyMesh.Bone b = mesh == null ? null : mesh.bones.get(bone.getName());
             if (b != null && !bone.isHidden()) {
-                LowPoly.drawBone(poseStack, buffer, b, packedLight, packedOverlay, colour);
+                jp.revati.skyabyss.client.splat.SplatDraw.mesh(mesh, null, bone.getName(), poseStack.last().pose(), null, packedLight, packedOverlay, colour);
             }
         }
     }

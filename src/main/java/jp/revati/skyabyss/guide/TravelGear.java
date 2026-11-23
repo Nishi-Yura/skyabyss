@@ -7,7 +7,6 @@ import java.util.Map;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.item.GearCurve;
 import jp.revati.skyabyss.notice.Notice;
-import jp.revati.skyabyss.quest.QuestLog;
 import jp.revati.skyabyss.quest.Quests;
 import jp.revati.skyabyss.readiness.Readiness;
 import jp.revati.skyabyss.registry.ModItems;
@@ -38,7 +37,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -148,10 +146,6 @@ public final class TravelGear {
         }
     }
 
-    // 持ち物に砥石 (一章) があるか
-    public static boolean carriesWhetstone(Player player) {
-        return carries(player, ROCK_WHETSTONE.get());
-    }
 
     public static boolean carries(Player player, Item item) {
         var inv = player.getInventory();

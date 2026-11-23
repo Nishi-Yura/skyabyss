@@ -9,7 +9,7 @@ import math
 import numpy as np
 
 from blp import *  # noqa: F401,F403
-from blp import keys, eye
+from blp import keys, eye, punch
 
 BONE = [(96, 88, 72), (140, 130, 110), (184, 174, 150), (214, 206, 186), (236, 230, 214)]
 LEATHER = [(34, 22, 16), (56, 36, 24), (82, 54, 36), (110, 76, 52)]
@@ -133,6 +133,31 @@ def build():
     return m
 
 
+
+def _merge(*poses):
+    out = {}
+    for p in poses:
+        for b, ch in p.items():
+            out.setdefault(b, {}).update(ch)
+    return out
+
+
+def _shake(base, bones, amp, t0, t1, step=0.07, axis=1):
+    out = []
+    t, k = t0, 0
+    while t <= t1 + 1e-6:
+        p = _merge(base)
+        for b in bones:
+            r = list(p.get(b, {}).get("rot", (0, 0, 0)))
+            r[axis] += amp if k % 2 == 0 else -amp
+            p.setdefault(b, {})["rot"] = tuple(r)
+        out.append((round(t, 3), p))
+        t += step
+        k += 1
+    return out
+
+# 作り込み (2026-11-11 の声「他のボスたちもこの方向性で」): 技の動きに溜めの震えと行き過ぎ (blp.punch)、登場 (intro) と後半の咆哮 (scream) を足した
+
 def gaits():
     g = []
     idle = Gait("idle", 3.0)
@@ -159,10 +184,16 @@ def gaits():
           "leg_br": {"rot": (25, 0, 0)}, "neck": {"rot": (-20, 0, 0)}, "rider": {"rot": (20, 0, 0)}, "arm_r": {"rot": (-70, 0, 0)}}
     down = {"body": {"rot": (8, 0, 0), "pos": (0, -1, 0)}, "leg_fl": {"rot": (-10, 0, 0)}, "leg_fr": {"rot": (-8, 0, 0)}, "neck": {"rot": (20, 0, 0)},
             "rider": {"rot": (-6, 0, 0)}, "arm_r": {"rot": (10, 0, 0)}}
-    g.append(keys("rear", 1.8, [(0.0, rest), (0.9, up), (1.05, down), (1.3, down), (1.8, rest)]))
+    g.append(keys("rear", 1.8, punch([(0.0, rest), (0.9, up), (1.05, down), (1.3, down), (1.8, rest)], 2)))
     wind = {"rider": {"rot": (0, 50, 0)}, "arm_r": {"rot": (-30, 30, 30)}, "neck": {"rot": (0, -10, 0)}}
     cut = {"rider": {"rot": (6, -55, 0)}, "arm_r": {"rot": (-20, -40, 20)}, "neck": {"rot": (0, 10, 0)}}
-    g.append(keys("sweep", 1.2, [(0.0, rest), (0.6, wind), (0.75, cut), (0.85, cut), (1.2, rest)]))
+    g.append(keys("sweep", 1.2, punch([(0.0, rest), (0.6, wind), (0.75, cut), (0.85, cut), (1.2, rest)], 2)))
+    # 登場 (3.8 秒): 骨の馬が乗り手ごと床を割って棹立ちに迫り上がり、前脚を叩きつけ、乗り手が槍を天へ掲げる (名前の札 2.40 秒 = introCardAt 48)
+    lift_ = _merge(up, {"arm_r": {"rot": (-150, 0, 0)}, "rhead": {"rot": (-20, 0, 0)}, "neck": {"rot": (-30, 0, 0)}})
+    g.append(keys("intro", 3.8, [(0.0, _merge(up, {"root": {"pos": (0, -50, 0)}})), (0.8, _merge(up, {"root": {"pos": (0, -30, 0)}})),
+                                 (1.5, _merge(up, {"root": {"pos": (0, -6, 0)}})), (1.8, down), (1.95, _merge(down, {"body": {"pos": (0, -2, 0)}})),
+                                 (2.4, lift_)] + _shake(lift_, ["neck", "rhead"], 4, 2.46, 3.0) + [(3.3, down), (3.8, rest)]))
+    g.append(keys("scream", 1.6, [(0.0, rest), (0.32, lift_)] + _shake(lift_, ["neck", "rhead"], 4, 0.38, 1.04) + [(1.2, down), (1.6, rest)]))
     g.append(keys("hurt", 0.3, [(0.0, rest), (0.1, {"neck": {"rot": (-14, 0, 0)}, "rider": {"rot": (-10, 0, 6)}}), (0.3, rest)]))
     fold = {"body": {"pos": (0, -10, 0), "rot": (0, 0, 20)}, "leg_fl": {"rot": (-80, 0, 0)}, "leg_fr": {"rot": (-80, 0, 0)}, "leg_bl": {"rot": (70, 0, 0)},
             "leg_br": {"rot": (70, 0, 0)}, "neck": {"rot": (40, 0, 0)}, "rider": {"rot": (30, 0, -30)}}
@@ -170,5 +201,5 @@ def gaits():
     return g
 
 
-POSES = [("idle", 0.0), ("walk", 0.3), ("charge", 1.25), ("rear", 0.9), ("rear", 1.05), ("sweep", 0.75), ("hurt", 0.1), ("death", 2.0)]
+POSES = [("idle", 0.0), ("walk", 0.3), ("charge", 1.25), ("rear", 0.9), ("rear", 1.05), ("sweep", 0.75), ("hurt", 0.1), ("death", 2.0), ("intro", 1.5), ("intro", 2.4), ("scream", 0.5)]
 BOUNDS = (6, 6)

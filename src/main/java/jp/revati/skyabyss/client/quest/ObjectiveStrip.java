@@ -357,13 +357,26 @@ public final class ObjectiveStrip {
         if (any == null && provider != null) {
             any = provider.apply(def.id() + "/giver");
         }
-        if (any == null && def.giver() != null && !def.giver().isEmpty()) {
+        // 頼んだ人の居場所は、品を渡しに戻る段 (turn_in) だけ。場所の決まっていない段 (支度・あちこちで集める・空を見るなど) で
+        // 頼んだ人を指すと、帯の文と関係のない所 (都の語り部・鯨見のイサナ) を指していた (2026-11-15「ピンが全く違う場所を指す」)
+        if (any == null && def.giver() != null && !def.giver().isEmpty() && returnsToGiver(stage, entry)) {
             any = SiteTargets.npc(def.giver());
         }
         if (any == null) {
             return Resolved.NONE;
         }
         return overworld ? new Resolved(any, false) : new Resolved(null, true);
+    }
+
+    // まだ済んでいない目的に、頼んだ人へ品を渡す目的 (turn_in) があるか
+    static boolean returnsToGiver(QuestDef.Stage stage, QuestLog.Entry entry) {
+        for (int i = 0; i < stage.objectives().size(); i++) {
+            QuestDef.Objective ob = stage.objectives().get(i);
+            if (ob.type().equals("turn_in") && entry.progress(i) < ob.count()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     static final double FOE_NEAR = 96;
@@ -480,9 +493,9 @@ public final class ObjectiveStrip {
         java.util.List<String> lines = wrap(font, text, w - 6, Math.max(1, (rect.h() - 5 - extra) / 10));
         int bottom = y + lines.size() * 10 + extra + 1;
         float glow = now < flashUntil ? Mth.clamp((flashUntil - now) / 1400f, 0f, 1f) : 0f;
-        int bg = ((int) ((0x50 + glow * 0x50) * a)) << 24 | 0x0A0C10;
+        int bg = ((int) ((0x78 + glow * 0x48) * a)) << 24 | 0x0A0E1E;
         g.fill(x - 3, y - 2, x + w + 3, bottom, bg);
-        int accent = ((int) (255 * a)) << 24 | 0xF2C14E;
+        int accent = ((int) (255 * a)) << 24 | 0xE9C46A;
         g.fill(x - 3, y - 2, x - 2, bottom, accent);
         int textColor = ((int) (255 * a)) << 24 | 0xE9E3D4;
         int ty = y + 1;
@@ -518,7 +531,7 @@ public final class ObjectiveStrip {
                         fx += 9;
                     }
                 }
-                g.drawString(font, far, fx, fy, ((int) (255 * a)) << 24 | (resolved.inside() ? 0x9A9AAE : 0x7FD6D0), true);
+                g.drawString(font, far, fx, fy, ((int) (255 * a)) << 24 | (resolved.inside() ? 0x9A9AAE : 0x8FD0FF), true);
             }
         }
     }

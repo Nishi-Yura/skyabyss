@@ -119,8 +119,10 @@ public final class FounderArena {
         e.tuneCloud(1, FounderBoss.HP, FounderBoss.DMG);
         e.addTag(TAG);
         level.addFreshEntity(e);
+        // 登場: 鐘の内の床から静かにせり上がり、名前の札と顔のアップ (combat/BossEmerge)
+        jp.revati.skyabyss.combat.BossEmerge.stage(e, "king", 56, "founder");
         e.playAction("call");
-        level.sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 1.5, at.getZ() + 0.5, 60, 0.6, 1.2, 0.6, 0.04);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.getX() + 0.5, at.getY() + 1.5, at.getZ() + 0.5, 24, 0.6, 1.2, 0.6, 0.04);
         level.playSound(null, at, SoundEvents.BELL_BLOCK, SoundSource.HOSTILE, 3.0f, 0.5f);
         for (ServerPlayer p : present(level)) {
             Notice.narrate(p, "message.skyabyss.founder.appear");
@@ -150,7 +152,7 @@ public final class FounderArena {
         e.setHealth(real.getHealth());
         level.addFreshEntity(e);
         e.makeEcho(real);
-        level.sendParticles(ParticleTypes.CLOUD, x, real.getY() + 1.2, z, 20, 0.3, 0.8, 0.3, 0.02);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), x, real.getY() + 1.2, z, 20, 0.3, 0.8, 0.3, 0.02);
         return e;
     }
 
@@ -244,5 +246,10 @@ public final class FounderArena {
         empty = 0;
         startedAt = -1;
         FELL_HERE.clear();
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

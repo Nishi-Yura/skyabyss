@@ -23,17 +23,9 @@ public final class EmberHeatClient {
         return heat;
     }
 
-    // 前の値 (上がった・下がったの向き)
-    public static float previous() {
-        return heatO;
-    }
 
     public static EmberHeat.Band band() {
         return EmberHeat.Band.of(heat);
     }
 
-    // 最後に届いてから何ミリ秒か (サーバーは背中にいる間 2 秒ごとに送る)
-    public static long ageMillis() {
-        return System.currentTimeMillis() - receivedAt;
-    }
 }

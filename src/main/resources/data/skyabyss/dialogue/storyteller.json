@@ -20,46 +20,6 @@
       }
     },
     {
-      "node": "deja_vu_song",
-      "if": [
-        {
-          "type": "loop",
-          "min": 1
-        },
-        {
-          "type": "remembers",
-          "flag": "song_heard"
-        },
-        {
-          "type": "not",
-          "of": {
-            "type": "flag",
-            "flag": "met"
-          }
-        }
-      ]
-    },
-    {
-      "node": "deja_vu",
-      "if": [
-        {
-          "type": "loop",
-          "min": 1
-        },
-        {
-          "type": "remembers",
-          "flag": "met"
-        },
-        {
-          "type": "not",
-          "of": {
-            "type": "flag",
-            "flag": "met"
-          }
-        }
-      ]
-    },
-    {
       "node": "shadow0",
       "if": {
         "type": "quest",
@@ -136,14 +96,6 @@
   "nodes": {
     "first": {
       "face": "smile",
-      "next": "menu"
-    },
-    "deja_vu": {
-      "face": "grave",
-      "next": "menu"
-    },
-    "deja_vu_song": {
-      "face": "grave",
       "next": "menu"
     },
     "shadow0": {

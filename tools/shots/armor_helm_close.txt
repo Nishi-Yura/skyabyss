@@ -1,0 +1,34 @@
+# Low-poly armor (stone_whale) on armor stands and on the player (docs/design/16_armor_design.md section 6).
+# ./gradlew runShots -Pscript=tools/shots/armor_lp_stone_whale.txt
+world shots flat
+size 1280 720
+timeout 1500
+render 8
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamemode spectator
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+hud off
+cmd summon armor_stand 0 -60 12 {Invisible:1b}
+armortier rare
+armorlevel 0
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[0f,0f],ArmorItems:[{},{},{},{id:"skyabyss:stone_whale_helmet",count:1}]}
+camera minecraft:overworld 0 -59.4 2.6 180 5
+waitchunks
+wait 25
+shot helm_front
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[35f,0f],ArmorItems:[{},{},{},{id:"skyabyss:stone_whale_helmet",count:1}]}
+wait 25
+shot helm_q34
+cmd kill @e[type=minecraft:armor_stand]
+cmd summon armor_stand 0 -60 0 {ShowArms:1b,NoBasePlate:1b,Rotation:[150f,0f],ArmorItems:[{},{},{},{id:"skyabyss:stone_whale_helmet",count:1}]}
+wait 25
+shot helm_back

@@ -1,9 +1,10 @@
 package jp.revati.skyabyss.client.pouch;
 
-import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.client.accessory.AccessoryScreen;
+import jp.revati.skyabyss.client.inventory.GearPanel;
+import jp.revati.skyabyss.client.ui.Golden;
 import jp.revati.skyabyss.pouch.Pouch;
 import jp.revati.skyabyss.pouch.PouchData;
+import jp.revati.skyabyss.pouch.PouchConfig;
 import jp.revati.skyabyss.pouch.PouchEntries;
 import jp.revati.skyabyss.pouch.PouchLayout;
 import jp.revati.skyabyss.pouch.PouchMenu;
@@ -11,36 +12,50 @@ import jp.revati.skyabyss.pouch.PouchUsable;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
-// 旅嚢の画面 (docs/design/22 の 9 章 A つまみ)。持ち物 / 装飾 / 旅嚢 のつまみの三つ目。
-//   枠: 品ごとに決まった枠 (区分の名札つき)。まだ手に入れていない品は「？」、いちど手に入れて今は 0 の品は暗い影。
+// 旅袋の画面 (docs/design/22 の 9 章 A つまみ・56 の 4 章)。持ち物 / 旅袋 / 封印の箱 のつまみの二つ目。持ち物と同じ組み方 (client/inventory/GearPanel) で、
+//   左の板: ページの栞 (大事な物・巨神の素材・土地の素材・細工)
+//   真ん中の板 (幅 176・高さ 200): 品ごとに決まった枠 (区分の名札つき)。まだ手に入れていない品は「？」、いちど手に入れて今は 0 の品は暗い影。
 //       枠の置く・取り出す・シフトクリックは PouchMenu が決める (取り出せない決まりのときは何も起きない)
+//   右の板: 重ねた品の説明 (名前・数・使い方)、心臓の遺物の釦
+// 枠の並び (pouch/PouchLayout) は幅 176 の升目のまま、真ん中の板に置く
 public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements jp.revati.skyabyss.client.ui.TextBounded {
-    static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/pouch/pouch.png");
-    static final int TEX = 512;
-    private static final int TEXT = 0xFFD8DCE6;
-    private static final int DIM = 0xFF9AA0B0;
-    private static final int GOLD = 0xFFF2C14E;
-    private static final int OK = 0xFF7FD6D0;
-    // 心臓の遺物のボタン (受け取れる遺物があるときだけ。右上)
-    private static final int BTN_W = 44;
-    private static final int BTN_H = 12;
-    private static final int RELIC_X = PouchLayout.W - 8 - BTN_W;
-    private static final int RELIC_Y = 2;
+    private static final int TEXT = 0xFF000000 | Golden.TEXT;
+    private static final int DIM = 0xFF000000 | Golden.SOFT;
+    private static final int GOLD = 0xFF000000 | Golden.GOLD;
+    private static final int OK = 0xFF000000 | Golden.PALE;
+    static final int CORE_H = PouchLayout.H;
+    private static final Golden.Box LEFT = GearPanel.left(CORE_H);
+    private static final Golden.Box RIGHT = GearPanel.right(CORE_H);
+    // 升目 (PouchLayout の座標) を真ん中の板へ
+    private static final int DX = GearPanel.CORE_X;
+    private static final int DY = GearPanel.CORE_Y;
+    // 左の板: 栞の行。右の板: 説明、遺物の釦
+    private static final int BOOK_H = 21;
+    private static final int INFO_X = RIGHT.x() + GearPanel.PAD;
+    private static final int INFO_W = RIGHT.w() - 2 * GearPanel.PAD;
+    private static final int INFO_Y = RIGHT.y() + GearPanel.PAD + 1;
 
     public PouchScreen(PouchMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
-        imageWidth = PouchLayout.W;
-        imageHeight = PouchLayout.H;
+        imageWidth = GearPanel.W;
+        imageHeight = GearPanel.H;
     }
 
     @Override
     protected void init() {
         super.init();
-        AccessoryScreen.addTabs(this::addRenderableWidget, this, 2);
+        // 枠の置き場 (メニューの並び: 品の枠・転生の余白・細工)
+        int n = menu.pouchSlotCount();
+        for (int i = 0; i < menu.slots.size(); i++) {
+            int[] at = i < n ? new int[] {menu.layout().spots().get(i).x(), menu.layout().spots().get(i).y()}
+                    : i < n + menu.spareCount() ? menu.layout().spare().get(i - n) : PouchLayout.part(i - n - menu.spareCount());
+            menu.slots.get(i).x = at[0] + DX;
+            menu.slots.get(i).y = at[1] + DY;
+        }
+        GearPanel.addTabs(this::addRenderableWidget, () -> leftPos, () -> topPos, 1);
     }
 
     // ---------------------------------------------------------------- 描く
@@ -65,8 +80,8 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
         PouchData d = Pouch.data(minecraft.player);
         for (int i = 0; i < menu.pouchSlotCount(); i++) {
             PouchLayout.Spot spot = menu.layout().spots().get(i);
-            if (d.isFresh(spot.entry().id()) && d.count(spot.entry().id()) > 0) {
-                PouchNew.badge(g, font, leftPos + spot.x(), topPos + spot.y());
+            if (spot.page() == menu.page() && d.isFresh(spot.entry().id()) && d.count(spot.entry().id()) > 0) {
+                PouchNew.badge(g, font, leftPos + spot.x() + DX, topPos + spot.y() + DY);
             }
         }
     }
@@ -80,42 +95,64 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
     protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
         int x = leftPos;
         int y = topPos;
-        g.blit(TEXTURE, x, y, PouchLayout.W, PouchLayout.H, 0, 0, PouchLayout.W * 2, PouchLayout.H * 2, TEX, TEX);
+        g.pose().pushPose();
+        g.pose().translate(x, y, 0);
+        GearPanel.panels(g, CORE_H);
+        g.pose().popPose();
         if (minecraft == null || minecraft.player == null) {
             return;
         }
-        renderSpareBg(g, x, y);
+        renderBookmarks(g, x, y, mouseX, mouseY);
+        int gx = x + DX;
+        int gy = y + DY;
+        if (menu.page() == PouchConfig.Page.KEEP) {
+            for (int i = 0; i < menu.spareCount(); i++) {
+                boolean has = !menu.getSlot(menu.pouchSlotCount() + i).getItem().isEmpty();
+                int[] at = menu.layout().spare().get(i);
+                frame(g, gx + at[0], gy + at[1], has ? 1 : 0);
+            }
+        }
+        if (menu.page() == PouchConfig.Page.PARTS) {
+            PouchData pd = Pouch.data(minecraft.player);
+            for (int i = 0; i < PouchData.PARTS; i++) {
+                int[] at = PouchLayout.part(i);
+                frame(g, gx + at[0], gy + at[1], pd.part(i).isEmpty() ? 0 : 1);
+            }
+        }
         for (int i = 0; i < menu.pouchSlotCount(); i++) {
             PouchLayout.Spot spot = menu.layout().spots().get(i);
+            if (spot.page() != menu.page()) {
+                continue;
+            }
             PouchEntries.Entry e = spot.entry();
             int n = Pouch.data(minecraft.player).count(e.id());
             boolean usable = n > 0 && e.item() instanceof PouchUsable;
-            // 枠: 持っている品は青緑の縁、使える道具は金の縁、ないものは空
-            float u = usable ? 440f : n > 0 ? 400f : 360f;
-            g.blit(TEXTURE, x + spot.x() - 1, y + spot.y() - 1, 18, 18, u, 0f, 36, 36, TEX, TEX);
+            int sx = gx + spot.x();
+            int sy = gy + spot.y();
+            // 枠: 持っている品は空色の縁、使える道具は金の縁、ないものは空
+            frame(g, sx, sy, usable ? 2 : n > 0 ? 1 : 0);
             if (usable && QuickCard.isPinned(e.id())) {
                 // 札に置いた印 (角の金の点)
-                g.fill(x + spot.x() - 1, y + spot.y() - 1, x + spot.x() + 2, y + spot.y(), 0xFFF2C14E);
-                g.fill(x + spot.x() - 1, y + spot.y() - 1, x + spot.x(), y + spot.y() + 2, 0xFFF2C14E);
+                g.fill(sx - 1, sy - 1, sx + 2, sy, GOLD);
+                g.fill(sx - 1, sy - 1, sx, sy + 2, GOLD);
             }
             if (n <= 0) {
                 if (seen(e)) {
                     // いちど手に入れた品: 暗い影 (今は手もとにない)
-                    g.renderItem(new ItemStack(e.item()), x + spot.x(), y + spot.y());
-                    g.fill(x + spot.x(), y + spot.y(), x + spot.x() + 16, y + spot.y() + 16, 0xC8141820);
+                    g.renderItem(new ItemStack(e.item()), sx, sy);
+                    g.fill(sx, sy, sx + 16, sy + 16, 0xC80A0E1E);
                 } else {
-                    g.blit(TEXTURE, x + spot.x(), y + spot.y(), 16, 16, 360f, 50f, 32, 32, TEX, TEX);
+                    g.drawString(font, "?", sx + 8 - font.width("?") / 2, sy + 4, 0xFF000000 | Golden.DIM, false);
                 }
             }
         }
     }
 
-    // 転生の余白の枠 (docs/design/31 の B13): 名札と枠。中身は標準の枠の描きが重ねる
-    private void renderSpareBg(GuiGraphics g, int x, int y) {
-        for (int i = 0; i < menu.spareCount(); i++) {
-            boolean has = !menu.getSlot(menu.pouchSlotCount() + i).getItem().isEmpty();
-            int[] at = menu.layout().spare().get(i);
-            g.blit(TEXTURE, x + at[0] - 1, y + at[1] - 1, 18, 18, has ? 400f : 360f, 0f, 36, 36, TEX, TEX);
+    // 品の枠 (16 角の品の左上から)。state 0 空 / 1 持っている (空色の縁) / 2 使える道具 (金の縁)
+    private static void frame(GuiGraphics g, int x, int y, int state) {
+        Golden.slot(g, x - 1, y - 1, 18);
+        if (state > 0) {
+            Golden.outline(g, x - 1, y - 1, x + 17, y + 17, state == 2 ? GOLD : 0xFF5A8FC0);
         }
     }
 
@@ -123,14 +160,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
         return mx >= x && mx < x + w && my >= y && my < y + h;
     }
 
-    // ボタンの絵 (pouch.png の 44x16 を、指定の大きさへ)。state 0 押せる / 1 重ねた / 2 押せない
-    private void drawButton(GuiGraphics g, int x, int y, int w, int h, int state, Component label) {
-        g.blit(TEXTURE, x, y, w, h, state * 100f, 420f, 88, 32, TEX, TEX);
-        int color = state == 2 ? 0xFF6A7080 : state == 1 ? 0xFFE6E2D6 : 0xFFA9AEBC;
-        g.drawString(font, label, x + (w - font.width(label)) / 2, y + (h - 8) / 2, color, false);
-    }
-
-    // 旅嚢の枠の鐘銭は、枠の上に数を出さない (2026-11-01「数字がすごいため見せなくていい」。数は下の説明の行と店の画面に出る)
+    // 旅袋の枠の鐘銭は、枠の上に数を出さない (2026-11-01「数字がすごいため見せなくていい」。数は下の説明の行と店の画面に出る)
     @Override
     protected void renderSlot(GuiGraphics g, net.minecraft.world.inventory.Slot slot) {
         ItemStack s = slot.getItem();
@@ -143,34 +173,37 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
 
     @Override
     protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
-        int mx = mouseX - leftPos;
-        int my = mouseY - topPos;
-        g.drawString(font, title, 8, 5, GOLD, false);
-        if (jp.revati.skyabyss.client.reward.HeartRewardClient.pending()) {
-            // 心臓の遺物: 金の縁のボタン (ゆっくり点る)
-            boolean relicHover = hit(mx, my, RELIC_X, RELIC_Y, BTN_W, BTN_H);
-            drawButton(g, RELIC_X, RELIC_Y, BTN_W, BTN_H, relicHover ? 1 : 0, Component.translatable("skyabyss_reward.pouch.button"));
-            int glow = 0x40 + (int) (0x50 * (0.5 + 0.5 * Math.sin(System.currentTimeMillis() / 300.0)));
-            g.renderOutline(RELIC_X - 1, RELIC_Y - 1, BTN_W + 2, BTN_H + 2, (glow << 24) | 0xF2C14E);
-        }
         if (minecraft == null || minecraft.player == null) {
             return;
         }
         for (PouchLayout.Label label : menu.layout().labels()) {
-            g.drawString(font, Component.translatable("skyabyss_pouch.category." + label.category().id), label.x(), label.y(), DIM, false);
+            if (label.page() != menu.page()) {
+                continue;
+            }
+            g.drawString(font, Component.translatable("skyabyss_pouch.category." + label.category().id), label.x() + DX, label.y() + DY, Golden.PALE, false);
         }
-        if (menu.spareCount() > 0) {
+        if (menu.page() == PouchConfig.Page.PARTS) {
+            g.drawString(font, Component.translatable("skyabyss_pouch.category.parts"), PouchLayout.X0 + DX, PouchLayout.TOP + DY, Golden.PALE, false);
+        }
+        if (menu.spareCount() > 0 && menu.page() == PouchConfig.Page.KEEP) {
             int[] at = menu.layout().spareLabel();
-            g.drawString(font, Component.translatable("skyabyss_pouch.category.spare"), at[0], at[1], DIM, false);
+            g.drawString(font, Component.translatable("skyabyss_pouch.category.spare"), at[0] + DX, at[1] + DY, Golden.PALE, false);
         }
         renderInfo(g);
     }
 
-    // 下の説明: 枠の上にいるときは品名と数と使い方、いないときは「倒れても残る」の一行 (何も入っていなければ最初の案内)
+    // 左の欄の説明: 枠の上にいるときは品名と数と使い方、いないときは「倒れても残る」の一行 (何も入っていなければ最初の案内)
     private void renderInfo(GuiGraphics g) {
-        int y1 = PouchLayout.SEPARATOR_Y + 7;
-        int y2 = y1 + 11;
+        int y1 = INFO_Y;
+        int y2 = y1 + Golden.ROW;
         PouchEntries.Entry e = hoveredEntry();
+        if (e == null && menu.page() == PouchConfig.Page.PARTS) {
+            ItemStack part = hoveredSlot != null ? hoveredSlot.getItem() : ItemStack.EMPTY;
+            Component line = part.isEmpty() ? Component.translatable("skyabyss_pouch.screen.parts_hint")
+                    : Component.empty().append(part.getHoverName()).append(" ×" + part.getCount());
+            drawWrapped(g, line, y1);
+            return;
+        }
         if (e == null) {
             boolean empty = Pouch.data(minecraft.player).isEmpty();
             Component line = Component.translatable(empty ? "skyabyss_pouch.screen.empty" : "skyabyss_pouch.screen.kept");
@@ -180,13 +213,14 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
         PouchData d = Pouch.data(minecraft.player);
         int n = d.count(e.id());
         if (!seen(e)) {
-            jp.revati.skyabyss.client.ui.TextClip.line(g, font, Component.translatable("skyabyss_pouch.screen.unknown"), 12, y1, PouchLayout.W - 24, DIM, false);
-            jp.revati.skyabyss.client.ui.TextClip.line(g, font, Component.translatable("skyabyss_pouch.screen.unknown_hint"), 12, y2, PouchLayout.W - 24, DIM, false);
+            g.drawString(font, Component.translatable("skyabyss_pouch.screen.unknown"), INFO_X, y1, DIM, false);
+            wrap(g, Component.translatable("skyabyss_pouch.screen.unknown_hint"), y2, 4, DIM);
             return;
         }
         Component count = Component.translatable("skyabyss_pouch.screen.count", n, e.limit());
-        jp.revati.skyabyss.client.ui.TextClip.line(g, font, e.item().getDescription(), 12, y1, PouchLayout.W - 24 - font.width(count) - 6, n > 0 ? GOLD : DIM, false);
-        g.drawString(font, count, PouchLayout.W - 12 - font.width(count), y1, n > 0 ? TEXT : DIM, false);
+        int y = wrap(g, e.item().getDescription(), y1, 3, n > 0 ? GOLD : DIM);
+        g.drawString(font, count, INFO_X, y, n > 0 ? TEXT : DIM, false);
+        y += Golden.ROW;
         Component hint;
         int color = DIM;
         if (n <= 0) {
@@ -199,15 +233,24 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
         } else {
             hint = Component.translatable("skyabyss_pouch.screen.kept");
         }
-        jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(hint.getString()), 12, y2, PouchLayout.W - 24, color, false);
+        y = wrap(g, hint, y, 4, color);
         if (n > 0 && e.item() instanceof PouchUsable) {
-            Component pin = Component.translatable(QuickCard.isPinned(e.id()) ? "skyabyss_pouch.screen.unpin" : "skyabyss_pouch.screen.pin");
-            jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(pin.getString()), 12, y2 + 10, PouchLayout.W - 24, DIM, false);
+            wrap(g, Component.translatable(QuickCard.isPinned(e.id()) ? "skyabyss_pouch.screen.unpin" : "skyabyss_pouch.screen.pin"), y, 2, DIM);
         }
     }
 
+    // 左の欄の幅で折り返して描き、次の行の y を返す
+    private int wrap(GuiGraphics g, Component text, int y, int maxLines, int color) {
+        var lines = font.split(text, INFO_W);
+        int n = Math.min(maxLines, lines.size());
+        for (int i = 0; i < n; i++) {
+            g.drawString(font, lines.get(i), INFO_X, y + i * Golden.ROW, color, false);
+        }
+        return y + Math.max(1, n) * Golden.ROW;
+    }
+
     private void drawWrapped(GuiGraphics g, Component line, int y) {
-        jp.revati.skyabyss.client.ui.TextClip.wrapped(g, font, line, 12, y, PouchLayout.W - 24, 3, 10, DIM, false);
+        wrap(g, line, y, 9, DIM);
     }
 
     private PouchEntries.Entry hoveredEntry() {
@@ -218,15 +261,14 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
         return i >= 0 && i < menu.pouchSlotCount() ? menu.entryAt(i) : null;
     }
 
-    // 空の枠の名札、遺物のボタンの札
+    // 空の枠の名札
     private void renderExtraTooltips(GuiGraphics g, int mouseX, int mouseY) {
         if (minecraft == null || minecraft.player == null) {
             return;
         }
         int mx = mouseX - leftPos;
         int my = mouseY - topPos;
-        if (jp.revati.skyabyss.client.reward.HeartRewardClient.pending() && hit(mx, my, RELIC_X, RELIC_Y, BTN_W, BTN_H)) {
-            g.renderTooltip(font, Component.translatable("skyabyss_reward.pouch.tip"), mouseX, mouseY);
+        if (hoveredSlot != null && !hoveredSlot.hasItem() && hoveredSlot.index >= menu.pouchSlotCount() + menu.spareCount()) {
             return;
         }
         if (hoveredSlot != null && !hoveredSlot.hasItem() && hoveredSlot.index >= menu.pouchSlotCount()) {
@@ -240,15 +282,70 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
         }
     }
 
+    // ---------------------------------------------------------------- ページの栞 (左の欄の上。絵と名前の行)
+    private static net.minecraft.world.item.Item bookmarkIcon(PouchConfig.Page p) {
+        return switch (p) {
+            case KEEP -> jp.revati.skyabyss.registry.ModItems.SKY_KEY_FRAGMENT.get();
+            case TITAN -> jp.revati.skyabyss.registry.ModItems.STONE_WHALE_SHARD.get();
+            case LAND -> jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get();
+            case PARTS -> jp.revati.skyabyss.registry.ModItems.ASPECT_CORE.get();
+        };
+    }
+
+    private static Golden.Box bookmark(PouchConfig.Page p) {
+        return new Golden.Box(LEFT.x() + 4, LEFT.y() + 6 + p.ordinal() * (BOOK_H + 1), LEFT.w() - 8, BOOK_H);
+    }
+
+    private PouchConfig.Page bookmarkAt(int mouseX, int mouseY) {
+        for (PouchConfig.Page p : PouchConfig.Page.values()) {
+            if (bookmark(p).contains(mouseX - leftPos, mouseY - topPos)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    // そのページに、まだ見ていない新しい品があるか (栞の点)
+    private boolean pageFresh(PouchConfig.Page p) {
+        PouchData d = Pouch.data(minecraft.player);
+        for (PouchLayout.Spot spot : menu.layout().spots()) {
+            if (spot.page() == p && d.isFresh(spot.entry().id()) && d.count(spot.entry().id()) > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void renderBookmarks(GuiGraphics g, int x, int y, int mouseX, int mouseY) {
+        for (PouchConfig.Page p : PouchConfig.Page.values()) {
+            boolean on = p == menu.page();
+            Golden.Box b = bookmark(p);
+            Golden.Box at = new Golden.Box(x + b.x(), y + b.y(), b.w(), b.h());
+            if (on) {
+                Golden.selected(g, at);
+            } else if (at.contains(mouseX, mouseY)) {
+                g.fill(at.x(), at.y(), at.right(), at.bottom(), 0x18FFFFFF);
+            }
+            g.renderItem(new ItemStack(bookmarkIcon(p)), at.x() + 5, at.y() + 2);
+            g.drawString(font, Component.translatable("skyabyss_pouch.page." + p.id), at.x() + 26, Golden.textY(at.y(), at.h()), on ? Golden.GOLD : Golden.SOFT, false);
+            if (pageFresh(p)) {
+                g.fill(at.right() - 6, at.y() + 9, at.right() - 3, at.y() + 12, 0xFF000000 | Golden.PALE);
+            }
+        }
+    }
+
     // ---------------------------------------------------------------- 押す
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         int mx = (int) mouseX - leftPos;
         int my = (int) mouseY - topPos;
-        if (button == 0 && jp.revati.skyabyss.client.reward.HeartRewardClient.pending() && hit(mx, my, RELIC_X, RELIC_Y, BTN_W, BTN_H)) {
-            // 遺物の画面はサーバーが開かせる (選べるかを決めるのはサーバー)
-            minecraft.player.playSound(net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), 0.6f, 1.2f);
-            jp.revati.skyabyss.client.reward.HeartRewardClient.request();
+        PouchConfig.Page tab = bookmarkAt((int) mouseX, (int) mouseY);
+        if (button == 0 && tab != null) {
+            if (tab != menu.page()) {
+                menu.setPage(tab);
+                minecraft.gameMode.handleInventoryButtonClick(menu.containerId, tab.ordinal());
+                minecraft.player.playSound(net.minecraft.sounds.SoundEvents.BOOK_PAGE_TURN, 0.6f, 1.1f);
+            }
             return true;
         }
         if (button == 1 && hoveredSlot != null && hoveredSlot.index >= 0 && hoveredSlot.index < menu.pouchSlotCount()) {
@@ -274,6 +371,6 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
 
     @Override
     public int[] textBounds() {
-        return new int[] {leftPos, topPos - AccessoryScreen.TAB_H, PouchLayout.W, PouchLayout.H + AccessoryScreen.TAB_H};
+        return new int[] {leftPos, topPos, imageWidth, GearPanel.CORE_Y + CORE_H};
     }
 }

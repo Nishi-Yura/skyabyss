@@ -1,0 +1,253 @@
+# 月のシリーズ（look5）を一人称・近く・全身で撮る
+# ./gradlew runShots --offline --no-daemon -Pscript=tools/shots/gear_bow_legends.txt -PshotsName=gear_bow_legends
+world gear_look flat
+size 1280 720
+timeout 4000
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd gamerule doMobLoot false
+camera 0 -60 0 0 0
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 70
+cmd skyabyss level set @p 30
+swingpose off
+gearlook all a
+cmd tp @s 0.5 -60 0.5 0 0
+cmd kill @e[type=!player]
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_storm_bow
+close
+wait 30
+chat clear
+shot fp_abyss_storm_bow
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_storm_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_storm_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_whale_bow
+close
+wait 30
+chat clear
+shot fp_abyss_whale_bow
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_whale_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_whale_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_tide_bow
+close
+wait 30
+chat clear
+shot fp_abyss_tide_bow
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_tide_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_tide_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:abyss_ember_bow
+close
+wait 30
+chat clear
+shot fp_abyss_ember_bow
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_abyss_ember_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_abyss_ember_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_plume_bow
+close
+wait 30
+chat clear
+shot fp_divine_plume_bow
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_divine_plume_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_divine_plume_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_mist_bow
+close
+wait 30
+chat clear
+shot fp_divine_mist_bow
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_divine_mist_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_divine_mist_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:ember_flare_bow
+close
+wait 30
+chat clear
+shot fp_ember_flare_bow
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_ember_flare_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_ember_flare_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:moon_starfall_bow
+close
+wait 30
+chat clear
+shot fp_moon_starfall_bow
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_moon_starfall_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_moon_starfall_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:storm_gale_bow
+close
+wait 30
+chat clear
+shot fp_storm_gale_bow
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_storm_gale_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_storm_gale_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:tide_coral_bow
+close
+wait 30
+chat clear
+shot fp_tide_coral_bow
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_tide_coral_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_tide_coral_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:tower_eye_bow
+close
+wait 30
+chat clear
+shot fp_tower_eye_bow
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_tower_eye_bow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_tower_eye_bow
+hud on
+perspective first
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:whale_rib_longbow
+close
+wait 30
+chat clear
+shot fp_whale_rib_longbow
+hud off
+perspective front
+fov 42
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 20
+shot close_whale_rib_longbow
+fov 70
+cmd tp @s 0.5 -60 0.5 -30 0
+wait 20
+shot full_whale_rib_longbow

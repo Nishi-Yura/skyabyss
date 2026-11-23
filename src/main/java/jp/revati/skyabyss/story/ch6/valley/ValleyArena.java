@@ -65,11 +65,13 @@ public final class ValleyArena {
         e.tuneMoon(0, nm, false, ShadowEmbracer.HP / MoonMob.SECTION_HP[0], ShadowEmbracer.DMG / MoonMob.SECTION_DMG[0]);
         e.addTag(TAG);
         level.addFreshEntity(e);
+        // 登場 (combat/BossEmerge): 出方と、名前の札と顔のアップ
+        jp.revati.skyabyss.combat.BossEmerge.stage(e, "king", 44, "shadow_embracer");
         // 人数で強く (受ける傷を割る。47 の 2.6)
         jp.revati.skyabyss.combat.PartyScale.applyNearby(e, 64);
         jp.revati.skyabyss.combat.PartyScale.resist(e, 2.28);
         e.playAction("rise");
-        level.sendParticles(ParticleTypes.SQUID_INK, at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 80, 1.2, 1.5, 1.2, 0.05);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 24, 1.2, 1.5, 1.2, 0.05);
         level.playSound(null, at, MoonMobsSetup.EMBRACER_ROAR.get(), net.minecraft.sounds.SoundSource.HOSTILE, 2.0f, 0.7f);
         empty = 0;
         return e;
@@ -116,5 +118,10 @@ public final class ValleyArena {
                 LampPostBlock.snuff(level, MoonValley.mark("lamp_" + i));
             }
         });
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

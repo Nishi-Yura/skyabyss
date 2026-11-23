@@ -143,7 +143,7 @@ public final class GearEvents {
         if (player.getHealth() < player.getMaxHealth() && onMoss(player)
                 && Accessories.worn(player, ModItems.MOSS_TALISMAN.get())) {
             player.heal(0.5f);
-            player.serverLevel().sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY() + 0.3, player.getZ(), 2, 0.3, 0.1, 0.3, 0);
+            player.serverLevel().sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX(), player.getY() + 0.3, player.getZ(), 2, 0.3, 0.1, 0.3, 0);
         }
     }
 

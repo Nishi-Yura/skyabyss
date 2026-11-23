@@ -98,7 +98,7 @@ public final class BoxService {
         SESSIONS.remove(player.getUUID());
     }
 
-    // 旅嚢の箱の欄から持ち物へ取り出す (一つ / 全部)。取り出した箱には取り出し済みの印が付くので、掃除で袋へ戻らず、
+    // 旅袋の箱の欄から持ち物へ取り出す (一つ / 全部)。取り出した箱には取り出し済みの印が付くので、掃除で袋へ戻らず、
     // 持ち物から落とせる・箱に入れられる・仲間に渡せる。拾い直すと袋へ入る。中身は開ける人の封の列から (空なら箱の表から引く。LootBoxData)
     static void takeOut(ServerPlayer player, String kindId, boolean all) {
         BoxKind kind = BoxKind.byId(kindId);

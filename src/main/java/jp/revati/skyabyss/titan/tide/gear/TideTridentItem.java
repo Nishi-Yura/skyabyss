@@ -42,11 +42,16 @@ public class TideTridentItem extends TideWeaponItem {
             boolean awakened = ModGear.awakened(stack);
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, TideGear.TRIDENT_SLOW_TICKS, awakened ? 1 : 0), attacker);
             if (attacker.level() instanceof ServerLevel level) {
-                level.sendParticles(ParticleTypes.SPLASH, target.getX(), target.getY(0.5), target.getZ(), 16, 0.35, 0.3, 0.35, 0.2);
-                level.sendParticles(ParticleTypes.BUBBLE_POP, target.getX(), target.getY(0.6), target.getZ(), 6, 0.25, 0.25, 0.25, 0.05);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), target.getX(), target.getY(0.5), target.getZ(), 16, 0.35, 0.3, 0.35, 0.2);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), target.getX(), target.getY(0.6), target.getZ(), 6, 0.25, 0.25, 0.25, 0.05);
                 level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.TRIDENT_HIT, SoundSource.PLAYERS, 0.8f, 1.2f);
             }
         }
         return super.hurtEnemy(stack, target, attacker);
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

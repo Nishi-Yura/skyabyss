@@ -15,8 +15,6 @@ import jp.revati.skyabyss.story.ch5.AbyssBossBars;
 import jp.revati.skyabyss.story.ch6.cliff.CliffBlocks;
 import jp.revati.skyabyss.story.ch6.cliff.MoonCliff;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
@@ -92,9 +90,6 @@ public class MoonScale extends MoonMob {
         return toppleFor > 0;
     }
 
-    public boolean tilting() {
-        return tiltFor > 0;
-    }
 
     @Override
     public boolean removeWhenFarAway(double distanceToClosestPlayer) {
@@ -248,7 +243,7 @@ public class MoonScale extends MoonMob {
                 double r = random.nextDouble() * 13;
                 Vec3 at = center().add(Math.cos(a) * r, -0.4, Math.sin(a) * r);
                 if (side(at) > 0.5) {
-                    sl.sendParticles(ParticleTypes.CLOUD, at.x, at.y, at.z, 0, w.x, 0.0, w.z, 0.25);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.x, at.y, at.z, 0, w.x, 0.0, w.z, 0.25);
                 }
             }
         }
@@ -263,7 +258,7 @@ public class MoonScale extends MoonMob {
                 BlockPos p = BlockPos.of(w[0]);
                 if (sl.getBlockState(p).is(CliffBlocks.MOON_WEIGHT.get())) {
                     sl.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
-                    sl.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE.defaultBlockState()), p.getX() + 0.5, p.getY() + 0.4,
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), p.getX() + 0.5, p.getY() + 0.4,
                             p.getZ() + 0.5, 12, 0.3, 0.3, 0.3, 0.05);
                 }
                 it.remove();
@@ -271,13 +266,10 @@ public class MoonScale extends MoonMob {
         }
     }
 
-    public int landedWeights() {
-        return landed.size();
-    }
 
     // 錘が落ちた所: 人の側の皿の上なら残す。二つになったら主が崩れる
     void weightLands(ServerLevel sl, Vec3 at) {
-        sl.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE.defaultBlockState()), at.x, at.y + 0.3, at.z, 30, 0.6, 0.3, 0.6, 0.1);
+        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), at.x, at.y + 0.3, at.z, 24, 0.6, 0.3, 0.6, 0.1);
         playSound(MoonMobsSetup.SCALE_WEIGHT.get(), 1.4f, 0.8f);
         for (Player p : sl.getEntitiesOfClass(Player.class, new AABB(at, at).inflate(WEIGHT_RADIUS, 2.5, WEIGHT_RADIUS), e -> e.isAlive())) {
             if (p.position().subtract(at).horizontalDistance() <= WEIGHT_RADIUS + 0.3) {
@@ -305,7 +297,7 @@ public class MoonScale extends MoonMob {
         for (long[] w : landed) {
             w[1] = sl.getGameTime() + 2;
         }
-        sl.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 3, getZ(), 40, 1.0, 1.5, 1.0, 0.05);
+        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 3, getZ(), 24, 1.0, 1.5, 1.0, 0.05);
         if (!toldTopple) {
             toldTopple = true;
             for (ServerPlayer p : sl.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(24), e -> e.isAlive())) {
@@ -332,7 +324,7 @@ public class MoonScale extends MoonMob {
                 }
                 holes.put(p, st);
                 sl.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
-                sl.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, st), p.getX() + 0.5, p.getY() + 0.8, p.getZ() + 0.5, 6, 0.3, 0.2, 0.3, 0.05);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), p.getX() + 0.5, p.getY() + 0.8, p.getZ() + 0.5, 6, 0.3, 0.2, 0.3, 0.05);
             }
         }
         holesBack = sl.getGameTime() + HOLE_LIFE;
@@ -459,15 +451,19 @@ public class MoonScale extends MoonMob {
                     spots.add(getTarget().position());
                 }
                 playSound(MoonMobsSetup.SCALE_THROW.get(), 1.5f, 0.9f);
+                // 技の形: 影の円へ秤の錘が落ちてくる (t 26 で着く)
+                for (Vec3 s : spots) {
+                    jp.revati.skyabyss.combat.prop.AttackProps.fall(sl, "weight", MoonScale.this, s, 25, 14, 14f, 1.3f, 8);
+                }
             }
             if (t <= 26 && t % 2 == 0) {
                 for (Vec3 s : spots) {
                     for (int i = 0; i < 16; i++) {
                         double a = i / 16.0 * Math.PI * 2;
-                        sl.sendParticles(ParticleTypes.SQUID_INK, s.x + Math.cos(a) * WEIGHT_RADIUS, s.y + 0.1, s.z + Math.sin(a) * WEIGHT_RADIUS, 1, 0, 0, 0, 0);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), s.x + Math.cos(a) * WEIGHT_RADIUS, s.y + 0.1, s.z + Math.sin(a) * WEIGHT_RADIUS, 1, 0, 0, 0, 0);
                     }
                     double h = 10.0 * (1.0 - t / 26.0);
-                    sl.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE.defaultBlockState()), s.x, s.y + 1 + h, s.z, 3, 0.3, 0.2, 0.3, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), s.x, s.y + 1 + h, s.z, 3, 0.3, 0.2, 0.3, 0);
                 }
             }
             if (t == 26) {
@@ -488,7 +484,7 @@ public class MoonScale extends MoonMob {
                 for (int i = 0; i < 6; i++) {
                     Vec3 at = center().add(w.scale(2 + random.nextDouble() * 10)).add(-w.z * (random.nextDouble() * 20 - 10), -0.4, w.x * (random.nextDouble() * 20 - 10));
                     if (onPlate(at.add(0, 1, 0))) {
-                        sl.sendParticles(ParticleTypes.CLOUD, at.x, at.y, at.z, 0, w.x, 0, w.z, 0.12);
+                        sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.x, at.y, at.z, 0, w.x, 0, w.z, 0.12);
                     }
                 }
             }
@@ -512,7 +508,7 @@ public class MoonScale extends MoonMob {
             if (slamAt != null && t <= 30 && t % 2 == 0) {
                 for (int i = 0; i < 18; i++) {
                     double a = i / 18.0 * Math.PI * 2;
-                    sl.sendParticles(ParticleTypes.SQUID_INK, slamAt.x + Math.cos(a) * SLAM_RADIUS, slamAt.y + 0.1, slamAt.z + Math.sin(a) * SLAM_RADIUS, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), slamAt.x + Math.cos(a) * SLAM_RADIUS, slamAt.y + 0.1, slamAt.z + Math.sin(a) * SLAM_RADIUS, 1, 0, 0, 0, 0);
                 }
             }
             if (t == 12 && slamAt != null) {
@@ -523,7 +519,7 @@ public class MoonScale extends MoonMob {
             if (t == 30 && slamAt != null) {
                 setPos(slamAt.x, slamAt.y, slamAt.z);
                 playSound(MoonMobsSetup.SCALE_SLAM.get(), 2.0f, 0.7f);
-                sl.sendParticles(ParticleTypes.EXPLOSION, slamAt.x, slamAt.y + 0.3, slamAt.z, 2, 0.5, 0.1, 0.5, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), slamAt.x, slamAt.y + 0.3, slamAt.z, 2, 0.5, 0.1, 0.5, 0);
                 for (Player p : sl.getEntitiesOfClass(Player.class, new AABB(slamAt, slamAt).inflate(SLAM_RADIUS + 1, 3, SLAM_RADIUS + 1), e -> e.isAlive())) {
                     if (p.position().subtract(slamAt).horizontalDistance() <= SLAM_RADIUS + 0.4) {
                         strike(p, dmg(1.5));
@@ -560,5 +556,10 @@ public class MoonScale extends MoonMob {
         public void stop() {
             move = "";
         }
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

@@ -122,7 +122,7 @@ public class MoonLeaper extends MoonMob {
             if (t <= POUNCE_DOWN && t % 2 == 0) {
                 for (int i = 0; i < 16; i++) {
                     double a = i / 16.0 * Math.PI * 2;
-                    sl.sendParticles(ParticleTypes.SQUID_INK, spot.x + Math.cos(a) * POUNCE_RADIUS, spot.y + 0.1, spot.z + Math.sin(a) * POUNCE_RADIUS, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), spot.x + Math.cos(a) * POUNCE_RADIUS, spot.y + 0.1, spot.z + Math.sin(a) * POUNCE_RADIUS, 1, 0, 0, 0, 0);
                 }
             }
             if (t == POUNCE_DOWN) {
@@ -138,7 +138,7 @@ public class MoonLeaper extends MoonMob {
 
         private void land(ServerLevel sl) {
             playSound(MoonMobsSetup.LEAPER_LAND.get(), 1.2f, 0.9f);
-            sl.sendParticles(ParticleTypes.CLOUD, spot.x, spot.y + 0.2, spot.z, 12, POUNCE_RADIUS * 0.5, 0.1, POUNCE_RADIUS * 0.5, 0.02);
+            sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), spot.x, spot.y + 0.2, spot.z, 12, POUNCE_RADIUS * 0.5, 0.1, POUNCE_RADIUS * 0.5, 0.02);
             for (LivingEntity e : sl.getEntitiesOfClass(LivingEntity.class, new AABB(spot, spot).inflate(POUNCE_RADIUS, 2, POUNCE_RADIUS),
                     e -> e instanceof Player && e.isAlive())) {
                 if (e.position().distanceTo(spot) <= POUNCE_RADIUS + 0.3) {
@@ -160,5 +160,10 @@ public class MoonLeaper extends MoonMob {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.MOON_DUST.get(), 0.35, 1, 1);
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

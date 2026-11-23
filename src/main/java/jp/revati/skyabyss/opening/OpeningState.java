@@ -133,16 +133,6 @@ public final class OpeningState {
         return awakeDay;
     }
 
-    // 済んでいる拍子のうち、一番先まで進んだもの (なければ null)
-    public OpeningBeat latest() {
-        OpeningBeat best = null;
-        for (OpeningBeat beat : OpeningBeat.values()) {
-            if (done.contains(beat)) {
-                best = beat;
-            }
-        }
-        return best;
-    }
 
     // 全部なかったことにする (コマンド用。次の見回りで、また初参加として B0 から)
     void reset() {

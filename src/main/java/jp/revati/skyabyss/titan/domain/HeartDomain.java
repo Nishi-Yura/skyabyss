@@ -20,7 +20,6 @@ import jp.revati.skyabyss.util.Players;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -51,7 +50,7 @@ import org.joml.Vector3f;
 //     手がかり (光る柱・音・一行) は出し続け、間違えても傷は受けない (決まりの傷は領域の決まりの予告だけ)
 //  3. 解いた: 予告は全部消え、領域は砕け、心臓は STUN_TICKS (5 秒) のあいだ傷を 1.5 倍受ける。
 //     人がいなくなれば心臓ごと最初に戻る。安全網として SAFETY_TICKS (6 分) で静かに終わる。
-// 領域は部屋ごとの subclass (StoneSeaDomain / ShellMatchDomain / ThunderCageDomain / HearthCoreDomain) が rule() と仕掛けを書く。
+// 領域は部屋ごとの subclass (StoneSeaDomain / EbbFlowDomain / ThunderCageDomain / HearthCoreDomain) が rule() と仕掛けを書く。
 // 画面の側は client/titan/domain/DomainClient (題字・色・床の紋・仕掛けの進み)。
 public abstract class HeartDomain {
     public static final int DECLARE_TICKS = 80;
@@ -222,10 +221,6 @@ public abstract class HeartDomain {
         return timeLimit();
     }
 
-    // この巡の残り (tick。制限がなければ -1)
-    public int timeLeft() {
-        return timeLimit() <= 0 || interlude > 0 ? -1 : Math.max(0, timeLimit() - roundTicks);
-    }
 
     private int roundTicks;
 
@@ -382,7 +377,7 @@ public abstract class HeartDomain {
             p.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.8f, 1.2f);
             p.playNotifySound(SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2f, 0.7f);
         }
-        level.sendParticles(ParticleTypes.END_ROD, cx, floorY + 3, cz, 60, radius * 0.4, 1.5, radius * 0.4, 0.15);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx, floorY + 3, cz, 24, radius * 0.4, 1.5, radius * 0.4, 0.15);
         tell(level, "message.skyabyss.domain.round_clear", round, rounds);
         lastStanding = "";
     }
@@ -490,10 +485,6 @@ public abstract class HeartDomain {
     // 領域が解けたか
     protected abstract boolean complete();
 
-    // 仕掛けの一行の手がかりの鍵 (gui の hud の二行目)
-    public String goalKey() {
-        return "gui.skyabyss.domain." + id + ".goal";
-    }
 
     // 試験・event から: 仕掛け index を player が叩いた
     public boolean strikeNode(ServerLevel level, int index, ServerPlayer player) {
@@ -666,14 +657,14 @@ public abstract class HeartDomain {
         DustParticleOptions dust = new DustParticleOptions(c, size);
         for (ServerPlayer p : inRoom()) {
             for (int i = 0; i < count; i++) {
-                level.sendParticles(p, dust, true, n.pos.x, n.pos.y + 0.3 + i * (2.4 / Math.max(1, count)), n.pos.z, 1, 0.12, 0.05, 0.12, 0);
+                level.sendParticles(p, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, n.pos.x, n.pos.y + 0.3 + i * (2.4 / Math.max(1, count)), n.pos.z, 1, 0.12, 0.05, 0.12, 0);
             }
         }
     }
 
     protected void burst(ServerLevel level, Node n, ParticleOptions particle, int count, double spread, double speed) {
         for (ServerPlayer p : inRoom()) {
-            level.sendParticles(p, particle, true, n.pos.x, n.pos.y + 1.2, n.pos.z, count, spread, spread, spread, speed);
+            level.sendParticles(p, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, n.pos.x, n.pos.y + 1.2, n.pos.z, count, spread, spread, spread, speed);
         }
     }
 
@@ -682,7 +673,7 @@ public abstract class HeartDomain {
         for (ServerPlayer p : inRoom()) {
             for (int i = 0; i < count; i++) {
                 double a = Math.PI * 2 * i / count;
-                level.sendParticles(p, particle, true, center.x + Math.cos(a) * r, center.y + 0.15, center.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
+                level.sendParticles(p, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, center.x + Math.cos(a) * r, center.y + 0.15, center.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
             }
         }
     }

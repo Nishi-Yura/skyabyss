@@ -10,8 +10,6 @@ public final class GrowthRules {
     public static final int POINTS_PER_LEVEL = 0;
     // ステータス一つの上限 (木の基礎の節の合計がこれを超えることはない)
     public static final int STAT_CAP = 100;
-    // 記憶の断片の器の、はじめの大きさ (03 の E9 で広げる)
-    public static final int FRAGMENT_CAPACITY = 12;
 
     // ---------------------------------------------------------------- ステータスの効果
     // 筋力: 近接の攻撃力 ×(1 + 0.6% × 筋力)。武器ごと掛かる

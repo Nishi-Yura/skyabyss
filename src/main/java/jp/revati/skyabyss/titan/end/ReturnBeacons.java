@@ -16,7 +16,6 @@ import jp.revati.skyabyss.titan.storm.back.StormBackLayout;
 import jp.revati.skyabyss.titan.tide.back.TideBackLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -38,7 +37,7 @@ import org.joml.Vector3f;
 // 【今は出さない】試練を越えたあとは、順路が仲間を次の試練の入口へ運ぶ (trial/TrialRoute。32 の 2.3)。この光の出し口 (offer) は
 // どこからも呼ばない。真ん中へ戻す toHub と、笛で地上へ下りる whistleInBack、真ん中 (hubOf = 到着の台) は使っている。
 //   試練を越えた人のそばに、5 分だけ個人の光の柱を立てる (その人にだけ見える)。光の中でしゃがんで 1.5 秒で、その背中の真ん中 (到着の台) へ戻る。
-//   途中から地上へ戻る道は、光ではなく、その巨神の呼び笛 (旅嚢) を背中の中で使う: 「地上へ下りる？」と聞かれ、5 秒以内にもう一度使うと地上へ戻る (Titans.sendDown)。
+//   途中から地上へ戻る道は、光ではなく、その巨神の呼び笛 (旅袋) を背中の中で使う: 「地上へ下りる？」と聞かれ、5 秒以内にもう一度使うと地上へ戻る (Titans.sendDown)。
 //   心臓を止めたあとの運び出しは別 (TitanEnd)。
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class ReturnBeacons {
@@ -249,9 +248,6 @@ public final class ReturnBeacons {
         return true;
     }
 
-    public static boolean isAsking(UUID player) {
-        return ASKED.containsKey(player);
-    }
 
     private static void sendBeam(ServerPlayer player, Beacon b) {
         double dx = player.getX() - b.foot().x;
@@ -270,9 +266,9 @@ public final class ReturnBeacons {
         int n = 14;
         for (int i = 0; i < n; i++) {
             double a = Math.PI * 2 * i / n + progress * 3;
-            level.sendParticles(dust, foot.x + Math.cos(a) * r, foot.y + 0.15, foot.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), foot.x + Math.cos(a) * r, foot.y + 0.15, foot.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
         }
-        level.sendParticles(ParticleTypes.END_ROD, foot.x, foot.y + 0.4 + progress, foot.z, 1, 0.2, 0.1, 0.2, 0.01);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), foot.x, foot.y + 0.4 + progress, foot.z, 1, 0.2, 0.1, 0.2, 0.01);
     }
 
     @SubscribeEvent

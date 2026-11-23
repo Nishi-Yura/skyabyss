@@ -17,9 +17,7 @@ import jp.revati.skyabyss.titan.group.GroupGates;
 import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.util.Players;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -51,11 +49,11 @@ public final class RoomPlay {
     }
 
     public enum Theme {
-        BONE(Blocks.CRACKED_DEEPSLATE_BRICKS, Blocks.BONE_BLOCK, Blocks.BONE_BLOCK, SoundEvents.SKELETON_HURT, ParticleTypes.SOUL),
-        TIDE(Blocks.PRISMARINE_BRICKS, Blocks.SEA_LANTERN, Blocks.DARK_PRISMARINE, SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT, ParticleTypes.BUBBLE_POP),
+        BONE(Blocks.CRACKED_DEEPSLATE_BRICKS, Blocks.BONE_BLOCK, Blocks.BONE_BLOCK, SoundEvents.SKELETON_HURT, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE)),
+        TIDE(Blocks.PRISMARINE_BRICKS, Blocks.SEA_LANTERN, Blocks.DARK_PRISMARINE, SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE)),
         STORM(Blocks.WAXED_WEATHERED_COPPER, Blocks.WAXED_OXIDIZED_COPPER, Blocks.WAXED_EXPOSED_CUT_COPPER, SoundEvents.LIGHTNING_BOLT_IMPACT,
-                ParticleTypes.ELECTRIC_SPARK),
-        EMBER(Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS, Blocks.SHROOMLIGHT, Blocks.BLACKSTONE, SoundEvents.BLAZE_SHOOT, ParticleTypes.SMALL_FLAME);
+                jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW)),
+        EMBER(Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS, Blocks.SHROOMLIGHT, Blocks.BLACKSTONE, SoundEvents.BLAZE_SHOOT, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW));
 
         public final Block ring;
         public final Block accent;
@@ -101,14 +99,9 @@ public final class RoomPlay {
     public static final int TIER2_FROM = 3;
     public static final int TIER3_FROM = 5;
     // 湧きを寄せる強さ (残す割合)。1 人 45%・2 人 60%・3 人 80%・4 人から全部
-    private static final double[] KEEP = {1.0, 0.45, 0.60, 0.80, 1.0};
     // 入口からこれより近くには湧かせない (人の目の前に湧かない)
     public static final double MIN_SPAWN_FROM_ENTRANCE = 7.0;
 
-    // その人数で湧き場所に残す割合
-    public static double keepFraction(int entrants) {
-        return KEEP[Math.max(1, Math.min(entrants, KEEP.length - 1))];
-    }
 
     // 罠の総数 (部屋の広さから)。3〜8
     public static int trapTotal(int area) {
@@ -142,72 +135,12 @@ public final class RoomPlay {
         return entrants >= TIER3_FROM ? 2 : entrants >= TIER2_FROM ? 1 : 0;
     }
 
-    public static int pillarsVisible(int total, int entrants) {
-        int n = 0;
-        int max = pillarTierFor(entrants);
-        for (int i = 0; i < total; i++) {
-            if (pillarTier(i, total) <= max) {
-                n++;
-            }
-        }
-        return n;
-    }
 
-    // ---------------------------------------------------------------- 湧き場所を入口側に寄せる
-    // 候補を入口に近い順に並べ、人数に応じた割合だけ残す (入口の近すぎる所は、残りが足りるかぎり除く)。4 人以上は並べ替えず全部
-    public static List<BlockPos> spawnNear(List<BlockPos> candidates, BlockPos entrance, int entrants) {
-        if (entrants >= 4 || candidates.size() <= 3) {
-            return candidates;
-        }
-        List<BlockPos> sorted = new ArrayList<>(candidates);
-        sorted.sort(Comparator.comparingDouble(p -> flat(p, entrance)));
-        int keep = Math.max(3, (int) Math.ceil(sorted.size() * keepFraction(entrants)));
-        // 入口に近すぎない候補を近い順に。足りなければ、近すぎる候補のうち入口から遠いものから足す
-        List<BlockPos> far = new ArrayList<>();
-        List<BlockPos> near = new ArrayList<>();
-        for (BlockPos p : sorted) {
-            (flat(p, entrance) >= MIN_SPAWN_FROM_ENTRANCE ? far : near).add(p);
-        }
-        List<BlockPos> out = new ArrayList<>(far.subList(0, Math.min(keep, far.size())));
-        for (int i = near.size() - 1; i >= 0 && out.size() < keep; i--) {
-            out.add(near.get(i));
-        }
-        return List.copyOf(out);
-    }
 
-    // 番号つきの湧き口 (砦の 6 つの口など) を、少人数のときだけ入口に近い順に並べ替える。ids はもとの順 (多人数はそのまま)
-    public static int[] orderNear(int[] ids, List<BlockPos> spots, BlockPos entrance, int entrants) {
-        if (entrants >= 4) {
-            return ids;
-        }
-        List<Integer> sorted = new ArrayList<>();
-        for (int id : ids) {
-            sorted.add(id);
-        }
-        sorted.sort(Comparator.comparingDouble(id -> flat(spots.get(id), entrance)));
-        int[] out = new int[ids.length];
-        for (int i = 0; i < out.length; i++) {
-            out[i] = sorted.get(i);
-        }
-        return out;
-    }
 
-    // 円の上に並べて湧かせる敵 (嵐の巣など) の角度: 3 人以上は与えられた角 (配置で回る) のまま、一人・二人は入口の向き (bearing) の左右に寄せる。
-    // 入口の真上には湧かせない (0.9 ラジアン以上離す。半径 10 で入口まで 8.8 マス): i 番目は左右交互に、0.9・0.9・1.2〜1.35 …
-    public static double angleNear(double original, int i, int count, double bearing, int entrants) {
-        if (entrants >= 3) {
-            return original;
-        }
-        double step = entrants <= 1 ? 0.3 : 0.45;
-        double offset = (i % 2 == 0 ? 1 : -1) * (MIN_SPAWN_ANGLE + step * (i / 2));
-        return bearing + offset;
-    }
 
     public static final double MIN_SPAWN_ANGLE = 0.9;
 
-    public static double bearingFor(double cx, double cz, BlockPos entrance) {
-        return Math.atan2(entrance.getZ() + 0.5 - cz, entrance.getX() + 0.5 - cx);
-    }
 
     static double flat(BlockPos a, BlockPos b) {
         return Math.hypot(a.getX() - b.getX(), a.getZ() - b.getZ());
@@ -440,9 +373,6 @@ public final class RoomPlay {
         return LOG;
     }
 
-    public static void clearLog() {
-        LOG.clear();
-    }
 
     private static final class Trap {
         final BlockPos at;
@@ -606,7 +536,7 @@ public final class RoomPlay {
             }
             if (now % 20 < STEP) {
                 BlockPos sp = jp.revati.skyabyss.trial.TrialFrame.shift(t.at);
-                level.sendParticles(room.theme().spark, sp.getX() + 0.5, sp.getY() + 1.1, sp.getZ() + 0.5, 2, 0.9, 0.05, 0.9, 0.01);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), sp.getX() + 0.5, sp.getY() + 1.1, sp.getZ() + 0.5, 2, 0.9, 0.05, 0.9, 0.01);
             }
             if (anyoneOn(level, t, s, players, foes)) {
                 t.standing += STEP;
@@ -684,8 +614,8 @@ public final class RoomPlay {
         LOG.add(new Event(t.at.toShortString(), t.index, kind, started, started + WARN_TICKS));
         level.playSound(null, cx, floor, cz, kind == Kind.CRUMBLE ? SoundEvents.GENERIC_EXPLODE.value() : theme.sound, SoundSource.HOSTILE, 1.2f,
                 kind == Kind.CRUMBLE ? 0.9f : 1.2f);
-        level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, floorState), cx, floor + 0.2, cz, 40, 1.1, 0.2, 1.1, 0.12);
-        level.sendParticles(theme.spark, cx, floor + 0.5, cz, 24, 1.0, 0.6, 1.0, 0.05);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), cx, floor + 0.2, cz, 24, 1.1, 0.2, 1.1, 0.12);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx, floor + 0.5, cz, 24, 1.0, 0.6, 1.0, 0.05);
         AABB zone = new AABB(cx - TRAP_R, floor - 1.5, cz - TRAP_R, cx + TRAP_R, floor + 2.5, cz + TRAP_R);
         for (Mob m : level.getEntitiesOfClass(Mob.class, zone, m -> m.isAlive() && m instanceof Enemy
                 && (Groups.keyOf(m) == null || group.equals(Groups.keyOf(m))))) {
@@ -761,32 +691,6 @@ public final class RoomPlay {
         }
     }
 
-    // 試験用: 人を指定して一つのグループを動かす (パーティを作らずに、人数だけを変えて試す)
-    public static void stepGroupForTest(ServerLevel level, Room room, UUID group, List<ServerPlayer> players, long now) {
-        stepGroup(level, room, group, players, now);
-    }
 
-    // 試験用: 予告を出している罠の数
-    public static int activeTraps(Room room, UUID group) {
-        State s = STATES.get(key(room, group));
-        int n = 0;
-        if (s != null) {
-            for (Trap t : s.traps) {
-                if (t.telegraph != null) {
-                    n++;
-                }
-            }
-        }
-        return n;
-    }
 
-    // 試験用: 部屋の状態 (働いている罠の数・立っている柱の段) を読む
-    @Nullable
-    public static int[] probeState(Room room, UUID group) {
-        State s = STATES.get(key(room, group));
-        if (s == null) {
-            return null;
-        }
-        return new int[] {s.peak, s.tierShown, s.traps.size()};
-    }
 }

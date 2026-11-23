@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity.foe.late;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
@@ -54,14 +55,12 @@ public class AshWhirl extends LateFoe {
         begin(target, "spin");
         double x = getX();
         double z = getZ();
-        Telegraph.in(server(), TelegraphShape.circle(x, z, RADIUS))
+        Telegraph.in(server(), TelegraphShape.circle(x, z, RADIUS)).prop(PropFx.rise("whirlwind"))
                 .floor(getY()).warn(WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.MOSS_DEAD_SPORES.get(), 1.2f, 0.7f)
                 .victims(this::canHit)
                 .onImpact(server -> {
                     playAction("burst");
-                    server.sendParticles(ParticleTypes.LARGE_SMOKE, x, getY() + 1.0, z, 90, RADIUS * 0.4, 1.0, RADIUS * 0.4, 0.04);
-                    server.sendParticles(ParticleTypes.FLAME, x, getY() + 0.8, z, 20, 0.6, 0.6, 0.6, 0.02);
                 })
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage());
@@ -76,9 +75,6 @@ public class AshWhirl extends LateFoe {
     protected void during(int tick) {
         if (tick >= WARN || !(level() instanceof net.minecraft.server.level.ServerLevel server)) {
             return;
-        }
-        if (tick % 4 == 0) {
-            server.sendParticles(ParticleTypes.ASH, getX(), getY() + 1.2, getZ(), 30, RADIUS * 0.45, 0.8, RADIUS * 0.45, 0.02);
         }
         for (ServerPlayer p : server.players()) {
             double dx = getX() - p.getX();

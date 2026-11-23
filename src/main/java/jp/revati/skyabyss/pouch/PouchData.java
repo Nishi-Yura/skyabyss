@@ -32,10 +32,11 @@ public final class PouchData {
             Codec.BOOL.optionalFieldOf("hold", false).forGetter(d -> d.hold),
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.INT).optionalFieldOf("items", Map.of()).forGetter(d -> d.counts),
             ResourceLocation.CODEC.listOf().optionalFieldOf("seen", List.of()).forGetter(d -> new ArrayList<>(d.seen)),
-            ResourceLocation.CODEC.listOf().optionalFieldOf("fresh", List.of()).forGetter(d -> new ArrayList<>(d.fresh)))
+            ResourceLocation.CODEC.listOf().optionalFieldOf("fresh", List.of()).forGetter(d -> new ArrayList<>(d.fresh)),
+            net.minecraft.world.item.ItemStack.OPTIONAL_CODEC.listOf().optionalFieldOf("parts", List.of()).forGetter(d -> new ArrayList<>(d.parts)))
             .apply(i, PouchData::new));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, PouchData> STREAM_CODEC = StreamCodec.composite(
+    private static final StreamCodec<RegistryFriendlyByteBuf, PouchData> BASE_STREAM = StreamCodec.composite(
             ByteBufCodecs.VAR_INT, d -> d.version,
             ByteBufCodecs.VAR_INT, d -> d.migrated,
             ByteBufCodecs.BOOL, d -> d.hold,
@@ -44,6 +45,21 @@ public final class PouchData {
             ResourceLocation.STREAM_CODEC.apply(ByteBufCodecs.list()), d -> new ArrayList<>(d.seen),
             ResourceLocation.STREAM_CODEC.apply(ByteBufCodecs.list()), d -> new ArrayList<>(d.fresh),
             PouchData::new);
+
+    // 細工の枠 (部品つきの品) は六つの欄の後ろに続けて送る
+    public static final StreamCodec<RegistryFriendlyByteBuf, PouchData> STREAM_CODEC = StreamCodec.of(
+            (buf, d) -> {
+                BASE_STREAM.encode(buf, d);
+                net.minecraft.world.item.ItemStack.OPTIONAL_LIST_STREAM_CODEC.encode(buf, new ArrayList<>(d.parts));
+            },
+            buf -> {
+                PouchData d = BASE_STREAM.decode(buf);
+                d.setParts(net.minecraft.world.item.ItemStack.OPTIONAL_LIST_STREAM_CODEC.decode(buf));
+                return d;
+            });
+
+    // 細工の枠の数 (名残の芯・粉・ルーンなど、一つずつ中身が違う品をそのまま入れる。2026-11-10 の選び p_parts)
+    public static final int PARTS = 36;
 
     // 保存の形の版 (読み込んだあとは今の版に読み替えて、次の保存から新しい版で書く)
     public int version = VERSION;
@@ -56,13 +72,47 @@ public final class PouchData {
     private final Set<ResourceLocation> seen = new LinkedHashSet<>();
     // 新しく入ったまま、まだ画面で見ていない品 ("NEW" の印。見たら外す。docs/design/22 の 9.4)
     private final Set<ResourceLocation> fresh = new LinkedHashSet<>();
+    // 細工の枠 (PARTS 個。空は EMPTY)
+    private final List<net.minecraft.world.item.ItemStack> parts = new ArrayList<>(java.util.Collections.nCopies(PARTS, net.minecraft.world.item.ItemStack.EMPTY));
 
     public PouchData() {
     }
 
     private PouchData(int version, int migrated, boolean hold, Map<ResourceLocation, Integer> items, List<ResourceLocation> seen,
             List<ResourceLocation> fresh) {
-        this(Optional.of(version), migrated, hold, items, seen, fresh);
+        this(Optional.of(version), migrated, hold, items, seen, fresh, List.of());
+    }
+
+    private PouchData(Optional<Integer> version, int migrated, boolean hold, Map<ResourceLocation, Integer> items, List<ResourceLocation> seen,
+            List<ResourceLocation> fresh, List<net.minecraft.world.item.ItemStack> parts) {
+        this(version, migrated, hold, items, seen, fresh);
+        setParts(parts);
+    }
+
+    // ---------------------------------------------------------------- 細工の枠
+    public net.minecraft.world.item.ItemStack part(int i) {
+        return i >= 0 && i < PARTS ? parts.get(i) : net.minecraft.world.item.ItemStack.EMPTY;
+    }
+
+    public void setPart(int i, net.minecraft.world.item.ItemStack s) {
+        if (i >= 0 && i < PARTS) {
+            parts.set(i, s == null ? net.minecraft.world.item.ItemStack.EMPTY : s);
+        }
+    }
+
+    public void setParts(List<net.minecraft.world.item.ItemStack> in) {
+        for (int i = 0; i < PARTS; i++) {
+            parts.set(i, i < in.size() && in.get(i) != null ? in.get(i).copy() : net.minecraft.world.item.ItemStack.EMPTY);
+        }
+    }
+
+    public boolean partsEmpty() {
+        for (net.minecraft.world.item.ItemStack s : parts) {
+            if (!s.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private PouchData(Optional<Integer> version, int migrated, boolean hold, Map<ResourceLocation, Integer> items, List<ResourceLocation> seen,
@@ -127,10 +177,11 @@ public final class PouchData {
 
     public void clear() {
         counts.clear();
+        java.util.Collections.fill(parts, net.minecraft.world.item.ItemStack.EMPTY);
     }
 
     public boolean isEmpty() {
-        return counts.isEmpty();
+        return counts.isEmpty() && partsEmpty();
     }
 
     public int total() {
@@ -143,6 +194,6 @@ public final class PouchData {
 
     // 死んだあと・同期の写し
     public PouchData copy() {
-        return new PouchData(Optional.of(version), migrated, hold, counts, new ArrayList<>(seen), new ArrayList<>(fresh));
+        return new PouchData(Optional.of(version), migrated, hold, counts, new ArrayList<>(seen), new ArrayList<>(fresh), parts);
     }
 }

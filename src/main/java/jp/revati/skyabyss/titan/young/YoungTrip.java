@@ -10,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import jp.revati.skyabyss.ModText;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.notice.Notice;
-import jp.revati.skyabyss.quest.Quests;
 import jp.revati.skyabyss.titan.group.Groups;
 import jp.revati.skyabyss.titan.travel.LandingFinder;
 import jp.revati.skyabyss.titan.travel.TravelNetwork;
@@ -111,9 +110,6 @@ public final class YoungTrip {
         return dest;
     }
 
-    public boolean departed() {
-        return phase == Phase.CARRY || phase == Phase.LAND;
-    }
 
     private void setPhase(Phase next) {
         phase = next;
@@ -642,11 +638,11 @@ public final class YoungTrip {
 
     private void motes(ServerLevel level, int amount) {
         for (int i = 0; i < amount; i++) {
-            level.sendParticles(ParticleTypes.END_ROD, e.getX() + (level.random.nextDouble() - 0.5) * 6, e.getY() + 0.5 + level.random.nextDouble() * 3,
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.getX() + (level.random.nextDouble() - 0.5) * 6, e.getY() + 0.5 + level.random.nextDouble() * 3,
                     e.getZ() + (level.random.nextDouble() - 0.5) * 6, 1, 0, 0.05, 0, 0.02);
         }
         if (phaseTicks % 6 == 0) {
-            level.sendParticles(ParticleTypes.NOTE, e.getX(), e.getY() + 3.0, e.getZ(), 1, 1.5, 0.3, 1.5, 0.0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.getX(), e.getY() + 3.0, e.getZ(), 1, 1.5, 0.3, 1.5, 0.0);
         }
     }
 
@@ -663,7 +659,7 @@ public final class YoungTrip {
         float yaw = e.getYRot() * Mth.DEG_TO_RAD;
         double bx = e.getX() + Mth.sin(yaw) * 4;
         double bz = e.getZ() - Mth.cos(yaw) * 4;
-        level.sendParticles(p, bx, e.getY() + 0.6, bz, 3, 1.4, 0.3, 1.4, 0.02);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), bx, e.getY() + 0.6, bz, 3, 1.4, 0.3, 1.4, 0.02);
     }
 
     private SoundEvent departSound() {

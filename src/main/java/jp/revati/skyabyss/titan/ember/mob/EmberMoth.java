@@ -1,6 +1,5 @@
 package jp.revati.skyabyss.titan.ember.mob;
 
-import jp.revati.skyabyss.util.Players;
 
 import jp.revati.skyabyss.titan.group.GroupOwned;
 import java.util.ArrayList;
@@ -11,12 +10,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import jp.revati.skyabyss.titan.ember.EmberIds;
 import jp.revati.skyabyss.titan.ember.back.EmberHeat;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -28,9 +23,7 @@ import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -187,13 +180,7 @@ public class EmberMoth extends EmberMob {
         return best;
     }
 
-    public Vec3 lure() {
-        return lure;
-    }
 
-    public Player lurePlayer() {
-        return lurePlayer;
-    }
 
     // ---------------------------------------------------------------- 触れる・散る
 
@@ -207,7 +194,7 @@ public class EmberMoth extends EmberMob {
         EmberHeat.add(p, TOUCH_HEAT, EmberHeat.Reason.MOTH);
         playAction("attack");
         if (level() instanceof ServerLevel server) {
-            server.sendParticles(ParticleTypes.SMALL_FLAME, p.getX(), p.getY() + 1.0, p.getZ(), 6, 0.25, 0.4, 0.25, 0.02);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1.0, p.getZ(), 6, 0.25, 0.4, 0.25, 0.02);
         }
     }
 
@@ -225,8 +212,8 @@ public class EmberMoth extends EmberMob {
 
     // 死ぬと火の粉が散る: 3 ブロック以内の人に熱 +4
     void sparks(ServerLevel server) {
-        server.sendParticles(ParticleTypes.LAVA, getX(), getY() + 0.3, getZ(), 5, 0.3, 0.2, 0.3, 0.05);
-        server.sendParticles(ParticleTypes.FLAME, getX(), getY() + 0.3, getZ(), 14, 0.5, 0.3, 0.5, 0.06);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY() + 0.3, getZ(), 5, 0.3, 0.2, 0.3, 0.05);
+        server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.3, getZ(), 14, 0.5, 0.3, 0.5, 0.06);
         sparkPlayers(server.getEntitiesOfClass(Player.class, getBoundingBox().inflate(SPARK_RADIUS), p -> GroupOwned.mayTarget(this, p)), position());
     }
 
@@ -251,7 +238,7 @@ public class EmberMoth extends EmberMob {
         if (level().isClientSide) {
             // 腹の熾から落ちる小さな火の粉 (見た目だけ)
             if (random.nextInt(6) == 0) {
-                level().addParticle(ParticleTypes.SMALL_FLAME, getX(), getY() + 0.3, getZ(), 0, -0.02, 0);
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.3, getZ(), 0, -0.02, 0);
             }
         }
     }
@@ -359,4 +346,9 @@ public class EmberMoth extends EmberMob {
     protected void playStepSound(BlockPos pos, BlockState state) {
     }
 
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
+    }
 }

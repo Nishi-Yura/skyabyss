@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -54,7 +55,7 @@ public class LavaSlug extends ContinentFoe {
             lastTrail = position();
             Vec3 at = lastTrail;
             trail.add(new long[] {Double.doubleToLongBits(at.x), Double.doubleToLongBits(at.y), Double.doubleToLongBits(at.z), tickCount + WARN + TRAIL_TICKS});
-            Telegraph.in(server(), TelegraphShape.circle(at.x, at.z, TRAIL_RADIUS))
+            Telegraph.in(server(), TelegraphShape.circle(at.x, at.z, TRAIL_RADIUS)).prop(PropFx.rise("lava_pillar").size(0.4f).linger(10))
                     .floor(at.y).warn(WARN).active(TRAIL_TICKS).repeatEvery(10).danger().owner(this)
                     .victims(this::canHit)
                     .onHit((server, player) -> {
@@ -69,7 +70,7 @@ public class LavaSlug extends ContinentFoe {
         }
         if (tickCount % 4 == 0) {
             for (long[] t : trail) {
-                server().sendParticles(ParticleTypes.FLAME, Double.longBitsToDouble(t[0]), Double.longBitsToDouble(t[1]) + 0.1, Double.longBitsToDouble(t[2]),
+                server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), Double.longBitsToDouble(t[0]), Double.longBitsToDouble(t[1]) + 0.1, Double.longBitsToDouble(t[2]),
                         2, TRAIL_RADIUS * 0.5, 0.05, TRAIL_RADIUS * 0.5, 0.01);
             }
         }
@@ -85,7 +86,6 @@ public class LavaSlug extends ContinentFoe {
         Telegraph.in(server(), TelegraphShape.cone(getX(), getZ(), Telegraph.angleOf(f), BITE_RANGE + 0.6, Math.toRadians(50)))
                 .floor(getY()).warn(WARN).danger().owner(this).target(target)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.LAVA, getX() + f.x * 1.6, getY() + 0.4, getZ() + f.z * 1.6, 6, 0.3, 0.1, 0.3, 0.02))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage());
                     player.setRemainingFireTicks(Math.max(player.getRemainingFireTicks(), 40));
@@ -101,5 +101,10 @@ public class LavaSlug extends ContinentFoe {
     @Override
     protected void finish() {
         cooldown = 24 + random.nextInt(16);
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

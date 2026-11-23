@@ -449,13 +449,13 @@ public final class Dungeons {
         Quests.give(p, new ItemStack(ModItems.socketShard(d.element).get(), mood == DungeonMood.SWARM ? 3 : 2));
         Notice.place(p, Component.translatable("message.skyabyss.dungeon.clear_title"), Component.translatable(d.nameKey()));
         p.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.MASTER, 1f, 1f);
-        Notice.gain(p, "message.skyabyss.dungeon.reward", xp, coins);
+        Notice.gainLog(p, "message.skyabyss.dungeon.reward", xp, coins);
         if (box) {
             BoxKind kind = BoxKind.rarity(boxTier(d, deep), (d.level - 1) / 10 + 1);
             var item = kind == null ? null : LootBoxSetup.item(kind);
             if (item != null) {
                 Quests.give(p, new ItemStack(item));
-                Notice.gain(p, "message.skyabyss.dungeon.box");
+                Notice.gainLog(p, "message.skyabyss.dungeon.box");
             }
         }
         if (clears == 1) {
@@ -466,7 +466,7 @@ public final class Dungeons {
             if (!trinket.isEmpty()) {
                 DungeonGear.setClears(trinket, 1);
                 Quests.give(p, trinket);
-                Notice.gain(p, "message.skyabyss.dungeon.trinket", trinket.getHoverName());
+                Notice.gainItem(p, trinket, jp.revati.skyabyss.ModText.progress("message.skyabyss.dungeon.trinket", trinket.getHoverName()));
             }
             jp.revati.skyabyss.rebirth.Rebirths.updateTitles(p);
         }
@@ -745,7 +745,8 @@ public final class Dungeons {
         });
     }
 
-    // 入り直したとき: 写しが続いていれば checkpoint の層へ、終わっていれば入口の間へ
+    // 入り直したとき: 入る前の所 (入口の間。小さなダンジョンは入った門のそば) へ戻す (2026-11-15 の声「ダンジョンに入っているときに
+    // ワールドから抜けると、再度参加したときは入る前のところでスポーンするように」)。続きは層の門から
     @SubscribeEvent
     static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer p) || !DungeonWorld.in(p)) {
@@ -755,10 +756,9 @@ public final class Dungeons {
         DungeonWorld.Place at = DungeonWorld.place(p.blockPosition());
         Dungeon d = run != null ? run.dungeon : at != null ? at.dungeon() : Dungeon.BONE_PIT;
         Tasks.later(10, () -> {
-            if (run != null && RUNS.containsKey(run.id)) {
-                moveTo(p, run, run.checkpoint);
-            } else {
+            if (!p.hasDisconnected() && DungeonWorld.in(p)) {
                 sendBack(p, d);
+                Notice.hint(p, "message.skyabyss.dungeon.left");
             }
         });
     }
@@ -893,9 +893,6 @@ public final class Dungeons {
         return start(server, d, squad, deep);
     }
 
-    public static void rewardForTest(ServerPlayer p, Dungeon d, boolean deep, DungeonMood mood) {
-        reward(p, d, deep, mood);
-    }
 
     public static void endForTest(DungeonRun run) {
         end(run);

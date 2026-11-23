@@ -18,6 +18,7 @@
   "element.skyabyss.ash": "Ash Powder",
   "element.skyabyss.bone": "Bone Powder",
   "gear.skyabyss.socket_empty": " ◇ Empty socket",
+  "gear.skyabyss.socket_empty_short": "Empty socket",
   "gear.skyabyss.aspect": " ✦ Remnant - %1$s",
   "gear.skyabyss.hollow": "Its rewrite was drawn out; only the mark remains",
   "gear.skyabyss.generation": "Generation %1$s",

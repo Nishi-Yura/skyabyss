@@ -94,7 +94,7 @@ public class RopeHanger extends AbyssMobB {
         }
         if (tell >= 0) {
             if (tickCount % 8 == 0) {
-                sl.sendParticles(ParticleTypes.DRIPPING_OBSIDIAN_TEAR, getX(), getY() - 0.2, getZ(), 2, 0.3, 0, 0.3, 0);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() - 0.2, getZ(), 2, 0.3, 0, 0.3, 0);
                 playSound(AbyssMobsBSetup.ROPE_CREAK.get(), 0.9f, 1.0f);
             }
             if (--tell < 0) {
@@ -177,5 +177,10 @@ public class RopeHanger extends AbyssMobB {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         Ch4Mobs.drop(level, this, source, AbyssMobsBSetup.ROPE_KNOT.get(), 0.7, 1, 2);
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

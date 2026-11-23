@@ -80,7 +80,7 @@ public final class SkillLessonClient {
     // 呼吸する金の縁 (x, y から w × h の外側に 1 px)
     public static void frame(GuiGraphics g, int x, int y, int w, int h) {
         float pulse = 0.55f + 0.45f * Mth.sin(Util.getMillis() / 260f);
-        int c = ((int) (pulse * 255) << 24) | 0xF2C14E;
+        int c = ((int) (pulse * 255) << 24) | 0xE9C46A;
         g.fill(x - 1, y - 1, x + w + 1, y, c);
         g.fill(x - 1, y + h, x + w + 1, y + h + 1, c);
         g.fill(x - 1, y, x, y + h, c);

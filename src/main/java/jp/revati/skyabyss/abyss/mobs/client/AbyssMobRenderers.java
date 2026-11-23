@@ -7,7 +7,6 @@ import jp.revati.skyabyss.abyss.boss.client.BossRender;
 import jp.revati.skyabyss.abyss.mobs.AbyssMob;
 import jp.revati.skyabyss.abyss.mobs.AbyssMobKind;
 import jp.revati.skyabyss.abyss.mobs.AbyssMobsA;
-import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -85,20 +84,14 @@ public final class AbyssMobRenderers {
             if (look != 0) {
                 return BossRender.geo(look);
             }
-            if (!LowPoly.enabled) {
-                return LowPoly.cubeOr(id("geo/entity/" + stemOf(kind, 1) + ".geo.json"), id("geo/entity/" + stemOf(kind, a.stage()) + "_lowpoly.geo.json"));
-            }
-            return id("geo/entity/" + stemOf(kind, a.stage()) + (LowPoly.debug ? "_lowpoly_debug" : "_lowpoly") + ".geo.json");
+            return id("geo/entity/" + stemOf(kind, a.stage()) + "_lowpoly" + ".geo.json");
         }
 
         @Override
         public ResourceLocation getTextureResource(AbyssMob a) {
             int look = BossRender.look(a);
             if (look != 0) {
-                return LowPoly.debug ? super.getTextureResource(a) : BossRender.texture(look);
-            }
-            if (!LowPoly.enabled) {
-                return LowPoly.cubeOr(id("textures/entity/" + stemOf(kind, 1) + ".png"), id("textures/lowpoly/" + stemOf(kind, a.stage()) + ".png"));
+                return BossRender.texture(look);
             }
             return id("textures/lowpoly/" + stemOf(kind, a.stage()) + ".png");
         }

@@ -1,0 +1,77 @@
+world gear_look flat
+size 960 540
+timeout 6000
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd gamerule doMobLoot false
+camera 0 -60 0 0 0
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+cmd skyabyss level set @p 30
+swingpose off
+gearlook all a
+cmd kill @e[type=!player]
+armortier auto
+cmd item replace entity @s armor.head with minecraft:air
+cmd item replace entity @s armor.chest with minecraft:air
+cmd item replace entity @s armor.legs with minecraft:air
+cmd item replace entity @s armor.feet with minecraft:air
+hud on
+fov 70
+cmd tp @s 0.5 -60 0.5 0 0
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_tusk_axe
+close
+wait 12
+chat clear
+hud off
+perspective front
+fov 52
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 8
+shot tusk_a
+hud on
+fov 70
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_tusk_axe
+close
+wait 12
+chat clear
+hud off
+perspective front
+fov 52
+cmd tp @s 0.5 -60 0.5 -120 0
+wait 8
+shot tusk_b
+hud on
+fov 70
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_gale_glaive
+close
+wait 12
+chat clear
+hud off
+perspective front
+fov 85
+cmd tp @s 0.5 -60 0.5 -60 0
+wait 8
+shot gale_a
+hud on
+fov 70
+cmd item replace entity @s weapon.mainhand with skyabyss:wild_gale_glaive
+close
+wait 12
+chat clear
+hud off
+perspective front
+fov 85
+cmd tp @s 0.5 -60 0.5 -100 0
+wait 8
+shot gale_b
+hud on
+fov 70

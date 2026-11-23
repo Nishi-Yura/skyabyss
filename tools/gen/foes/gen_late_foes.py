@@ -5,7 +5,6 @@
 
 入力: docs/review/roughs_late_foes/<id>/<案>/<id>_<案>_{mesh.json,atlas.png,glowmask.png}   (ラフは tools/rough/lowpoly/late_foes/)
 出力 (assets/skyabyss/ の下): lowpoly/<id>.json・textures/lowpoly/<id>(_glowmask).png・geo/entity/<id>_lowpoly(_debug).geo.json (tools/install/install_lowpoly.py)、
-  geo/entity/<id>.geo.json + textures/entity/<id>.png (LowPoly.enabled = false のときの箱の代用)、animations/entity/<id>.animation.json、
   models/item/<id>_spawn_egg.json
 動きの名前は Java (entity/foe/<型>) と同じ: idle・walk・hurt・death と技の名前。
 回転の約束: ラフの姿勢 = 数学の右手系 (前 -Z。x が + = 前が上がる) で書き、ファイルへは (-x, -y, z) (tools/gen/ch4/gen_ch4_ground_mobs.py と同じ)。
@@ -270,8 +269,6 @@ def install():
                "--glow", d + "glowmask.png"]
         subprocess.check_call(cmd, cwd=ROOT)
         os.makedirs(os.path.join(A, "textures", "entity"), exist_ok=True)
-        shutil.copyfile(os.path.join(A, "geo", "entity", mob + "_lowpoly_debug.geo.json"), os.path.join(A, "geo", "entity", mob + ".geo.json"))
-        shutil.copyfile(os.path.join(A, "textures", "lowpoly", mob + ".png"), os.path.join(A, "textures", "entity", mob + ".png"))
         wjson(os.path.join(A, "models", "item", mob + "_spawn_egg.json"), {"parent": "minecraft:item/template_spawn_egg"})
         wjson(os.path.join(A, "animations", "entity", mob + ".animation.json"), {"format_version": "1.8.0", "animations": ANIMS[mob]()})
 

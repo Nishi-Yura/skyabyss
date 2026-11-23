@@ -137,7 +137,7 @@ public class ThunderSupplicant extends StormMob {
                     mob.face(t, 20f);
                 }
                 if (mob.level() instanceof ServerLevel server) {
-                    mob.warn(server, ParticleTypes.ELECTRIC_SPARK, mob.getX(), mob.getY() + 3.0, mob.getZ(), 3, 0.15, 0.15, 0.15, 0.05);
+                    mob.warn(server, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), mob.getX(), mob.getY() + 3.0, mob.getZ(), 3, 0.15, 0.15, 0.15, 0.05);
                 }
                 if (--castWindup <= 0) {
                     castWindup = -1;

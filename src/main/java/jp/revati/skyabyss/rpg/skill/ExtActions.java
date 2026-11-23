@@ -103,12 +103,12 @@ final class ExtActions {
         int n = Math.max(1, (int) (from.distanceTo(to) / step));
         for (int i = 0; i <= n; i++) {
             Vec3 at = from.lerp(to, i / (double) n);
-            level.sendParticles(p, at.x, at.y, at.z, 1, spread, spread, spread, 0.0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y, at.z, 1, spread, spread, spread, 0.0);
         }
     }
 
-    private static BlockParticleOption dust(net.minecraft.world.level.block.Block block) {
-        return new BlockParticleOption(ParticleTypes.BLOCK, block.defaultBlockState());
+    private static net.minecraft.core.particles.SimpleParticleType dust(net.minecraft.world.level.block.Block block) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD);
     }
 
     private static void teleport(ServerPlayer player, Vec3 to) {
@@ -185,7 +185,7 @@ final class ExtActions {
         for (int i = 0; i < 40; i++) {
             double a = i * 0.55;
             double r = radius * (1 - i / 42.0);
-            level.sendParticles(p, center.x + Math.cos(a) * r, center.y + 0.2 + i * 0.03, center.z + Math.sin(a) * r, 1, 0.02, 0.02, 0.02, 0.0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), center.x + Math.cos(a) * r, center.y + 0.2 + i * 0.03, center.z + Math.sin(a) * r, 1, 0.02, 0.02, 0.02, 0.0);
         }
     }
 
@@ -265,7 +265,7 @@ final class ExtActions {
     private static void ghostSlash(ServerLevel level, LivingEntity foe, boolean reverse) {
         // 斬りの筋はクライアントの SkillFx が描く。ここは当たりの小さな火花だけ
         Vec3 c = foe.position().add(0, foe.getBbHeight() * 0.6, 0);
-        level.sendParticles(Skills.RUNE_SPARK.get(), c.x, c.y, c.z, 1, 0.1, 0.1, 0.1, 0.02);
+        level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), c.x, c.y, c.z, 1, 0.1, 0.1, 0.1, 0.02);
     }
 
     // 墓鐘 (転生 2): 鐘を 1 つ打つ。周り (半径 5) の敵を少し打って、3 秒、足を重くする
@@ -339,10 +339,10 @@ final class ExtActions {
             SkillEffects.later(level, i, () -> {
                 for (int s = -1; s <= 1; s++) {
                     Vec3 p = at.add(side.scale(s * 0.9));
-                    level.sendParticles(dust(Blocks.STONE), p.x, p.y + 0.4, p.z, 14, 0.3, 0.6, 0.3, 0.1);
-                    level.sendParticles(dust(Blocks.DEEPSLATE), p.x, p.y + 1.4, p.z, 6, 0.25, 0.5, 0.25, 0.08);
-                    level.sendParticles(ParticleTypes.POOF, p.x, p.y + 0.2, p.z, 3, 0.3, 0.1, 0.3, 0.02);
-                    level.sendParticles(ParticleTypes.CRIT, p.x, p.y + 1.2, p.z, 4, 0.15, 0.7, 0.15, 0.15);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 0.4, p.z, 14, 0.3, 0.6, 0.3, 0.1);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 1.4, p.z, 6, 0.25, 0.5, 0.25, 0.08);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.x, p.y + 0.2, p.z, 3, 0.3, 0.1, 0.3, 0.02);
+                    level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.x, p.y + 1.2, p.z, 4, 0.15, 0.7, 0.15, 0.15);
                 }
             });
         }
@@ -360,7 +360,7 @@ final class ExtActions {
             SkillActions.hit(player, e, amount, Skill.WHALE_SWEEP);
         }
         SkillActions.ring(level, dust(Blocks.STONE), c, 2.0, 16, 0.2);
-        SkillActions.ring(level, ParticleTypes.CLOUD, c, SkillRules.SWEEP_RADIUS, 24, 0.3);
+        SkillActions.ring(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c, SkillRules.SWEEP_RADIUS, 24, 0.3);
         SkillEffects.later(level, 8, () -> {
             if (!alive(player, level)) {
                 return;
@@ -371,7 +371,7 @@ final class ExtActions {
                 }
             }
             SkillActions.ring(level, dust(Blocks.STONE), c, 4.0, 22, 0.2);
-            SkillActions.ring(level, ParticleTypes.CLOUD, c, SkillRules.SWEEP_RADIUS + 2, 34, 0.3);
+            SkillActions.ring(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), c, SkillRules.SWEEP_RADIUS + 2, 34, 0.3);
             SkillActions.ring(level, Skills.SKY_MOTE.get(), c, SkillRules.SWEEP_RADIUS + 2, 20, 0.6);
         });
         player.swing(InteractionHand.MAIN_HAND, true);
@@ -421,10 +421,10 @@ final class ExtActions {
         Vec3 side = new Vec3(-unit.z, 0, unit.x).normalize();
         for (double t = 0; t <= len; t += 0.6) {
             Vec3 at = from.add(unit.scale(t));
-            level.sendParticles(ParticleTypes.SWEEP_ATTACK, at.x, at.y, at.z, 0, 1.2, 0, 0, 1.0);
-            level.sendParticles(ParticleTypes.CLOUD, at.x, at.y, at.z, 1, 0.1, 0.1, 0.1, 0.01);
-            level.sendParticles(Skills.SKY_MOTE.get(), at.x + side.x * 0.4, at.y, at.z + side.z * 0.4, 1, 0.03, 0.03, 0.03, 0.0);
-            level.sendParticles(Skills.SKY_MOTE.get(), at.x - side.x * 0.4, at.y, at.z - side.z * 0.4, 1, 0.03, 0.03, 0.03, 0.0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.x, at.y, at.z, 0, 1.2, 0, 0, 1.0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.x, at.y, at.z, 1, 0.1, 0.1, 0.1, 0.01);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x + side.x * 0.4, at.y, at.z + side.z * 0.4, 1, 0.03, 0.03, 0.03, 0.0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x - side.x * 0.4, at.y, at.z - side.z * 0.4, 1, 0.03, 0.03, 0.03, 0.0);
         }
     }
 
@@ -436,11 +436,11 @@ final class ExtActions {
         ServerLevel level = player.serverLevel();
         Vec3 center = aim(player, SkillRules.RAIN_REACH);
         float amount = (float) (SkillRules.rainDamage(rank) * SkillRules.RAIN_PULSES * 0.85);
-        SkillActions.ring(level, ParticleTypes.END_ROD, center, 3.5, 24, 0.1);
+        SkillActions.ring(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), center, 3.5, 24, 0.1);
         for (int i = 0; i < 6; i++) {
             int h = i;
             SkillEffects.later(level, h * 2, () -> {
-                level.sendParticles(ParticleTypes.END_ROD, center.x, center.y + 14 - h * 2.2, center.z, 4, 0.15, 0.4, 0.15, 0.01);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), center.x, center.y + 14 - h * 2.2, center.z, 4, 0.15, 0.4, 0.15, 0.01);
             });
         }
         SkillEffects.later(level, 12, () -> {
@@ -452,9 +452,9 @@ final class ExtActions {
                     push(e, center, 0.5);
                 }
             }
-            level.sendParticles(ParticleTypes.FLASH, center.x, center.y + 0.5, center.z, 1, 0, 0, 0, 0);
-            level.sendParticles(Skills.RUNE_SPARK.get(), center.x, center.y + 0.6, center.z, 40, 1.2, 0.8, 1.2, 0.15);
-            SkillActions.ring(level, ParticleTypes.ELECTRIC_SPARK, center, 3.0, 28, 0.2);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), center.x, center.y + 0.5, center.z, 1, 0, 0, 0, 0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), center.x, center.y + 0.6, center.z, 24, 1.2, 0.8, 1.2, 0.15);
+            SkillActions.ring(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STORM, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), center, 3.0, 28, 0.2);
             level.playSound(null, center.x, center.y, center.z, Skills.SOUND_RAIN.get(), net.minecraft.sounds.SoundSource.PLAYERS, 1.2f, 0.6f);
         });
         player.swing(InteractionHand.MAIN_HAND, true);
@@ -476,8 +476,8 @@ final class ExtActions {
             SkillEffects.slow(e, 0.5 * (SkillActions.isLarge(e) ? 0.5 : 1.0), SkillRules.ebbSlowTicks(rank));
         }
         SkillEffects.zone(SkillEffects.ZoneKind.WHIRL, player, point, SkillRules.WHIRL_RADIUS, SkillRules.WHIRL_TICKS, rank);
-        spiral(level, point, range, ParticleTypes.SPLASH);
-        spiral(level, point, range * 0.7, ParticleTypes.BUBBLE_POP);
+        spiral(level, point, range, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE));
+        spiral(level, point, range * 0.7, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE));
         SkillActions.sound(player, SoundEvents.PLAYER_SPLASH_HIGH_SPEED, 0.9f, 0.6f);
         player.swing(InteractionHand.MAIN_HAND, true);
         return null;
@@ -499,8 +499,8 @@ final class ExtActions {
         for (LivingEntity e : along(player, from, end.add(dir.scale(1.0)), 1.3)) {
             SkillActions.hit(player, e, amount, Skill.LUNGE);
         }
-        line(level, ParticleTypes.SPLASH, from.add(0, 0.6, 0), end.add(0, 0.6, 0), 0.3, 0.3);
-        line(level, ParticleTypes.BUBBLE_POP, from.add(0, 1.2, 0), end.add(0, 1.2, 0), 0.5, 0.2);
+        line(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), from.add(0, 0.6, 0), end.add(0, 0.6, 0), 0.3, 0.3);
+        line(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), from.add(0, 1.2, 0), end.add(0, 1.2, 0), 0.5, 0.2);
         player.swing(InteractionHand.MAIN_HAND, true);
         SkillActions.sound(player, SoundEvents.PLAYER_SPLASH, 0.9f, 1.4f);
         return null;
@@ -512,13 +512,13 @@ final class ExtActions {
         Vec3 center = player.position().add(SkillActions.flatLook(player).scale(6.0));
         float amount = atk(player, SkillRules.hammerMultiplier(rank));
         double radius = SkillRules.HAMMER_RADIUS + 0.5;
-        SkillActions.ring(level, ParticleTypes.FLAME, center, radius, 22, 0.1);
+        SkillActions.ring(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), center, radius, 22, 0.1);
         for (int i = 0; i < 10; i++) {
             int h = i;
             SkillEffects.later(level, h, () -> {
-                level.sendParticles(ParticleTypes.FLAME, center.x, center.y + 10 - h, center.z, 14, 0.4, 0.5, 0.4, 0.03);
-                level.sendParticles(ParticleTypes.LAVA, center.x, center.y + 10 - h, center.z, 2, 0.3, 0.3, 0.3, 0.0);
-                level.sendParticles(ParticleTypes.SMOKE, center.x, center.y + 10 - h, center.z, 4, 0.3, 0.3, 0.3, 0.02);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), center.x, center.y + 10 - h, center.z, 14, 0.4, 0.5, 0.4, 0.03);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), center.x, center.y + 10 - h, center.z, 2, 0.3, 0.3, 0.3, 0.0);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), center.x, center.y + 10 - h, center.z, 4, 0.3, 0.3, 0.3, 0.02);
             });
         }
         SkillEffects.later(level, 10, () -> {
@@ -531,9 +531,9 @@ final class ExtActions {
                 }
             }
             SkillEffects.zone(SkillEffects.ZoneKind.EMBER, player, center, radius, SkillRules.EMBER_TICKS, rank);
-            level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, center.x, center.y + 0.6, center.z, 1, 0, 0, 0, 0);
-            level.sendParticles(ParticleTypes.FLAME, center.x, center.y + 0.5, center.z, 40, radius * 0.4, 0.3, radius * 0.4, 0.12);
-            level.sendParticles(dust(Blocks.MAGMA_BLOCK), center.x, center.y + 0.3, center.z, 30, radius * 0.5, 0.3, radius * 0.5, 0.1);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), center.x, center.y + 0.6, center.z, 1, 0, 0, 0, 0);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), center.x, center.y + 0.5, center.z, 24, radius * 0.4, 0.3, radius * 0.4, 0.12);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.STONE, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), center.x, center.y + 0.3, center.z, 24, radius * 0.5, 0.3, radius * 0.5, 0.1);
             level.playSound(null, center.x, center.y, center.z, SoundEvents.GENERIC_EXPLODE.value(), net.minecraft.sounds.SoundSource.PLAYERS, 0.8f, 0.8f);
         });
         player.swing(InteractionHand.MAIN_HAND, true);
@@ -546,7 +546,7 @@ final class ExtActions {
         ServerLevel level = player.serverLevel();
         Vec3 at = aim(player, 8);
         float amount = atk(player, SkillRules.trapMultiplier(rank) * 1.1);
-        SkillActions.ring(level, ParticleTypes.FLAME, at, 1.0, 12, 0.1);
+        SkillActions.ring(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at, 1.0, 12, 0.1);
         Runnable[] tick = new Runnable[1];
         int[] age = {0};
         tick[0] = () -> {
@@ -562,13 +562,13 @@ final class ExtActions {
                         push(e, at, 0.5);
                     }
                 }
-                level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.4, at.z, 1, 0, 0, 0, 0);
-                SkillActions.ring(level, ParticleTypes.FLAME, at, 2.5, 24, 0.2);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), at.x, at.y + 0.4, at.z, 1, 0, 0, 0, 0);
+                SkillActions.ring(level, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at, 2.5, 24, 0.2);
                 level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), net.minecraft.sounds.SoundSource.PLAYERS, 0.7f, 1.2f);
                 return;
             }
             if (age[0] % 12 == 0) {
-                level.sendParticles(ParticleTypes.SMALL_FLAME, at.x, at.y + 0.2, at.z, 3, 0.2, 0.05, 0.2, 0.01);
+                level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), at.x, at.y + 0.2, at.z, 3, 0.2, 0.05, 0.2, 0.01);
             }
             SkillEffects.later(level, 4, tick[0]);
         };

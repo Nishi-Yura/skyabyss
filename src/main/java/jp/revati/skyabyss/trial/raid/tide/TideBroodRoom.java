@@ -307,7 +307,7 @@ public final class TideBroodRoom extends RaidRoom {
                 Mob d = spawnDecoy(ctx);
                 if (d != null) {
                     decoys.add(d);
-                    level.sendParticles(ParticleTypes.POOF, d.getX(), d.getY() + 0.5, d.getZ(), 8, 0.3, 0.3, 0.3, 0.02);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), d.getX(), d.getY() + 0.5, d.getZ(), 8, 0.3, 0.3, 0.3, 0.02);
                 }
             }
         }
@@ -320,7 +320,7 @@ public final class TideBroodRoom extends RaidRoom {
         if (now % 4 == 0) {
             for (int k = 0; k < 8; k++) {
                 double a = Math.PI * 2 * k / 8;
-                level.sendParticles(TideRaid.dust(0.04f, 0.04f, 0.1f, 2.2f), mother.getX() + Math.cos(a) * ring, mother.getY() + 0.06, mother.getZ() + Math.sin(a) * ring, 1, 0.02, 0, 0.02, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), mother.getX() + Math.cos(a) * ring, mother.getY() + 0.06, mother.getZ() + Math.sin(a) * ring, 1, 0.02, 0, 0.02, 0);
             }
         }
         if (now % 10 == 0) {
@@ -348,8 +348,8 @@ public final class TideBroodRoom extends RaidRoom {
 
     private void pop(RaidCtx ctx, Mob d) {
         ServerLevel level = ctx.level();
-        level.sendParticles(ParticleTypes.POOF, d.getX(), d.getY() + 0.6, d.getZ(), 14, 0.4, 0.4, 0.4, 0.03);
-        level.sendParticles(ParticleTypes.END_ROD, d.getX(), d.getY() + 0.6, d.getZ(), 6, 0.3, 0.3, 0.3, 0.05);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), d.getX(), d.getY() + 0.6, d.getZ(), 14, 0.4, 0.4, 0.4, 0.03);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), d.getX(), d.getY() + 0.6, d.getZ(), 6, 0.3, 0.3, 0.3, 0.05);
         level.playSound(null, d.blockPosition(), SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.HOSTILE, 1.2f, 1.4f);
         d.discard();
     }
@@ -414,5 +414,10 @@ public final class TideBroodRoom extends RaidRoom {
 
     public int printCount() {
         return prints.size();
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

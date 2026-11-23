@@ -24,7 +24,7 @@ PANELS = [
     ("inv_g2_bow", "GUI 2"),
     ("acc_g3", "装飾の画面 GUI 3: つまみの字"),
     ("acc_g3_hover", "装飾 GUI 3: ツールチップ"),
-    ("pouch_g3", "旅嚢 GUI 3: つまみの字"),
+    ("pouch_g3", "旅袋 GUI 3: つまみの字"),
     ("acc_g4", "装飾 GUI 4"),
     ("acc_g2", "装飾 GUI 2"),
 ]

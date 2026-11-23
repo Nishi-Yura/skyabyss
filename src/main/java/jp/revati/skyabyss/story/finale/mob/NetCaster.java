@@ -117,14 +117,19 @@ public class NetCaster extends CloudMob {
                 for (int i = -3; i <= 3; i++) {
                     Vec3 d = fwd.yRot((float) Math.toRadians(i * CONE / 6.0));
                     Vec3 p = position().add(d.scale(RANGE));
-                    sl.sendParticles(ParticleTypes.FALLING_WATER, p.x, p.y + 0.3, p.z, 1, 0, 0, 0, 0);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), p.x, p.y + 0.3, p.z, 1, 0, 0, 0, 0);
                 }
+            }
+            if (t == TELL - 4) {
+                // 技の形: 投げ網が扇の真ん中の先へ広がって落ちる (打つ瞬間に着く)
+                jp.revati.skyabyss.combat.prop.AttackProps.toss(sl, "net", NetCaster.this, position().add(0, getBbHeight(), 0),
+                        position().add(fwd.scale(RANGE * 0.65)), 6, 6, 2.5f, (float) Math.min(1.4, RANGE / 6.0), 16);
             }
             if (t == TELL + 2) {
                 playSound(CloudMobsSetup.CASTER_CAST.get(), 1.2f, 1.0f);
                 for (double d = 1; d <= RANGE; d += 1) {
                     Vec3 p = position().add(fwd.scale(d));
-                    sl.sendParticles(ParticleTypes.SPLASH, p.x, p.y + 0.6, p.z, 6, d * 0.25, 0.2, d * 0.25, 0.1);
+                    sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.x, p.y + 0.6, p.z, 3, d * 0.25, 0.2, d * 0.25, 0.1);
                 }
                 for (ServerPlayer p : sl.getEntitiesOfClass(ServerPlayer.class, getBoundingBox().inflate(RANGE + 0.5), e -> e.isAlive() && !e.isSpectator())) {
                     Vec3 to = p.position().subtract(position());
@@ -142,5 +147,10 @@ public class NetCaster extends CloudMob {
             t = -1;
             cooldown = 100;
         }
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

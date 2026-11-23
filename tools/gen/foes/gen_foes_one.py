@@ -6,7 +6,6 @@
 入力: docs/review/foes_one/<id>/a/<id>_a_{mesh.json,atlas.png,glowmask.png}  (形の作り方は tools/rough/lowpoly/foes/)
 出力 (src/main/resources/assets/ の下):
   skyabyss/lowpoly/<id>.json, skyabyss/textures/lowpoly/<id>(.png|_glowmask.png), skyabyss/geo/entity/<id>_lowpoly(.geo|_debug.geo).json
-  skyabyss/geo/entity/<id>.geo.json + skyabyss/textures/entity/<id>.png   LowPoly.enabled = false のときの代用
   skyabyss/animations/entity/<id>.animation.json   このファイルで作る。予告・技の姿勢はラフの POSES をそのまま使う (見せた絵と同じ構え)
   skyabyss/sounds.json の行 (バニラ / 既存の音の別名) と字幕 (skyabyss_mobsounds)、名前 (skyabyss_foes)、スポーンエッグのモデル
 
@@ -643,12 +642,8 @@ def install():
         d = os.path.join(R, mob, "a", mob + "_a_")
         subprocess.check_call([sys.executable, os.path.join(ROOT, "tools", "install/install_lowpoly.py"), mob, "--mesh", d + "mesh.json", "--atlas", d + "atlas.png",
                                "--glow", d + "glowmask.png"], cwd=ROOT)
-        shutil.copyfile(os.path.join(A, "geo", "entity", mob + "_lowpoly_debug.geo.json"), os.path.join(A, "geo", "entity", mob + ".geo.json"))
         os.makedirs(os.path.join(A, "textures", "entity"), exist_ok=True)
-        shutil.copyfile(os.path.join(A, "textures", "lowpoly", mob + ".png"), os.path.join(A, "textures", "entity", mob + ".png"))
         gm = os.path.join(A, "textures", "lowpoly", mob + "_glowmask.png")
-        if os.path.exists(gm):
-            shutil.copyfile(gm, os.path.join(A, "textures", "entity", mob + "_glowmask.png"))
 
 
 def main():

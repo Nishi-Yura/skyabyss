@@ -51,7 +51,6 @@ public abstract class RegionBoss extends ContinentFoe {
                 .floor(getY()).warn(warn).danger().owner(this).target(target)
                 .startSound(sound.get(), 1.4f, 1.0f)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 0.2, getZ(), 12, 0.6, 0.1, 0.6, 0.02))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage() * 1.2f);
                     player.knockback(1.4, -f.x, -f.z);
@@ -68,9 +67,6 @@ public abstract class RegionBoss extends ContinentFoe {
         if (dashing()) {
             Vec3 f = forward();
             setDeltaMovement(f.x * dashSpeed, getDeltaMovement().y, f.z * dashSpeed);
-            if (tick % 3 == 0) {
-                server().sendParticles(ParticleTypes.POOF, getX(), getY() + 0.2, getZ(), 3, 0.5, 0.05, 0.5, 0.02);
-            }
         }
     }
 

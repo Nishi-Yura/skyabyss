@@ -579,17 +579,18 @@ public final class FinaleSelfTest {
         jp.revati.skyabyss.story.finale.gear.DivineGear.swap(p, jp.revati.skyabyss.rpg.skill.Job.MAGE);
         check(f, p.getInventory().countItem(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.EYELID.get()) == 1, "the second relic did not follow the job change");
         p.getInventory().clearContent();
+        jp.revati.skyabyss.pouch.Pouch.clear(p);
         p.getPersistentData().remove("skyabyss_divine_given");
         jp.revati.skyabyss.story.finale.gear.DivineGear.reward(p);
         net.minecraft.world.item.Item cloudBox = jp.revati.skyabyss.loot.box.LootBoxSetup.item(cloud);
         check(f, jp.revati.skyabyss.story.finale.gear.DivineGear.given(p) && countRelics(p) == 0
                 && jp.revati.skyabyss.pouch.Pouch.countAll(p, cloudBox) == 1
-                && p.getInventory().countItem(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.CORE.get()) == 1, "the first defeat did not give one cloud box and the cloud core");
+                && jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.story.finale.gear.DivineGearSetup.CORE.get()) == 1, "the first defeat did not give one cloud box and the cloud core");
         // 箱から出た一本目の代わりに、職の一本目を持たせて続きを確かめる
         p.getInventory().add(new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SWORD.get()));
-        int shardsBefore = p.getInventory().countItem(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SHARD.get());
+        int shardsBefore = jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SHARD.get());
         jp.revati.skyabyss.story.finale.gear.DivineGear.reward(p);
-        check(f, countRelics(p) == 1 && p.getInventory().countItem(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SHARD.get()) > shardsBefore,
+        check(f, countRelics(p) == 1 && jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SHARD.get()) > shardsBefore,
                 "a later defeat gave another relic or no shards");
         // 職を替えると神器も替わる (強化はそのまま)
         int slot = -1;
@@ -607,9 +608,9 @@ public final class FinaleSelfTest {
                 "changing job did not turn the relic into the mage's, keeping its upgrade");
         // 心核を砕く
         net.minecraft.world.item.ItemStack core = new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.CORE.get(), 2);
-        int sh = p.getInventory().countItem(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SHARD.get());
+        int sh = jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SHARD.get());
         check(f, jp.revati.skyabyss.story.finale.gear.DivineGear.breakCore(p, core) && core.getCount() == 1
-                && p.getInventory().countItem(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SHARD.get()) == sh + jp.revati.skyabyss.story.finale.gear.DivineGear.SHARDS_PER_CORE,
+                && jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SHARD.get()) == sh + jp.revati.skyabyss.story.finale.gear.DivineGear.SHARDS_PER_CORE,
                 "breaking a heart core did not give shards");
         for (String c : jp.revati.skyabyss.story.finale.gear.DivineGear.CORES) {
             check(f, jp.revati.skyabyss.story.finale.gear.DivineGear.item(c) != net.minecraft.world.item.Items.AIR, "the heart core " + c + " is not registered");
@@ -621,6 +622,7 @@ public final class FinaleSelfTest {
             }
         }
         p.getInventory().clearContent();
+        jp.revati.skyabyss.pouch.Pouch.clear(p);
         p.getPersistentData().remove("skyabyss_divine_given");
     }
 
@@ -647,10 +649,11 @@ public final class FinaleSelfTest {
         }
         SeatArena.clear(cloud);
         check(f, SeatArena.tier() == 0 && SeatArena.form() == 0, "clearing the trial left its tier");
+        jp.revati.skyabyss.pouch.Pouch.clear(p);
         // 報酬と記録 (段 5 は記念の頁)
         PilgrimTrial.won(java.util.List.of(p), 5);
         check(f, PilgrimTrial.cleared(p) == 5 && PilgrimTrial.next(p) == 5
-                && p.getInventory().countItem(jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SHARD.get()) >= 8
+                && jp.revati.skyabyss.pouch.Pouch.countAll(p, jp.revati.skyabyss.story.finale.gear.DivineGearSetup.SHARD.get()) >= 8
                 && jp.revati.skyabyss.lore.Lore.state(p).has(PilgrimTrial.KEEPSAKE), "winning tier 5 did not record, reward, or write the keepsake");
         p.getInventory().clearContent();
         p.getPersistentData().remove(PilgrimTrial.KEY);

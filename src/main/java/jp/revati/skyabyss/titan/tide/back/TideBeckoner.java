@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.titan.tide.back;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.util.Players;
 
 import java.util.ArrayList;
@@ -227,8 +228,8 @@ public class TideBeckoner extends TideMob {
         moveTo(at.x, at.y, at.z, getYRot(), 0);
         playAction("emerge");
         playSound(TideBackSetup.BECKONER_EMERGE.get(), 3f, 1f);
-        level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, net.minecraft.world.level.block.Blocks.SAND.defaultBlockState()),
-                at.x, at.y + 0.5, at.z, 120, 2.0, 0.6, 2.0, 0.2);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
+                at.x, at.y + 0.5, at.z, 24, 2.0, 0.6, 2.0, 0.2);
         invulnerable = 16;
     }
 
@@ -372,7 +373,7 @@ public class TideBeckoner extends TideMob {
     // 床を走る輪 (跳べば当たらない。安全な筋は何もない)
     private void ripple(ServerLevel server, double cx, double cz, double floor, double r0, double r1, int warn, double[] gaps, float damage) {
         int active = (int) Math.ceil((r1 - r0) / 0.55);
-        tg(server, TelegraphShape.wave(cx, cz, r0, r1, 0.9, gaps, LANE_HALF), floor, warn, D).active(active).jumpClear(0.9)
+        tg(server, TelegraphShape.wave(cx, cz, r0, r1, 0.9, gaps, LANE_HALF), floor, warn, D).prop(PropFx.ring("water_spout", 1)).active(active).jumpClear(0.9)
                 .onHit((s, p) -> {
                     p.hurt(attackSource(), damage);
                     Vec3 away = p.position().subtract(cx, floor, cz).multiply(1, 0, 1);
@@ -465,7 +466,7 @@ public class TideBeckoner extends TideMob {
             case BREATH -> {
                 if (actionTick % 4 == 0 && actionTick < BREATH_WINDUP) {
                     Vec3 m = mouth();
-                    warn(server, ParticleTypes.BUBBLE_POP, m.x, m.y, m.z, 6, 0.3, 0.2, 0.3, 0.02);
+                    warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), m.x, m.y, m.z, 6, 0.3, 0.2, 0.3, 0.02);
                 }
                 if (actionTick >= BREATH_WINDUP + 4) {
                     breathCooldown = 70 + random.nextInt(40);
@@ -475,10 +476,10 @@ public class TideBeckoner extends TideMob {
             case BURROW -> tickBurrow(server);
             case ROAR -> {
                 if (actionTick % 5 == 0 && actionTick < ROAR_TICKS) {
-                    warn(server, new DustParticleOptions(new Vector3f(0.75f, 0.25f, 0.25f), 2f), getX(), getY() + 0.2, getZ(), 30, 3, 0.1, 3, 0);
+                    warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.2, getZ(), 24, 3, 0.1, 3, 0);
                 }
                 if (actionTick == ROAR_TICKS) {
-                    server.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + 0.5, getZ(), 4, 2, 0.2, 2, 0);
+                    server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY() + 0.5, getZ(), 4, 2, 0.2, 2, 0);
                     if (flats != null) {
                         flats.roarSpawn(server, this);
                     }
@@ -532,7 +533,7 @@ public class TideBeckoner extends TideMob {
     private void slamImpact(ServerLevel server, double dx, double dz, double length, double from, boolean water, boolean first) {
         for (double f = from + 1; f <= from + length; f += 0.8) {
             Vec3 p = position().add(dx * f, 0, dz * f);
-            server.sendParticles(water ? ParticleTypes.SPLASH : ParticleTypes.CLOUD, p.x, groundY(p) + 0.3, p.z, water ? 10 : 3, 0.6, 0.1, 0.6, 0.1);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.x, groundY(p) + 0.3, p.z, water ? 10 : 3, 0.6, 0.1, 0.6, 0.1);
         }
         if (first) {
             sound(server, TideBackSetup.BECKONER_SLAM.get(), 3f, 0.9f);
@@ -598,13 +599,10 @@ public class TideBeckoner extends TideMob {
                 double dz = Math.sin(angle);
                 boolean sounds = first;
                 first = false;
-                tg(server, TelegraphShape.line(m.x, m.z, angle, BREATH_LENGTH, BREATH_HALF_WIDTH), ground, BREATH_WINDUP, D).target(aim)
+                tg(server, TelegraphShape.line(m.x, m.z, angle, BREATH_LENGTH, BREATH_HALF_WIDTH), ground, BREATH_WINDUP, D).prop(PropFx.shots("pearl", 1)).target(aim)
                         .onImpact(s -> {
                             if (sounds) {
                                 s.playSound(null, m.x, m.y, m.z, jp.revati.skyabyss.titan.tide.mob.TideMobSetup.BUBBLE_POP.get(), SoundSource.HOSTILE, 1.2f, 1f);
-                            }
-                            for (double d = 2; d <= BREATH_LENGTH; d += 2.0) {
-                                s.sendParticles(ParticleTypes.BUBBLE_POP, m.x + dx * d, ground + 1.0, m.z + dz * d, 4, 0.4, 0.4, 0.4, 0.05);
                             }
                         })
                         .onHit((s, p) -> {
@@ -623,6 +621,7 @@ public class TideBeckoner extends TideMob {
         double ground = groundY(position());
         double cx = getX();
         double cz = getZ();
+        // 咆哮の円は押し返すだけなので、攻撃の形 (殻の棘の輪) は出さない。跳び越える輪 (ripple) は攻撃なので形が出る
         tg(server, TelegraphShape.circle(cx, cz, ROAR_RADIUS), ground, ROAR_TICKS, D)
                 .onHit((s, p) -> {
                     p.hurt(attackSource(), ROAR_DAMAGE);
@@ -664,7 +663,7 @@ public class TideBeckoner extends TideMob {
                 for (int i = 0; i < 10; i++) {
                     double a = (actionTick * 0.5 + i * Math.PI / 5);
                     double r = 0.6 + (i % 3) * 0.7;
-                    warn(server, new DustParticleOptions(new Vector3f(0.85f, 0.75f, 0.45f), 1.5f), burrowAt.x + Math.cos(a) * r,
+                    warn(server, fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), burrowAt.x + Math.cos(a) * r,
                             burrowAt.y + 0.1, burrowAt.z + Math.sin(a) * r, 1, 0, 0, 0, 0);
                 }
                 if (actionTick % 6 == 0) {
@@ -720,11 +719,9 @@ public class TideBeckoner extends TideMob {
             double fx = gx;
             double fz = gz;
             double fy = gy;
-            tg(server, TelegraphShape.circle(gx, gz, GEYSER_RADIUS), gy, warn, D)
+            tg(server, TelegraphShape.circle(gx, gz, GEYSER_RADIUS), gy, warn, D).prop(PropFx.rise("water_spout"))
                     .onImpact(s -> {
                         s.playSound(null, fx, fy, fz, net.minecraft.sounds.SoundEvents.SAND_BREAK, SoundSource.HOSTILE, 1.6f, 0.7f);
-                        s.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, net.minecraft.world.level.block.Blocks.SAND.defaultBlockState()),
-                                fx, fy + 0.5, fz, 40, 0.8, 0.6, 0.8, 0.2);
                     })
                     .onHit((s, p) -> {
                         p.hurt(attackSource(), GEYSER_DAMAGE);
@@ -866,5 +863,10 @@ public class TideBeckoner extends TideMob {
     // 戦いの範囲 (干潟) の外へ出たら、真ん中へ戻す (TideFlats が見る)
     public AABB arena() {
         return flats != null ? flats.arena() : TideBackLayout.FLATS.aabb().inflate(0, 4, 0);
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

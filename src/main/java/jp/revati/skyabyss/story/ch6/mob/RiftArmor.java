@@ -60,7 +60,7 @@ public class RiftArmor extends RiftMob {
             if (level() instanceof ServerLevel sl) {
                 playSound(MoonMobsSetup.ARMOR_GUARD.get(), 0.8f, 1.2f);
                 Vec3 f = position().add(Vec3.directionFromRotation(0, yBodyRot).scale(0.8));
-                sl.sendParticles(net.minecraft.core.particles.ParticleTypes.CRIT, f.x, f.y + 1.4, f.z, 6, 0.2, 0.3, 0.2, 0.1);
+                sl.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), f.x, f.y + 1.4, f.z, 6, 0.2, 0.3, 0.2, 0.1);
             }
         }
         return super.hurt(source, amount);
@@ -72,5 +72,10 @@ public class RiftArmor extends RiftMob {
         if (!echo()) {
             jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.MOON_DUST.get(), 0.5, 1, 2);
         }
+    }
+
+    // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);
     }
 }

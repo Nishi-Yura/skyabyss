@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.notice.Notice;
@@ -228,11 +227,6 @@ public final class TrainingYard {
         }
     }
 
-    // 自己テスト用
-    @Nullable
-    static List<BlockPos> cachedColumns(BlockPos master) {
-        return COLUMNS.get(master.asLong());
-    }
 
     static void forget(MinecraftServer server) {
         COLUMNS.clear();

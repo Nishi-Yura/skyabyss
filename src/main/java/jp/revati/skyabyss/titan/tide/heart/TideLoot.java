@@ -15,7 +15,6 @@ import java.util.function.Predicate;
 import org.jetbrains.annotations.Nullable;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
@@ -31,7 +30,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -77,7 +75,7 @@ public final class TideLoot {
     public static final String SHIELD = id("coral_shield");
     public static final String CHARM = id("tide_chime_charm");
     // 専用の逸品: 潮招きの大鋏、珊瑚憑きの銛、月潮の真珠
-    public static final List<String> EXCLUSIVES = List.of(id("tidecaller_claw"), id("coral_harpoon"), id("moontide_pearl"));
+    public static final List<String> EXCLUSIVES = jp.revati.skyabyss.titan.tide.gear.TideGear.SET.exclusives();
 
     public static final float ARMOR_CHANCE = 0.25f;
     public static final float TRIDENT_CHANCE = 0.20f;
@@ -222,13 +220,10 @@ public final class TideLoot {
             List<ItemStack> items = stacks(draws, level.random, unmade);
             // 属性の欠片・技の修飾ルーン (item/extra/GearFreedomLoot。装備の確率は変えない)
             items.addAll(jp.revati.skyabyss.item.extra.GearFreedomLoot.heartDrops(TITAN, level.random));
-            // 巨神のヒロイック武器 (図鑑の表の外。一本ずつまれに。item/HeroicGear)
-            items.addAll(jp.revati.skyabyss.item.HeroicGear.heartDrops(TITAN, level.random));
             int held = TitanLoot.handOver(server, uuid, player, items, 0);
             boolean first = !r.firstCleared;
             if (first) {
                 r.firstCleared = true;
-                r.choicePending = jp.revati.skyabyss.loot.reward.HeartReward.CHOICE_ON_FIRST_CLEAR;
             }
             if (!unmade.isEmpty()) {
                 SkyAbyss.LOGGER.info("Tide heart reward for {} skipped items that are not made yet: {}", uuid, unmade);
@@ -241,7 +236,7 @@ public final class TideLoot {
                 Notice.unlock(player, "message.skyabyss.fragment_received");
             }
             Notice.narrate(player, "message.skyabyss.tide_heart.reward");
-            Notice.gain(player, TitanLoot.rewardLine(items));
+            Notice.gainItems(player, items, TitanLoot.rewardLine(items));
             announce(level, player, r, roll, items);
             if (roll.guaranteed() != null) {
                 Notice.narrate(player, "message.skyabyss.memory_guarantee");
@@ -250,9 +245,6 @@ public final class TideLoot {
             }
             Notice.gain(player, TitanLoot.memoryLine(r));
             TitanLoot.tellHeld(player, held);
-            if (first) {
-                offerChoice(player, r);
-            }
         }
     }
 
@@ -309,20 +301,13 @@ public final class TideLoot {
         }
     }
 
-    // 初回の選択: 画面 (loot/reward/HeartReward) が眠りの場面のあとに開く。ここは案内の一行だけ
-    private static void offerChoice(ServerPlayer player, TitanMemoryData.Record r) {
-        jp.revati.skyabyss.loot.reward.HeartReward.announce(player, TITAN);
-    }
-
     // ---------------------------------------------------------------- コマンド
     // /titanmemory tide              : 潮殻の記憶と図鑑 (誰でも)
-    // /titanmemory tide choose <品>  : 初回の選択
     @SubscribeEvent
     static void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
         dispatcher.register(Commands.literal("titanmemory")
-                .then(Commands.literal("tide").executes(TideLoot::status)
-                        .then(Commands.literal("choose").then(Commands.argument("item", StringArgumentType.greedyString()).executes(TideLoot::choose)))));
+                .then(Commands.literal("tide").executes(TideLoot::status)));
     }
 
     private static TitanMemoryData.Record record(ServerPlayer player) {
@@ -349,20 +334,6 @@ public final class TideLoot {
             owned.append("  ");
         }
         player.sendSystemMessage(owned);
-        if (r.choicePending) {
-            offerChoice(player, r);
-        }
-        return 1;
-    }
-
-    private static int choose(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ServerPlayer player = ctx.getSource().getPlayerOrException();
-        String choice = StringArgumentType.getString(ctx, "item").trim();
-        // 決まりは画面と同じ一箇所 (HeartReward.claim)
-        if (jp.revati.skyabyss.loot.reward.HeartReward.claim(player, TITAN, choice) != jp.revati.skyabyss.loot.reward.HeartReward.Result.OK) {
-            Notice.warn(player, "message.skyabyss.first_clear_none");
-            return 0;
-        }
         return 1;
     }
 

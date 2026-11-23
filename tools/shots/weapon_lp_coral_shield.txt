@@ -135,7 +135,6 @@ wait 10
 chat clear
 shot coral_shield_tp_legend_p10
 weapontier off
-weaponmesh off
 cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield
 perspective first
 hud on
@@ -149,7 +148,6 @@ bodyyaw 35
 wait 10
 chat clear
 shot coral_shield_tp_voxel
-weaponmesh on
 weapontier rare
 cmd item replace entity @s weapon.mainhand with skyabyss:coral_shield
 perspective first

@@ -726,7 +726,7 @@ public final class MarkerArt {
             double fy = b.beamFrom();
             if (style == MarkerStyle.A) {
                 if (tick % 6 == 0) {
-                    mc.level.addParticle(ParticleTypes.END_ROD, b.cx() + (rnd.nextDouble() - 0.5) * 0.6, fy + 1.5, b.cz() + (rnd.nextDouble() - 0.5) * 0.6,
+                    mc.level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), b.cx() + (rnd.nextDouble() - 0.5) * 0.6, fy + 1.5, b.cz() + (rnd.nextDouble() - 0.5) * 0.6,
                             (rnd.nextDouble() - 0.5) * 0.01, -0.01, (rnd.nextDouble() - 0.5) * 0.01);
                 }
             } else if (style == MarkerStyle.B) {
@@ -743,7 +743,7 @@ public final class MarkerArt {
             } else if (style == MarkerStyle.C) {
                 if (tick % 6 == 0) {
                     double[] r = {1, 0};
-                    mc.level.addParticle(ParticleTypes.END_ROD, b.cx() + (rnd.nextDouble() - 0.5) * 1.6 * r[0], fy + 0.3 + rnd.nextDouble() * 2.4, b.cz() + (rnd.nextDouble() - 0.5) * 0.6,
+                    mc.level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), b.cx() + (rnd.nextDouble() - 0.5) * 1.6 * r[0], fy + 0.3 + rnd.nextDouble() * 2.4, b.cz() + (rnd.nextDouble() - 0.5) * 0.6,
                             0, 0.01, 0);
                 }
             }
@@ -757,7 +757,7 @@ public final class MarkerArt {
             double sz = Math.sin(yaw);
             double dd = rnd.nextDouble() * (DOORWAY_PATH + DOORWAY_OUT) - DOORWAY_OUT;
             double off = (rnd.nextDouble() - 0.5) * 3.0;
-            mc.level.addParticle(ParticleTypes.END_ROD, b.cx() - sx * dd - Math.sin(yaw) * off, floor + 0.3, b.cz() - sz * dd + Math.cos(yaw) * off,
+            mc.level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), b.cx() - sx * dd - Math.sin(yaw) * off, floor + 0.3, b.cz() - sz * dd + Math.cos(yaw) * off,
                     -sx * 0.05, 0.0, -sz * 0.05);
             return;
         }
@@ -770,7 +770,7 @@ public final class MarkerArt {
                 double rr = Math.sqrt(rnd.nextDouble()) * Math.max(0.5, b.beamRadius()) * 1.2;
                 mc.level.addParticle(dust, b.cx() + Math.cos(a) * rr, floor + 0.2 + rnd.nextDouble() * 3, b.cz() + Math.sin(a) * rr, 0, 0.05 + rnd.nextDouble() * 0.04, 0);
                 if (tick % 9 == 0) {
-                    mc.level.addParticle(ParticleTypes.END_ROD, b.cx() + Math.cos(a) * rr, floor + 0.5, b.cz() + Math.sin(a) * rr, 0, 0.06, 0);
+                    mc.level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), b.cx() + Math.cos(a) * rr, floor + 0.5, b.cz() + Math.sin(a) * rr, 0, 0.06, 0);
                 }
             }
             case B -> {
@@ -781,7 +781,7 @@ public final class MarkerArt {
             default -> {
                 // 提灯からの小さな火の粉
                 double a = rnd.nextDouble() * Math.PI * 2;
-                mc.level.addParticle(ParticleTypes.END_ROD, b.cx() + Math.cos(a) * R, b.cy() + rnd.nextDouble() * 2, b.cz() + Math.sin(a) * R, 0, 0.01, 0);
+                mc.level.addParticle(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), b.cx() + Math.cos(a) * R, b.cy() + rnd.nextDouble() * 2, b.cz() + Math.sin(a) * R, 0, 0.01, 0);
             }
         }
     }

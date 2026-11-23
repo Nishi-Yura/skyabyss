@@ -45,13 +45,10 @@ public final class DomainClient {
     private record Theme(float[] fog, int accent, int floor) {
     }
 
-    // 合わせ貝の印の色 (ShellMatchDomain.RGB と同じ)
-    private static final int[] MATCH_RGB = {0x4DC3FF, 0xA070E0, 0xF2D23C, 0xF0F4F8};
-
     private static Theme theme(String id) {
         return switch (id) {
             case "stone_sea" -> new Theme(new float[] {0.30f, 0.36f, 0.33f}, 0xB7C9B0, 0xA8B8A0);
-            case "shell_match" -> new Theme(new float[] {0.10f, 0.20f, 0.32f}, 0x9ADCF0, 0x4DC3FF);
+            case "ebb_flow" -> new Theme(new float[] {0.08f, 0.22f, 0.30f}, 0x9ADCF0, 0x4DC3FF);
             case "thunder_cage" -> new Theme(new float[] {0.14f, 0.12f, 0.30f}, 0xC8B8FF, 0xB8A4FF);
             default -> new Theme(new float[] {0.34f, 0.07f, 0.04f}, 0xFF8A4A, 0x8A2A18);
         };
@@ -107,6 +104,8 @@ public final class DomainClient {
                 r.remaining = 0;
                 r.theme = theme(p.id());
                 run = r;
+                // 宣言のあいだ、部屋の上に裂け目が開き、終わりに広がって溶ける (client/fx/RiftFx)
+                jp.revati.skyabyss.client.fx.RiftFx.domain(p.id(), p.cx(), p.cz(), p.floor(), p.radius(), p.a());
             }
             case DomainPayload.PROGRESS -> {
                 if (run != null && run.ended == 0) {
@@ -146,6 +145,11 @@ public final class DomainClient {
 
     public static boolean active() {
         return run != null;
+    }
+
+    // 領域の空 (client/fx/DomainSkyFx) が見る: -1 = 領域なし、0 = 続いている、1 = 時間切れ、2 = 砕かれた
+    public static int state() {
+        return run == null ? -1 : run.ended;
     }
 
     @SubscribeEvent
@@ -474,15 +478,15 @@ public final class DomainClient {
                 }
                 f.disc(r.cx, r.cz, R, 0.04f);
             }
-            case "shell_match" -> {
-                // 合わせ貝: いまの印の色のうすい円と、ゆっくり広がる輪 (印の色は手がかりの鍵 find.N の N)
-                int m = r.standKey.contains(".find.") ? r.standKey.charAt(r.standKey.length() - 1) - (int) 0x30 : -1;
-                int mc = m >= 0 ? MATCH_RGB[m] : r.theme.floor;
-                Floor mf = new Floor(buffer, pose, cam, r.floor + 0.045, mc, in);
-                mf.disc(r.cx, r.cz, R, 0.05f + 0.02f * (float) Math.sin(sec * 1.4));
+            case "ebb_flow" -> {
+                // 満ち引き: 満ち潮 (手がかりの鍵 .wait) は青い円と中へ寄せる輪、引き潮 (.pull) は砂色の外へ引く輪
+                boolean flood = r.standKey.endsWith(".wait");
+                Floor tf = new Floor(buffer, pose, cam, r.floor + 0.045, flood ? 0x4DC3FF : 0xE8D8A8, in);
+                tf.disc(r.cx, r.cz, R, flood ? 0.06f + 0.02f * (float) Math.sin(sec * 1.2) : 0.03f);
                 for (int k = 0; k < 3; k++) {
-                    double rr = (sec * 1.6 + k * R / 3) % R;
-                    mf.ring(r.cx, r.cz, rr - 0.3, rr + 0.3, (float) (0.16 * (1 - rr / R) + 0.03));
+                    double ph = (sec * 1.4 + k * R / 3) % R;
+                    double rr = flood ? R - ph : ph;
+                    tf.ring(r.cx, r.cz, rr - 0.35, rr + 0.35, (float) (0.18 * (flood ? rr / R : 1 - rr / R) + 0.03));
                 }
             }
             case "thunder_cage" -> {

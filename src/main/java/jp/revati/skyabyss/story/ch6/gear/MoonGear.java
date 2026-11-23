@@ -51,9 +51,8 @@ public final class MoonGear {
     public static final String STARFALL_BOW = id("moon_starfall_bow");
     public static final String UMBRA_DAGGER = id("moon_umbra_dagger");
     public static final String HALO_BELL = id("moon_halo_bell_staff");
-    // 月の核の別枠のヒロイック武器 (図鑑に入れない。巨神のヒロイック武器 item/HeroicGear と同じ扱い)
+    // 残りの職のヒロイック武器 (図鑑の専用の逸品。どの職も同じ入り方。2026-11-21)
     public static final List<String> HEROICS = List.of(FULL_HAMMER, NEW_STAFF, STARFALL_BOW, UMBRA_DAGGER, HALO_BELL);
-    public static final float HEROIC_CHANCE = 0.02f;
     public static final String RING = id("moon_full_ring");
     public static final String TEAR = id("moon_tear");
     public static final String SHARD = id("moon_fragment");
@@ -69,7 +68,7 @@ public final class MoonGear {
     public static final float TEAR_CHANCE = 0.30f;
     public static final float CORE_CHANCE = 0.25f;
 
-    // 図鑑 (12 品)
+    // 図鑑 (17 品)
     public static final TitanGearSet SET = new TitanGearSet(DUNGEON, SHARD, CORE, List.of(
             TitanGearSet.piece(HELMET, ARMOR_CHANCE),
             TitanGearSet.piece(CHESTPLATE, ARMOR_CHANCE),
@@ -82,7 +81,13 @@ public final class MoonGear {
             TitanGearSet.piece(DAGGER, BASE_CHANCE),
             TitanGearSet.piece(BELL, BASE_CHANCE),
             TitanGearSet.exclusive(BLADE, EXCLUSIVE_CHANCE),
-            TitanGearSet.exclusive(RING, EXCLUSIVE_CHANCE)));
+            TitanGearSet.exclusive(RING, EXCLUSIVE_CHANCE),
+            // 残りの職のヒロイック武器 (HEROICS。どの職も同じ入り方: 図鑑・天井・交換・初回の選択。後ろへ足す = 交換の番号を変えない)
+            TitanGearSet.exclusive(FULL_HAMMER, EXCLUSIVE_CHANCE),
+            TitanGearSet.exclusive(NEW_STAFF, EXCLUSIVE_CHANCE),
+            TitanGearSet.exclusive(STARFALL_BOW, EXCLUSIVE_CHANCE),
+            TitanGearSet.exclusive(UMBRA_DAGGER, EXCLUSIVE_CHANCE),
+            TitanGearSet.exclusive(HALO_BELL, EXCLUSIVE_CHANCE)));
 
     // 区画の主: 初めて倒した人に、その主の鎧の一部位を必ず (影抱き = 兜・月秤 = 胴・灯守 = すね当て・剣守 = 靴)
     public static String lordPiece(String lord) {

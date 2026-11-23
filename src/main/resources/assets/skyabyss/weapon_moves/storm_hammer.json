@@ -1,6 +1,6 @@
 {
   "item": "storm_hammer",
-  "label": "雷の鎚: 振りかぶって打ち下ろす",
+  "label": "雷石の鎚: 振りかぶって打ち下ろす",
   "family": "HAMMER",
   "strike": 0.55,
   "reach": 0.5,

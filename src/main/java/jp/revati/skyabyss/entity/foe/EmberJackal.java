@@ -45,7 +45,7 @@ public class EmberJackal extends PackBeast {
 
     @Override
     protected void howlPeak(LivingEntity target) {
-        server().sendParticles(ParticleTypes.LAVA, getX(), getY() + 1.0, getZ(), 6, 0.3, 0.2, 0.3, 0.0);
+        server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), getX(), getY() + 1.0, getZ(), 6, 0.3, 0.2, 0.3, 0.0);
         List<EmberJackal> mates = new ArrayList<>(level().getEntitiesOfClass(EmberJackal.class, getBoundingBox().inflate(PACK_RADIUS),
                 e -> e != this && e.isAlive() && e.act == 0 && e.flankWait == 0));
         // 背中側: 人の向きの反対。左右へ交互に散らす (0, +50, -50, +100 ...)
@@ -69,7 +69,7 @@ public class EmberJackal extends PackBeast {
         setTarget(target);
         flankTarget = target;
         flankWait = FLANK_WAIT + 10;
-        server().sendParticles(ParticleTypes.FLAME, getX(), getY() + 0.6, getZ(), 8, 0.3, 0.2, 0.3, 0.02);
+        server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.6, getZ(), 8, 0.3, 0.2, 0.3, 0.02);
     }
 
     public boolean flanking() {
@@ -80,7 +80,7 @@ public class EmberJackal extends PackBeast {
     protected void customServerAiStep() {
         if (flankWait > 0) {
             if (tickCount % 2 == 0) {
-                server().sendParticles(ParticleTypes.SMALL_FLAME, getX(), getY() + 0.5, getZ(), 1, 0.15, 0.1, 0.15, 0.0);
+                server().sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 0.5, getZ(), 1, 0.15, 0.1, 0.15, 0.0);
             }
             getNavigation().stop();
             if (--flankWait == 0) {
@@ -97,5 +97,10 @@ public class EmberJackal extends PackBeast {
 
     @Override
     protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+    }
+
+    // 攻撃の粒は mod の ember の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, kind);
     }
 }

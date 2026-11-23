@@ -130,7 +130,7 @@ public class CoralThrall extends TideMob {
         setTarget(null);
         getNavigation().stop();
         if (level() instanceof ServerLevel server) {
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BRAIN_CORAL_BLOCK.defaultBlockState()),
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                     getX(), getY() + 1.2, getZ(), 24, 0.35, 0.8, 0.35, 0.05);
             server.playSound(null, getX(), getY(), getZ(), TideMobSetup.THRALL_PETRIFY.get(), SoundSource.HOSTILE, 1f, 1f);
         }
@@ -152,8 +152,8 @@ public class CoralThrall extends TideMob {
         }
         playAction("wake");
         if (level() instanceof ServerLevel server) {
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BRAIN_CORAL_BLOCK.defaultBlockState()),
-                    getX(), getY() + 1.2, getZ(), 30, 0.4, 0.9, 0.4, 0.08);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
+                    getX(), getY() + 1.2, getZ(), 24, 0.4, 0.9, 0.4, 0.08);
             server.playSound(null, getX(), getY(), getZ(), TideMobSetup.THRALL_WAKE.get(), SoundSource.HOSTILE, 1.2f, 1f);
         }
     }
@@ -308,5 +308,10 @@ public class CoralThrall extends TideMob {
     @Override
     protected void playStepSound(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
         modStep(MobSounds.CORAL_THRALL_STEP.get(), 0.3f);
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

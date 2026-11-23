@@ -1,4 +1,4 @@
-# 鐘銭まわり (2026-11-01): 封切り師の買い取り、鐘銭だけの取引所 (市・出す・申し出)、旅嚢の鐘銭 (枠の上に数を出さない)
+# 鐘銭まわり (2026-11-01): 封切り師の買い取り、鐘銭だけの取引所 (市・出す・申し出)、旅袋の鐘銭 (枠の上に数を出さない)
 # bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/money.txt -PshotsName=money
 world shots flat
 size 960 540

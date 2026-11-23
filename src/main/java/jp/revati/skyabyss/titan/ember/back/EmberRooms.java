@@ -77,12 +77,6 @@ public final class EmberRooms {
         return null;
     }
 
-    // その位置を含む部屋の持ち主 (部屋の外・持ち主なしなら null)
-    @Nullable
-    public static UUID ownerAt(Vec3 pos) {
-        Room r = at(pos);
-        return r == null ? null : owner(r);
-    }
 
     // 10 tick ごと (EmberBackTrials から)。持ち主を決め直し、ほかのグループの人を外へ出す
     static void tick(ServerLevel level) {

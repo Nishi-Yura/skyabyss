@@ -9,7 +9,6 @@ import jp.revati.skyabyss.story.ch5.AbyssEntrance;
 import jp.revati.skyabyss.town.TownGuests;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.phys.AABB;
 
 // 深淵の四つの層の決まり (docs/design/36 の 8 章。設計図は データを直接直す（生成スクリプトはない）)。
 //   層 = 章の区切り: 五章の一「骨の層」… 五章の四「灰の層」、五章の終わり「心臓」(section 0〜4)
@@ -69,13 +68,6 @@ public final class Layers {
         return dx * dx + dz * dz <= (ARENA_R + 1) * (ARENA_R + 1) && p.getY() >= c.getY() - 1 && p.getY() <= c.getY() + 11;
     }
 
-    public static AABB arenaBox(String layer) {
-        BlockPos c = AbyssBuild.mark("arena_" + layer);
-        if (c == null) {
-            return new AABB(0, 0, 0, 0, 0, 0);
-        }
-        return new AABB(c).inflate(ARENA_R + 1, 0, ARENA_R + 1).expandTowards(0, 11, 0);
-    }
 
     // 野営の部屋の中 (中心から 8 以内、床から 8)
     public static boolean inCamp(String layer, BlockPos p) {

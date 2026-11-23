@@ -49,9 +49,10 @@ public final class WardenRenderer extends LowPolyGeoRenderer<HeartWarden> {
         super.preRender(poseStack, w, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
     }
 
+    // 心臓が光っている間だけ、光る点を最大の明るさに (点の模型 client/splat)
     @Override
-    protected boolean autoGlow() {
-        return glowOn;
+    protected float splatGlow(HeartWarden animatable, float partialTick) {
+        return glowOn ? 1f : 0f;
     }
 
     @Override
@@ -65,6 +66,6 @@ public final class WardenRenderer extends LowPolyGeoRenderer<HeartWarden> {
         if (!w.lit()) {
             return Color.ofRGB(26, 26, 32);
         }
-        return Color.ofRGB(255, 255, 255);
+        return jp.revati.skyabyss.client.lowpoly.LowPolyGeoRenderer.heated(w, partialTick, Color.ofRGB(255, 255, 255));
     }
 }

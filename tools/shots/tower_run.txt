@@ -1,0 +1,321 @@
+# あいだの塔を一人で実際に戦う (技を止めない)。体力を段ごとに下げて後半の技まで出させ、最後に倒して越えた場面を撮る (2026-11-12)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/tower_run.txt -PshotsName=tower_run
+# 生存の姿で戦うので camera の行は効かない (撮るのは人の目)。落ちる月を叩かないので、体力 12% の段で月が橋を渡りきって全滅する (越えた場面は tower_master_cues.txt で撮る)
+world shots flat
+size 1280 720
+timeout 3600
+render 14
+cmd gamemode creative
+camera 0 -55 0 180 0
+waitchunks
+hud off
+wait 200
+cmd skyabyss cinematic stop
+close
+wait 20
+cmd skyabyss tower start
+wait 60
+cmd gamemode survival
+cmd effect give @s minecraft:resistance infinite 4 true
+cmd effect give @s minecraft:regeneration infinite 4 true
+cmd effect give @s minecraft:saturation infinite 4 true
+camera skyabyss:tower 0 140 44 180 12
+waitchunks 300
+wait 60
+shot a00_wake
+wait 120
+shot a01_wake
+wait 120
+shot a02_wake
+wait 140
+cmd skyabyss cinematic stop
+cmd tp @s 0 ~ 4
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot b00_hp100
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot b01_hp100
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot b02_hp100
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot b03_hp100
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot b04_hp100
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot b05_hp100
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot b06_hp100
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot b07_hp100
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot b08_hp100
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot b09_hp100
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot b10_hp100
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot b11_hp100
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot b12_hp100
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot b13_hp100
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot b14_hp100
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot b15_hp100
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot b16_hp100
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot b17_hp100
+cmd skyabyss tower hp 70
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot c00_hp70
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot c01_hp70
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot c02_hp70
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot c03_hp70
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot c04_hp70
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot c05_hp70
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot c06_hp70
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot c07_hp70
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot c08_hp70
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot c09_hp70
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot c10_hp70
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot c11_hp70
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot c12_hp70
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot c13_hp70
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot c14_hp70
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot c15_hp70
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot c16_hp70
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot c17_hp70
+cmd skyabyss tower hp 50
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot d00_hp50
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot d01_hp50
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot d02_hp50
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot d03_hp50
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot d04_hp50
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot d05_hp50
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot d06_hp50
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot d07_hp50
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot d08_hp50
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot d09_hp50
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot d10_hp50
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot d11_hp50
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot d12_hp50
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot d13_hp50
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot d14_hp50
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot d15_hp50
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot d16_hp50
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot d17_hp50
+cmd skyabyss tower hp 30
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot e00_hp30
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot e01_hp30
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot e02_hp30
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot e03_hp30
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot e04_hp30
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot e05_hp30
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot e06_hp30
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot e07_hp30
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot e08_hp30
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot e09_hp30
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot e10_hp30
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot e11_hp30
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot e12_hp30
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot e13_hp30
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot e14_hp30
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot e15_hp30
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot e16_hp30
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot e17_hp30
+cmd skyabyss tower hp 12
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot f00_hp12
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot f01_hp12
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot f02_hp12
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot f03_hp12
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot f04_hp12
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot f05_hp12
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot f06_hp12
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot f07_hp12
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot f08_hp12
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot f09_hp12
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot f10_hp12
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot f11_hp12
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot f12_hp12
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot f13_hp12
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot f14_hp12
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot f15_hp12
+camera skyabyss:tower 0 140 44 180 12
+wait 36
+shot f16_hp12
+camera skyabyss:tower 46 150 6 125 14
+wait 36
+shot f17_hp12
+cmd skyabyss cinematic stop
+camera skyabyss:tower 0 140 44 180 12
+cmd skyabyss tower act win
+wait 30
+shot g01_scene_1s
+wait 50
+shot g02_scene_4s
+wait 50
+shot g03_scene_6s
+wait 40
+shot g04_scene_8s
+wait 40
+shot g05_scene_10s
+wait 50
+shot g06_scene_13s

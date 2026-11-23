@@ -258,8 +258,8 @@ public final class Ch2Gear {
         }
         event.setAmount(event.getAmount() + bonus);
         if (player.level() instanceof ServerLevel level) {
-            level.sendParticles(ParticleTypes.WHITE_ASH, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 14, 0.3, 0.3, 0.3, 0.02);
-            level.sendParticles(ParticleTypes.BUBBLE_POP, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 6, 0.25, 0.25, 0.25, 0.05);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 14, 0.3, 0.3, 0.3, 0.02);
+            level.sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(), 6, 0.25, 0.25, 0.25, 0.05);
             level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.AMETHYST_BLOCK_HIT, SoundSource.PLAYERS, 0.5f, 1.6f);
         }
     }

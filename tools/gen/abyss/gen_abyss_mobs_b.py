@@ -8,7 +8,6 @@
 出力 (assets/skyabyss/ の下):
   lowpoly/<id>.json, textures/lowpoly/<id>(.png|_glowmask.png), geo/entity/<id>_lowpoly(_debug).geo.json   (tools/install/install_lowpoly.py)
   textures/lowpoly/<id>_s1(.png|_glowmask.png), <id>_s2(...)        歪み・崩れの絵 (同じ骨・同じ UV)
-  geo/entity/<id>.geo.json + textures/entity/<id>.png              LowPoly.enabled = false のときの箱の代用
   animations/entity/<id>.animation.json
   textures/item/<品>.png・models/item/<品>.json・models/item/<id>_spawn_egg.json
   assets/skyabyss_abyss_b/sounds.json                              音の出来事 (既存の音の別名。字幕は lang)
@@ -428,14 +427,9 @@ def install(only=()):
             if os.path.exists(gd):
                 os.remove(gd)
             shutil.copyfile(g, gd)
-        # 箱の代用 (LowPoly.enabled = false)。発光マスクも同じく入れる
         ent = os.path.join(A, "textures", "entity")
         os.makedirs(ent, exist_ok=True)
-        shutil.copyfile(os.path.join(A, "geo", "entity", mob + "_lowpoly_debug.geo.json"), os.path.join(A, "geo", "entity", mob + ".geo.json"))
-        shutil.copyfile(os.path.join(tex, mob + ".png"), os.path.join(ent, mob + ".png"))
         gm = os.path.join(tex, mob + "_glowmask.png")
-        if os.path.exists(gm):
-            shutil.copyfile(gm, os.path.join(ent, mob + "_glowmask.png"))
         wjson(os.path.join(A, "models", "item", mob + "_spawn_egg.json"), {"parent": "minecraft:item/template_spawn_egg"})
         wjson(os.path.join(A, "animations", "entity", mob + ".animation.json"), {"format_version": "1.8.0", "animations": ANIMS[mob]()})
 

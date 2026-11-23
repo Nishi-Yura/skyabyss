@@ -23,16 +23,16 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 // 野営地のそばに来ると選ぶ画面が開き、選ぶとその職の始めの武器を受け取って、職の木の幹の技を一つ取る (Lv 1 の 1 点)。
 // 職の間 (訓練場の師範の「職を替える」) は同じ画面を替えるために開く。職は持ち替えでは替わらない。木の取り方は職ごとに残る。
 // 選んだ職は人の永続データの KEY (倒れても残る。util/LifeKeep)。
-// 始めの武器はどれも祠の品 (祠の剣・祠の鎚・宿り木の杖・祠の弓・宿り木の短剣・祠の鈴杖)
+// 始めの武器はどれも祠の品 (祠の剣・祠の鎚・祠の杖・祠の弓・祠の短剣・祠の鈴杖)
 public final class JobChoice {
     public static final String KEY = "skyabyss_first_job";
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SkyAbyss.MODID);
 
-    // 杖: 攻撃力 5、速さ 1.2 / 鈴杖: 攻撃力 4、速さ 1.4 / 短剣: 攻撃力 4、速さ 2.0 (攻撃力 = 1 + 2 + 品ごとの値)
+    // 杖: 攻撃力 5、速さ 1.2 / 鈴杖: 攻撃力 5、速さ 1.4 (2026-11-11 に 4 から。呪印は遅れて噴くぶん、魔弾より一撃を重く) / 短剣: 攻撃力 4、速さ 2.0 (攻撃力 = 1 + 2 + 品ごとの値)
     public static final DeferredItem<Item> STAFF = ITEMS.register("shrine_staff",
             () -> new StarterWeaponItem(new Item.Properties(), 2, 1.2f, "item.skyabyss.shrine_staff.desc"));
     public static final DeferredItem<Item> BELL_STAFF = ITEMS.register("shrine_bell_staff",
-            () -> new StarterWeaponItem(new Item.Properties(), 1, 1.4f, "item.skyabyss.shrine_bell_staff.desc"));
+            () -> new StarterWeaponItem(new Item.Properties(), 2, 1.4f, "item.skyabyss.shrine_bell_staff.desc"));
     public static final DeferredItem<Item> DAGGER = ITEMS.register("shrine_dagger",
             () -> new StarterWeaponItem(new Item.Properties(), 1, 2.0f, "item.skyabyss.shrine_dagger.desc"));
     // 剣: 攻撃力 5、速さ 1.6 / 鎚: 攻撃力 8、速さ 1.0 (どちらも 1 秒あたり 8。一章のエピックの武器を上回らない) / 弓: 矢の傷はふつうの弓と同じ

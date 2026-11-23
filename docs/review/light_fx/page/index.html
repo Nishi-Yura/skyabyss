@@ -1,0 +1,131 @@
+<title>天と淵 光の表現ラフ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+<style>
+/* 選定の帳面: 部分ごとに見比べの絵と A/B/C。選んだ案は水色、推奨に印。ゲームの夜に合わせた暗い地 */
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#0a8fa6; --accent-ink:#ffffff; --ok:#2f8a4b; --rec:#b07a10;
+  --display:"DotGothic16","Zen Kaku Gothic New",system-ui,sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; --rec:#e8c06a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; --rec:#e8c06a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7;margin:0}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 80px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(22px,3.4vw,32px);margin:0 0 6px;letter-spacing:.04em}
+h2{font-family:var(--display);font-weight:400;font-size:21px;margin:0}
+.intro{color:var(--muted);max-width:74ch;margin:0 0 6px}
+.save{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+section{display:grid;gap:10px;padding:18px 0;border-top:1px solid var(--line)}
+.desc{margin:0;max-width:80ch}
+.sheet{overflow-x:auto;border:1px solid var(--line);background:#0e0e14}
+.sheet img{display:block;width:100%;height:auto;min-width:620px}
+.opts{display:flex;flex-wrap:wrap;gap:6px;border:0;margin:0;padding:0}
+.opt{position:relative;display:flex;gap:6px;align-items:flex-start;padding:6px 10px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-size:13px;max-width:100%}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt .tag{font-weight:700;flex:none}
+.opt .rec{color:var(--rec);font-size:11px;flex:none;padding-top:1px}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.opt:has(input:checked) .rec{color:var(--accent-ink)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.note{width:100%;font:inherit;font-size:13px;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:6px 8px;resize:vertical}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+button.b{font:inherit;font-size:13px;padding:5px 12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+button.b:hover,button.b:focus-visible{border-color:var(--accent);outline:none}
+.caveat{font-size:13px;color:var(--muted);margin:0}
+</style>
+
+<div class="wrap">
+  <h1>光の表現 3 案ずつ</h1>
+  <p class="intro">選んでもらった 6 つの表現を、ゲームの中で 3 案ずつ作って撮りました。色はどれも巨神ごとの色で、動画の紫には寄せていません。部分ごとに 1 案を選ぶと自動で保存されます。選んだ案は清書してから入れます。</p>
+  <p class="save" id="save">読み込み中…</p>
+  <div class="tools"><button class="b" id="fillrec" type="button">未回答をすべて「推奨」にする</button></div>
+  <main id="main"></main>
+</div>
+
+<script>
+(() => {
+  const PARTS = [
+    {id:'rift', title:'1・2 裂け目', imgs:[['rift_world.jpg','場に開く裂け目。上から 開き始め / 岩鯨 / 潮殻 / 雷翼 / 余燼 / 深淵 / 月 / 広がって溶ける'],['rift_pass.jpg','渡る裂け目 (岩鯨)。12 tick 線が走る → 19 太る → 24 迫る → 32 覆った中 (ここで運ばれる) → 47 閉じていく'],['rift_pass_themes.jpg','渡る裂け目の巨神ごとの色 (案 A)'],['domain.jpg','本物の領域の始まり (案 A)。心臓の上に開き、宣言の終わりに広がって溶ける']],
+     desc:'領域の始まり、順路の部屋から次の部屋へ運ばれるとき、深淵の門、月の門で使います。中には、その場所の内側の空 (岩鯨 = 光る鉱脈、潮殻 = 水面越しの光、雷翼 = 雷雲、余燼 = 昇る熾、深淵 = 底のない闇、月 = 銀の星) がのぞきます。',
+     opts:[['A','光の縁。なめらかな水滴形と柔らかい光'],['B','割れ目。ぎざぎざの縁、先から走るひび、飛ぶ光の欠片'],['C','渦。縁の外を三本の光の帯が回る']], rec:1},
+    {id:'beam', title:'4 光線と溜め', imgs:[['hearts.jpg','心臓の技。行ごとに 岩鯨の核 / 突きの溜め / 突きの光線 / 突きの当たり / 薙ぎの溜め / 薙ぎの最中 / 余燼の核 / 息の溜め / 息の光線']],
+     desc:'溜めの間は光の筋が心臓へ吸い込まれ、放つと芯の白い光の帯が走ります (光の帯は 6 tick 満ち、8 tick で薄れる)。いちばん下の行 (余燼の息) が光線の違いのよく見える絵です。岩鯨の突きはこちらへ向かって撃つので、この角度では光線が見えません。',
+     opts:[['A','まっすぐな光の帯。溜めはまっすぐな筋'],['B','帯に巻きつく二本の細い光。溜めの筋は渦を描く'],['C','帯を走る光の塊。溜めに縮んでいく光の輪']], rec:0},
+    {id:'ring', title:'5 当たりの光の輪', imgs:[['ring.jpg','当たってすぐ / 広がる (その場に置いた輪)']],
+     desc:'心臓・領域の技と、心臓のあとの主の技が当たった瞬間に、床を走って広がる輪です。当たった所の床も一瞬明るみます。',
+     opts:[['A','一本の光の輪'],['B','二重の輪 (少し遅れて二本目)'],['C','輪と、上に立ち上がる薄い光の幕']], rec:1},
+    {id:'glow', title:'6 核の光', imgs:[['hearts.jpg','1 行目と 7 行目が核の光 (岩鯨・余燼)。崩しゲージが割れている間は大きく白く燃え立ちます (この絵には映っていません)']],
+     desc:'動く核の骨を追って、核のまわりがにじんで光ります。鼓動に合わせて脈打ちます。',
+     opts:[['A','柔らかいにじみだけ'],['B','にじみと、ゆっくり回る十字の光の筋'],['C','にじみと、まわりを回る光の粒']], rec:1},
+    {id:'orbit', title:'8 軌道の線 (月の主・塔の主)', imgs:[['orbit.jpg','月の主 (欠け刃) を 12 tick ごとに撮ったもの']],
+     desc:'技の予告の間、体のまわりを光の軌道が回り、放つ瞬間に外へ散ります。',
+     caveat:'案 A・B (体のまわりの傾いた輪) は、月の主の体がとても大きく、この絵ではほとんど体に隠れて見えません。選ぶなら輪の大きさを体の見た目に合わせて直します。案 C (足もとの輪) ははっきり見えます。',
+     opts:[['A','体のまわりを回る傾いた細い輪'],['B','A の輪に、輪を走る星の玉'],['C','足もとに重なって回る三本の輪']], rec:2},
+  ];
+  const main = document.getElementById('main');
+  const saveEl = document.getElementById('save');
+  const answers = {};
+  const timers = {};
+  let db = null;
+  function el(t, c, s){const e=document.createElement(t); if(c) e.className=c; if(s!=null) e.textContent=s; return e;}
+  PARTS.forEach(p => {
+    const sec = el('section'); sec.id = p.id;
+    sec.appendChild(el('h2', null, p.title));
+    sec.appendChild(el('p', 'desc', p.desc));
+    if (p.caveat) sec.appendChild(el('p', 'caveat', p.caveat));
+    p.imgs.forEach(([src, cap]) => {
+      sec.appendChild(el('p', 'caveat', cap));
+      const box = el('div', 'sheet'); const img = el('img'); img.src = src; img.alt = cap; img.loading = 'lazy'; box.appendChild(img); sec.appendChild(box);
+    });
+    const fs = el('fieldset', 'opts');
+    p.opts.forEach(([k, txt], i) => {
+      const lab = el('label', 'opt'); const inp = el('input'); inp.type='radio'; inp.name=p.id; inp.value=k; inp.id=p.id+'-'+k; lab.htmlFor=inp.id;
+      lab.appendChild(inp); lab.appendChild(el('span','tag','案 '+k)); lab.appendChild(el('span',null,txt));
+      if (i === p.rec) lab.appendChild(el('span','rec','推奨'));
+      inp.addEventListener('change', () => { answers[p.id] = Object.assign(answers[p.id]||{}, {option:k}); save(p.id); });
+      fs.appendChild(lab);
+    });
+    sec.appendChild(fs);
+    const note = el('textarea','note'); note.rows=1; note.id=p.id+'-note'; note.placeholder='メモ（任意）'; note.setAttribute('aria-label', p.title+' のメモ');
+    note.addEventListener('input', () => { answers[p.id]=Object.assign(answers[p.id]||{}, {note:note.value}); clearTimeout(timers[p.id]); timers[p.id]=setTimeout(()=>save(p.id),800); });
+    sec.appendChild(note);
+    main.appendChild(sec);
+  });
+  async function save(id){
+    if (!db) { saveEl.textContent='この表示では保存できません（サインインして開いてください）'; return; }
+    const a = answers[id]||{}; saveEl.textContent='保存中…';
+    try { await db.doc('answers/'+id).set({option:a.option||'', note:a.note||'', at:Date.now()}); saveEl.textContent='保存しました'; }
+    catch(e){ saveEl.textContent='保存できませんでした。もう一度選び直してください'; }
+  }
+  document.getElementById('fillrec').addEventListener('click', async () => {
+    let n = 0;
+    for (const p of PARTS) {
+      if (!(answers[p.id] && answers[p.id].option)) {
+        const k = p.opts[p.rec][0]; answers[p.id]=Object.assign(answers[p.id]||{}, {option:k});
+        const r = document.getElementById(p.id+'-'+k); if (r) r.checked = true; await save(p.id); n++;
+      }
+    }
+    saveEl.textContent = n ? n+' 件を「推奨」で保存しました' : '未回答はありません';
+  });
+  (async () => {
+    const c = window.claude && window.claude.use ? window.claude : null;
+    db = c ? await c.use('db') : null;
+    if (!db) { saveEl.textContent='この表示では保存できません（サインインして開いてください）'; return; }
+    try {
+      const snap = await db.collection('answers').get(); const docs = snap.docs || snap;
+      for (const d of docs) { const data = typeof d.data==='function' ? d.data() : d.data; if(!data) continue;
+        answers[d.id]={option:data.option||'', note:data.note||''};
+        if (data.option){ const r=document.getElementById(d.id+'-'+data.option); if(r) r.checked=true; }
+        const n=document.getElementById(d.id+'-note'); if(n && data.note) n.value=data.note; }
+      saveEl.textContent='選ぶと自動で保存されます';
+    } catch(e){ saveEl.textContent='前回の回答を読み込めませんでした'; }
+  })();
+})();
+</script>

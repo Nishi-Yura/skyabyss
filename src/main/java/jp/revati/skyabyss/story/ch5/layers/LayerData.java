@@ -41,12 +41,6 @@ public final class LayerData extends SavedData {
         return added;
     }
 
-    public void unset(UUID who, String flag) {
-        Set<String> s = flags.get(who);
-        if (s != null && s.remove(flag)) {
-            setDirty();
-        }
-    }
 
     public void forget(UUID who) {
         if (flags.remove(who) != null) {

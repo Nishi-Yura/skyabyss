@@ -179,7 +179,7 @@ public final class ContinentSecrets {
     static void hint(ServerPlayer p, BlockPos at) {
         p.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundPacket(net.minecraft.core.Holder.direct(SoundEvents.AMETHYST_BLOCK_CHIME), SoundSource.AMBIENT,
                 at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5, 0.45f, 1.5f, p.getRandom().nextLong()));
-        p.serverLevel().sendParticles(p, ParticleTypes.END_ROD, true, at.getX() + 0.5, at.getY() + 1.6, at.getZ() + 0.5, 3, 0.3, 0.4, 0.3, 0.01);
+        p.serverLevel().sendParticles(p, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, at.getX() + 0.5, at.getY() + 1.6, at.getZ() + 0.5, 3, 0.3, 0.4, 0.3, 0.01);
     }
 
     static SiteData.Entry entry(SiteData data, int id) {

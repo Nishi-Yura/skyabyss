@@ -64,7 +64,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 //   景品    野営地ごとの品の表 (その土地の巨神の品・その土地の目安の帯の階級の品 (レア・エピック・ヒロイック)・神器 (塔と雲上の品)・
 //           旅の支え (回復の薬・その土地の糧・鐘銭))。PERIOD_DAYS ごとに表を引き直す (野営地と期の番号で決まる。誰が見ても同じ)。
 //           アンコモンと伝説は入れない (2026-11-06 の声「ミシックおいて。逆に伝説なくして。アンコモンなくして、回復とか食べ物、金銭もおいてほしい」)
-//   引き    終わると、印 1 つにつき 1 回 (呪いの柱 1 本につき +1)、表から引く。重み WEIGHTS と SUPPLY_WEIGHT (神器は 0.1%)。引いた品は旅嚢へ入れ、
+//   引き    終わると、印 1 つにつき 1 回 (呪いの柱 1 本につき +1)、表から引く。重み WEIGHTS と SUPPLY_WEIGHT (神器は 0.1%)。引いた品は旅袋へ入れ、
 //           画面の幕 (client/endgame/CircuitRewardScreen) で一つずつ見せる
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class CircuitCamps {
@@ -333,9 +333,9 @@ public final class CircuitCamps {
     static void beam(ServerPlayer p, BlockPos at) {
         ServerLevel level = p.serverLevel();
         for (int y = 3; y < 46; y += 3) {
-            level.sendParticles(p, ParticleTypes.END_ROD, true, at.getX() + 0.5, at.getY() + y, at.getZ() + 0.5, 1, 0.05, 0.6, 0.05, 0.0);
+            level.sendParticles(p, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, at.getX() + 0.5, at.getY() + y, at.getZ() + 0.5, 1, 0.05, 0.6, 0.05, 0.0);
         }
-        level.sendParticles(p, ParticleTypes.WAX_ON, true, at.getX() + 0.5, at.getY() + 46, at.getZ() + 0.5, 3, 0.4, 0.3, 0.4, 0.0);
+        level.sendParticles(p, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), true, at.getX() + 0.5, at.getY() + 46, at.getZ() + 0.5, 3, 0.4, 0.3, 0.4, 0.0);
     }
 
     // ---------------------------------------------------------------- 建てる

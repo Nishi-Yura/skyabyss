@@ -17,7 +17,7 @@ public final class OpeningBeats {
     // 語り部と話したことがあるか (記録は人ごと。月のループで印が「覚え」に移っても、会った人は会った人)
     static boolean metStoryteller(ServerPlayer player) {
         NpcBonds.Bond bond = NpcBonds.of(player).bonds().get(NpcSetup.STORYTELLER_ID);
-        return bond != null && (bond.talks() > 0 || bond.flags().contains("met") || bond.echoes().contains("met"));
+        return bond != null && (bond.talks() > 0 || bond.flags().contains("met"));
     }
 
     // オーバーワールドにいる誰かが語り部と話したことがあるか (岩鯨の出現の条件)

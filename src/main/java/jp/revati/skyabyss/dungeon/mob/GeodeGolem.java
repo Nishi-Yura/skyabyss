@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.dungeon.mob;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,12 +88,10 @@ public class GeodeGolem extends DungeonBoss {
             lastPound = tickCount;
             begin(target, "pound");
             cue("geode_golem", "pound", POUND_WARN);
-            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), POUND_RADIUS))
+            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), POUND_RADIUS)).prop(PropFx.ring("crystal_spike", 8))
                     .floor(getY()).warn(POUND_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
-                        server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.AMETHYST_BLOCK.defaultBlockState()), getX(), getY() + 0.2, getZ(),
-                                60, POUND_RADIUS * 0.4, 0.1, POUND_RADIUS * 0.4, 0.15);
                         server.playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 0.8f, 0.7f);
                     })
                     .onHit((server, player) -> {
@@ -136,12 +135,10 @@ public class GeodeGolem extends DungeonBoss {
             spots.add(position().add(Math.cos(a) * (5 + random.nextDouble() * 7), 0, Math.sin(a) * (5 + random.nextDouble() * 7)));
         }
         for (Vec3 s : spots) {
-            Telegraph.in(server(), TelegraphShape.circle(s.x, s.z, 2.4))
+            Telegraph.in(server(), TelegraphShape.circle(s.x, s.z, 2.4)).prop(PropFx.fall("crystal_spike").size(0.9f))
                     .floor(getY()).warn(SHARDS_WARN).danger().owner(this).target(target)
                     .victims(this::canHit)
                     .onImpact(server -> {
-                        server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.AMETHYST_CLUSTER.defaultBlockState()), s.x, getY() + 4, s.z,
-                                30, 0.8, 1.4, 0.8, 0.1);
                         server.playSound(null, s.x, getY(), s.z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.HOSTILE, 1.4f, 0.7f);
                     })
                     .onHit((server, player) -> player.hurt(attackSource(), damage() * 0.9f))
@@ -158,12 +155,16 @@ public class GeodeGolem extends DungeonBoss {
             double dot = look.dot(toSource);
             if (dot > 0.64) {
                 amount *= FRONT_TAKEN;
-                server().sendParticles(ParticleTypes.ELECTRIC_SPARK, getX() + look.x * 1.2, getY() + 2.1, getZ() + look.z * 1.2, 8, 0.3, 0.3, 0.3, 0.1);
             } else if (dot < -0.5) {
                 amount *= BACK_TAKEN;
             }
         }
         return super.hurt(source, amount);
+    }
+
+    @Override
+    protected boolean midBoss() {
+        return true;
     }
 
     @Override

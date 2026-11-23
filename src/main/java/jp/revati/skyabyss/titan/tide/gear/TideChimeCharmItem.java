@@ -75,15 +75,15 @@ public class TideChimeCharmItem extends Item implements ModGear, Accessory {
             double cx = Math.cos(a);
             double cz = Math.sin(a);
             for (double d = 1.5; d <= r; d += 1.75) {
-                level.sendParticles(ParticleTypes.SPLASH, player.getX() + cx * d, player.getY() + 0.2, player.getZ() + cz * d, 2, 0.1, 0.05, 0.1, 0.05);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.getX() + cx * d, player.getY() + 0.2, player.getZ() + cz * d, 2, 0.1, 0.05, 0.1, 0.05);
             }
             // 波頭: 外へ押し出される白い泡 (速さを持たせて輪が広がって見えるように)
-            level.sendParticles(ParticleTypes.CLOUD, player.getX() + cx * 1.2, player.getY() + 0.25, player.getZ() + cz * 1.2, 0, cx, 0.02, cz, 0.35);
+            level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.getX() + cx * 1.2, player.getY() + 0.25, player.getZ() + cz * 1.2, 0, cx, 0.02, cz, 0.35);
             if (i % 2 == 0) {
-                level.sendParticles(ParticleTypes.GLOW, player.getX() + cx * r, player.getY() + 0.4, player.getZ() + cz * r, 1, 0.05, 0.1, 0.05, 0);
+                level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), player.getX() + cx * r, player.getY() + 0.4, player.getZ() + cz * r, 1, 0.05, 0.1, 0.05, 0);
             }
         }
-        level.sendParticles(ParticleTypes.BUBBLE_POP, player.getX(), player.getY() + 1, player.getZ(), 30, 1.2, 0.6, 1.2, 0.05);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), player.getX(), player.getY() + 1, player.getZ(), 24, 1.2, 0.6, 1.2, 0.05);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CONDUIT_ACTIVATE, SoundSource.PLAYERS, 1.2f, 1.4f);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 0.8f, 1.6f);
         player.getCooldowns().addCooldown(this, TideGear.CHARM_COOLDOWN);
@@ -118,5 +118,10 @@ public class TideChimeCharmItem extends Item implements ModGear, Accessory {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         ModGear.tooltip(stack, tooltip, tier(), "item.skyabyss.tide_chime_charm.desc", false);
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

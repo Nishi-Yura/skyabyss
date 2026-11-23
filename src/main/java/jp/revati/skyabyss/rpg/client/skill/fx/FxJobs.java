@@ -43,9 +43,6 @@ public final class FxJobs {
         if (plans.containsKey(Skill.LUNGE)) {
             plans.put(Skill.SHIELD_RUSH, plans.get(Skill.LUNGE));
         }
-        if (plans.containsKey(Skill.BACKSTEP)) {
-            plans.put(Skill.ARCHER_LEAP, plans.get(Skill.BACKSTEP));
-        }
     }
 
     // 雷の矢 [放ち 0 (手元の閃きと、狙いへ折れ曲がる稲妻) / 当たり 1 (当たりの火花) / 残り 10]
@@ -70,7 +67,7 @@ public final class FxJobs {
         Vec3 hand = c.hand();
         c.at(0, x -> {
             FxDraw.add(x, Prim.arc(hand, x.right, new Vec3(0, 1, 0), 0.5, 0, Math.PI * 2).color(EMBER).width(0.25).life(8).ease(Ease.OUT).glow(0.6));
-            SkillFx.burst(x, ParticleTypes.FLAME, hand, 6, 0.15, 0.02);
+            SkillFx.burst(x, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), hand, 6, 0.15, 0.02);
         });
         c.at(2, x -> {
             FxDraw.add(x, Prim.line(hand, x.aim(6)).color(EMBER).width(0.35).life(10).ease(Ease.OUT).trail(0.6).glow(0.5));

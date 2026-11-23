@@ -58,7 +58,7 @@ public class BubbleShot extends Projectile {
         ProjectileUtil.rotateTowardsMovement(this, 0.5f);
         if (level().isClientSide) {
             if (tickCount % 2 == 0) {
-                level().addParticle(ParticleTypes.BUBBLE_POP, getX(), getY(), getZ(), 0, 0.01, 0);
+                level().addParticle(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY(), getZ(), 0, 0.01, 0);
             }
         } else if (tickCount > LIFETIME) {
             pop();
@@ -101,7 +101,7 @@ public class BubbleShot extends Projectile {
 
     private void pop() {
         if (level() instanceof ServerLevel server) {
-            server.sendParticles(ParticleTypes.BUBBLE_POP, getX(), getY(), getZ(), 12, 0.25, 0.25, 0.25, 0.05);
+            server.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), getX(), getY(), getZ(), 12, 0.25, 0.25, 0.25, 0.05);
             server.playSound(null, getX(), getY(), getZ(), TideMobSetup.BUBBLE_POP.get(), SoundSource.HOSTILE, 0.9f,
                     0.9f + random.nextFloat() * 0.3f);
         }
@@ -116,5 +116,10 @@ public class BubbleShot extends Projectile {
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
         return distance < 64 * 64;
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

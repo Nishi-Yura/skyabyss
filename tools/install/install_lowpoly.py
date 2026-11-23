@@ -13,8 +13,6 @@ Writes
   assets/skyabyss/lowpoly/<name>.json            mesh (the "texture" field is rewritten)
   assets/skyabyss/textures/lowpoly/<name>.png    atlas (+ <name>_glowmask.png when it has lit pixels; an empty mask is never installed)
   assets/skyabyss/geo/entity/<name>_lowpoly.geo.json         skeleton: same bone names/parents/pivots/REST ROTATIONS as the original geo, no cubes
-  assets/skyabyss/geo/entity/<name>_lowpoly_debug.geo.json   one bounding box cube per bone (alignment check)
-  assets/skyabyss/textures/lowpoly/debug.png                 translucent red for the debug boxes
 The original cube geo (geo/entity/<name>.geo.json) and its animations are never touched, so reverting is one flag.
 
 Bone data: the mesh JSON wins where it states parent / rotation; otherwise the original geo does. Rest rotations
@@ -226,37 +224,6 @@ def main():
     out_geo = os.path.join(ASSETS, "geo", "entity", geo_name + "_lowpoly.geo.json")
     write_json(out_geo, skeleton)
 
-    # debug geo: one box cube per bone (the bounding box of its mesh), same pivots and rotations
-    dbg_bones = []
-    for e in bones:
-        b = mesh["bones"].get(e["name"])
-        verts = None
-        if b and b["vertices"]:
-            verts = b["vertices"]
-        elif e["name"] in gear_rel:
-            p = e["pivot"]
-            verts = [[v[i] + p[i] for i in range(3)] for v in gear_rel[e["name"]]["vertices"]]
-        elif e["name"] in sockets:
-            rel = sockets[e["name"]][2]
-            p = sockets[e["name"]][1]
-            verts = [[v[i] + p[i] for i in range(3)] for v in rel["vertices"]]
-        d = dict(e)
-        if verts:
-            lo, hi = bbox(verts)
-            d["cubes"] = [{"origin": [round(x, 4) for x in lo], "size": [round(hi[i] - lo[i], 4) for i in range(3)],
-                           "uv": [0, 0]}]
-        dbg_bones.append(d)
-    ddesc = dict(desc)
-    ddesc["identifier"] = "geometry." + geo_name + "_lowpoly_debug"
-    ddesc["texture_width"] = 64
-    ddesc["texture_height"] = 64
-    write_json(os.path.join(ASSETS, "geo", "entity", geo_name + "_lowpoly_debug.geo.json"),
-               {"format_version": "1.12.0", "minecraft:geometry": [{"description": ddesc, "bones": dbg_bones}]})
-
-    dbg_png = os.path.join(tex_dir, "debug.png")
-    if not os.path.exists(dbg_png):
-        from PIL import Image
-        Image.new("RGBA", (64, 64), (255, 40, 40, 90)).save(dbg_png)
 
     print("installed %s: %d bones, %d triangles -> %s" % (a.name, len(bones), mesh["triangle_count"], os.path.relpath(out_geo, ROOT)))
 

@@ -60,10 +60,15 @@ public class CoralHarpoonItem extends TideWeaponItem {
         target.addEffect(new MobEffectInstance(MobEffects.JUMP, ticks, 250, false, false), attacker);
         target.setDeltaMovement(target.getDeltaMovement().multiply(0, 1, 0));
         target.hurtMarked = true;
-        level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BRAIN_CORAL_BLOCK.defaultBlockState()),
-                target.getX(), target.getY() + 0.2, target.getZ(), 30, 0.35, 0.2, 0.35, 0.1);
-        level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.TUBE_CORAL_BLOCK.defaultBlockState()),
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
+                target.getX(), target.getY() + 0.2, target.getZ(), 24, 0.35, 0.2, 0.35, 0.1);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD),
                 target.getX(), target.getY() + 0.4, target.getZ(), 14, 0.3, 0.3, 0.3, 0.1);
         level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.CORAL_BLOCK_PLACE, SoundSource.PLAYERS, 1.2f, 0.7f);
+    }
+
+    // 攻撃の粒は mod の water の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.WATER, kind);
     }
 }

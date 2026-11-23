@@ -6,7 +6,6 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.progress.Titans;
-import jp.revati.skyabyss.titan.StoneWhaleEntity;
 import jp.revati.skyabyss.titan.TitanWorldData;
 import jp.revati.skyabyss.titan.WhaleKeeper;
 import jp.revati.skyabyss.titan.ember.EmberKeeper;
@@ -252,18 +251,6 @@ public final class YoungReach {
         return null;
     }
 
-    // 二点のあいだが海だけか (潮殻の稚貝が、陸を避けずに滑っていけるか)
-    public static boolean seaOnly(ServerLevel level, Vec3 from, BlockPos to) {
-        double d = Math.hypot(to.getX() - from.x, to.getZ() - from.z);
-        int n = Math.max(1, (int) (d / 32));
-        for (int i = 1; i < n; i++) {
-            double t = (double) i / n;
-            if (!sea(level, Mth.lerp(t, from.x, to.getX()), Mth.lerp(t, from.z, to.getZ()))) {
-                return false;
-            }
-        }
-        return true;
-    }
 
     // 笛を吹く場所のそばに水があるか (潮殻の稚貝が滑り出せる)。読み込まれている所だけ見る
     @Nullable

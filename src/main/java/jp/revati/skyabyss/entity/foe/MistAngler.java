@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.entity.foe;
 
+import jp.revati.skyabyss.combat.prop.PropFx;
 import jp.revati.skyabyss.combat.Telegraph;
 import jp.revati.skyabyss.combat.TelegraphShape;
 import jp.revati.skyabyss.registry.MobSounds;
@@ -51,11 +52,10 @@ public class MistAngler extends ContinentFoe {
             swaying = true;
             lastSway = tickCount;
             begin(target, "sway");
-            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), SWAY_RADIUS))
+            Telegraph.in(server(), TelegraphShape.circle(getX(), getZ(), SWAY_RADIUS)).prop(PropFx.ring("wisp_orb", 6).size(0.5f))
                     .floor(getY()).warn(SWAY_WARN).danger().owner(this).target(target)
                     .startSound(MobSounds.MIST_ANGLER_SWAY.get(), 1.2f, 1.0f)
                     .victims(this::canHit)
-                    .onImpact(server -> server.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 0.6, getZ(), 70, SWAY_RADIUS * 0.4, 0.5, SWAY_RADIUS * 0.4, 0.01))
                     .onHit((server, player) -> player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 50, 0), this))
                     .start();
             return;
@@ -68,11 +68,10 @@ public class MistAngler extends ContinentFoe {
         double x = target.getX();
         double z = target.getZ();
         double y = target.getY();
-        Telegraph.in(server(), TelegraphShape.circle(x, z, NET_RADIUS))
+        Telegraph.in(server(), TelegraphShape.circle(x, z, NET_RADIUS)).prop(PropFx.toss("net"))
                 .floor(y).warn(NET_WARN).danger().owner(this).target(target)
                 .startSound(MobSounds.MIST_ANGLER_NET.get(), 1.0f, 1.0f)
                 .victims(this::canHit)
-                .onImpact(server -> server.sendParticles(ParticleTypes.SPLASH, x, y + 0.3, z, 40, NET_RADIUS * 0.4, 0.2, NET_RADIUS * 0.4, 0.05))
                 .onHit((server, player) -> {
                     player.hurt(attackSource(), damage() * 0.6f);
                     player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 2), this);

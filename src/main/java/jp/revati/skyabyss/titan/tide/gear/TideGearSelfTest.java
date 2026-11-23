@@ -88,8 +88,9 @@ public final class TideGearSelfTest {
     private static void table(List<String> f) {
         check(f, TitanGearSets.get(TideGear.TITAN) == TideGear.SET, "tide set is not registered in TitanGearSets");
         check(f, TitanGearSets.all().get(0) == TitanGearSets.STONE_WHALE, "stone whale should be the first gear set");
-        check(f, TideGear.SET.collection().size() == 10 + jp.revati.skyabyss.item.ChapterGear.TIDE.size() && TideGear.SET.exclusives().size() == 3,
-                "tide collection should be 10 + the job weapons, with 3 exclusives");
+        check(f, TideGear.SET.collection().size() == 10 + jp.revati.skyabyss.item.ChapterGear.TIDE.size() + jp.revati.skyabyss.item.HeroicGear.forTitan(TideGear.TITAN).size()
+                && TideGear.SET.exclusives().size() == 3 + jp.revati.skyabyss.item.HeroicGear.forTitan(TideGear.TITAN).size(),
+                "tide collection should be 10 + the job weapons + the heroic weapons, with 7 exclusives");
         check(f, TideLoot.collection().equals(TideGear.SET.collection()), "TideLoot does not read the tide gear table");
         for (String id : TideGear.SET.collection()) {
             check(f, TitanGearSet.registered(id) && TideLoot.registered(id), id + " is not registered");

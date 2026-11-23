@@ -197,8 +197,8 @@ public final class EmberSkeletonSelfTest {
         } catch (IllegalAccessException e) {
             f.add("could not read EmberIds: " + e);
         }
-        int codex = 10 + jp.revati.skyabyss.item.ChapterGear.EMBER.size();
-        expect(EmberIds.CODEX.size() == codex && new HashSet<>(EmberIds.CODEX).size() == codex, "the codex is not 10 + the job weapons, distinct", f);
+        int codex = 10 + jp.revati.skyabyss.item.ChapterGear.EMBER.size() + jp.revati.skyabyss.item.HeroicGear.forTitan("ember").size();
+        expect(EmberIds.CODEX.size() == codex && new HashSet<>(EmberIds.CODEX).size() == codex, "the codex is not 10 + the job weapons + the heroic weapons, distinct", f);
         expect(EmberIds.CODEX.containsAll(EmberIds.FIRST_CLEAR_CHOICES), "a first clear choice is not in the codex", f);
 
         // ---- 共通の TitanGate: 乗る資格、待ち、戻る段の 0.5 秒 (2 tick ごとに数えて 10 tick)

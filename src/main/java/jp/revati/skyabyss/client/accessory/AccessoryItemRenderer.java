@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.client.lowpoly.LowPolyMesh;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -28,7 +27,7 @@ import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsE
 
 // 装飾品・補助の品 16 種を、手に持つ・地面・額縁・頭で低ポリメッシュとして描く (docs/design/15 の 4.6.3)。武器の WeaponItemRenderer と同じ作り。
 // 品の item モデル (models/item/<id>.json) は base が builtin/entity (display は持ち方の表)、gui は 32x32 の絵 (perspectives)。
-// `LowPoly.accessoryMeshes = false` なら元の平絵のモデル (models/item_flat/<id>.json) を同じ置き方で描く。
+// メッシュの無い品だけ、元の平絵のモデル (models/item_flat/<id>.json) を同じ置き方で描く。
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class AccessoryItemRenderer extends BlockEntityWithoutLevelRenderer {
     private static AccessoryItemRenderer instance;
@@ -46,7 +45,7 @@ public final class AccessoryItemRenderer extends BlockEntityWithoutLevelRenderer
 
     @Override
     public void renderByItem(ItemStack stack, ItemDisplayContext context, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
-        if (LowPoly.accessoryMeshes) {
+        {
             LowPolyMesh mesh = AccessoryMeshes.mesh(stack);
             if (mesh != null) {
                 pose.pushPose();

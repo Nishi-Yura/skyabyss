@@ -42,7 +42,7 @@ public final class StormGearClient {
                     if (entity == null || entity.getUseItem() != stack) {
                         return 0f;
                     }
-                    return (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / 20f;
+                    return jp.revati.skyabyss.combat.BowDraw.pull(stack.getUseDuration(entity) - entity.getUseItemRemainingTicks());
                 });
                 ItemProperties.register(bow, ResourceLocation.withDefaultNamespace("pulling"),
                         (stack, level, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1f : 0f);

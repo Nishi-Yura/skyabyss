@@ -55,10 +55,6 @@ public final class TideOcean {
         return p < TIDE_LEAD ? TIDE_LEAD - p : TIDE_PERIOD - p + TIDE_LEAD;
     }
 
-    // 干潮の刻の終わりまで (刻の外なら 0)
-    static long ticksUntilHighTide(long dayTime) {
-        return isLowTide(dayTime) ? TIDE_LEAD + TIDE_LENGTH - phase(dayTime) : 0;
-    }
 
     // ---- 海の調べ方
 

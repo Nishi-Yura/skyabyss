@@ -107,13 +107,13 @@ public final class Echoes {
             if (e.dir != null && d.dot(e.dir) < e.cosHalf) {
                 continue;
             }
-            e.level.sendParticles(soon ? ParticleTypes.FLAME : ParticleTypes.SMALL_FLAME, e.c.x + d.x * e.r, e.c.y + 0.15, e.c.z + d.z * e.r, 1, 0, 0, 0, 0);
+            e.level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.c.x + d.x * e.r, e.c.y + 0.15, e.c.z + d.z * e.r, 1, 0, 0, 0, 0);
         }
         if (e.dir != null) {
             for (double t = 0.5; t <= e.r; t += 0.8) {
                 for (int s = -1; s <= 1; s += 2) {
                     Vec3 side = e.dir.yRot((float) (s * Math.acos(e.cosHalf)));
-                    e.level.sendParticles(ParticleTypes.SMALL_FLAME, e.c.x + side.x * t, e.c.y + 0.15, e.c.z + side.z * t, 1, 0, 0, 0, 0);
+                    e.level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.c.x + side.x * t, e.c.y + 0.15, e.c.z + side.z * t, 1, 0, 0, 0, 0);
                 }
             }
         }
@@ -122,13 +122,26 @@ public final class Echoes {
     static void fire(Echo e) {
         ServerLevel l = e.level;
         l.playSound(null, e.c.x, e.c.y, e.c.z, CloudMobsSetup.ECHO_BURST.get(), SoundSource.HOSTILE, 1.2f, 0.9f);
-        l.sendParticles(ParticleTypes.FLAME, e.c.x, e.c.y + 0.4, e.c.z, (int) (14 + e.r * 8), e.r * 0.5, 0.3, e.r * 0.5, 0.04);
-        l.sendParticles(ParticleTypes.LAVA, e.c.x, e.c.y + 0.3, e.c.z, 4, e.r * 0.4, 0.1, e.r * 0.4, 0);
+        // 技の形: 残り火の所から熔岩の柱が噴く (扇は真ん中の筋に沿って二本)。粒は少し減らした
+        if (e.dir == null) {
+            jp.revati.skyabyss.combat.prop.AttackProps.rise(l, "lava_pillar", e.owner, e.c, l.random.nextFloat() * 360f, (float) Math.max(0.5, Math.min(1.4, e.r / 2.4)), 12);
+        } else {
+            for (int k = 1; k <= 2; k++) {
+                jp.revati.skyabyss.combat.prop.AttackProps.rise(l, "lava_pillar", e.owner, e.c.add(e.dir.scale(e.r * k / 3.0)), k * 70f, 0.6f, 12);
+            }
+        }
+        l.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), e.c.x, e.c.y + 0.4, e.c.z, (int) (8 + e.r * 5), e.r * 0.5, 0.3, e.r * 0.5, 0.04);
+        l.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), e.c.x, e.c.y + 0.3, e.c.z, 4, e.r * 0.4, 0.1, e.r * 0.4, 0);
         for (ServerPlayer p : l.getEntitiesOfClass(ServerPlayer.class, new AABB(e.c, e.c).inflate(e.r + 1, 3, e.r + 1), x -> x.isAlive() && !x.isSpectator())) {
             if (e.inside(p.position())) {
                 boolean owned = e.owner != null && e.owner.isAlive();
                 p.hurt(owned ? l.damageSources().mobAttack(e.owner) : l.damageSources().inFire(), e.dmg);
             }
         }
+    }
+
+    // 攻撃の粒は mod の paper の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.PAPER, kind);
     }
 }

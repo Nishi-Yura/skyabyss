@@ -60,8 +60,8 @@ public final class AbyssReturn {
         double cz = exit != null ? exit.getZ() + 0.5 : p.getZ();
         level.playSound(null, cx, cy, cz, SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 1.6f, 1.1f);
         level.playSound(null, cx, cy, cz, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.BLOCKS, 1.4f, 0.8f);
-        level.sendParticles(ParticleTypes.END_ROD, cx, cy + 1.2, cz, 40, 0.6, 1.2, 0.6, 0.04);
-        level.sendParticles(SKY_DUST, p.getX(), p.getY() + 1, p.getZ(), 30, 0.5, 0.9, 0.5, 0);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), cx, cy + 1.2, cz, 24, 0.6, 1.2, 0.6, 0.04);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1, p.getZ(), 24, 0.5, 0.9, 0.5, 0);
         p.addEffect(new MobEffectInstance(MobEffects.LEVITATION, RISE + 6, 0, false, false));
         p.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, RISE + 60, 0, false, false));
         Notice.bar(p, net.minecraft.network.chat.Component.translatable("message.skyabyss.abyss_v3.return.rise"));
@@ -73,7 +73,7 @@ public final class AbyssReturn {
             int at = k * 7;
             later(p.server, at, () -> {
                 if (p.level() == level) {
-                    level.sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 16, 0.7, 0.8, 0.7, 0.02);
+                    level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1, p.getZ(), 16, 0.7, 0.8, 0.7, 0.02);
                     level.playSound(null, p.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.2f, 0.8f + 0.2f * at / 7f);
                 }
             });
@@ -94,8 +94,8 @@ public final class AbyssReturn {
     // 着いた所 (都の下の門の前): 光と鐘と一言
     static void arrived(ServerPlayer p) {
         ServerLevel ow = p.serverLevel();
-        ow.sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 50, 0.6, 1.4, 0.6, 0.05);
-        ow.sendParticles(SKY_DUST, p.getX(), p.getY() + 0.5, p.getZ(), 40, 1.2, 0.3, 1.2, 0);
+        ow.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1, p.getZ(), 24, 0.6, 1.4, 0.6, 0.05);
+        ow.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 0.5, p.getZ(), 24, 1.2, 0.3, 1.2, 0);
         ow.playSound(null, p.blockPosition(), SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 1.2f, 0.7f);
         ow.playSound(null, p.blockPosition(), SoundEvents.BEACON_DEACTIVATE, SoundSource.BLOCKS, 0.8f, 1.4f);
         later(p.server, 30, () -> Notice.place(p, net.minecraft.network.chat.Component.translatable("message.skyabyss.abyss_v3.return.title"),
@@ -129,10 +129,10 @@ public final class AbyssReturn {
             return;
         }
         double x = exit.getX() + 0.5, y = exit.getY(), z = exit.getZ() + 0.5;
-        level.sendParticles(ParticleTypes.END_ROD, x, y + 1.5 + level.random.nextDouble() * 4, z, 2, 0.08, 0.6, 0.08, 0.01);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x, y + 1.5 + level.random.nextDouble() * 4, z, 2, 0.08, 0.6, 0.08, 0.01);
         double a = (server.getTickCount() / 10 % 12) * Math.PI / 6;
-        level.sendParticles(SKY_DUST, x + Math.cos(a) * 1.4, y + 0.3, z + Math.sin(a) * 1.4, 2, 0.05, 0.05, 0.05, 0);
-        level.sendParticles(SKY_DUST, x - Math.cos(a) * 1.4, y + 0.3, z - Math.sin(a) * 1.4, 2, 0.05, 0.05, 0.05, 0);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x + Math.cos(a) * 1.4, y + 0.3, z + Math.sin(a) * 1.4, 2, 0.05, 0.05, 0.05, 0);
+        level.sendParticles(fx(jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), x - Math.cos(a) * 1.4, y + 0.3, z - Math.sin(a) * 1.4, 2, 0.05, 0.05, 0.05, 0);
         if (server.getTickCount() % 80 == 6) {
             level.playSound(null, exit, SoundEvents.BEACON_AMBIENT, SoundSource.BLOCKS, 1.0f, 1.2f);
         }
@@ -162,5 +162,10 @@ public final class AbyssReturn {
         List<Pending> due = List.copyOf(LATER);
         LATER.clear();
         due.forEach(e -> e.run().run());
+    }
+
+    // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)
+    private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
+        return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, kind);
     }
 }

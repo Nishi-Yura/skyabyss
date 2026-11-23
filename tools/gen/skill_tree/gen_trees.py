@@ -207,8 +207,9 @@ EFF_TEXT = {
     "fire_resist": ("火の傷 %s", "Fire damage %s"), "knockback": ("ノックバック耐性 %s", "Knockback resistance %s"), "armor": ("防具 %s", "Armor %s"),
     "low_hp_armor": ("体力が少ないとき防具 %s", "Armor %s while low on health"), "big_target": ("大きな相手への技の傷 %s", "Skill damage to large foes %s"),
     "lifesteal": ("近接で与えた傷の %s を吸う（1 回 2 まで）", "Heal %s of melee damage dealt (up to 2 per hit)"),
+    "spirit_count": ("番の弓霊の数 %s", "Bow spirits %s"),
 }
-FLAT = {"armor", "low_hp_armor"}
+FLAT = {"armor", "low_hp_armor", "spirit_count"}
 CAPS = {"lifesteal": 0.06}
 
 

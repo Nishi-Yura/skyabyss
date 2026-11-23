@@ -175,7 +175,7 @@ public final class EmberCarry extends EmberRoom {
                 redCircle(ctx, v.getX() + 0.5, v.getZ() + 0.5, 2.0, VENT_WARN, (lvl, p) -> ventBurst(lvl, p, v));
             } else if (at == VENT_WARN) {
                 BlockPos v = ctx.local(VENTS[i][0], 1, VENTS[i][1]);
-                particles(ctx, ParticleTypes.FLAME, v.getX() + 0.5, v.getY(), v.getZ() + 0.5, 24, 0.5, 0.08);
+                particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), v.getX() + 0.5, v.getY(), v.getZ() + 0.5, 24, 0.5, 0.08);
                 ctx.level().playSound(null, v, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.7f, 0.7f);
             }
         }
@@ -193,7 +193,7 @@ public final class EmberCarry extends EmberRoom {
             }
             if (left <= 1) {
                 carry.remove(p.getUUID());
-                particles(ctx, ParticleTypes.SMOKE, p.getX(), p.getY() + 1, p.getZ(), 20, 0.3, 0.02);
+                particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SMOKE), p.getX(), p.getY() + 1, p.getZ(), 20, 0.3, 0.02);
                 bar(ctx, Component.translatable("raid.skyabyss.ER1.cooled"));
                 continue;
             }
@@ -202,7 +202,7 @@ public final class EmberCarry extends EmberRoom {
                 heatHurt(ctx, p, HEAT_DAMAGE, 5f);
             }
             if (t % 4 == 0) {
-                particles(ctx, ParticleTypes.FLAME, p.getX(), p.getY() + 1.2, p.getZ(), 1, 0.2, 0.01);
+                particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), p.getX(), p.getY() + 1.2, p.getZ(), 1, 0.2, 0.01);
             }
         }
         // 取る・渡す・納める
@@ -222,7 +222,7 @@ public final class EmberCarry extends EmberRoom {
                 carry.remove(id);
                 set(ctx, ctx.local(SOCKET_X[Math.min(delivered, NEED - 1)], 2, 10), b(Blocks.SHROOMLIGHT));
                 delivered++;
-                particles(ctx, ParticleTypes.LAVA, forge.getX() + 0.5, forge.getY() + 2, forge.getZ() + 0.5, 12, 0.6, 0.1);
+                particles(ctx, jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.EMBER, jp.revati.skyabyss.fx.FxParticles.Kind.SHARD), forge.getX() + 0.5, forge.getY() + 2, forge.getZ() + 0.5, 12, 0.6, 0.1);
                 ctx.level().playSound(null, forge, SoundEvents.BLASTFURNACE_FIRE_CRACKLE, SoundSource.BLOCKS, 1.2f, 0.8f);
                 if (delivered >= NEED) {
                     done = true;

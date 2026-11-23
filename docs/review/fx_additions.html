@@ -1,0 +1,192 @@
+<title>天と淵 光の表現</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+<style>
+/* 回答の帳面: 左に章の目次、右に問いの列。選んだ答えは共鳴の水色、未回答は石の灰。ラフ選定ページと同じ石の地 */
+:root{
+  --bg:#eceef0; --panel:#f8f9fa; --ink:#1b2129; --muted:#5b6672; --line:#c9d0d6;
+  --accent:#0a8fa6; --accent-ink:#ffffff; --ok:#2f8a4b; --now:#e2e7ea;
+  --display:"DotGothic16","Zen Kaku Gothic New",system-ui,sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; --now:#1f252e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --panel:#171b22; --ink:#e3e8ee; --muted:#93a0ad; --line:#2a313b;
+  --accent:#5fdcef; --accent-ink:#0b1216; --ok:#6fd18c; --now:#1f252e; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 80px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:2;background:var(--bg);padding-block:12px;border-bottom:1px solid var(--line);display:grid;gap:8px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(22px,3.4vw,32px);margin:0;letter-spacing:.04em;text-wrap:balance}
+.intro{color:var(--muted);margin:0;max-width:72ch;font-size:14px}
+.progress{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-variant-numeric:tabular-nums;font-size:14px}
+.bar{flex:1 1 200px;height:8px;background:var(--line);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.save{color:var(--muted);font-size:13px}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+button.b{font:inherit;font-size:13px;padding:5px 12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+button.b:hover,button.b:focus-visible{border-color:var(--accent);outline:none}
+.layout{display:grid;grid-template-columns:200px minmax(0,1fr);gap:28px;align-items:start;margin-top:20px}
+nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 150px);display:grid;gap:2px;font-size:13px}
+nav a{color:var(--muted);text-decoration:none;padding:4px 10px;border-left:2px solid var(--line);display:flex;justify-content:space-between;gap:8px}
+nav a span{font-variant-numeric:tabular-nums}
+nav a.done{color:var(--ink);border-left-color:var(--ok)}
+nav a:hover,nav a:focus-visible{color:var(--accent);outline:none}
+section.g{display:grid;gap:10px;padding-block:18px}
+section.g h2{font-family:var(--display);font-weight:400;font-size:21px;margin:0}
+.item{display:grid;gap:8px;padding:12px 14px;background:var(--panel);border:1px solid var(--line)}
+.item[data-done="1"]{border-left:3px solid var(--ok)}
+.qrow{display:flex;gap:10px;align-items:baseline;min-width:0}
+.num{font-family:var(--display);color:var(--muted);font-size:13px;flex:none;min-width:3.6em}
+.q{margin:0;font-weight:400;min-width:0}
+.doc{color:var(--muted);font-size:12px;flex:none;margin-left:auto}
+.opts{display:flex;flex-wrap:wrap;gap:6px;border:0;margin:0;padding:0;min-width:0}
+.opt{position:relative;display:flex;align-items:flex-start;gap:6px;padding:5px 10px;border:1px solid var(--line);background:var(--bg);cursor:pointer;font-size:13px;max-width:100%}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt .tag{font-size:11px;color:var(--muted);flex:none;padding-top:1px}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.opt:has(input:checked) .tag{color:var(--accent-ink)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.opt.now{background:var(--now)}
+.note{width:100%;font:inherit;font-size:13px;color:var(--ink);background:var(--bg);border:1px solid var(--line);padding:6px 8px;resize:vertical}
+.note:focus{outline:2px solid var(--accent);outline-offset:0}
+.empty{color:var(--muted);font-size:13px}
+@media (max-width:760px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  nav{position:static;display:flex;flex-wrap:wrap;gap:4px}
+  nav a{border-left:0;border-bottom:2px solid var(--line)}
+  nav a.done{border-bottom-color:var(--ok)}
+  .doc{display:none}
+}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>光の表現を足す</h1>
+    <p class="intro">動画にあった表現（裂け目・空の差し替え・光線・光の輪・にじみ・題字・軌道）を、このModの雰囲気に合わせて足す案です。色や形は動画に寄せず、巨神ごとの色と形の言葉に合わせます。どれも追加のライブラリはいりません（6 の案3 だけは別）。「推奨」の印がついた案がおすすめです。選んだものから、ゲーム内で撮った 3 案の見比べを出してから入れます。</p>
+    <div class="progress"><div class="bar" aria-hidden="true"><i id="pbar"></i></div>
+      <span id="pcount">0 / 8 回答済み</span><span class="save" id="save">読み込み中…</span></div>
+    <div class="tools"><button class="b" id="fillnow" type="button">未回答をすべて「推奨」にする</button></div>
+  </header>
+  <div class="layout">
+    <nav id="nav" aria-label="章"></nav>
+    <main id="main"></main>
+  </div>
+</div>
+
+<script>
+(() => {
+  const GROUPS = [{"title": "裂け目（空間が割れて、向こうが見える）", "items": [{"id": "fx_rift_heart", "num": "1", "doc": "DomainClient・20", "q": "心臓の「領域」の始まりを、裂け目が開く演出にするか。今は黒帯・暗転・金の題字。裂け目の向こうに、その巨神の内側の空（岩鯨＝鉱脈が星のように光る岩の闇、潮殻＝水面越しに揺れる光、雷翼＝雷雲の中、余燼＝熾の夜）がのぞき、広がって部屋ごと領域になる。色と縁の形は巨神ごとに変える（岩鯨＝岩の割れ目、潮殻＝渦、雷翼＝稲妻、余燼＝溶けた縁）", "now": "足さない（今の暗転と題字）", "alts": ["領域の始まりに使う", "順路の部屋を越えて運ばれるときにも使う（台に乗る→裂け目に吸われる）"], "rec": 0}, {"id": "fx_rift_gate", "num": "2", "doc": "36・46", "q": "物語の大きな入口にも裂け目を使うか。淵は大坑道の底で闇が縦に割れ、月は空が割れて月の面がのぞく", "now": "足さない", "alts": ["淵（5章）の入口と、月（6章）へ渡る場面の両方", "淵の入口だけ（月はほかの見せ方を考える）"], "rec": 0}]}, {"title": "空の差し替え", "items": [{"id": "fx_sky", "num": "3", "doc": "DomainClient・SkyScreenEffects", "q": "戦いのあいだだけ空を替えるか。今の領域は、霧の色と画面の縁の色が変わるだけ。1 の裂け目の向こうに見えた空が、そのまま頭上に広がる", "now": "足さない（霧と縁の色だけ）", "alts": ["心臓の領域のあいだだけ", "心臓のあとのボス戦にも（紙の切り絵の黒・クリーム・ピンクの空。紙を重ねたような雲）"], "rec": 0}]}, {"title": "光る線・光線", "items": [{"id": "fx_beam", "num": "4", "doc": "AttackFx・AttackLook", "q": "光線や薙ぎ払いの技を、芯が白く外側に巨神の色がにじむ光の帯にするか。剣の軌跡と同じ描き方で、今の模型と粒の上に重ねる", "now": "足さない", "alts": ["光線と薙ぎ払いの技だけ", "それに加えて、溜めの間に光の筋が主へ吸い込まれる（溜めが目で読める）"], "rec": 1}]}, {"title": "地を走る光の輪", "items": [{"id": "fx_ring", "num": "5", "doc": "BossImpactFx・TelegraphRenderer", "q": "当たった瞬間、地面を走る衝撃の輪を、粒の輪から光の帯の輪にするか。広がりながら細く薄れていく", "now": "足さない（粒の輪のまま）", "alts": ["心臓と主の当たりだけ", "予告の縁も淡く光らせる（暗い部屋で予告が読みやすくなる。予告の色は変えない）"], "rec": 0}]}, {"title": "光のにじみ", "items": [{"id": "fx_glow", "num": "6", "doc": "ItemGlowClient・各 Renderer", "q": "光る点のまわりに、柔らかくにじむ光をつけるか。柔らかい光の板を何枚か重ねて、発光しているように見せる", "now": "足さない", "alts": ["心臓の核と弱点だけ（狙う場所がひと目でわかる）", "祠・乗り込み口の光・町の灯りにも", "本物のブルーム（画面全体の後処理。きれいだが重く、シェーダーパックと競合しやすい）"], "rec": 0}]}, {"title": "大きな題字", "items": [{"id": "fx_title", "num": "7", "doc": "DomainClient", "q": "領域を砕いたとき、白い瞬きのあとに題字を一行出すか（例: 「領域は砕けた」）。始まりの題字と同じ金の字", "now": "足さない（白い瞬きだけ）", "alts": ["領域を砕いたときだけ", "主を倒したときにも（主ごとの一行）"], "rec": 0}]}, {"title": "軌道の線", "items": [{"id": "fx_orbit", "num": "8", "doc": "BossImpactFx", "q": "主のまわりを回る光の軌道（円弧の線）を技に使うか。星の色の主に合う", "now": "足さない", "alts": ["月の主と塔の主の星の技だけ", "始祖にも（白い羽根の軌道）"], "rec": 0}]}];
+  const total = GROUPS.reduce((n, g) => n + g.items.length, 0);
+  const main = document.getElementById('main');
+  const nav = document.getElementById('nav');
+  const saveEl = document.getElementById('save');
+  let db = null;
+  const timers = {};
+  const answers = {};
+
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  GROUPS.forEach((g, gi) => {
+    const sec = el('section', 'g'); sec.id = 'g' + gi;
+    sec.appendChild(el('h2', null, g.title));
+    const a = el('a'); a.href = '#g' + gi; a.dataset.g = gi;
+    a.appendChild(el('span', null, g.title.replace(/（.*）/, ''))); a.appendChild(el('span', 'cnt', '0/' + g.items.length));
+    nav.appendChild(a);
+    g.items.forEach(it => {
+      const box = el('div', 'item'); box.id = it.id; box.dataset.g = gi;
+      const qr = el('div', 'qrow');
+      qr.appendChild(el('span', 'num', it.num));
+      qr.appendChild(el('p', 'q', it.q));
+      if (it.doc) qr.appendChild(el('span', 'doc', it.doc));
+      box.appendChild(qr);
+      const fs = el('fieldset', 'opts');
+      const choices = [{v: 'now', tag: '足さない', text: it.now, cls: 'now'}]
+        .concat(it.alts.map((t, i) => ({v: 'alt' + (i + 1), tag: '案' + (i + 1) + (it.rec === i ? '・推奨' : ''), text: t})))
+        .concat([{v: 'other', tag: 'その他', text: 'メモに書く'}]);
+      choices.forEach(c => {
+        const lab = el('label', 'opt' + (c.cls ? ' ' + c.cls : ''));
+        const inp = el('input'); inp.type = 'radio'; inp.name = it.id; inp.value = c.v; inp.id = it.id + '-' + c.v;
+        lab.htmlFor = inp.id;
+        lab.appendChild(inp); lab.appendChild(el('span', 'tag', c.tag)); lab.appendChild(el('span', null, c.text));
+        inp.addEventListener('change', () => { answers[it.id] = Object.assign(answers[it.id] || {}, {option: c.v}); refresh(); save(it.id); });
+        fs.appendChild(lab);
+      });
+      box.appendChild(fs);
+      const note = el('textarea', 'note'); note.rows = 1; note.id = it.id + '-note'; note.placeholder = 'メモ（任意）';
+      note.setAttribute('aria-label', it.num + ' のメモ');
+      note.addEventListener('input', () => {
+        answers[it.id] = Object.assign(answers[it.id] || {}, {note: note.value});
+        clearTimeout(timers[it.id]); timers[it.id] = setTimeout(() => save(it.id), 800);
+      });
+      box.appendChild(note);
+      sec.appendChild(box);
+    });
+    main.appendChild(sec);
+  });
+
+  function refresh() {
+    let n = 0;
+    document.querySelectorAll('.item').forEach(b => {
+      const done = !!(answers[b.id] && answers[b.id].option);
+      b.dataset.done = done ? '1' : '0'; if (done) n++;
+    });
+    GROUPS.forEach((g, gi) => {
+      const d = g.items.filter(it => answers[it.id] && answers[it.id].option).length;
+      const a = nav.querySelector('[data-g="' + gi + '"]');
+      a.querySelector('.cnt').textContent = d + '/' + g.items.length;
+      a.classList.toggle('done', d === g.items.length);
+    });
+    document.getElementById('pcount').textContent = n + ' / ' + total + ' 回答済み';
+    document.getElementById('pbar').style.width = (n / total * 100) + '%';
+  }
+
+  async function save(id) {
+    if (!db) { saveEl.textContent = 'この表示では保存できません（サインインして開いてください）'; return; }
+    const a = answers[id] || {};
+    saveEl.textContent = '保存中…';
+    try {
+      await db.doc('answers/' + id).set({option: a.option || '', note: a.note || '', at: Date.now()});
+      saveEl.textContent = '保存しました';
+    } catch (e) { saveEl.textContent = '保存できませんでした。もう一度選び直してください'; }
+  }
+
+  document.getElementById('fillnow').addEventListener('click', async () => {
+    const todo = [];
+    GROUPS.forEach(g => g.items.forEach(it => {
+      if (!(answers[it.id] && answers[it.id].option)) {
+        answers[it.id] = Object.assign(answers[it.id] || {}, {option: 'alt' + (it.rec + 1)});
+        const r = document.getElementById(it.id + '-alt' + (it.rec + 1)); if (r) r.checked = true;
+        todo.push(it.id);
+      }
+    }));
+    refresh();
+    for (const id of todo) { await save(id); }
+    saveEl.textContent = todo.length ? todo.length + ' 件を「推奨」で保存しました' : '未回答はありません';
+  });
+
+  refresh();
+  (async () => {
+    const c = window.claude && window.claude.use ? window.claude : null;
+    db = c ? await c.use('db') : null;
+    if (!db) { saveEl.textContent = 'この表示では保存できません（サインインして開いてください）'; return; }
+    try {
+      const snap = await db.collection('answers').get();
+      const docs = snap.docs || snap;
+      for (const d of docs) {
+        const data = typeof d.data === 'function' ? d.data() : d.data;
+        if (!data) continue;
+        answers[d.id] = {option: data.option || '', note: data.note || ''};
+        if (data.option) { const r = document.getElementById(d.id + '-' + data.option); if (r) r.checked = true; }
+        const n = document.getElementById(d.id + '-note'); if (n && data.note) n.value = data.note;
+      }
+      saveEl.textContent = '選ぶと自動で保存されます';
+    } catch (e) { saveEl.textContent = '前回の回答を読み込めませんでした'; }
+    refresh();
+  })();
+})();
+</script>

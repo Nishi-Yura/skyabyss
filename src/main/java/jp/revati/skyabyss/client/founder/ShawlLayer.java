@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.client.accessory.AccessoryMeshes;
-import jp.revati.skyabyss.client.lowpoly.LowPoly;
 import jp.revati.skyabyss.client.lowpoly.LowPolyMesh;
 import jp.revati.skyabyss.client.lowpoly.LowPolyMeshes;
 import jp.revati.skyabyss.story.finale.founder.FounderItems;
@@ -33,7 +32,7 @@ public final class ShawlLayer extends RenderLayer<AbstractClientPlayer, PlayerMo
     @Override
     public void render(PoseStack pose, MultiBufferSource buffers, int light, AbstractClientPlayer player, float limbSwing, float limbSwingAmount,
                        float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (!LowPoly.accessoryWorn || player.isInvisible() || player.isSpectator() || !FounderItems.wearing(player)) {
+        if (player.isInvisible() || player.isSpectator() || !FounderItems.wearing(player)) {
             return;
         }
         LowPolyMesh mesh = LowPolyMeshes.get(MESH);

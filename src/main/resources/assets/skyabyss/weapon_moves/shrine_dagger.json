@@ -1,6 +1,6 @@
 {
   "item": "shrine_dagger",
-  "label": "宿り木の短剣: 右上から左下へ、返して X、突き抜ける",
+  "label": "祠の短剣: 右上から左下へ、返して X、突き抜ける",
   "family": "FANG",
   "strike": 0.4,
   "reach": 0.5,

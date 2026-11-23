@@ -34,7 +34,7 @@ public class ChapterBowItem extends BowItem implements ModGear {
     }
 
     public double multiplier(int enhance) {
-        return multiplier * (1 + GearEvents.ATTACK_RATE_PER_LEVEL * enhance);
+        return TierFloor.bowMultiplier(this, multiplier) * (1 + GearEvents.ATTACK_RATE_PER_LEVEL * enhance);   // 階級の幅へ (item/TierFloor)
     }
 
     // 一体への 1 秒あたり (満月で撃ち続ける。AbstractArrow の式: ceil(速さ 3 × 基礎 2 × 倍率) + 会心の平均)
