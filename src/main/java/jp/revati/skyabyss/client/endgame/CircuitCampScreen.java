@@ -1,9 +1,13 @@
 package jp.revati.skyabyss.client.endgame;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import jp.revati.skyabyss.client.ui.TextStyle;
+import jp.revati.skyabyss.client.ui.FitText;
 import jp.revati.skyabyss.client.ui.Golden;
+import jp.revati.skyabyss.client.ui.JpWrap;
+import jp.revati.skyabyss.client.ui.Paper;
+import jp.revati.skyabyss.client.ui.PickStage;
 import jp.revati.skyabyss.client.ui.UiFit;
 import jp.revati.skyabyss.endgame.CircuitCamps;
 import jp.revati.skyabyss.item.GearTier;
@@ -12,35 +16,24 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.Mth;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
-import jp.revati.skyabyss.client.ui.Paper;
 
-// 巡り路の野営地の画面 (endgame/CircuitCamps。報いの箱を押すと開く)。試練の板と同じ石板の枠:
-//   題と野営地の名・今の景品 (階級の色の枠。指すと品の説明)・入れ替えまでの時間・階級ごとの出やすさ・決まり・今日の残り・「歩き出す」
-//   (歩いているあいだは「やめる」。それまでの印の報いを受け取って終える)。
-//   板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 景品は 34 角の枠 7 x 2、下の段に今日の残りと「歩き出す」(89)
+// 巡り路の野営地の画面 (endgame/CircuitCamps。報いの箱を押すと開く)。
+// 組み方は選ぶ類の「三枚を扇に」(client/ui/PickStage。docs/design/56 の 2.1) の舞台で、中身は祠の報いの頁と同じく黒い紙にじかに:
+//   左上に題と野営地の名。左に階級ごとの段 (階級の名と出やすさは黒の上に階級の色、品は少し傾けた生成りの札。指すと桃色で品の説明)。
+//   右の列に入れ替えまでの時間・引き方・決まり・今日の残り・「歩き出す」(歩いているあいだは「やめる」)。下の山の上に神器の出やすさ
 public class CircuitCampScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
-    private static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
-    private static final int BG = 0x05070F;
-    private static final int PANEL = 0x181722;
-    private static final int CARD = 0x16151E;
-    private static final int GOLD = 0xF89CD2;
-    private static final int TEAL = 0xFFF6EA;
-    private static final int TEXT = 0xECE4D6;
-    private static final int DIM = 0x9A929C;
-
-    private static final int W = Golden.L_W;
-    private static final int H = Golden.L_H;
-    private static final int COLS = 7;
-    private static final int SLOT = Golden.S34;
-    private static final int SLOT_GAP = Golden.S5;
-    private static final int GRID_X = LAYOUT.body().x() + (LAYOUT.body().w() - COLS * SLOT - (COLS - 1) * SLOT_GAP) / 2;
-    private static final int GRID_Y = LAYOUT.body().y() + Golden.ROW + Golden.S5;
-    private static final int BTN_W = Golden.S89;
-    private static final int BTN_H = Golden.BTN;
+    // 段 (階級 4 + 薬・糧・鐘銭)
+    private static final int ROW_X = 16;
+    private static final int LABEL_W = 70;
+    private static final int TILE = 26;
+    private static final int TILE_STEP = 32;
+    private static final int ROW_Y = 40;
+    private static final int ROW_STEP = 32;
+    private static final int BTN_W = 96;
+    private static final int BTN_Y = 188;
 
     private final UiFit fit = new UiFit();
     private final CircuitCamps.View view;
@@ -60,18 +53,6 @@ public class CircuitCampScreen extends Screen implements jp.revati.skyabyss.clie
         return false;
     }
 
-    private static int argb(float alpha, int rgb) {
-        return (Mth.clamp((int) (alpha * 255f), 0, 255) << 24) | (rgb & 0xFFFFFF);
-    }
-
-    private void frame(GuiGraphics g, int x, int y, int w, int h, int line, int fill) {
-        g.fill(x, y, x + w, y + h, 0xFF03050A);
-        g.fill(x + 1, y + 1, x + w - 1, y + h - 1, argb(1f, line));
-        g.fill(x + 2, y + 2, x + w - 2, y + h - 2, argb(1f, fill));
-        g.fill(x + 2, y + 2, x + w - 2, y + 3, argb(0.10f, 0xFFFFFF));
-        g.fill(x + 2, y + h - 3, x + w - 2, y + h - 2, argb(0.35f, 0x000000));
-    }
-
     static int tierRgb(ItemStack s) {
         return s.getItem() instanceof ModGear g ? g.tier().rgb() : 0x9A929C;
     }
@@ -81,113 +62,124 @@ public class CircuitCampScreen extends Screen implements jp.revati.skyabyss.clie
         return h >= 24 ? Component.translatable("gui.skyabyss.camp.time", h / 24, h % 24) : Component.translatable("gui.skyabyss.camp.time_h", h, seconds / 60 % 60);
     }
 
-    private int[] slot(int i) {
-        return new int[] {GRID_X + (i % COLS) * (SLOT + SLOT_GAP), GRID_Y + (i / COLS) * (SLOT + SLOT_GAP)};
-    }
-
-    private int btnX() {
-        return LAYOUT.foot().right() - BTN_W;
-    }
-
-    private int btnY() {
-        return LAYOUT.foot().y() + 4;
+    @Override
+    protected void init() {
+        fit.fit(width, height, PickStage.W, PickStage.H, 3f);
+        addRenderableWidget(Paper.tag(Component.translatable(view.running() ? "gui.skyabyss.camp.stop" : "gui.skyabyss.camp.start"), b -> {
+            PacketDistributor.sendToServer(view.running() ? new CircuitCamps.Stop() : new CircuitCamps.Start(view.camp()));
+            onClose();
+        }).bounds(PickStage.RIGHT_X + PickStage.RIGHT_W - BTN_W, BTN_Y, BTN_W, Golden.BTN).primary().build());
     }
 
     @Override
     public boolean mouseClicked(double screenX, double screenY, int button) {
-        double mx = fit.x(screenX);
-        double my = fit.y(screenY);
-        if (button == 0 && mx >= btnX() && mx < btnX() + BTN_W && my >= btnY() && my < btnY() + BTN_H) {
-            PacketDistributor.sendToServer(view.running() ? new CircuitCamps.Stop() : new CircuitCamps.Start(view.camp()));
-            onClose();
-            return true;
+        return super.mouseClicked(fit.x(screenX), fit.y(screenY), button);
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        Paper.dim(g, width, height);
+    }
+
+    // 段ごとの品 (階級 0..3、4 = 薬・糧・鐘銭)
+    private List<List<ItemStack>> rows() {
+        List<List<ItemStack>> out = new ArrayList<>();
+        for (int t = 0; t <= CircuitCamps.TIERS.length; t++) {
+            out.add(new ArrayList<>());
         }
-        return super.mouseClicked(screenX, screenY, button);
+        for (ItemStack st : view.pool()) {
+            int t = CircuitCamps.TIERS.length;
+            if (st.getItem() instanceof ModGear gear) {
+                for (int k = 0; k < CircuitCamps.TIERS.length; k++) {
+                    if (CircuitCamps.TIERS[k] == gear.tier()) {
+                        t = k;
+                    }
+                }
+            }
+            out.get(t).add(st);
+        }
+        return out;
     }
 
     @Override
     public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
-        g.fill(0, 0, width, height, argb(0.80f, BG));
-        fit.fit(width, height, W, H, 3f, 0.5f);
+        fit.fit(width, height, PickStage.W, PickStage.H, 3f);
+        renderBackground(g, screenX, screenY, partialTick);
         int mx = (int) Math.floor(fit.x(screenX));
         int my = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
-        Golden.panel(g, LAYOUT.panel());
-        Golden.headLine(g, LAYOUT);
-        Golden.Box head = LAYOUT.head();
-        int hy = Golden.textY(head.y(), head.h());
-        g.drawString(font, title, head.x() + Golden.S5, hy, argb(1f, GOLD), false);
-        Component land = Component.translatable("label.skyabyss.facility.circuit_camp_" + view.camp() + ".sub");
-        g.drawString(font, land, head.right() - Golden.S5 - font.width(land), hy, argb(1f, TEAL), false);
-        int bx = LAYOUT.body().x() + Golden.S5;
-        g.drawString(font, Component.translatable("gui.skyabyss.camp.pool", time(view.secondsToRotate())), bx, Golden.textY(LAYOUT.body().y(), Golden.ROW), argb(1f, TEXT), false);
-        // 景品の枠 (階級の色)
-        hovered = ItemStack.EMPTY;
-        List<ItemStack> pool = view.pool();
-        for (int i = 0; i < pool.size(); i++) {
-            int[] s = slot(i);
-            ItemStack st = pool.get(i);
-            int rgb = tierRgb(st);
-            boolean on = mx >= s[0] && mx < s[0] + SLOT && my >= s[1] && my < s[1] + SLOT;
-            Golden.recess(g, new Golden.Box(s[0], s[1], SLOT, SLOT));
-            Paper.edge(g, s[0], s[1], s[0] + SLOT, s[1] + SLOT, argb(on ? 1f : 0.75f, rgb));
-            if (on) {
-                g.fill(s[0] + 1, s[1] + 1, s[0] + SLOT - 1, s[1] + SLOT - 1, argb(0.12f, GOLD));
-            }
-            g.pose().pushPose();
-            g.pose().translate(s[0] + 1, s[1] + 1, 0);
-            g.pose().scale(2f, 2f, 1f);
-            g.renderItem(st, 0, 0);
-            g.pose().popPose();
-            if (on) {
-                hovered = st;
-            }
-        }
-        // 階級ごとの出やすさ
-        int y = GRID_Y + 2 * SLOT + SLOT_GAP + Golden.S5;
+        PickStage.backdrop(g, fit, width, height);
+        PickStage.title(g, font, title, Component.translatable("label.skyabyss.facility.circuit_camp_" + view.camp() + ".sub"));
+        // 階級ごとの段
         int total = CircuitCamps.SUPPLY_WEIGHT;
         for (int w : CircuitCamps.WEIGHTS) {
             total += w;
         }
-        MutableComponent odds = Component.empty();
-        for (int t = 0; t < CircuitCamps.TIERS.length; t++) {
-            GearTier tier = CircuitCamps.TIERS[t];
-            if (t > 0) {
-                odds.append(Component.literal("  ").withColor(DIM));
+        hovered = ItemStack.EMPTY;
+        List<List<ItemStack>> rows = rows();
+        for (int t = 0; t < rows.size(); t++) {
+            int y = ROW_Y + t * ROW_STEP;
+            boolean supply = t == CircuitCamps.TIERS.length;
+            int weight = supply ? CircuitCamps.SUPPLY_WEIGHT : CircuitCamps.WEIGHTS[t];
+            double pct = weight * 100.0 / total;
+            Component name = supply ? Component.translatable("gui.skyabyss.camp.supply")
+                    : Component.literal(Component.translatable("gear.skyabyss.tier." + CircuitCamps.TIERS[t].key).getString());
+            int rgb = supply ? Golden.TEXT : CircuitCamps.TIERS[t].rgb();
+            FitText.draw(g, font, name, ROW_X, y + 4, LABEL_W - 4, rgb, false);
+            FitText.draw(g, font, Component.literal(String.format(java.util.Locale.ROOT, pct < 1 ? "%.1f%%" : "%.0f%%", pct)), ROW_X, y + 15, LABEL_W - 4,
+                    Paper.ON_BLACK_SOFT, false);
+            List<ItemStack> items = rows.get(t);
+            for (int i = 0; i < items.size(); i++) {
+                int x = ROW_X + LABEL_W + i * TILE_STEP;
+                boolean on = mx >= x && mx < x + TILE && my >= y && my < y + TILE;
+                float ang = ((t * 5 + i * 3) % 7 - 3) * 1.2f;
+                Paper.cut(g, "camp_tile" + t + "_" + i, Paper.rotRect(x + TILE / 2f, y + TILE / 2f, TILE, TILE, ang), on ? Paper.PINK : Paper.CREAM,
+                        on ? Paper.BLACK_LO : Paper.PINK_LO, 1, 2);
+                g.pose().pushPose();
+                g.pose().translate(x + 1, y + 1, 0);
+                g.pose().scale(1.5f, 1.5f, 1f);
+                g.renderItem(items.get(i), 0, 0);
+                g.pose().popPose();
+                if (on) {
+                    hovered = items.get(i);
+                }
             }
-            String pct = String.format(java.util.Locale.ROOT, CircuitCamps.WEIGHTS[t] * 100.0 / total < 1 ? "%.1f%%" : "%.0f%%", CircuitCamps.WEIGHTS[t] * 100.0 / total);
-            odds.append(Component.translatable("gear.skyabyss.tier." + tier.key).withColor(tier.rgb())).append(Component.literal(" " + pct).withColor(DIM));
-        }
-        odds.append(Component.literal("  ").withColor(DIM)).append(Component.translatable("gui.skyabyss.camp.supply").withColor(TEXT))
-                .append(Component.literal(" " + String.format(java.util.Locale.ROOT, "%.0f%%", CircuitCamps.SUPPLY_WEIGHT * 100.0 / total)).withColor(DIM));
-        g.drawString(font, odds, bx, Golden.textY(y, Golden.ROW), -1, false);
-        // 決まりと引き方
-        Component how = Component.translatable("gui.skyabyss.camp.rules").append(Component.literal(" ")).append(Component.translatable("gui.skyabyss.camp.how"));
-        for (var line : jp.revati.skyabyss.client.ui.JpWrap.split(font, how, LAYOUT.body().w() - Golden.S13)) {
-            y += Golden.ROW;
-            if (y + Golden.ROW > LAYOUT.body().bottom()) {
-                break;
+            // 神器の段には桃色の菱
+            if (!supply && CircuitCamps.TIERS[t] == GearTier.MYTHIC && !items.isEmpty()) {
+                Paper.pin(g, ROW_X + LABEL_W + TILE - 1, y, 3, true);
             }
-            g.drawString(font, line, bx, Golden.textY(y, Golden.ROW), argb(1f, Paper.ON_BLACK_DIM), false);
         }
-        Golden.Box foot = LAYOUT.foot();
-        g.drawString(font, Component.translatable("gui.skyabyss.camp.left", view.runsLeft()), foot.x() + Golden.S5, Golden.textY(foot.y(), foot.h()),
-                argb(1f, view.runsLeft() > 0 ? TEAL : DIM), false);
-        // 歩き出す (歩いているあいだは、やめる)
-        boolean on = mx >= btnX() && mx < btnX() + BTN_W && my >= btnY() && my < btnY() + BTN_H;
-        g.fill(btnX(), btnY(), btnX() + BTN_W, btnY() + BTN_H, on ? 0xFF2A2618 : 0xFF16151E);
-        Paper.edge(g, btnX(), btnY(), btnX() + BTN_W, btnY() + BTN_H, argb(1f, on ? GOLD : 0x8C2C60));
-        Component b = Component.translatable(view.running() ? "gui.skyabyss.camp.stop" : "gui.skyabyss.camp.start");
-        g.drawString(font, b, btnX() + BTN_W / 2 - font.width(b) / 2, Golden.textY(btnY(), BTN_H), argb(1f, GOLD), false);
+        // 右の列: 入れ替えまでの時間・引き方・決まり・今日の残り
+        int rx = PickStage.RIGHT_X;
+        int rw = PickStage.RIGHT_W;
+        int ry = 40;
+        ry = para(g, Component.translatable("gui.skyabyss.camp.pool", time(view.secondsToRotate())), rx, ry, rw, PickStage.ON_PINK) + Golden.S5;
+        ry = para(g, Component.translatable("gui.skyabyss.camp.how"), rx, ry, rw, Paper.ON_BLACK_SOFT) + Golden.S5;
+        para(g, Component.translatable("gui.skyabyss.camp.rules"), rx, ry, rw, Paper.ON_BLACK_DIM);
+        FitText.draw(g, font, Component.translatable("gui.skyabyss.camp.left", view.runsLeft()), rx, BTN_Y - 13, rw,
+                view.runsLeft() > 0 ? Paper.ON_BLACK_HI : Paper.ON_BLACK_DIM, false);
+        PickStage.hint(g, font, Component.translatable("gui.skyabyss.camp.chance"));
+        for (net.minecraft.client.gui.components.Renderable r : renderables) {
+            r.render(g, mx, my, partialTick);
+        }
         fit.end(g);
         if (!hovered.isEmpty()) {
             g.renderTooltip(font, hovered, screenX, screenY);
         }
     }
 
+    // 折り返した文 (返すのは次の行の y)
+    private int para(GuiGraphics g, Component text, int x, int y, int w, int color) {
+        for (FormattedCharSequence line : JpWrap.split(font, text, w)) {
+            g.drawString(font, line, x, y, color, false);
+            y += 11;
+        }
+        return y;
+    }
+
     @Override
     public int[] textBounds() {
-        fit.fit(width, height, W, H, 3f, 0.5f);
-        return fit.screenRect(0, 0, W, H);
+        fit.fit(width, height, PickStage.W, PickStage.H, 3f);
+        return fit.screenRect(0, 0, PickStage.W, PickStage.H);
     }
 }

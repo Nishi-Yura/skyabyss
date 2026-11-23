@@ -5,7 +5,7 @@ import java.util.List;
 import org.lwjgl.glfw.GLFW;
 
 import jp.revati.skyabyss.client.ui.TextStyle;
-import jp.revati.skyabyss.client.ui.Golden;
+import jp.revati.skyabyss.client.ui.PickStage;
 import jp.revati.skyabyss.client.ui.UiFit;
 import jp.revati.skyabyss.endgame.CircuitCamps;
 import jp.revati.skyabyss.item.GearTier;
@@ -22,23 +22,17 @@ import net.minecraft.world.item.Items;
 import jp.revati.skyabyss.client.ui.Paper;
 
 // 巡りの報いの幕 (endgame/CircuitCamps.Reward。巡り路を終えたとき)。Wynncraft のルートランの報いの箱のように、
-// 中央の箱が揺れて、引いた品を一つずつ枠へ出す。階級が高いほど揺れが長く強く、出たときに階級の色で光る (ヒロイック・神器は音も大きい)。
+// 中央の箱が揺れて、引いた品を一つずつ札へ出す。階級が高いほど揺れが長く強く、箱の後ろの階級の色の紙の菱が大きく育つ (ヒロイック・神器は音も大きい)。
 // 押す (か Space) と残りを全部出す。品はもう旅袋に入っている (幕は見せるだけ)。Esc で閉じる。
-// 板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 枠は 34 角・9 列 (下から詰める)、箱は残りの高さの真ん中、下の段に数と手引き
+// 組み方は選ぶ類の「三枚を扇に」(client/ui/PickStage。docs/design/56 の 2.1) の舞台: 左上に題と野営地・印・鐘銭。
+// 出た品は少し傾けた生成りの札 (下から 9 枚ずつ詰める。影は階級の色 = 意味の色を黒の側に)。出た瞬間の札は桃色で持ち上がる。下の山の上に数と手引き
 public class CircuitRewardScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
-    private static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
-    private static final int BG = 0x05070A;
-    private static final int PANEL = 0x181722;
-    private static final int CARD = 0x16151E;
-    private static final int GOLD = 0xF89CD2;
-    private static final int TEAL = 0xFFF6EA;
-    private static final int DIM = 0x9A929C;
-
-    private static final int W = Golden.L_W;
-    private static final int H = Golden.L_H;
+    private static final int W = PickStage.W;
+    private static final int H = PickStage.H;
     private static final int COLS = 9;
-    private static final int SLOT = Golden.S34;
-    private static final int GAP = Golden.S3;
+    private static final int SLOT = 30;
+    private static final int GAP = 5;
+    private static final int GRID_BOTTOM = 192;
 
     private final UiFit fit = new UiFit();
     private final CircuitCamps.Reward reward;
@@ -117,6 +111,12 @@ public class CircuitRewardScreen extends Screen implements jp.revati.skyabyss.cl
         }
     }
 
+    // 撮影用: はじめから全部出した幕
+    public CircuitRewardScreen revealed() {
+        shown = items().size();
+        return this;
+    }
+
     private void revealAll() {
         while (shown < items().size()) {
             reveal(false);
@@ -142,24 +142,13 @@ public class CircuitRewardScreen extends Screen implements jp.revati.skyabyss.cl
         return super.keyPressed(key, scan, mods);
     }
 
-    private static int argb(float alpha, int rgb) {
-        return (Mth.clamp((int) (alpha * 255f), 0, 255) << 24) | (rgb & 0xFFFFFF);
-    }
-
-    private void frame(GuiGraphics g, int x, int y, int w, int h, int line, int fill) {
-        g.fill(x, y, x + w, y + h, 0xFF03050A);
-        g.fill(x + 1, y + 1, x + w - 1, y + h - 1, argb(1f, line));
-        g.fill(x + 2, y + 2, x + w - 2, y + h - 2, argb(1f, fill));
-        g.fill(x + 2, y + 2, x + w - 2, y + 3, argb(0.10f, 0xFFFFFF));
-    }
-
     // 枠の行の数と、枠の一番上 (中身の下の端から詰める)
     private int rows() {
         return Math.max(1, (items().size() + COLS - 1) / COLS);
     }
 
     private int gridTop() {
-        return LAYOUT.body().bottom() - rows() * (SLOT + GAP) + GAP;
+        return GRID_BOTTOM - rows() * (SLOT + GAP) + GAP;
     }
 
     // 枠の所: 行ごとに中央へ寄せる (少ないときに左へ寄らない)
@@ -171,52 +160,39 @@ public class CircuitRewardScreen extends Screen implements jp.revati.skyabyss.cl
         return new int[] {left + (i % COLS) * (SLOT + GAP), gridTop() + row * (SLOT + GAP)};
     }
 
-    // 塗りつぶした丸 (半分の画素で)
-    private static void disc(GuiGraphics g, int cx, int cy, int r, int color) {
-        g.pose().pushPose();
-        g.pose().scale(0.5f, 0.5f, 1f);
-        int rr = r * 2;
-        for (int dy = -rr; dy <= rr; dy++) {
-            int half = (int) Math.floor(Math.sqrt(rr * rr - dy * dy));
-            g.fill(cx * 2 - half, cy * 2 + dy, cx * 2 + half + 1, cy * 2 + dy + 1, color);
-        }
-        g.pose().popPose();
+    @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        Paper.dim(g, width, height);
     }
 
     @Override
     public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
-        g.fill(0, 0, width, height, argb(0.88f, BG));
-        fit.fit(width, height, W, H, 3f, 0.5f);
+        fit.fit(width, height, W, H, 3f);
+        renderBackground(g, screenX, screenY, partialTick);
         int mx = (int) Math.floor(fit.x(screenX));
         int my = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
-        Golden.panel(g, LAYOUT.panel());
-        Golden.headLine(g, LAYOUT);
-        Golden.Box head = LAYOUT.head();
-        g.drawCenteredString(font, title, W / 2, Golden.textY(head.y(), head.h()), argb(1f, GOLD));
+        PickStage.backdrop(g, fit, width, height);
         Component camp = reward.camp().isEmpty() ? Component.empty() : Component.translatable("label.skyabyss.facility.circuit_camp_" + reward.camp() + ".sub");
-        Component sub = Component.translatable("gui.skyabyss.reward.sub", camp, reward.marks(), reward.coins());
-        g.drawCenteredString(font, sub, W / 2, Golden.textY(LAYOUT.body().y(), Golden.ROW), argb(1f, TEAL));
-        // 箱の所: 一行目と枠のあいだの真ん中。高さが足りなければ 2 倍 (足りれば 3 倍)
-        int boxTop = LAYOUT.body().y() + Golden.ROW + Golden.S5;
-        int room = gridTop() - Golden.S5 - boxTop;
-        int chestK = room >= 48 ? 3 : 2;
+        PickStage.title(g, font, title, Component.translatable("gui.skyabyss.reward.sub", camp, reward.marks(), reward.coins()));
+        // 箱の所: 題と札のあいだの真ん中。高さが足りなければ 2 倍 (足りれば 3 倍)
+        int boxTop = 36;
+        int room = gridTop() - 6 - boxTop;
+        int chestK = room >= 56 ? 3 : 2;
         int chestY = boxTop + Math.max(0, (room - 16 * chestK) / 2);
         int chestCy = chestY + 8 * chestK;
-        // 中央の箱: 次の品を溜めているあいだ揺れ、階級の色の光がにじむ
+        // 中央の箱: 次の品を溜めているあいだ揺れ、後ろで階級の色の紙の菱が育つ
         boolean going = shown < items().size();
         float shake = 0f;
-        int glow = 0;
         if (going) {
             GearTier next = tier(items().get(shown));
-            float k = (t + partialTick) / suspense(next);
+            float k = Math.min(1f, (t + partialTick) / suspense(next));
             shake = k * (next.atLeast(GearTier.HEROIC) ? 3.5f : next.atLeast(GearTier.EPIC) ? 2.2f : 1.2f);
-            glow = next.rgb();
-            // にじむ光: 中心ほど濃い輪を重ねる (四角く見えないよう、半径ごとに薄く)
-            int peak = (int) (k * (next.atLeast(GearTier.EPIC) ? 46 : 22));
-            for (int r = Math.min(40, room / 2 + 8); r >= 6; r -= 4) {
-                disc(g, W / 2, chestCy, r, (Math.max(0, peak - r / 3) << 24) | (glow & 0xFFFFFF));
-            }
+            int max = next.atLeast(GearTier.HEROIC) ? 40 : next.atLeast(GearTier.EPIC) ? 32 : 24;
+            int r = 2 * Math.round((8 + k * (max - 8)) / 2f);
+            float cx = W / 2f;
+            Paper.cut(g, "reward_burst", new float[] {cx, chestCy - r, cx + r, chestCy, cx, chestCy + r, cx - r, chestCy},
+                    0xFF000000 | next.rgb(), Paper.BLACK_LO, 3, 3);
         }
         float sx = (float) Math.sin((t + partialTick) * 2.1) * shake;
         float sy = (float) Math.cos((t + partialTick) * 2.7) * shake * 0.5f;
@@ -225,28 +201,26 @@ public class CircuitRewardScreen extends Screen implements jp.revati.skyabyss.cl
         g.pose().scale(chestK, chestK, 1f);
         g.renderItem(new ItemStack(Items.CHEST), 0, 0);
         g.pose().popPose();
-        // 出た品の枠
+        // 出た品の札
         hovered = ItemStack.EMPTY;
         for (int i = 0; i < items().size(); i++) {
             int[] s = slot(i);
-            Golden.recess(g, new Golden.Box(s[0], s[1], SLOT, SLOT));
+            float ang = ((i * 5) % 7 - 3) * 1.3f;
             if (i >= shown) {
+                // まだの札は伏せた灰の紙
+                Paper.cut(g, "reward_slot" + i, Paper.rotRect(s[0] + SLOT / 2f, s[1] + SLOT / 2f, SLOT - 6, SLOT - 6, ang), Paper.GREY_LO, 0, 0, 0);
                 continue;
             }
             ItemStack st = items().get(i);
-            int rgb = tier(st).rgb();
+            int rgb = 0xFF000000 | tier(st).rgb();
             boolean on = mx >= s[0] && mx < s[0] + SLOT && my >= s[1] && my < s[1] + SLOT;
-            Paper.edge(g, s[0], s[1], s[0] + SLOT, s[1] + SLOT, argb(1f, rgb));
-            if (on) {
-                g.fill(s[0] + 1, s[1] + 1, s[0] + SLOT - 1, s[1] + SLOT - 1, argb(0.12f, GOLD));
-            }
-            if (i == flashSlot && flash > 0) {
-                int a = flash * (tier(st).atLeast(GearTier.HEROIC) ? 8 : 14);
-                g.fill(s[0] - 3, s[1] - 3, s[0] + SLOT + 3, s[1] + SLOT + 3, (Math.min(220, a) << 24) | (rgb & 0xFFFFFF));
-            }
+            boolean fresh = i == flashSlot && flash > 0;
+            int lift = fresh || on ? 2 : 0;
+            Paper.cut(g, "reward_slot" + i, Paper.rotRect(s[0] + SLOT / 2f, s[1] + SLOT / 2f - lift, SLOT, SLOT, ang), fresh || on ? Paper.PINK : Paper.CREAM,
+                    rgb, 2, 3 + lift);
             g.pose().pushPose();
-            g.pose().translate(s[0] + 1, s[1] + 1, 0);
-            g.pose().scale(2f, 2f, 1f);
+            g.pose().translate(s[0] + 3, s[1] + 3 - lift, 0);
+            g.pose().scale(1.5f, 1.5f, 1f);
             g.renderItem(st, 0, 0);
             g.renderItemDecorations(font, st, 0, 0);
             g.pose().popPose();
@@ -257,8 +231,7 @@ public class CircuitRewardScreen extends Screen implements jp.revati.skyabyss.cl
         Component foot = items().isEmpty() ? Component.translatable("gui.skyabyss.reward.none")
                 : going ? Component.translatable("gui.skyabyss.reward.count", shown, items().size()).copy().append("  ").append(Component.translatable("gui.skyabyss.reward.skip"))
                 : Component.translatable("gui.skyabyss.reward.done");
-        Golden.Box fb = LAYOUT.foot();
-        g.drawCenteredString(font, foot, W / 2, Golden.textY(fb.y(), fb.h()), argb(1f, going ? Paper.ON_BLACK_DIM : TEAL));
+        PickStage.hint(g, font, foot);
         fit.end(g);
         if (!hovered.isEmpty()) {
             g.renderTooltip(font, hovered, screenX, screenY);
@@ -267,7 +240,7 @@ public class CircuitRewardScreen extends Screen implements jp.revati.skyabyss.cl
 
     @Override
     public int[] textBounds() {
-        fit.fit(width, height, W, H, 3f, 0.5f);
+        fit.fit(width, height, W, H, 3f);
         return fit.screenRect(0, 0, W, H);
     }
 }

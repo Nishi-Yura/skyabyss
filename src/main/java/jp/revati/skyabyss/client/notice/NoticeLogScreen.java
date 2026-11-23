@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jp.revati.skyabyss.client.ui.Golden;
+import jp.revati.skyabyss.client.ui.LedgerStage;
 import jp.revati.skyabyss.client.ui.ScrollPanel;
 import jp.revati.skyabyss.notice.Notice;
 import net.minecraft.client.gui.Font;
@@ -14,14 +15,13 @@ import net.minecraft.util.FormattedCharSequence;
 import jp.revati.skyabyss.client.ui.Paper;
 
 // 知らせの記録 (N)。流れた語り・獲得・場所の名前を、時刻つきで新しい順に読み返す窓。
-// 板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 中身は一覧一つ (時刻の列 34・行 13)、下の段に動かし方
+// 組み方は帳の類の「黒に書いて、目録は帯に」(client/ui/LedgerStage。docs/design/56 の 2.1): 記録は左の黒い紙にじかに (時刻の列 34・行 13)、
+// 右の生成りの帯に題と数と動かし方
 public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
-    private static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
-    private static final Golden.Box BODY = LAYOUT.body();
+    private static final Golden.Box BODY = new Golden.Box(LedgerStage.PAGE_X, LedgerStage.PAGE_Y, LedgerStage.PAGE_W, 184);
     private static final int ROW_H = Golden.ROW;
     private static final int TIME_W = Golden.S34;
     private static final int EDGE_IN = 0xFF1C1A26;
-    private static final int TEAL = 0xFF000000 | Paper.ON_BLACK_HI;
     private static final int SOFT = 0xFF000000 | Paper.ON_BLACK_SOFT;
     private final ScrollPanel list = new ScrollPanel(ROW_H * 3);
     private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
@@ -54,8 +54,8 @@ public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client
     }
 
     private void layout() {
-        fit.fit(width, height, Golden.L_W, Golden.L_H, 3f);
-        list.setViewport(BODY.x() + Golden.S5, BODY.y() + 2, BODY.w() - Golden.S5 - 2, BODY.h() - 4);
+        fit.fit(width, height, LedgerStage.W, LedgerStage.H, 3f);
+        list.setViewport(BODY.x(), BODY.y(), BODY.w(), BODY.h());
     }
 
     @Override
@@ -87,13 +87,20 @@ public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float pt) {
         // 背景 (ぼかさない) と板と中身を描く。板は窓に合わせた変換 (画素ちょうど) の中で
         layout();
-        g.fill(0, 0, width, height, 0x80000000);
+        Paper.dim(g, width, height);
         fit.begin(g);
-        Golden.panel(g, LAYOUT.panel());
-        Golden.headLine(g, LAYOUT);
-        Golden.recess(g, BODY);
-        g.drawString(font, title, LAYOUT.head().x() + Golden.S5, Golden.textY(LAYOUT.head().y(), LAYOUT.head().h()), TEAL, false);
-        List<Row> rows = rows(font, list.width() - TIME_W);
+        LedgerStage.backdrop(g, fit, width, height);
+        LedgerStage.indexHead(g, font, title);
+        List<Row> rows = rows(font, list.width() - TIME_W - ScrollPanel.GUTTER);
+        Paper.inkBegin();
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.literal(Integer.toString(NoticeLog.entries().size())), LedgerStage.INDEX_X + 2, 32, LedgerStage.INDEX_W - 4,
+                Paper.INK_HEAD, false);
+        int hy = 48;
+        for (FormattedCharSequence l : font.split(Component.translatable("gui.skyabyss.notice.log_hint"), LedgerStage.INDEX_W - 4)) {
+            g.drawString(font, l, LedgerStage.INDEX_X + 2, hy, Paper.INK_SOFT, false);
+            hy += ROW_H;
+        }
+        Paper.inkEnd();
         list.setContentHeight(rows.size() * ROW_H);
         if (rows.isEmpty()) {
             Golden.empty(g, font, BODY, Component.translatable("gui.skyabyss.notice.log_empty"));
@@ -111,14 +118,12 @@ public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client
         }
         list.end(g);
         list.drawBar(g, EDGE_IN, 0x88E45A9C);
-        Golden.Box foot = LAYOUT.foot();
-        g.drawString(font, Component.translatable("gui.skyabyss.notice.log_hint"), foot.x() + Golden.S5, Golden.textY(foot.y(), foot.h()), 0xFF000000 | Paper.ON_BLACK_DIM, false);
         fit.end(g);
     }
 
     @Override
     public int[] textBounds() {
         layout();
-        return fit.screenRect(0, 0, Golden.L_W, Golden.L_H);
+        return fit.screenRect(0, 0, LedgerStage.W, LedgerStage.H);
     }
 }

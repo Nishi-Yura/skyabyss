@@ -97,57 +97,69 @@ public class DialogueScreen extends Screen {
         double scale = Math.max(1.0, Minecraft.getInstance().getWindow().getGuiScale());
         facePx = Math.max(1, (int) Math.floor(64 * scale / PORTRAIT_PX + 0.35));
         face = (int) Math.ceil(PORTRAIT_PX * facePx / scale);
-        // 幅は黄金比の大きい板と同じ 356 (一行 28 字ほど。読みやすい長さ)。縁 8・顔の欄・あいだ 5・本文
-        panelW = Math.min(jp.revati.skyabyss.client.ui.Golden.L_W, width - 16);
-        textX = jp.revati.skyabyss.client.ui.Golden.FRAME + faceColW() + jp.revati.skyabyss.client.ui.Golden.S8;
-        textW = panelW - textX - jp.revati.skyabyss.client.ui.Golden.FRAME - jp.revati.skyabyss.client.ui.Golden.S8;
+        // 組み方は会話の「立ち札」(UI の 3 周目で会話 A。docs/design/56 の 2.1): 下に窓の幅いっぱいの黒い帯、
+        // 左に顔の札 (傾けて帯の上へはみ出す)、真ん中に本文、右に選択肢の短冊を縦に。中身の幅は 460 まで
+        panelW = Math.min(460, width - 16);
+        panelX = (width - panelW) / 2;
+        textX = faceColW() + GAP;
+        textW = panelW - textX - GAP - OPT_W;
         lines.clear();
-        lines.addAll(wrapBalanced(Component.translatable(show.textKey()).getString(), textW, font));
+        lines.addAll(wrapBalanced(Component.translatable(show.textKey()).getString(), textW - ScrollPanel.GUTTER, font));
         totalChars = lines.stream().mapToInt(String::length).sum();
         optionLines.clear();
         for (NpcNetwork.OptionView o : options()) {
-            optionLines.add(wrapBalanced(Component.translatable(o.textKey()).getString(), textW - MARK_W, font));
-        }
-        int optionsH = 0;
-        for (List<String> ol : optionLines) {
-            optionsH += Math.max(OPTION_H, ol.size() * LINE_H + 2);
+            optionLines.add(wrapBalanced(Component.translatable(o.textKey()).getString(), OPT_W - OPT_PAD - 6, font));
         }
         int textH = lines.size() * LINE_H;
-        // 本文と選択肢は右の欄に収め、窓の高さを越えるときは目盛りつきで送る (2026-10-22 の部屋の見直し)
-        int minH = 2 * jp.revati.skyabyss.client.ui.Golden.FRAME + faceColH();
-        int natural = Math.max(minH, 2 * jp.revati.skyabyss.client.ui.Golden.FRAME + 4 + textH + 8 + optionsH + 4);
-        panelH = Math.min(natural, Math.max(minH, height - 20));
-        panelX = (width - panelW) / 2;
-        panelY = height - panelH - jp.revati.skyabyss.client.ui.Golden.S8;
+        int natural = Math.max(face + 2 * PAD + 8, Math.max(textH, optionsH()) + 2 * PAD);
+        panelH = Math.min(natural, Math.max(face + 2 * PAD + 8, height - 20));
+        panelY = height - panelH - 4;
         selected = Mth.clamp(selected, 0, Math.max(0, optionLines.size() - 1));
-        body.setViewport(panelX + textX - 4, panelY + jp.revati.skyabyss.client.ui.Golden.FRAME + 2, panelW - textX - 4, panelH - 2 * jp.revati.skyabyss.client.ui.Golden.FRAME - 4);
-        body.setContentHeight(textH + 8 + optionsH);
+        body.setViewport(panelX + textX, panelY + PAD, textW, panelH - 2 * PAD);
+        body.setContentHeight(textH);
     }
 
-    // 本文と選択肢の欄 (右の欄。目盛りつきで送る)
+    // 帯の中の余白、欄のあいだ、選択肢の列の幅と、短冊の中の字の左の余白
+    private static final int PAD = 10;
+    private static final int GAP = 12;
+    private static final int OPT_W = 124;
+    private static final int OPT_PAD = 12;
+
+    private int optionH(int i) {
+        return Math.max(OPTION_H + 2, optionLines.get(i).size() * LINE_H + 3);
+    }
+
+    private int optionsH() {
+        int h = 0;
+        for (int i = 0; i < optionLines.size(); i++) {
+            h += optionH(i) + 4;
+        }
+        return h;
+    }
+
+    // 選択肢の短冊の左上 {x, y} (右の列に縦。下へ少しずつ左へずらす)
+    private int[] optionAtXY(int i) {
+        int y = panelY + PAD;
+        for (int k = 0; k < i; k++) {
+            y += optionH(k) + 4;
+        }
+        return new int[] {panelX + panelW - OPT_W - i * 3, y};
+    }
+
+    // 本文の欄 (真ん中。目盛りつきで送る)
     private final ScrollPanel body = new ScrollPanel(LINE_H * 2);
 
-    // 顔の欄 (左): 顔と、下に名前・親しさ・印。幅は顔 + 余白、高さは顔 + 3 行
+    // 顔の欄 (左の札): 顔と余白
     private int faceColW() {
-        return face + 2 * jp.revati.skyabyss.client.ui.Golden.S8;
+        return face + 12;
     }
 
     private int faceColH() {
-        return face + jp.revati.skyabyss.client.ui.Golden.S8 + 3 * jp.revati.skyabyss.client.ui.Golden.ROW + jp.revati.skyabyss.client.ui.Golden.S5;
+        return face + 40;
     }
 
-    // 選んだ選択肢が欄の中に見えるよう送る
+    // 選択肢は右の列にいつも見えている
     private void revealOption(int i) {
-        int top = lines.size() * LINE_H + 8;
-        for (int k = 0; k < i && k < optionLines.size(); k++) {
-            top += Math.max(OPTION_H, optionLines.get(k).size() * LINE_H + 2);
-        }
-        int h = i < optionLines.size() ? Math.max(OPTION_H, optionLines.get(i).size() * LINE_H + 2) : OPTION_H;
-        if (top < body.scroll()) {
-            body.setScroll(top);
-        } else if (top + h > body.scroll() + body.height()) {
-            body.setScroll(top + h - body.height());
-        }
     }
 
     // 段落ごとに折り返す。最後の行が「れど。」のように短く残る (幅の 1/4 未満) ときは、行の数を変えずに
@@ -210,14 +222,19 @@ public class DialogueScreen extends Screen {
         Font font = Minecraft.getInstance().font;
         int x = panelX;
         int y = panelY;
-        // 枠 (黄金比の板と同じ絵柄。docs/design/56) と顔の欄
-        jp.revati.skyabyss.client.ui.Golden.panel(g, new jp.revati.skyabyss.client.ui.Golden.Box(x, y, panelW, panelH));
-        int cx = x + jp.revati.skyabyss.client.ui.Golden.FRAME;
-        int cy = y + jp.revati.skyabyss.client.ui.Golden.FRAME;
-        jp.revati.skyabyss.client.ui.Golden.recess(g, new jp.revati.skyabyss.client.ui.Golden.Box(cx, cy, faceColW(), panelH - 2 * jp.revati.skyabyss.client.ui.Golden.FRAME));
-        // 顔
-        int fx = cx + jp.revati.skyabyss.client.ui.Golden.S8;
-        int fy = cy + jp.revati.skyabyss.client.ui.Golden.S8;
+        // 黒い帯 (窓の幅いっぱい。上の辺は手で決めた点で、少しずつ斜めに切る)
+        int bw = width;
+        jp.revati.skyabyss.client.ui.Paper.cut(g, "talk_band", new float[] {-4, y + 2, bw * 0.38f, y - 2, bw * 0.81f, y + 3, bw + 4, y - 1, bw + 4, height + 4, -4, height + 4},
+                jp.revati.skyabyss.client.ui.Paper.BLACK, jp.revati.skyabyss.client.ui.Paper.PINK_LO, 0, -3);
+        // 顔の札 (傾けて、帯の上へはみ出す)
+        int cw = faceColW();
+        int ch = faceColH();
+        float ccx = x + cw / 2f;
+        float ccy = y + ch / 2f - 18;
+        jp.revati.skyabyss.client.ui.Paper.cut(g, "talk_card", jp.revati.skyabyss.client.ui.Paper.rotRect(ccx, ccy, cw, ch, -4), jp.revati.skyabyss.client.ui.Paper.CREAM,
+                jp.revati.skyabyss.client.ui.Paper.BLACK_LO, 3, 3);
+        int fx = Math.round(ccx - face / 2f);
+        int fy = Math.round(ccy - ch / 2f + 6);
         g.fill(fx - 1, fy - 1, fx + face + 1, fy + face + 1, 0xFF0E0D14);
         // 画面の画素に合わせた整数倍 (facePx 画素 = 絵の 1 画素)。GUI 単位に直した倍率で拡大する
         float k = facePx / (float) Math.max(1.0, Minecraft.getInstance().getWindow().getGuiScale());
@@ -226,18 +243,20 @@ public class DialogueScreen extends Screen {
         g.pose().scale(k, k, 1);
         g.blit(faceTexture(), 0, 0, 0, 0, PORTRAIT_PX, PORTRAIT_PX, PORTRAIT_PX, PORTRAIT_PX);
         g.pose().popPose();
-        // 名前と親しさ
-        Component name = Component.translatable("entity." + show.role().replace(':', '.'));
-        int ny = fy + face + jp.revati.skyabyss.client.ui.Golden.S5;
-        jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, name, fx + face / 2, jp.revati.skyabyss.client.ui.Golden.textY(ny, LINE_H), faceColW() - 4, NAME, true);
+        // 親しさ (札の上、顔の下に墨で) と名前 (札の足に貼った桃色の短冊)
         int affinity = Minecraft.getInstance().player == null ? 0 : NpcBonds.of(Minecraft.getInstance().player).affinity(show.role());
         int tier = Affinity.tier(affinity);
-        jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.npc.tier." + tier), fx + face / 2,
-                jp.revati.skyabyss.client.ui.Golden.textY(ny + LINE_H, LINE_H), faceColW() - 4, SOFT, true);
-        drawMarks(g, fx + face / 2, ny + 2 * LINE_H + 3, tier);
-        // 本文 (一字ずつ)
+        jp.revati.skyabyss.client.ui.Paper.inkBegin();
+        jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.npc.tier." + tier), Math.round(ccx), fy + face + 3, cw - 6, SOFT, false);
+        drawMarks(g, Math.round(ccx), fy + face + 13, tier);
+        jp.revati.skyabyss.client.ui.Paper.inkEnd();
+        Component name = Component.literal(Component.translatable("entity." + show.role().replace(':', '.')).getString());
+        int sw = Math.max(cw + 4, Math.min(cw + 40, font.width(name) + 18));
+        int sy = fy + face + 23;
+        jp.revati.skyabyss.client.ui.Paper.slip(g, x - 4, sy, sw, 14, jp.revati.skyabyss.client.ui.Paper.PINK, jp.revati.skyabyss.client.ui.Paper.CREAM, jp.revati.skyabyss.client.ui.Paper.REST);
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, name, x + 6, sy + 3, sw - 14, NAME, false);
+        // 本文 (一字ずつ。帯にじかに生成りの字で)
         int tx = x + textX;
-        // 本文と選択肢は目盛りつきの欄の中 (はみ出すぶんは送る)
         body.begin(g);
         int ty = body.top();
         int left = (int) revealed;
@@ -250,10 +269,11 @@ public class DialogueScreen extends Screen {
             left -= line.length();
             ty += LINE_H;
         }
-        ty = body.top() + lines.size() * LINE_H + 8;
+        body.end(g);
+        body.drawBar(g, EDGE_IN, 0x88E45A9C);
         boolean more = show.hasNext() && show.options().isEmpty();
         if (fullyShown() && !more) {
-            // 選択肢
+            // 選択肢 (右の列に短冊を縦に。選んでいるものは桃色で浮く)
             List<NpcNetwork.OptionView> opts = options();
             int hover = optionAt(mouseX, mouseY);
             if (hover >= 0) {
@@ -261,16 +281,21 @@ public class DialogueScreen extends Screen {
             }
             for (int i = 0; i < opts.size(); i++) {
                 List<String> ol = optionLines.get(i);
-                int h = Math.max(OPTION_H, ol.size() * LINE_H + 2);
-                if (i == selected) {
-                    g.fill(tx - 4, ty - 2, x + panelW - 8, ty + h - 2, HOVER);
+                int[] p = optionAtXY(i);
+                int h = optionH(i);
+                // 窓の下に入りきらない選択肢は描かない (数字キー・上下のキーでは選べる)
+                if (p[1] + h > height) {
+                    break;
                 }
+                boolean on = i == selected;
+                int st = on ? jp.revati.skyabyss.client.ui.Paper.HOVER : jp.revati.skyabyss.client.ui.Paper.REST;
+                int[] d = jp.revati.skyabyss.client.ui.Paper.slip(g, p[0], p[1], OPT_W, h, on ? jp.revati.skyabyss.client.ui.Paper.PINK : jp.revati.skyabyss.client.ui.Paper.CREAM,
+                        on ? jp.revati.skyabyss.client.ui.Paper.CREAM : jp.revati.skyabyss.client.ui.Paper.PINK, st);
                 NpcNetwork.OptionView o = opts.get(i);
-                int color = switch (o.kind()) {
-                    case "quest" -> GOLD;
-                    case "give" -> NAME;
-                    case "leave" -> SOFT;
-                    default -> TEXT;
+                int color = on ? 0xFFFFF6EA : switch (o.kind()) {
+                    case "quest" -> 0xFF000000 | jp.revati.skyabyss.client.ui.Paper.INK_HEAD;
+                    case "leave" -> 0xFF000000 | jp.revati.skyabyss.client.ui.Paper.INK_SOFT;
+                    default -> 0xFF000000 | jp.revati.skyabyss.client.ui.Paper.INK;
                 };
                 // 番号はいつも出す (数字キーで選べるのが分かるように)。クエストに関わるものは ◆、物を渡すものは ◇ を添える
                 String mark = (i + 1) + switch (o.kind()) {
@@ -278,22 +303,19 @@ public class DialogueScreen extends Screen {
                     case "give" -> "◇";
                     default -> ".";
                 };
-                g.drawString(font, mark, tx, jp.revati.skyabyss.client.ui.Golden.textY(ty - 2, OPTION_H), i == selected ? color : (color & 0x00FFFFFF) | 0xB0000000, false);
-                int ly = ty;
-                for (String l : ol) {
-                    g.drawString(font, l, tx + MARK_W, jp.revati.skyabyss.client.ui.Golden.textY(ly - 2, OPTION_H), i == selected ? color : (color & 0x00FFFFFF) | 0xC8000000, false);
+                int lx = p[0] + d[0] + OPT_PAD;
+                int ly = p[1] + d[1] + 2;
+                for (int l = 0; l < ol.size(); l++) {
+                    g.drawString(font, (l == 0 ? mark + " " : "   ") + ol.get(l), lx, jp.revati.skyabyss.client.ui.Golden.textY(ly, LINE_H), color, false);
                     ly += LINE_H;
                 }
-                ty += h;
             }
         }
-        body.end(g);
-        body.drawBar(g, EDGE_IN, 0x88E45A9C);
-        // 続き (欄の外の右下に出す)
+        // 続き (本文の欄の右下)
         if (fullyShown() && more) {
             long t = Minecraft.getInstance().level == null ? 0 : Minecraft.getInstance().level.getGameTime();
             if ((t / 10) % 2 == 0) {
-                g.drawString(font, "▼", x + panelW - jp.revati.skyabyss.client.ui.Golden.FRAME - 12, y + panelH - jp.revati.skyabyss.client.ui.Golden.FRAME - 11, NAME, false);
+                g.drawString(font, "▼", x + textX + textW - 12, y + panelH - PAD - 8, NAME, false);
             }
         }
     }
@@ -335,16 +357,11 @@ public class DialogueScreen extends Screen {
         if (!fullyShown() || (show.hasNext() && show.options().isEmpty())) {
             return -1;
         }
-        if (!body.contains(mx, my)) {
-            return -1;
-        }
-        int ty = body.top() + lines.size() * LINE_H + 8;
         for (int i = 0; i < optionLines.size(); i++) {
-            int h = Math.max(OPTION_H, optionLines.get(i).size() * LINE_H + 2);
-            if (mx >= panelX + textX - 4 && mx < panelX + panelW - 8 && my >= ty - 2 && my < ty + h - 2) {
+            int[] p = optionAtXY(i);
+            if (mx >= p[0] && mx < p[0] + OPT_W && my >= p[1] && my < p[1] + optionH(i) + 2) {
                 return i;
             }
-            ty += h;
         }
         return -1;
     }

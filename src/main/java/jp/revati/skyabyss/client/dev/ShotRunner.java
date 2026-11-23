@@ -1230,10 +1230,109 @@ public final class ShotRunner {
             case "growth" -> jp.revati.skyabyss.rpg.client.GrowthScreen::new;
             case "journey" -> jp.revati.skyabyss.endgame.client.JourneyScreen::new;
             case "hunt" -> jp.revati.skyabyss.endgame.client.HunterNotesScreen::new;
-            case "profile" -> jp.revati.skyabyss.endgame.client.ProfileScreen::new;
+            case "hunt_demo" -> jp.revati.skyabyss.endgame.client.HunterNotesScreen::demo;
+            // K の転生の頁の二頁目 (残るもの・戻るもの・魂盤の力)
+            case "soul_terms" -> () -> new jp.revati.skyabyss.client.rebirth.SoulScreen().termsPage();
+            case "profile" -> () -> new jp.revati.skyabyss.endgame.client.ProfileScreen().page(0);
+            case "profile_titles" -> () -> new jp.revati.skyabyss.endgame.client.ProfileScreen().page(1);
+            case "profile_looks" -> () -> new jp.revati.skyabyss.endgame.client.ProfileScreen().page(2);
+            // K の転生の頁 (魂盤)。Lv 50 にしておくと恩恵の札と釦が出る
+            case "soul" -> jp.revati.skyabyss.client.rebirth.SoulScreen::new;
             case "chat" -> () -> new net.minecraft.client.gui.screens.ChatScreen("");
             case "skills" -> jp.revati.skyabyss.rpg.client.skill.SkillScreen::new;
             case "tower_desk" -> jp.revati.skyabyss.tower.client.TowerDeskScreen::sample;
+            case "tower_desk_join" -> jp.revati.skyabyss.tower.client.TowerDeskScreen::sampleJoin;
+            case "tower_desk_many" -> jp.revati.skyabyss.tower.client.TowerDeskScreen::sampleMany;
+            // 言伝ての板を、今の人の行で (状態は見本のためにばらす)
+            case "board_demo" -> () -> {
+                net.minecraft.server.level.ServerPlayer sp = mc.getSingleplayerServer().getPlayerList().getPlayer(mc.player.getUUID());
+                java.util.List<jp.revati.skyabyss.quest.free.Board.Line> lines = new java.util.ArrayList<>();
+                int i = 0;
+                for (jp.revati.skyabyss.quest.free.Board.Line l : jp.revati.skyabyss.quest.free.Board.lines(sp)) {
+                    lines.add(new jp.revati.skyabyss.quest.free.Board.Line(l.quest(), (byte) new int[] {0, 0, 1, 2, 4, 0, 5, 3}[i % 8], i == 1 ? 2 : 0));
+                    i++;
+                }
+                return new jp.revati.skyabyss.client.quest.BoardScreen(new jp.revati.skyabyss.quest.free.BoardNetwork.Open(false, 1, 3, 36_000, lines));
+            };
+            // 巡り路の野営地を見本の景品で (ふだんはサーバーが送る)
+            case "circuit_camp_demo" -> () -> {
+                jp.revati.skyabyss.endgame.CircuitCamps.Camp c = jp.revati.skyabyss.endgame.CircuitCamps.byRegion(3);
+                java.util.List<net.minecraft.world.item.ItemStack> pool = new java.util.ArrayList<>();
+                for (net.minecraft.world.item.Item i : jp.revati.skyabyss.endgame.CircuitCamps.pool(c, 0)) {
+                    pool.add(new net.minecraft.world.item.ItemStack(i));
+                }
+                return new jp.revati.skyabyss.client.endgame.CircuitCampScreen(new jp.revati.skyabyss.endgame.CircuitCamps.View(c.id(), pool, 93_000, 2, false));
+            };
+            // 巡りの報いの幕を見本の品で (reward_demo = 出している途中、reward_done = 全部出したあと)
+            case "reward_demo", "reward_done" -> () -> {
+                jp.revati.skyabyss.endgame.CircuitCamps.Camp c = jp.revati.skyabyss.endgame.CircuitCamps.byRegion(3);
+                java.util.List<net.minecraft.world.item.ItemStack> items = new java.util.ArrayList<>();
+                for (net.minecraft.world.item.Item i : jp.revati.skyabyss.endgame.CircuitCamps.pool(c, 0)) {
+                    items.add(new net.minecraft.world.item.ItemStack(i));
+                }
+                jp.revati.skyabyss.client.endgame.CircuitRewardScreen rs = new jp.revati.skyabyss.client.endgame.CircuitRewardScreen(
+                        new jp.revati.skyabyss.endgame.CircuitCamps.Reward(c.id(), 12, 340, items));
+                return name.equals("reward_done") ? rs.revealed() : rs;
+            };
+            // 取引所を見本の中身で (trade_demo_<つまみ 0..4>。ふだんはサーバーが送る)
+            case "trade_demo_0", "trade_demo_1", "trade_demo_2", "trade_demo_3", "trade_demo_4" -> () -> {
+                net.minecraft.world.item.ItemStack coin = new net.minecraft.world.item.ItemStack(jp.revati.skyabyss.facility.FacilitySetup.BELL_COIN.get(), 1200);
+                java.util.function.IntFunction<java.util.List<net.minecraft.world.item.ItemStack>> give = k -> java.util.List.of(
+                        new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_INGOT, 8 + k),
+                        new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.AMETHYST_SHARD, 3));
+                java.util.List<jp.revati.skyabyss.facility.trade.TradeNetwork.Row> market = new java.util.ArrayList<>();
+                String[] who = {"Minato", "Nagi", "Isana", "Sora", "Kai", "Umi", "Hana"};
+                for (int k = 0; k < who.length; k++) {
+                    market.add(new jp.revati.skyabyss.facility.trade.TradeNetwork.Row(k + 1, who[k], give.apply(k), java.util.List.of(coin.copyWithCount(300 + 150 * k)),
+                            3_600_000L * (5 + 13 * k), k % 3, k == 2, k % 4 != 3));
+                }
+                java.util.List<jp.revati.skyabyss.facility.trade.TradeNetwork.AppRow> apps = java.util.List.of(
+                        new jp.revati.skyabyss.facility.trade.TradeNetwork.AppRow(new java.util.UUID(1, 7), "Minato", true, java.util.List.of(coin.copyWithCount(500)), true),
+                        new jp.revati.skyabyss.facility.trade.TradeNetwork.AppRow(new java.util.UUID(3, 9), "Nagi", false, java.util.List.of(coin.copyWithCount(420)), true),
+                        new jp.revati.skyabyss.facility.trade.TradeNetwork.AppRow(new java.util.UUID(5, 2), "Isana", true, java.util.List.of(coin.copyWithCount(900)), false));
+                java.util.List<jp.revati.skyabyss.facility.trade.TradeNetwork.MineRow> mine = java.util.List.of(
+                        new jp.revati.skyabyss.facility.trade.TradeNetwork.MineRow(market.get(0), apps),
+                        new jp.revati.skyabyss.facility.trade.TradeNetwork.MineRow(market.get(1), java.util.List.of()));
+                int t = name.charAt(name.length() - 1) - '0';
+                return new jp.revati.skyabyss.client.facility.TradeScreen(new jp.revati.skyabyss.facility.trade.TradeNetwork.View(5000, true, market, mine,
+                        market.subList(2, 5), java.util.List.of(coin.copyWithCount(250), new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_INGOT, 12)), 5, t));
+            };
+            // ギルドの画面を見本の中身で (guild_demo_<つまみ 0..3> = 入っている、guild_demo_list = 入っていない)
+            case "guild_demo_0", "guild_demo_1", "guild_demo_2", "guild_demo_3", "guild_demo_list" -> () -> {
+                boolean in = !name.endsWith("list");
+                java.util.List<jp.revati.skyabyss.facility.FacilityNetwork.GuildRow> guilds = new java.util.ArrayList<>();
+                String[] gn = {"鯨見の灯", "汐守の網", "風待の羽", "灰炉の鎚", "空見の会"};
+                for (int k = 0; k < gn.length; k++) {
+                    guilds.add(new jp.revati.skyabyss.facility.FacilityNetwork.GuildRow("g" + k, gn[k], "T" + k, k * 3 % 16, 0, 3 + k * 4, k % 2 == 0, k == 1, "Minato", ""));
+                }
+                java.util.List<jp.revati.skyabyss.facility.FacilityNetwork.MemberRow> members = new java.util.ArrayList<>();
+                members.add(new jp.revati.skyabyss.facility.FacilityNetwork.MemberRow(mc.player.getUUID(), mc.player.getName().getString(), true, true, 2));
+                String[] mn = {"Minato", "Nagi", "Isana", "Sora", "Kai"};
+                for (int k = 0; k < mn.length; k++) {
+                    members.add(new jp.revati.skyabyss.facility.FacilityNetwork.MemberRow(new java.util.UUID(k + 1, 3), mn[k], false, k % 2 == 0, k == 0 ? 1 : 0));
+                }
+                java.util.List<jp.revati.skyabyss.facility.FacilityNetwork.MemberRow> apps = java.util.List.of(
+                        new jp.revati.skyabyss.facility.FacilityNetwork.MemberRow(new java.util.UUID(9, 9), "Umi", false, true, 0));
+                jp.revati.skyabyss.facility.FacilityNetwork.ReqView req = new jp.revati.skyabyss.facility.FacilityNetwork.ReqView("bones",
+                        new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_INGOT), 200, 120, false, false, 34,
+                        java.util.List.of("Minato", "Dev", "Nagi"), java.util.List.of(50, 34, 20));
+                int t = in ? name.charAt(name.length() - 1) - '0' : 0;
+                return new jp.revati.skyabyss.client.facility.GuildScreen(new jp.revati.skyabyss.facility.FacilityNetwork.GuildView(in ? "g0" : "", in, true, guilds,
+                        in ? members : java.util.List.of(), in ? apps : java.util.List.of(), 20, in ? 2 : 0, 1, req, "", "", java.util.List.of(), java.util.List.of(3, 1, 0), 0, t));
+            };
+            // 封切り師の画面を見本の箱で (box_demo_list / spin / card / summary)
+            case "box_demo_list", "box_demo_spin", "box_demo_card", "box_demo_summary" -> () -> jp.revati.skyabyss.client.box.BoxScreen.demo(name.substring("box_demo_".length()));
+            // パーティー募集を見本の一覧で (6 件: 自分の募集・満員を含む。4 件より多いのでめくりが出る)
+            case "party_finder_demo" -> () -> {
+                java.util.List<jp.revati.skyabyss.party.PartyFinder.Row> rows = java.util.List.of(
+                        new jp.revati.skyabyss.party.PartyFinder.Row(mc.player.getName().getString(), "route", 2, 48, true),
+                        new jp.revati.skyabyss.party.PartyFinder.Row("Minato", "dungeon", 3, 51, false),
+                        new jp.revati.skyabyss.party.PartyFinder.Row("Nagi", "story", 4, 22, false),
+                        new jp.revati.skyabyss.party.PartyFinder.Row("Isana", "tower", 1, 60, false),
+                        new jp.revati.skyabyss.party.PartyFinder.Row("Sora", "fishing", 2, 30, false),
+                        new jp.revati.skyabyss.party.PartyFinder.Row("Kai", "lootrun", 3, 44, false));
+                return jp.revati.skyabyss.party.client.PartyFinderScreen.demo(new jp.revati.skyabyss.party.PartyNetwork.Finder(rows, "route", true, true));
+            };
             case "skills_build" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().buildPage();
             case "job_choice" -> jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen::new;
             case "job_choice_shaman" -> () -> new jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen().pick(jp.revati.skyabyss.rpg.skill.Job.SHAMAN);
@@ -1252,8 +1351,44 @@ public final class ShotRunner {
             case "party" -> jp.revati.skyabyss.party.client.PartyScreen::new;
             // パーティー募集の画面 (開いてから 2 秒ほどで一覧が届く)
             case "party_finder" -> () -> new jp.revati.skyabyss.party.client.PartyFinderScreen(null);
+            // 見本の中身で開く (切り絵の 3 周目の確かめ。ふだんはサーバーが送る)
+            case "party_demo" -> () -> {
+                String self = mc.player.getUUID().toString();
+                jp.revati.skyabyss.party.client.PartyClient.receive(new jp.revati.skyabyss.party.PartyNetwork.Sync(2, 30, 2, "?unseen", 70, java.util.List.of(
+                        new jp.revati.skyabyss.party.PartyNetwork.Member(self, mc.player.getName().getString(), 50, 180, 225, true, true, true),
+                        new jp.revati.skyabyss.party.PartyNetwork.Member(new java.util.UUID(1, 7).toString(), "Minato", 48, 200, 240, true, true, false),
+                        new jp.revati.skyabyss.party.PartyNetwork.Member(new java.util.UUID(3, 9).toString(), "Nagi", 47, 90, 180, true, false, false),
+                        new jp.revati.skyabyss.party.PartyNetwork.Member(new java.util.UUID(5, 2).toString(), "Isana", 45, 0, 200, false, false, false)), "Sora"));
+                return new jp.revati.skyabyss.party.client.PartyScreen();
+            };
+            case "records_demo" -> () -> {
+                java.util.List<jp.revati.skyabyss.facility.KeepRecords.TitanPage> pages = new java.util.ArrayList<>();
+                for (String t : new String[] {jp.revati.skyabyss.progress.Titans.STONE_WHALE, jp.revati.skyabyss.progress.Titans.TIDE_SHELL,
+                        jp.revati.skyabyss.progress.Titans.THUNDER_WING, jp.revati.skyabyss.progress.Titans.EMBER}) {
+                    java.util.List<jp.revati.skyabyss.facility.KeepRecords.Row> rows = new java.util.ArrayList<>();
+                    int i = 0;
+                    for (jp.revati.skyabyss.trial.Trial.Def d : jp.revati.skyabyss.trial.TrialCatalog.of(t)) {
+                        rows.add(new jp.revati.skyabyss.facility.KeepRecords.Row(d.id(), i % 3 != 2, i, i % 2, i % 4, 3));
+                        i++;
+                    }
+                    pages.add(new jp.revati.skyabyss.facility.KeepRecords.TitanPage(t, pages.size() < 2, pages.isEmpty(), 4, 21_000L, rows));
+                }
+                return new jp.revati.skyabyss.client.facility.RecordsScreen(new jp.revati.skyabyss.facility.KeepRecords.View(pages, 2, 9));
+            };
+            case "town_guide_demo" -> () -> {
+                java.util.List<jp.revati.skyabyss.facility.TownGuideNetwork.Entry> es = new java.util.ArrayList<>();
+                int i = 0;
+                for (jp.revati.skyabyss.facility.TownGuide.Place p : jp.revati.skyabyss.facility.TownGuide.PLACES) {
+                    es.add(new jp.revati.skyabyss.facility.TownGuideNetwork.Entry(p.id(), p.group().ordinal(), mc.player.blockPosition().offset(10 + i * 7, 0, i * 3)));
+                    i++;
+                }
+                return new jp.revati.skyabyss.client.facility.TownGuideScreen(new jp.revati.skyabyss.facility.TownGuideNetwork.Menu(es));
+            };
+            case "route_boon_demo" -> () -> new jp.revati.skyabyss.client.trial.RouteBoonScreen(new jp.revati.skyabyss.trial.RouteBoons.Offer(true, 0, 1, 30));
             // 祠の画面・背の試練の板を見本の中身で (ふだんはサーバーが大陸の世界で送る。重なり検査のため)
             case "shrine_demo" -> () -> new jp.revati.skyabyss.client.trial.TrialBoardScreen(trialDemo(true));
+            case "shrine_demo_codex", "shrine_demo_vow", "shrine_demo_rewards", "shrine_demo_how" -> () -> new jp.revati.skyabyss.client.trial.TrialBoardScreen(trialDemo(true))
+                    .page(java.util.List.of("codex", "vow", "rewards", "how").indexOf(name.substring("shrine_demo_".length())) + 1);
             case "trial_board_demo" -> () -> new jp.revati.skyabyss.client.trial.TrialBoardScreen(trialDemo(false));
             case "deep_choice" -> () -> new jp.revati.skyabyss.client.dungeon.DeepChoiceScreen(new jp.revati.skyabyss.dungeon.DeepChoice.Open("deep_fort",
                     jp.revati.skyabyss.dungeon.DungeonMood.values()[0].nameKey(), jp.revati.skyabyss.dungeon.DungeonMood.values()[0].descKey()));

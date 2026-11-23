@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.client.record;
 
+import jp.revati.skyabyss.client.ui.LedgerStage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,9 +25,10 @@ import jp.revati.skyabyss.client.ui.Paper;
 // 記録 (record/RecordsHub。2026-11-05 の ct_records = one)。見出しの下につまみ 7 (踏破・塔・深み・釣り・早駆け・転生・空見)、
 // その下の欄に頁の行 (サーバーが作った文。見出しは金)。行は欄の幅で折り返し、目盛りつきで送る。つまみを押すとその頁をサーバーへ頼む
 public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
-    static final Golden.Layout LAYOUT = Golden.Layout.large(0);
-    static final Golden.Box TABS = new Golden.Box(LAYOUT.body().x(), LAYOUT.body().y(), LAYOUT.body().w(), Golden.BTN);
-    static final Golden.Box LIST = new Golden.Box(LAYOUT.body().x(), TABS.bottom() + Golden.GAP, LAYOUT.body().w(), LAYOUT.body().bottom() - TABS.bottom() - Golden.GAP);
+    // 組み方は帳の類の「黒に書いて、目録は帯に」(client/ui/LedgerStage。docs/design/56 の 2.1): 頁の行は左の黒い紙にじかに、
+    // つまみは右の生成りの帯の目録 (選んだ頁は桃色の付箋)。転生の頁の「順位表に載せる」は下の山の上
+    static final Golden.Box LIST = new Golden.Box(LedgerStage.PAGE_X - Golden.S8, LedgerStage.BODY_Y, LedgerStage.PAGE_W + Golden.S8, LedgerStage.BODY_H);
+    static final int TAB_ROW = 16;
     static final int LINE_H = Golden.ROW;
 
     private final UiFit fit = new UiFit();
@@ -81,8 +83,8 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
     }
 
     private void layout() {
-        fit.fit(width, height, Golden.L_W, Golden.L_H, 3f);
-        panel.setViewport(LIST.x() + Golden.S5, LIST.y() + 3, LIST.w() - Golden.S5 - 3, LIST.h() - 6);
+        fit.fit(width, height, LedgerStage.W, LedgerStage.H, 3f);
+        panel.setViewport(LIST.x() + Golden.S5, LIST.y(), LIST.w() - Golden.S5, LIST.h());
     }
 
     private void rewrap() {
@@ -103,9 +105,8 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
         layout();
         tabButtons.clear();
         int n = RecordsHub.TABS.length;
-        int w = (TABS.w() - (n - 1) * 3) / n;
         for (int i = 0; i < n; i++) {
-            GoldTab b = addRenderableWidget(new GoldTab(TABS.x() + i * (w + 3), TABS.y(), w, i));
+            GoldTab b = addRenderableWidget(new GoldTab(LedgerStage.INDEX_X - 4, LedgerStage.LIST_Y + i * TAB_ROW, LedgerStage.INDEX_W + 6, i));
             b.selected = i == tab;
             tabButtons.add(b);
         }
@@ -114,7 +115,7 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
             hidden = !hidden;
             PacketDistributor.sendToServer(new jp.revati.skyabyss.rebirth.RebirthNet.HiddenPayload(hidden));
             x.setMessage(hideLabel());
-        }).bounds(LAYOUT.head().x(), LAYOUT.head().y() + 4, Golden.S89 + Golden.S55, Golden.BTN).build());
+        }).bounds(LedgerStage.PAGE_X + LedgerStage.PAGE_W - Golden.S89 - Golden.S55, LedgerStage.FOOT_Y, Golden.S89 + Golden.S55, Golden.BTN).build());
         hideButton.visible = tab == RecordsHub.REBIRTH;
         rewrap();
     }
@@ -126,7 +127,7 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fill(0, 0, width, height, 0x80000000);
+        Paper.dim(g, width, height);
     }
 
     @Override
@@ -136,8 +137,9 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
         int mx = (int) Math.floor(fit.x(screenX));
         int my = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
-        Golden.frame(g, font, LAYOUT, Component.translatable("gui.skyabyss.records_hub.tab." + RecordsHub.TABS[tab]).copy().append(" · ").append(title));
-        Golden.recess(g, LIST);
+        LedgerStage.backdrop(g, fit, width, height);
+        LedgerStage.indexHead(g, font, title);
+        LedgerStage.pageTitle(g, font, Component.translatable("gui.skyabyss.records_hub.tab." + RecordsHub.TABS[tab]), null);
         panel.begin(g);
         for (int i = 0; i < wrapped.size(); i++) {
             int y = panel.top() + i * LINE_H;
@@ -187,7 +189,7 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
     @Override
     public int[] textBounds() {
         layout();
-        return fit.screenRect(0, 0, Golden.L_W, Golden.L_H);
+        return fit.screenRect(0, 0, LedgerStage.W, LedgerStage.H);
     }
 
     // つまみ (金縁の板の絵柄。旅の記録のつまみと同じ Golden.tab)。選んでいる頁を押しても頼み直さない
@@ -196,7 +198,7 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
         boolean selected;
 
         GoldTab(int x, int y, int w, int which) {
-            super(x, y, w, Golden.BTN, Component.translatable("gui.skyabyss.records_hub.tab." + RecordsHub.TABS[which]));
+            super(x, y, w, TAB_ROW - 2, Component.translatable("gui.skyabyss.records_hub.tab." + RecordsHub.TABS[which]));
             this.which = which;
         }
 
@@ -209,7 +211,14 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
 
         @Override
         protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-            Golden.tab(g, font, new Golden.Box(getX(), getY(), getWidth(), getHeight()), getMessage(), selected, isHoveredOrFocused());
+            // 目録の一行 (選んでいる頁は桃色の付箋)
+            if (selected) {
+                LedgerStage.flag(g, getY(), getHeight());
+            } else if (isHoveredOrFocused()) {
+                LedgerStage.hover(g, getY(), getHeight());
+            }
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, getMessage(), getX() + Golden.S13, getY() + (getHeight() - 7) / 2, getWidth() - Golden.S13 - 2,
+                    selected ? LedgerStage.ON_PINK : Paper.INK, false);
         }
 
         @Override

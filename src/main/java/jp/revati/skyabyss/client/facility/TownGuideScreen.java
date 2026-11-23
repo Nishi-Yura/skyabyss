@@ -1,5 +1,7 @@
 package jp.revati.skyabyss.client.facility;
 
+import jp.revati.skyabyss.client.ui.Paper;
+import jp.revati.skyabyss.client.ui.LedgerStage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,11 +23,15 @@ import net.minecraft.sounds.SoundEvents;
 //   施設の名前・ひとこと・いまの場所からの距離。案内中の施設には「案内中」。行を押すと、その戸までの灯りがともり画面が閉じる。
 //   下に「案内をやめる」(案内中だけ) と「閉じる」。板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 一行目に手引き、その下に一覧 (行 13)、下の段に釦
 public class TownGuideScreen extends Screen {
-    private static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
-    private static final Golden.Box LIST = LAYOUT.body().afterTop(Golden.ROW);
+    // 組み方は帳の類の「黒に書いて、目録は帯に」(client/ui/LedgerStage。docs/design/56 の 2.1): 行き先の一覧は左の黒い紙にじかに (種類の色は意味の色)、
+    // 右の生成りの帯に題・手引き・「案内をやめる」「閉じる」
+    private static final Golden.Box LIST = new Golden.Box(LedgerStage.PAGE_X - 6, LedgerStage.PAGE_Y, LedgerStage.PAGE_W + 6, 184);
+    private static final int BTN_X = LedgerStage.INDEX_X;
+    private static final int STOP_Y = 176;
+    private static final int CLOSE_Y = 194;
     private static final int ROW_H = Golden.ROW;
     private static final int HEAD_H = Golden.ROW;
-    private static final int BTN_W = Golden.S89;
+    private static final int BTN_W = LedgerStage.INDEX_W - 4;
     private static final int BTN_H = Golden.BTN;
     private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
 
@@ -69,26 +75,22 @@ public class TownGuideScreen extends Screen {
 
     @Override
     protected void init() {
-        fit.fit(width, height, Golden.L_W, Golden.L_H, 3f);
-        w = Golden.L_W;
-        h = Golden.L_H;
+        fit.fit(width, height, LedgerStage.W, LedgerStage.H, 3f);
+        w = LedgerStage.W;
+        h = LedgerStage.H;
         x0 = 0;
         y0 = 0;
         listX = LIST.x();
         listY = LIST.y();
         listW = LIST.w();
         listH = LIST.h();
-        rows.setViewport(listX + 2, listY + 2, listW - 3, listH - 4);
+        rows.setViewport(listX, listY, listW, listH);
         rows.setContentHeight(contentHeight());
-    }
-
-    private int buttonY() {
-        return LAYOUT.foot().y() + 4;
     }
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fill(0, 0, width, height, 0xA00E0D14);
+        Paper.dim(g, width, height);
     }
 
     @Override
@@ -97,15 +99,17 @@ public class TownGuideScreen extends Screen {
         int mx = (int) Math.floor(fit.x(sx));
         int my = (int) Math.floor(fit.y(sy));
         fit.begin(g);
-        Golden.panel(g, LAYOUT.panel());
-        Golden.headLine(g, LAYOUT);
+        LedgerStage.backdrop(g, fit, width, height);
         Font font = this.font;
-        Golden.Box head = LAYOUT.head();
-        FacilityUi.gem(g, head.x() + 4, head.y() + head.h() / 2);
-        g.drawString(font, title, head.x() + 10, Golden.textY(head.y(), head.h()), FacilityUi.TEXT, false);
-        jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(Component.translatable("gui.skyabyss.town_guide.hint").getString()),
-                LAYOUT.body().x() + Golden.S5, Golden.textY(LAYOUT.body().y(), Golden.ROW), LAYOUT.body().w() - Golden.S13, FacilityUi.DIM, false);
-        Golden.recess(g, LIST);
+        LedgerStage.indexHead(g, font, title);
+        int hy = 32;
+        for (net.minecraft.util.FormattedCharSequence l : font.split(Component.literal(Component.translatable("gui.skyabyss.town_guide.hint").getString()), LedgerStage.INDEX_W - 4)) {
+            if (hy + 9 > STOP_Y - 4) {
+                break;
+            }
+            g.drawString(font, l, LedgerStage.INDEX_X + 2, hy, Paper.INK_SOFT, false);
+            hy += ROW_H;
+        }
         String current = TownGuideClient.currentId();
         Minecraft mc = Minecraft.getInstance();
         rows.begin(g);
@@ -150,9 +154,10 @@ public class TownGuideScreen extends Screen {
                     g.drawString(font, far, right - 4 - fw, Golden.textY(y, lh), on ? FacilityUi.TEAL : FacilityUi.DIM, false);
                     int dx = nx + Math.max(78, font.width(name) + 8);
                     int room = right - 10 - fw - dx;
+                    // ひとことは入るときだけ (縮めた字は使わない。入らない分は流す)
                     if (room > 30) {
-                        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.town_guide.place." + e.id() + ".desc"), dx, Golden.textY(y, lh), room,
-                                FacilityUi.DIM, false);
+                        jp.revati.skyabyss.client.ui.Marquee.draw(g, font, Component.translatable("gui.skyabyss.town_guide.place." + e.id() + ".desc").getVisualOrderText(), dx,
+                                Golden.textY(y, lh), room, FacilityUi.DIM, false);
                     }
                 }
             }
@@ -160,41 +165,35 @@ public class TownGuideScreen extends Screen {
         }
         rows.end(g);
         rows.drawBar(g, 0xFF0E0D14, FacilityUi.TEAL);
-        // 釦 (下の段)
-        int by = buttonY();
-        Golden.Box foot = LAYOUT.foot();
+        // 釦 (帯の下)
         if (current != null) {
-            button(g, foot.x(), by, Component.translatable("gui.skyabyss.town_guide.stop"), mx, my);
+            button(g, BTN_X, STOP_Y, Component.translatable("gui.skyabyss.town_guide.stop"), mx, my);
         }
-        button(g, foot.right() - BTN_W, by, Component.translatable("gui.skyabyss.town_guide.close"), mx, my);
+        button(g, BTN_X, CLOSE_Y, Component.translatable("gui.skyabyss.town_guide.close"), mx, my);
         fit.end(g);
     }
 
     private void button(GuiGraphics g, int x, int y, Component label, int mx, int my) {
         boolean hover = mx >= x && mx < x + BTN_W && my >= y && my < y + BTN_H;
-        g.fill(x, y, x + BTN_W, y + BTN_H, hover ? FacilityUi.ROW_HOVER : FacilityUi.ROW);
-        g.renderOutline(x, y, BTN_W, BTN_H, hover ? FacilityUi.TEAL : FacilityUi.LINE);
-        g.drawCenteredString(font, label, x + BTN_W / 2, Golden.textY(y, BTN_H), hover ? FacilityUi.TEXT : FacilityUi.DIM);
+        Paper.button(g, font, x, y, BTN_W, BTN_H, label, false, Paper.state(true, hover));
     }
 
     @Override
     public boolean mouseClicked(double sx, double sy, int button) {
         double mx = fit.x(sx);
         double my = fit.y(sy);
-        Golden.Box foot = LAYOUT.foot();
         if (button == 0) {
             if (rows.mouseClicked(mx, my, button)) {
                 return true;
             }
-            int by = buttonY();
-            if (my >= by && my < by + BTN_H) {
-                if (TownGuideClient.currentId() != null && mx >= foot.x() && mx < foot.x() + BTN_W) {
+            if (mx >= BTN_X && mx < BTN_X + BTN_W) {
+                if (TownGuideClient.currentId() != null && my >= STOP_Y && my < STOP_Y + BTN_H) {
                     TownGuideClient.pick("");
                     click();
                     onClose();
                     return true;
                 }
-                if (mx >= foot.right() - BTN_W && mx < foot.right()) {
+                if (my >= CLOSE_Y && my < CLOSE_Y + BTN_H) {
                     click();
                     onClose();
                     return true;

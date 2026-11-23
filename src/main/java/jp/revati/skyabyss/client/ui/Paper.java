@@ -277,6 +277,140 @@ public final class Paper {
         g.fill(x1 - 1, y0, x1, y1, color);
     }
 
+    // ---------- 舞台 (論理の 408x228。職を選ぶ画面・スキルの木と同じ。docs/design/56 の 2.1) ----------
+    public static final int STAGE_W = 408;
+    public static final int STAGE_H = 228;
+
+    // 黒い紙と下の桃色の山を窓の端まで敷く (fit.begin のあと、論理の座標で)。peaks = 山の峰 {論理の x, base 226 からの高さ}、
+    // x が 0 より小さい / STAGE_W より大きい峰は窓の端まで伸ばす。dm = 紙の上の菱 {x, y, 大きさ, 桃色なら 1}
+    public static void stage(GuiGraphics g, UiFit fit, int width, int height, String name, float[][] peaks, int[][] dm) {
+        inkDepth = 0;
+        int x0 = (int) Math.floor(fit.x(0));
+        int y0 = (int) Math.floor(fit.y(0));
+        int sw = (int) Math.ceil(fit.x(width)) - x0;
+        int sh = (int) Math.ceil(fit.y(height)) - y0;
+        int ox = -x0;
+        int oy = -y0;
+        draw(g, "stage_" + name, ox + "," + oy + "," + sw + "x" + sh, x0, y0, sw, sh, s -> {
+            float[] black = {7, 10, sw * 0.22f, 6, sw * 0.47f, 9, sw * 0.71f, 4, sw - 9, 8, sw - 5, sh * 0.30f, sw - 8, sh * 0.62f, sw - 4, sh - 12,
+                    sw * 0.64f, sh - 6, sw * 0.31f, sh - 9, 10, sh - 5, 5, sh * 0.58f, 8, sh * 0.27f};
+            s.poly(black, BLACK);
+            float base = oy + 226;
+            float[] p = new float[peaks.length * 2 + 4];
+            for (int i = 0; i < peaks.length; i++) {
+                p[i * 2] = peaks[i][0] < 0 ? -20 : peaks[i][0] > STAGE_W ? sw + 20 : ox + peaks[i][0];
+                p[i * 2 + 1] = base + peaks[i][1];
+            }
+            p[peaks.length * 2] = sw + 20;
+            p[peaks.length * 2 + 1] = sh + 4;
+            p[peaks.length * 2 + 2] = -20;
+            p[peaks.length * 2 + 3] = sh + 4;
+            s.poly(p, PINK_LO);
+            for (int i = 0; i + 1 < peaks.length; i++) {
+                float ax = p[i * 2], ay = p[i * 2 + 1], bx = p[i * 2 + 2], by = p[i * 2 + 3];
+                int n = (int) Math.max(1, Math.abs(bx - ax));
+                for (int k = 0; k <= n; k++) {
+                    s.px(Math.round(ax + (bx - ax) * k / n), Math.round(ay + (by - ay) * k / n), PINK);
+                }
+            }
+            for (int[] d : dm) {
+                s.diamond(ox + d[0], oy + d[1], d[2], d[3] == 1 ? PINK : GREY, d[3] == 1 ? PINK_HI : 0xFFD8D2CA);
+            }
+        });
+    }
+
+    // 紙一枚 (点の並びは論理の座標)。under が 0 でなければ、その色の影を (ux, uy) ずらして下に。
+    // 名前ごとに一枚の絵を使い回し、形か色が変わったときだけ塗り直す (行ごとの紙は名前に行の番号を入れる)
+    public static void cut(GuiGraphics g, String name, float[] pts, int body, int under, float ux, float uy) {
+        float minX = Float.MAX_VALUE, minY = Float.MAX_VALUE, maxX = -Float.MAX_VALUE, maxY = -Float.MAX_VALUE;
+        for (int i = 0; i < pts.length; i += 2) {
+            minX = Math.min(minX, pts[i]);
+            maxX = Math.max(maxX, pts[i]);
+            minY = Math.min(minY, pts[i + 1]);
+            maxY = Math.max(maxY, pts[i + 1]);
+        }
+        int x = (int) Math.floor(minX) - 1;
+        int y = (int) Math.floor(minY) - 1;
+        int w = (int) Math.ceil(maxX) - x + 2 + (int) Math.ceil(Math.abs(ux));
+        int h = (int) Math.ceil(maxY) - y + 2 + (int) Math.ceil(Math.abs(uy));
+        float[] q = pts.clone();
+        for (int i = 0; i < q.length; i += 2) {
+            q[i] -= x;
+            q[i + 1] -= y;
+        }
+        StringBuilder key = new StringBuilder(Integer.toHexString(body)).append(':').append(Integer.toHexString(under));
+        for (float f : pts) {
+            key.append(',').append(Math.round(f * 4));
+        }
+        draw(g, "cut_" + name, key.toString(), x, y, w, h, s -> {
+            if (under != 0) {
+                s.poly(q, under, ux, uy);
+            }
+            s.poly(q, body);
+        });
+    }
+
+    // 四隅を手でずらした四角の紙 (x, y, w, h と四隅のずれ {左上 y, 右上 y, 右下 x, 左下 x})
+    public static float[] quad(float x, float y, float w, float h, float a, float b, float c, float d) {
+        return new float[] {x, y + a, x + w, y + b, x + w + c, y + h, x + d, y + h};
+    }
+
+    // 菱の留め (r = 中心から角まで)
+    public static void pin(GuiGraphics g, int cx, int cy, int r, boolean pink) {
+        draw(g, "pin_" + r + "_" + pink, "", cx - r, cy - r, 2 * r + 1, 2 * r + 1, s -> s.diamond(r, r, r, pink ? PINK : GREY, pink ? PINK_HI : 0xFFD8D2CA));
+    }
+
+    // ---------- 生成りの紙の上の字 ----------
+    // inkBegin と inkEnd のあいだに描く字 (drawString の地の色) は、黒い紙の上の色から生成りの上の墨の色へ写す (mixin/GuiGraphicsMixin)。
+    // 黒い紙の上の色で書いてある画面の中身を、そのまま生成りの紙に載せるため。字の色が文の中で決めてあるもの (品の稀さの色など) は写らない
+    private static int inkDepth;
+
+    public static void inkBegin() {
+        inkDepth++;
+    }
+
+    public static void inkEnd() {
+        inkDepth = Math.max(0, inkDepth - 1);
+    }
+
+    public static boolean inking() {
+        return inkDepth > 0;
+    }
+
+    public static int inkColor(int argb) {
+        return inkDepth <= 0 ? argb : inkOf(argb);
+    }
+
+    // 黒い紙の上の字の色 -> 生成りの上の墨の色 (いつでも写す)
+    public static int inkOf(int argb) {
+        int a = argb & 0xFF000000;
+        if (a == 0) {
+            a = 0xFF000000;
+        }
+        int rgb = argb & 0xFFFFFF;
+        int out;
+        switch (rgb) {
+            case 0xF89CD2, 0xE9C46A, 0xE45A9C, 0xF2D78A -> out = INK_HEAD;
+            case 0x9A929C, 0xB4BBD6, 0xC4BCC4, 0xA8A29A -> out = INK_SOFT;
+            case 0x7C7480, 0x8892B6, 0x707070, 0x808080, 0x5A5460 -> out = 0x8A8086;
+            case 0xD9779A, 0xF0607A, 0xE87C9A, 0xFF5555 -> out = 0xB0102C;
+            case 0x7BD66B, 0x55FF55, 0x7FFFA0 -> out = 0x2E7A3A;
+            default -> {
+                int r = (rgb >> 16) & 0xFF;
+                int g = (rgb >> 8) & 0xFF;
+                int b = rgb & 0xFF;
+                // 明るい字 (黒の上の地の文・目立つ字) は墨、ほかの色はそのまま
+                out = r * 3 + g * 6 + b > 1800 ? INK : rgb;
+            }
+        }
+        return a | out;
+    }
+
+    // 窓の外 (舞台の外) を薄く暗くする地
+    public static void dim(GuiGraphics g, int width, int height) {
+        g.fill(0, 0, width, height, 0xA00E0D14);
+    }
+
     // Button.builder の代わり (同じ書き方で Tag を作る)。主の釦は .primary()
     public static TagBuilder tag(Component text, net.minecraft.client.gui.components.Button.OnPress onPress) {
         return new TagBuilder(text, onPress);

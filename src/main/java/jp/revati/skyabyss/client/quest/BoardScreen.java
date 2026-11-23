@@ -1,11 +1,13 @@
 package jp.revati.skyabyss.client.quest;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import jp.revati.skyabyss.client.ui.FitText;
 import jp.revati.skyabyss.client.ui.Golden;
-import jp.revati.skyabyss.client.ui.ScrollPanel;
-import jp.revati.skyabyss.lore.LoreWrap;
+import jp.revati.skyabyss.client.ui.JpWrap;
+import jp.revati.skyabyss.client.ui.Marquee;
+import jp.revati.skyabyss.client.ui.Paper;
+import jp.revati.skyabyss.client.ui.ShopStage;
 import jp.revati.skyabyss.quest.QuestDef;
 import jp.revati.skyabyss.quest.free.Board;
 import jp.revati.skyabyss.quest.free.BoardNetwork;
@@ -19,34 +21,23 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.neoforged.neoforge.network.PacketDistributor;
-import jp.revati.skyabyss.client.ui.Paper;
 
-// 言伝ての板の画面。今日の頼みごと (日替わり) と、今週の頼みごと (週替わり) を紙の札のように並べる。
+// 言伝ての板の画面。今日の頼みごと (日替わり) と、今週の頼みごと (週替わり) を並べる。
 // 受けられるものには「受ける」。まだ物語が届かないものは題を伏せる (「？？？」と、何をすれば開くか)。
 // 状態はすべてサーバーが決めて送る (BoardNetwork.Open)。押すとサーバーが確かめ直して、新しい中身を送り返す
-// 板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 見出しの帯に題と今日の数、一行目に次の張り替え、その下に札 (一行 34。送れる。受ける釦は札に合わせて動く)、下の段に手引き
+// 組み方は店の類の「帳面と台」(client/ui/ShopStage。docs/design/56 の 2.1):
+//   左の帳面に頼みを一つ一行 (左に週替わり = 桃色・日替わり = 灰の菱、題 …… 状態、二行目に類か開き方)。押して選んだ行は桃色の紙。
+//   右の黒い紙に、選んだ頼みの題・類・全文・報酬と「受ける」(主の釦)。右上に板の名前、その下に今日受けた数と次の張り替え
 public class BoardScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
-    private static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
-    private static final Golden.Box LIST = LAYOUT.body().afterTop(Golden.ROW);
-    private static final int ROW_H = Golden.S34;
-    private static final int EDGE_IN = 0xFF3A2E1C;
-    private static final int PAPER = 0x30F0E2C0;
-    private static final int TEAL = 0xFF000000 | Paper.ON_BLACK_HI;
-    private static final int GOLD = 0xFF000000 | Paper.ON_BLACK_PINK;
-    private static final int TEXT = 0xFF000000 | Golden.TEXT;
-    private static final int SOFT = 0xFF000000 | Paper.ON_BLACK_SOFT;
-    private static final int DIM = 0xFF000000 | Paper.ON_BLACK_DIM;
+    private static final int ROWS = ShopStage.ROWS;
+    private static final int BTN_W = 80;
+    private static final int BTN_Y = 196;
     private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
 
     private BoardNetwork.Open data;
-    private int w;
-    private int left;
-    private int top;
-    private int height0;
-    private final ScrollPanel rows = new ScrollPanel(ROW_H);
-    // 受ける釦と、その札の番号 (送りで動かす)
-    private final List<Button> accepts = new ArrayList<>();
-    private final List<Integer> acceptRow = new ArrayList<>();
+    private int scroll;
+    private int focus;
+    private Button accept;
 
     public BoardScreen(BoardNetwork.Open data) {
         super(Component.translatable(data.npc() ? "gui.skyabyss.board.title_npc" : "gui.skyabyss.board.title"));
@@ -65,28 +56,22 @@ public class BoardScreen extends Screen implements jp.revati.skyabyss.client.ui.
         }
     }
 
+    private int n() {
+        return data.lines().size();
+    }
+
     @Override
     protected void init() {
-        fit.fit(width, height, Golden.L_W, Golden.L_H, 3f);
-        w = Golden.L_W;
-        height0 = Golden.L_H;
-        left = 0;
-        top = 0;
-        rows.setViewport(LIST.x(), LIST.y(), LIST.w(), LIST.h());
-        rows.setContentHeight(Math.max(1, data.lines().size()) * ROW_H);
-        accepts.clear();
-        acceptRow.clear();
-        for (int i = 0; i < data.lines().size(); i++) {
-            Board.Line line = data.lines().get(i);
-            if (line.state() == Board.OPEN) {
-                Button b = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.board.accept"), x -> {
-                    x.active = false;
-                    PacketDistributor.sendToServer(new BoardNetwork.Accept(line.quest()));
-                }).bounds(LIST.right() - Golden.S8 - Golden.S55 - 4, LIST.y(), Golden.S55, Golden.BTN).primary().build());
-                accepts.add(b);
-                acceptRow.add(i);
+        fit.fit(width, height, ShopStage.W, ShopStage.H, 3f);
+        scroll = Math.max(0, Math.min(scroll, n() - ROWS));
+        focus = Math.max(0, Math.min(focus, n() - 1));
+        // 受ける (右の列の下。乗せた頼みが受けられるときだけ)
+        accept = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.board.accept"), x -> {
+            if (focus < n() && data.lines().get(focus).state() == Board.OPEN) {
+                x.active = false;
+                PacketDistributor.sendToServer(new BoardNetwork.Accept(data.lines().get(focus).quest()));
             }
-        }
+        }).bounds(ShopStage.RIGHT_X + ShopStage.RIGHT_W - BTN_W, BTN_Y, BTN_W, Golden.BTN).primary().build());
     }
 
     @Override
@@ -102,156 +87,169 @@ public class BoardScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     @Override
     public boolean mouseScrolled(double mx, double my, double scrollX, double scrollY) {
-        return rows.mouseScrolled(fit.x(mx), fit.y(my), scrollY) || super.mouseScrolled(mx, my, scrollX, scrollY);
+        if (n() > ROWS && scrollY != 0) {
+            scroll = Math.max(0, Math.min(n() - ROWS, scroll + (scrollY < 0 ? 1 : -1)));
+            return true;
+        }
+        return super.mouseScrolled(mx, my, scrollX, scrollY);
     }
 
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
-        return rows.mouseClicked(fit.x(mx), fit.y(my), button) || super.mouseClicked(fit.x(mx), fit.y(my), button);
-    }
-
-    @Override
-    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
-        return rows.mouseDragged(fit.x(mx), fit.y(my), button, dx / fit.scale(), dy / fit.scale())
-                || super.mouseDragged(fit.x(mx), fit.y(my), button, dx / fit.scale(), dy / fit.scale());
-    }
-
-    @Override
-    public boolean mouseReleased(double mx, double my, int button) {
-        return rows.mouseReleased(fit.x(mx), fit.y(my), button) || super.mouseReleased(fit.x(mx), fit.y(my), button);
-    }
-
-    @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        return rows.keyPressed(key) || super.keyPressed(key, scan, mods);
+        double x = fit.x(mx);
+        double y = fit.y(my);
+        int r = ShopStage.rowAt(x, y);
+        if (button == 0 && r >= 0 && r + scroll < n()) {
+            focus = r + scroll;
+            return true;
+        }
+        return super.mouseClicked(x, y, button);
     }
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fill(0, 0, width, height, 0x80000000);
+        Paper.dim(g, width, height);
     }
 
-    private void drawBoard(GuiGraphics g, int mouseX, int mouseY) {
-        hoverTip = null;
-        Font font = Minecraft.getInstance().font;
-        Golden.panel(g, LAYOUT.panel());
-        Golden.headLine(g, LAYOUT);
-        Golden.Box head = LAYOUT.head();
-        int hy = Golden.textY(head.y(), head.h());
-        g.drawString(font, title, head.x() + Golden.S5, hy, GOLD, false);
-        // 今日受けた数と、次の張り替え
-        Component quota = Component.translatable("gui.skyabyss.board.quota", data.used(), data.quota());
-        g.drawString(font, quota, head.right() - Golden.S5 - font.width(quota), hy, data.used() >= data.quota() ? SOFT : TEAL, false);
-        long minutes = Math.max(1, Math.round(data.until() / 1200.0));
-        g.drawString(font, Component.translatable("gui.skyabyss.board.next", minutes), LAYOUT.body().x() + Golden.S5, Golden.textY(LAYOUT.body().y(), Golden.ROW), SOFT, false);
-        if (data.lines().isEmpty()) {
-            g.drawCenteredString(font, Component.translatable("gui.skyabyss.board.empty"), LIST.cx(), Golden.textY(LIST.y() + 8, Golden.ROW), SOFT);
-        }
-        rows.setContentHeight(Math.max(1, data.lines().size()) * ROW_H);
-        rows.begin(g);
-        for (int i = 0; i < data.lines().size(); i++) {
-            int y = rows.top() + i * ROW_H;
-            if (y + ROW_H < rows.y() || y > rows.y() + rows.height()) {
-                continue;
-            }
-            drawLine(g, font, data.lines().get(i), y, mouseX, mouseY);
-        }
-        rows.end(g);
-        rows.drawBar(g, EDGE_IN, 0x88E45A9C);
-        // 受ける釦は、その札の所へ動かす (枠の外のものは隠す)
-        for (int k = 0; k < accepts.size(); k++) {
-            Button b = accepts.get(k);
-            int by = rows.top() + acceptRow.get(k) * ROW_H + (ROW_H - 3 - Golden.BTN) / 2;
-            b.setY(by);
-            b.visible = by >= rows.y() && by + Golden.BTN <= rows.y() + rows.height();
-        }
-        Golden.Box foot = LAYOUT.foot();
-        g.drawString(font, Component.translatable("gui.skyabyss.board.footer"), foot.x() + Golden.S5, Golden.textY(foot.y(), foot.h()), DIM, false);
+    private static boolean weekly(QuestDef def) {
+        return def != null && def.repeat().equals("weekly");
     }
 
-    private List<FormattedCharSequence> hoverTip;
-
-    private void drawLine(GuiGraphics g, Font font, Board.Line line, int y, int mouseX, int mouseY) {
-        QuestDef def = QuestClient.quest(line.quest());
-        boolean locked = line.state() == Board.LOCKED;
-        boolean faint = locked || line.state() == Board.CLOSED || line.state() == Board.DONE || line.state() == Board.FULL;
-        // 札 (一段くぼんだ欄。左の縁に週替わりは金・日替わりは青緑の帯)
-        int cx0 = LIST.x();
-        int cx1 = LIST.right() - Golden.S8;
-        Golden.recess(g, new Golden.Box(cx0, y, cx1 - cx0, ROW_H - 3));
-        if (!faint) {
-            g.fill(cx0 + 1, y + 1, cx1 - 1, y + ROW_H - 4, 0x0CF0E2C0);
-        }
-        g.fill(cx0 + 1, y + 1, cx0 + 3, y + ROW_H - 4, def != null && def.repeat().equals("weekly") ? GOLD : TEAL);
-        int textW = cx1 - cx0 - Golden.S8 - Golden.S55 - Golden.S13;
-        Component name = locked || def == null ? Component.translatable("gui.skyabyss.board.hidden") : Component.translatable(def.titleKey());
-        String tag = def == null ? "" : Component.translatable("gui.skyabyss.quest.repeat." + def.repeat()).getString();
-        jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(name.getString()), cx0 + Golden.S8, Golden.textY(y + 2, Golden.ROW), textW - font.width(tag) - 8, faint ? SOFT : TEXT, false);
-        g.drawString(font, tag, cx0 + Golden.S8 + textW - font.width(tag), Golden.textY(y + 2, Golden.ROW), def != null && def.repeat().equals("weekly") ? GOLD : TEAL, false);
-        // 二行目: 何をするか (伏せたものは、何をすれば開くか)
-        String second;
-        if (locked && def != null) {
-            second = Component.translatable("gui.skyabyss.quest.locked." + def.minStage()).getString();
-        } else if (line.state() == Board.CLOSED && def != null) {
-            second = Component.translatable(QuestDef.keyBase(def.id()) + ".unlock_hint").getString();
-        } else {
-            second = def == null ? "" : Component.translatable(def.summaryKey()).getString();
-        }
-        // 右下に「仲間も N 人」を出すときは、そのぶん二行目を短く切る
-        int secondW = line.mates() > 0 ? textW - 30 : textW;
-        // 入らない文は横へ流す (Marquee。前は「…」で切っていた)
-        jp.revati.skyabyss.client.ui.Marquee.draw(g, font, second, cx0 + Golden.S8, Golden.textY(y + 2 + Golden.ROW, Golden.ROW), secondW, faint ? DIM : SOFT, false);
-        // 右: 状態 (受けられるものは釦)
-        String state = switch (line.state()) {
+    private static String stateKey(int state) {
+        return switch (state) {
             case Board.ACTIVE -> "gui.skyabyss.board.state.active";
             case Board.DONE -> "gui.skyabyss.board.state.done";
             case Board.FULL -> "gui.skyabyss.board.state.full";
             case Board.LOCKED, Board.CLOSED -> "gui.skyabyss.board.state.locked";
             default -> null;
         };
+    }
+
+    // 二行目: 何をするか (伏せたものは、何をすれば開くか)
+    private static String second(Board.Line line, QuestDef def) {
+        if (def == null) {
+            return "";
+        }
+        if (line.state() == Board.LOCKED) {
+            return Component.translatable("gui.skyabyss.quest.locked." + def.minStage()).getString();
+        }
+        if (line.state() == Board.CLOSED) {
+            return Component.translatable(QuestDef.keyBase(def.id()) + ".unlock_hint").getString();
+        }
+        return Component.translatable(def.summaryKey()).getString();
+    }
+
+    private void drawLine(GuiGraphics g, Font font, Board.Line line, int i, boolean hot) {
+        QuestDef def = QuestClient.quest(line.quest());
+        boolean locked = line.state() == Board.LOCKED;
+        boolean faint = locked || line.state() == Board.CLOSED || line.state() == Board.DONE || line.state() == Board.FULL;
+        int y = ShopStage.rowY(i);
+        int x = ShopStage.LIST_X + 10;
+        int right = ShopStage.LIST_X + ShopStage.LIST_W - 4;
+        if (hot) {
+            ShopStage.hot(g, i);
+        }
+        // 週替わり = 桃色の菱、日替わり = 灰の菱
+        Paper.pin(g, ShopStage.LIST_X + 4, y + 6, 2, weekly(def));
+        String st = stateKey(line.state());
+        Component state = st == null ? null : Component.translatable(st);
+        int sw = state == null ? 0 : font.width(state);
+        Component name = Component.literal((locked || def == null ? Component.translatable("gui.skyabyss.board.hidden") : Component.translatable(def.titleKey())).getString());
+        int nameW = Math.min(font.width(name), right - x - sw - 16);
+        FitText.draw(g, font, name, x, y + 2, nameW, hot ? ShopStage.ON_PINK : faint ? Paper.INK_SOFT : Paper.INK, false);
         if (state != null) {
-            Component s = Component.translatable(state);
-            g.drawString(font, s, cx1 - Golden.S8 - font.width(s), Golden.textY(y + 2, Golden.ROW), line.state() == Board.ACTIVE ? TEAL : SOFT, false);
+            ShopStage.leader(g, x + nameW + 4, right - sw - 3, y + 8, hot);
+            g.drawString(font, state, right - sw, y + 2, hot ? ShopStage.ON_PINK : line.state() == Board.ACTIVE ? Paper.INK_HEAD : Paper.INK_SOFT, false);
         }
-        if (line.mates() > 0) {
-            Component m = Component.translatable("gui.skyabyss.board.mates", line.mates());
-            g.drawString(font, m, cx1 - Golden.S8 - font.width(m), Golden.textY(y + 2 + Golden.ROW, Golden.ROW), TEAL, false);
+        Component mates = line.mates() > 0 ? Component.translatable("gui.skyabyss.board.mates", line.mates()) : null;
+        int mw = mates == null ? 0 : font.width(mates) + 6;
+        // 二行目は類 (日替わり・週替わり)。伏せたものは何をすれば開くか。全文は右の列に
+        String sub = def == null ? "" : faint && line.state() != Board.DONE && line.state() != Board.FULL ? second(line, def)
+                : Component.translatable("gui.skyabyss.quest.repeat." + def.repeat()).getString();
+        Marquee.draw(g, font, sub, x, y + 13, right - x - mw, hot ? ShopStage.ON_PINK : Paper.INK_SOFT, false);
+        if (mates != null) {
+            g.drawString(font, mates, right - mw + 6, y + 13, hot ? ShopStage.ON_PINK : Paper.INK_HEAD, false);
         }
-        // 札に重ねると、全文と報酬
-        if (!locked && def != null && mouseX >= cx0 && mouseX < cx1 - Golden.S55 - Golden.S13 && mouseY >= y && mouseY < y + ROW_H - 3 && rows.contains(mouseX, mouseY)) {
-            List<FormattedCharSequence> tip = new ArrayList<>();
-            tip.add(Component.translatable(def.titleKey()).getVisualOrderText());
-            for (String l : LoreWrap.wrap(Component.translatable(def.summaryKey()).getString(), 200, font::width)) {
-                tip.add(Component.literal(l).withColor(0xC8C0A8).getVisualOrderText());
+    }
+
+    // 右の列: 乗せた頼みの題・類・全文・報酬
+    private void drawDetail(GuiGraphics g, Font font, Board.Line line) {
+        QuestDef def = QuestClient.quest(line.quest());
+        boolean locked = line.state() == Board.LOCKED || def == null;
+        int x = ShopStage.RIGHT_X;
+        int w = ShopStage.RIGHT_W;
+        int y = 54;
+        Component name = locked ? Component.translatable("gui.skyabyss.board.hidden") : Component.translatable(def.titleKey());
+        for (FormattedCharSequence l : JpWrap.split(font, name, w)) {
+            g.drawString(font, l, x, y, Paper.ON_BLACK_PINK, false);
+            y += 11;
+        }
+        if (def != null) {
+            g.drawString(font, Component.translatable("gui.skyabyss.quest.repeat." + def.repeat()), x, y, Paper.ON_BLACK_SOFT, false);
+            y += 13;
+        }
+        g.fill(x, y - 2, x + w, y - 1, Paper.PINK_LO);
+        y += 2;
+        int bottom = BTN_Y - 4;
+        String reward = locked ? "" : QuestLogScreen.rewardText(def);
+        List<FormattedCharSequence> rew = reward.isEmpty() ? List.of() : JpWrap.split(font, Component.translatable("gui.skyabyss.quest.reward", reward), w);
+        int rewTop = bottom - rew.size() * 11;
+        for (FormattedCharSequence l : JpWrap.split(font, Component.literal(second(line, def)), w)) {
+            if (y + 9 > rewTop - 3) {
+                break;
             }
-            String reward = QuestLogScreen.rewardText(def);
-            if (!reward.isEmpty()) {
-                for (String l : LoreWrap.wrap(Component.translatable("gui.skyabyss.quest.reward", reward).getString(), 200, font::width)) {
-                    tip.add(Component.literal(l).withColor(GOLD).getVisualOrderText());
-                }
-            }
-            hoverTip = tip;
+            g.drawString(font, l, x, y, Golden.TEXT, false);
+            y += 11;
+        }
+        int ry = rewTop;
+        for (FormattedCharSequence l : rew) {
+            g.drawString(font, l, x, ry, Paper.ON_BLACK_HI, false);
+            ry += 11;
         }
     }
 
     @Override
     public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        fit.fit(width, height, ShopStage.W, ShopStage.H, 3f);
         renderBackground(g, screenX, screenY, partialTick);
         int mouseX = (int) Math.floor(fit.x(screenX));
         int mouseY = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
-        drawBoard(g, mouseX, mouseY);
+        ShopStage.backdrop(g, fit, width, height);
+        Font font = Minecraft.getInstance().font;
+        // 選びは押して決める (右の釦へ指を動かすあいだに選びが変わらないように)。乗せた行は薄い桃色
+        int hoverRow = ShopStage.rowAt(mouseX, mouseY);
+        if (hoverRow >= 0 && hoverRow + scroll < n() && hoverRow + scroll != focus) {
+            int hy = ShopStage.rowY(hoverRow);
+            g.fill(ShopStage.LIST_X - 1, hy, ShopStage.LIST_X + ShopStage.LIST_W + 1, hy + ShopStage.ROW_H - 1, 0x30E45A9C);
+        }
+        if (n() == 0) {
+            ShopStage.empty(g, font, Component.translatable("gui.skyabyss.board.empty"));
+        }
+        for (int i = 0; i < ROWS && i + scroll < n(); i++) {
+            drawLine(g, font, data.lines().get(i + scroll), i, i + scroll == focus);
+        }
+        ShopStage.scroll(g, scroll, n());
+        ShopStage.hint(g, font, Component.translatable("gui.skyabyss.board.footer"));
+        // 右: 板の名前・今日受けた数・次の張り替え・乗せた頼み
+        ShopStage.title(g, font, title);
+        Component quota = Component.translatable("gui.skyabyss.board.quota", data.used(), data.quota());
+        FitText.draw(g, font, quota, ShopStage.RIGHT_X, 26, ShopStage.RIGHT_W, data.used() >= data.quota() ? Paper.ON_BLACK_DIM : Paper.ON_BLACK_HI, false);
+        long minutes = Math.max(1, Math.round(data.until() / 1200.0));
+        FitText.draw(g, font, Component.translatable("gui.skyabyss.board.next", minutes), ShopStage.RIGHT_X, 38, ShopStage.RIGHT_W, Paper.ON_BLACK_SOFT, false);
+        boolean open = focus < n() && data.lines().get(focus).state() == Board.OPEN;
+        if (focus < n()) {
+            drawDetail(g, font, data.lines().get(focus));
+        }
+        accept.visible = open;
         for (net.minecraft.client.gui.components.Renderable r : renderables) {
             r.render(g, mouseX, mouseY, partialTick);
         }
         fit.end(g);
-        if (hoverTip != null) {
-            g.renderTooltip(Minecraft.getInstance().font, hoverTip, screenX, screenY);
-        }
     }
 
     @Override
     public int[] textBounds() {
-        return fit.screenRect(0, 0, Golden.L_W, Golden.L_H);
+        return fit.screenRect(0, 0, ShopStage.W, ShopStage.H);
     }
 }

@@ -2,14 +2,15 @@ package jp.revati.skyabyss.rpg.client;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.rpg.Growth;
 import jp.revati.skyabyss.rpg.GrowthData;
 import jp.revati.skyabyss.rpg.GrowthRules;
 import jp.revati.skyabyss.rpg.GrowthRules.Stat;
-import jp.revati.skyabyss.client.ui.Golden;
+import jp.revati.skyabyss.client.ui.FitText;
+import jp.revati.skyabyss.client.ui.LedgerStage;
 import jp.revati.skyabyss.client.ui.UiFit;
+import jp.revati.skyabyss.rpg.client.skill.RpgTabs;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -18,38 +19,35 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import jp.revati.skyabyss.client.ui.Paper;
 
-// ステータス画面 (J キー)。見るだけの記録: レベルと経験値、基礎 (筋力・敏捷・精神・耐久) とその効き目、記憶の断片。
+// ステータス画面 (J キー)。見るだけの記録: レベルと経験値、基礎 (筋力・敏捷・精神・耐久) とその効き目。
 // 基礎は技の木の節で上がる (docs/design/48。振り分けの釦はない。基礎は SkillManager.refreshStats が木から写す)。
-// 板は黄金比の大きい板 (client/ui/Golden。docs/design/56)。見出しの帯に記録・技・旅のつまみ、主の列 (左) に基礎の 4 行、
-// 脇の列 (右) にレベル・経験値・職・記憶の断片。基礎の絵だけ tools/gen/items/gen_growth_assets.py のテクスチャから取る
+// 組み方は帳の類の「黒に書いて、目録は帯に」(client/ui/LedgerStage。docs/design/56 の 2.1): つまみはスキルの木と同じ左上、その右に題。
+// 左の黒い紙に基礎の 4 行 (絵・名前・値、二行目に効き目)、右の生成りの帯にレベル・経験値・職・基礎の上がり方。
+// 基礎の絵だけ tools/gen/items/gen_growth_assets.py のテクスチャから取る
 public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/growth/status.png");
     static final int TEX = 512;
-    static final Golden.Layout LAYOUT = Golden.Layout.large(0);
-    static final int W = Golden.L_W;
-    static final int H = Golden.L_H;
-    // 主の列 (基礎の行) と脇の列 (レベル・職・断片)
-    static final Golden.Box MAIN = LAYOUT.body().major(true);
-    static final Golden.Box SIDE = LAYOUT.body().minor(false);
-    // 基礎の行: 高さ 34、あいだ 13
-    static final int ROW_H = Golden.S34;
-    static final int ROW_STEP = Golden.S34 + Golden.S13;
-    // 経験値の帯 (脇の列の中)
-    static final int BAR_X = SIDE.x() + Golden.S8;
-    static final int BAR_Y = SIDE.y() + Golden.S5 + Golden.ROW + Golden.S3;
-    static final int BAR_W = SIDE.w() - 2 * Golden.S8;
-    static final int BAR_H = Golden.S5;
+    // 基礎の行
+    static final int ROW_X = LedgerStage.PAGE_X;
+    static final int ROW_W = LedgerStage.PAGE_W;
+    static final int ROW_Y = LedgerStage.K_BODY_Y + 4;
+    static final int ROW_H = 34;
+    static final int ROW_STEP = 40;
+    // 右の帯
+    static final int SIDE_X = LedgerStage.INDEX_X;
+    static final int SIDE_W = LedgerStage.INDEX_W - 4;
+    // 経験値の帯
+    static final int BAR_X = SIDE_X;
+    static final int BAR_Y = 30;
+    static final int BAR_W = SIDE_W;
+    static final int BAR_H = 5;
 
-    static final int TITLE = Paper.ON_BLACK_HI;
-    static final int TEXT = Golden.TEXT;
+    static final int TEXT = jp.revati.skyabyss.client.ui.Golden.TEXT;
     static final int SOFT = Paper.ON_BLACK_SOFT;
     static final int GOLD = Paper.ON_BLACK_PINK;
-    static final int LORE = Paper.ON_BLACK_HI;
 
-    // 画面は窓に合わせて一様に大きくする (描くのも、当たりも、この一つの変換を通す)。論理の原点は (left, top)
+    // 画面は窓に合わせて一様に大きくする (描くのも、当たりも、この一つの変換を通す)
     private final UiFit fit = new UiFit();
-    private int left;
-    private int top;
 
     public GrowthScreen() {
         super(Component.translatable("gui.skyabyss.growth.title"));
@@ -57,12 +55,9 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
 
     @Override
     protected void init() {
-        fit.fit(width, height, W, H, 3f);
-        left = 0;
-        top = 0;
-        // 技の画面などへのつまみ (見出しの帯の中)
-        jp.revati.skyabyss.rpg.client.skill.RpgTabs.addHead(this::addRenderableWidget, LAYOUT.head(),
-                jp.revati.skyabyss.rpg.client.skill.RpgTabs.STATUS);
+        fit.fit(width, height, LedgerStage.W, LedgerStage.H, 3f);
+        // 技の画面などへのつまみ (スキルの木と同じ左上)
+        RpgTabs.addHead(this::addRenderableWidget, LedgerStage.K_HEAD, RpgTabs.STATUS, true);
     }
 
     private GrowthData data() {
@@ -72,7 +67,7 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         // J で閉じる、K で技の画面へ
-        if (jp.revati.skyabyss.rpg.client.skill.RpgTabs.keyPressed(keyCode, scanCode, jp.revati.skyabyss.rpg.client.skill.RpgTabs.STATUS)) {
+        if (RpgTabs.keyPressed(keyCode, scanCode, RpgTabs.STATUS)) {
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
@@ -85,26 +80,23 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        // 全面の暗い地だけ (板は render の中で、窓に合わせた変換の中で描く)
-        super.renderBackground(g, mouseX, mouseY, partialTick);
+        Paper.dim(g, width, height);
     }
 
     @Override
     public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        fit.fit(width, height, LedgerStage.W, LedgerStage.H, 3f);
         renderBackground(g, screenX, screenY, partialTick);
         pendingTip = null;
         int mouseX = (int) Math.floor(fit.x(screenX));
         int mouseY = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
-        Golden.frame(g, font, LAYOUT, title);
-        for (Stat stat : Stat.values()) {
-            Golden.recess(g, statRow(stat.ordinal()));
-        }
-        Golden.recess(g, SIDE);
+        LedgerStage.backdrop(g, fit, width, height);
+        LedgerStage.kTitle(g, font, title, LedgerStage.K_HEAD.x() + RpgTabs.headWidth(RpgTabs.STATUS));
+        renderBody(g, mouseX, mouseY);
         for (net.minecraft.client.gui.components.Renderable r : renderables) {
             r.render(g, mouseX, mouseY, partialTick);
         }
-        renderBody(g, mouseX, mouseY);
         fit.end(g);
         if (pendingTip != null) {
             g.renderTooltip(font, pendingTip, screenX, screenY);
@@ -139,56 +131,69 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
         pendingTip = lines;
     }
 
-    // 基礎の i 行目の欄
-    static Golden.Box statRow(int i) {
-        return new Golden.Box(MAIN.x(), MAIN.y() + 1 + i * ROW_STEP, MAIN.w(), ROW_H);
+    static int rowY(int i) {
+        return ROW_Y + i * ROW_STEP;
+    }
+
+    static boolean inRow(int i, int mx, int my) {
+        return mx >= ROW_X && mx < ROW_X + ROW_W && my >= rowY(i) && my < rowY(i) + ROW_H;
     }
 
     private void renderBody(GuiGraphics g, int mouseX, int mouseY) {
         GrowthData d = data();
-        int sx = SIDE.x() + Golden.S8;
-        int sw = SIDE.w() - 2 * Golden.S8;
-        int y = SIDE.y() + Golden.S5;
+        // 基礎の行 (左の黒い紙)
+        for (Stat stat : Stat.values()) {
+            int i = stat.ordinal();
+            int y = rowY(i);
+            if (i > 0) {
+                for (int x = ROW_X; x < ROW_X + ROW_W; x += 3) {
+                    g.fill(x, y - 4, x + 1, y - 3, Paper.PINK_LO);
+                }
+            }
+            g.blit(TEXTURE, ROW_X + 2, y + 6, 20, 20, i * 32, 384, 32, 32, TEX, TEX);
+            int value = d.stat(stat);
+            g.drawString(font, Component.translatable(stat.nameKey()), ROW_X + 30, y + 4, TEXT, false);
+            String v = String.valueOf(value);
+            g.drawString(font, v, ROW_X + ROW_W - font.width(v), y + 4, value > 0 ? GOLD : TEXT, false);
+            FitText.draw(g, font, effect(stat, value, d.level), ROW_X + 30, y + 17, ROW_W - 30, SOFT, false);
+        }
 
-        // レベルと経験値の帯 (脇の列の上)
+        // 右の帯: レベルと経験値・職・基礎の上がり方 (字は墨へ写る)
+        Paper.inkBegin();
+        int sx = SIDE_X;
+        int sw = SIDE_W;
         boolean max = d.level >= GrowthRules.MAX_LEVEL;
-        g.drawString(font, Component.translatable("gui.skyabyss.growth.hud_level", d.level), sx, Golden.textY(y, Golden.ROW), GOLD, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.growth.hud_level", d.level), sx, 16, GOLD, false);
         float fraction = max ? 1f : (float) d.xp / Math.max(1, d.xpNeed());
-        g.fill(BAR_X, BAR_Y, BAR_X + BAR_W, BAR_Y + BAR_H, 0xFF3A3644);
-        g.fill(BAR_X + 1, BAR_Y + 1, BAR_X + BAR_W - 1, BAR_Y + BAR_H - 1, 0xFF0E0D14);
+        g.fill(BAR_X, BAR_Y, BAR_X + BAR_W, BAR_Y + BAR_H, Paper.CREAM_LO);
+        g.fill(BAR_X + 1, BAR_Y + 1, BAR_X + BAR_W - 1, BAR_Y + BAR_H - 1, Paper.CREAM);
         int fill = Mth.clamp(Math.round((BAR_W - 2) * fraction), 0, BAR_W - 2);
         if (fill > 0) {
-            g.fill(BAR_X + 1, BAR_Y + 1, BAR_X + 1 + fill, BAR_Y + BAR_H - 1, max ? 0xFFFFF6EA : 0xFFE45A9C);
+            g.fill(BAR_X + 1, BAR_Y + 1, BAR_X + 1 + fill, BAR_Y + BAR_H - 1, max ? Paper.PINK_LO : Paper.PINK);
         }
         Component xpText = max ? Component.translatable("gui.skyabyss.growth.max")
                 : Component.translatable("gui.skyabyss.growth.xp", d.xp, d.xpNeed());
-        int ty = BAR_Y + BAR_H + Golden.S3;
-        g.drawString(font, xpText, sx + sw - font.width(xpText), Golden.textY(ty, Golden.ROW), SOFT, false);
-
+        int ty = BAR_Y + BAR_H + 4;
+        FitText.draw(g, font, xpText, sx, ty, sw, SOFT, false);
+        ty += 16;
+        g.fill(sx, ty - 4, sx + sw, ty - 3, Paper.CREAM_LO);
         // 職と、基礎の上がり方 (木の節)
-        ty += Golden.ROW + Golden.S8;
         jp.revati.skyabyss.rpg.skill.Job job = jp.revati.skyabyss.rpg.skill.Job.byId(jp.revati.skyabyss.rpg.skill.SkillManager.get(minecraft.player).curJob);
         Component jobLine = Component.translatable("gui.skyabyss.growth.job_line",
                 job == null ? Component.translatable("gui.skyabyss.growth.job_none") : Component.translatable(job.nameKey()));
-        jp.revati.skyabyss.client.ui.FitText.draw(g, font, jobLine, sx, Golden.textY(ty, Golden.ROW), sw, job == null ? SOFT : GOLD, false);
-        ty += Golden.ROW;
+        for (FormattedCharSequence line : jp.revati.skyabyss.client.ui.JpWrap.split(font, jobLine, sw)) {
+            g.drawString(font, line, sx, ty, job == null ? SOFT : GOLD, false);
+            ty += 11;
+        }
+        ty += 4;
         for (FormattedCharSequence line : jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.growth.from_tree"), sw)) {
-            g.drawString(font, line, sx, Golden.textY(ty, Golden.ROW), SOFT, false);
-            ty += Golden.ROW;
+            if (ty + 9 > 214) {
+                break;
+            }
+            g.drawString(font, line, sx, ty, SOFT, false);
+            ty += 11;
         }
-
-        // 基礎の行 (主の列)
-        for (Stat stat : Stat.values()) {
-            int i = stat.ordinal();
-            Golden.Box r = statRow(i);
-            g.blit(TEXTURE, r.x() + 9, r.y() + 9, 16, 16, i * 32, 384, 32, 32, TEX, TEX);
-            int value = d.stat(stat);
-            g.drawString(font, Component.translatable(stat.nameKey()), r.x() + Golden.S34, Golden.textY(r.y() + 4, Golden.ROW), TEXT, false);
-            String v = String.valueOf(value);
-            g.drawString(font, v, r.right() - Golden.S8 - font.width(v), Golden.textY(r.y() + 4, Golden.ROW), value > 0 ? GOLD : TEXT, false);
-            jp.revati.skyabyss.client.ui.FitText.draw(g, font, effect(stat, value, d.level), r.x() + Golden.S34, Golden.textY(r.y() + 4 + Golden.ROW, Golden.ROW),
-                    r.w() - Golden.S34 - Golden.S8, SOFT, false);
-        }
+        Paper.inkEnd();
 
         renderHover(g, d, mouseX, mouseY);
     }
@@ -215,7 +220,7 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
     // 名前に重ねると説明、バーに重ねると合計の経験値
     private void renderHover(GuiGraphics g, GrowthData d, int mouseX, int mouseY) {
         for (Stat stat : Stat.values()) {
-            if (statRow(stat.ordinal()).contains(mouseX, mouseY)) {
+            if (inRow(stat.ordinal(), mouseX, mouseY)) {
                 List<FormattedCharSequence> lines = new ArrayList<>();
                 lines.add(Component.translatable(stat.nameKey()).withColor(GOLD).getVisualOrderText());
                 lines.addAll(jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.growth.desc." + stat.id), 200));
@@ -224,7 +229,7 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
                 return;
             }
         }
-        if (mouseX >= BAR_X && mouseX < BAR_X + BAR_W && mouseY >= BAR_Y - Golden.ROW && mouseY < BAR_Y + BAR_H + Golden.ROW) {
+        if (mouseX >= BAR_X && mouseX < BAR_X + BAR_W && mouseY >= BAR_Y - 13 && mouseY < BAR_Y + BAR_H + 13) {
             tip(List.of(Component.translatable("gui.skyabyss.growth.lifetime", d.lifetimeXp(),
                     GrowthRules.totalXpFor(GrowthRules.MAX_LEVEL)).getVisualOrderText()));
         }
@@ -232,6 +237,6 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
 
     @Override
     public int[] textBounds() {
-        return fit.screenRect(0, 0, W, H);
+        return fit.screenRect(0, 0, LedgerStage.W, LedgerStage.H);
     }
 }

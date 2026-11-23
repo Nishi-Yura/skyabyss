@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import jp.revati.skyabyss.client.ui.Golden;
+import jp.revati.skyabyss.client.ui.LedgerStage;
 import jp.revati.skyabyss.client.ui.ScrollPanel;
 import jp.revati.skyabyss.lore.LoreWrap;
 import jp.revati.skyabyss.quest.QuestDef;
@@ -37,9 +38,9 @@ import jp.revati.skyabyss.client.ui.Paper;
 public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     // 一覧の「今日・今週」の行 (クエストの id とぶつからない印)
     static final String CLOCK = "#clock";
-    static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
-    private static final Golden.Box LIST = LAYOUT.body().minor(true);
-    private static final Golden.Box PAGE = LAYOUT.body().major(false);
+    // 帳の類の組み方「黒に書いて、目録は帯に」(client/ui/LedgerStage。docs/design/56 の 2.1): 読む頁は左の黒い紙、一覧は右の生成りの目録
+    private static final Golden.Box LIST = new Golden.Box(LedgerStage.INDEX_X - 4, LedgerStage.LIST_Y, LedgerStage.INDEX_W + 6, LedgerStage.LIST_H);
+    private static final Golden.Box PAGE = new Golden.Box(LedgerStage.PAGE_X, LedgerStage.PAGE_Y, LedgerStage.PAGE_W, LedgerStage.BODY_Y + LedgerStage.BODY_H - LedgerStage.PAGE_Y);
     private static final int ROW_H = Golden.ROW;
     private static final int LINE_H = Golden.ROW;
     private static final int EDGE_IN = 0xFF1C1A26;
@@ -79,26 +80,25 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
 
     // 窓の大きさと場所、一覧と頁の見える所 (画面が変わったら、ここで決め直す)
     private void layout() {
-        fit.fit(width, height, Golden.L_W, Golden.L_H, 3f);
-        w = Golden.L_W;
-        h = Golden.L_H;
+        fit.fit(width, height, LedgerStage.W, LedgerStage.H, 3f);
+        w = LedgerStage.W;
+        h = LedgerStage.H;
         left = 0;
         top = 0;
-        listPanel.setViewport(LIST.x() + 2, LIST.y() + 2, LIST.w() - 3, LIST.h() - 4);
-        // 頁: 題の一行と線の下から。目盛りの余白 (8) の分だけ右へ広げる
-        bodyPanel.setViewport(bodyLeft(), PAGE.y() + Golden.ROW + Golden.S8, PAGE.right() - 2 - bodyLeft(), PAGE.h() - Golden.ROW - Golden.S8 - 2);
+        listPanel.setViewport(LIST.x(), LIST.y(), LIST.w(), LIST.h());
+        // 頁: 題と線の下から
+        bodyPanel.setViewport(bodyLeft(), LedgerStage.BODY_Y, PAGE.right() - bodyLeft(), LedgerStage.BODY_H);
     }
 
     private int bodyLeft() {
-        return PAGE.x() + Golden.S8;
+        return PAGE.x();
     }
 
     @Override
     protected void init() {
         layout();
-        Golden.Box foot = LAYOUT.footUnder(PAGE);
         trackButton = addRenderableWidget(Paper.tag(Component.empty(), b -> toggleTrack())
-                .bounds(foot.right() - Golden.S89, foot.y() + 4, Golden.S89, Golden.BTN).build());
+                .bounds(PAGE.right() - Golden.S89, LedgerStage.FOOT_Y, Golden.S89, Golden.BTN).primary().build());
         rebuild();
         if (selected == null) {
             QuestLog log = log();
@@ -407,7 +407,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fill(0, 0, width, height, 0x80000000);
+        Paper.dim(g, width, height);
     }
 
     // 板・中身・釦は、窓に合わせた変換 (fit。画素ちょうど) の中で描く。当たりも同じ変換を通す
@@ -427,16 +427,19 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
 
     private void drawPanel(GuiGraphics g, int mouseX, int mouseY) {
         Font font = Minecraft.getInstance().font;
-        Golden.panel(g, LAYOUT.panel());
-        Golden.headLine(g, LAYOUT);
-        g.drawString(font, title, LAYOUT.head().x() + Golden.S5, Golden.textY(LAYOUT.head().y(), LAYOUT.head().h()), Paper.ON_BLACK_HI, false);
-        Golden.recess(g, LIST);
-        Golden.recess(g, PAGE);
-        g.drawString(font, Component.translatable("gui.skyabyss.quest.lore_hint"), LAYOUT.foot().x() + Golden.S5,
-                Golden.textY(LAYOUT.foot().y(), LAYOUT.foot().h()), DIM, false);
+        LedgerStage.backdrop(g, fit, width, height);
+        LedgerStage.indexHead(g, font, title);
+        LedgerStage.footHint(g, font, Component.translatable("gui.skyabyss.quest.lore_hint"), PAGE.x(), PAGE.w() - Golden.S89 - Golden.S8);
         if (rows.isEmpty()) {
-            g.drawCenteredString(font, Component.translatable("gui.skyabyss.quest.empty"), LAYOUT.body().cx(), Golden.textY(LAYOUT.body().y() + LAYOUT.body().h() / 2 - 6, Golden.ROW), SOFT);
+            jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.quest.empty"), PAGE.cx(), PAGE.y() + 60, PAGE.w(), SOFT, false);
             return;
+        }
+        // 選んだ行の付箋 (帯の外へはみ出すので、送りの切り抜きの外で先に)
+        for (int ri = 0; ri < rows.size(); ri++) {
+            int y = listPanel.top() + ri * ROW_H;
+            if (rows.get(ri).quest() != null && rows.get(ri).quest().equals(selected) && y >= listPanel.y() - 2 && y + ROW_H <= listPanel.y() + listPanel.height() + 2) {
+                LedgerStage.flag(g, y, ROW_H);
+            }
         }
         // 一覧 (目盛りつき。見える行だけ描く)
         listPanel.begin(g);
@@ -448,34 +451,31 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
             Row r = rows.get(ri);
             if (r.quest() == null) {
                 boolean hover = r.jump() != null && inList(mouseX, mouseY) && mouseY >= y && mouseY < y + ROW_H;
-                jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(r.label().getString()), LIST.x() + Golden.S5,
-                        Golden.textY(y, ROW_H), listTextW(), hover ? TEXT : r.color(), false);
+                LedgerStage.section(g, font, r.label(), LIST.x() + 4, y, ROW_H, hover ? Paper.INK : LedgerStage.ink(r.color()));
             } else {
                 boolean sel = r.quest().equals(selected);
                 boolean hover = inList(mouseX, mouseY) && mouseY >= y && mouseY < y + ROW_H;
-                if (sel) {
-                    Golden.selected(g, new Golden.Box(LIST.x() + 2, y, LIST.w() - 7, ROW_H));
-                } else if (hover) {
-                    g.fill(LIST.x() + 2, y, LIST.right() - 5, y + ROW_H, 0x281E5552);
+                if (hover && !sel) {
+                    LedgerStage.hover(g, y, ROW_H);
                 }
+                int c = sel ? LedgerStage.ON_PINK : LedgerStage.ink(r.color());
                 jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.literal(r.label().getString()), LIST.x() + Golden.S13, Golden.textY(y, ROW_H),
-                        listTextW() - Golden.S8, r.color(), false);
+                        listTextW() - Golden.S8, c, false);
                 QuestLog log = log();
                 if (log != null && r.quest().equals(log.tracked())) {
-                    g.drawString(font, "▸", LIST.x() + Golden.S5, Golden.textY(y, ROW_H), r.color(), false);
+                    g.drawString(font, "▸", LIST.x() + Golden.S5, Golden.textY(y, ROW_H), c, false);
                 }
             }
         }
         listPanel.end(g);
-        listPanel.drawBar(g, EDGE_IN, 0x88E45A9C);
+        listPanel.drawBar(g, 0x30181722, 0xFFE45A9C);
         // 右の頁
         QuestDef def = selected == null ? null : QuestClient.quest(selected);
         int bx = bodyLeft();
         boolean clock = CLOCK.equals(selected);
         if (def != null || clock) {
-            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable(clock ? "quest.skyabyss.clock.title" : def.titleKey()), bx, Golden.textY(PAGE.y() + 2, Golden.ROW),
-                    PAGE.w() - 2 * Golden.S8, clock || def.main() ? GOLD : TEAL, false);
-            Golden.rule(g, bx, PAGE.right() - Golden.S8, PAGE.y() + Golden.ROW + Golden.S5);
+            Component sub = clock || def.chapterOrNull() == null ? null : Component.translatable(def.main() ? "gui.skyabyss.quest.section.main" : "gui.skyabyss.quest.section.sub");
+            LedgerStage.pageTitle(g, font, Component.literal(Component.translatable(clock ? "quest.skyabyss.clock.title" : def.titleKey()).getString()), sub);
             bodyPanel.begin(g);
             for (int i = 0; i < body.size(); i++) {
                 int y = bodyPanel.top() + i * LINE_H;
@@ -492,7 +492,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
 
     // 一覧の字の幅 (送りの印が出るときは、その分だけ短く切る)
     private int listTextW() {
-        return LIST.w() - Golden.S5 - Golden.S8;
+        return LIST.w() - Golden.S13;
     }
 
     private boolean inList(double mx, double my) {

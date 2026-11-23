@@ -28,13 +28,16 @@ import jp.revati.skyabyss.client.ui.Paper;
 
 // 共鳴の炉の画面。左の板に装備の枠・材料の枠・特性・持ち物、右の板に四つのつまみ (強化・粉・再鍛造・交換)。
 // 再鍛造のつまみの中に、再鍛造・抽出・刻印の三頁 (2026-11-05 の粉と炉の頁 2-3)。町の鍛冶師で開いたときは粉のつまみだけ (menu.powderOnly)。
-// 背景は 2 倍密度のテクスチャ (textures/gui/forge/forge.png、tools/gen/items/gen_forge_assets.py)。配置を変えたら生成元もそろえる
+// 組み方は店の類の「帳面と台」(client/ui/ShopStage。docs/design/56 の 2.1。作業台の 3 案からユーザーが A を選んだ): 舞台 408x228 を GUI の等倍で真ん中に置き
+// (枠の当たりは GUI の座標のまま)、左の生成りの帳面に つまみ (上の辺)・つまみの中身 (字は墨)・細工の列 (下の端)、右の黒い紙に題・素材の枠・桃色の台に立てた装備の枠・
+// 装備の名前と特性・持ち物。枠の場所は画面の側で動かす (Slot.x/y。accesstransformer)
 public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForgeMenu> implements jp.revati.skyabyss.client.ui.TextBounded {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/forge/forge.png");
     private static final int TEX_W = 1024;
     private static final int TEX_H = 512;
     private static final int MAIN_W = 176;
-    private static final int SIDE_X = 180;
+    // つまみの中身の欄の左 (帳面の中)
+    private static final int SIDE_X = 44;
     private static final int SIDE_W = 152;
     private static final int H = 166;
     // つまみは 4 つ (強化・粉・再鍛造・交換)。元の絵 (幅 48) を幅 35 に縮めて並べ、字は幅に収まるまで縮める
@@ -57,7 +60,20 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     private static final int OK = 0xFFFFF6EA;
     private static final int LACK = 0xFFD9779A;
     private static final int GOLD = 0xFFF89CD2;
-    private static final int INFO_X = 72;
+    // 右の黒い紙: 装備の名前と特性、素材・装備の枠、持ち物
+    private static final int INFO_X = jp.revati.skyabyss.client.ui.ShopStage.RIGHT_X;
+    private static final int INFO_Y = 64;
+    private static final int MAT_SX = 266;
+    private static final int MAT_SY = 38;
+    private static final int GEAR_SX = 324;
+    private static final int GEAR_SY = 32;
+    private static final int INV_SX = 244;
+    private static final int INV_SY = 138;
+    // 細工の列 (帳面の下の端)
+    private static final int PART_SX = 44;
+    private static final int PART_SY = 187;
+    private static final int PART_MAX = 10;
+    private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
 
     private enum Tab {
         ENHANCE, POWDER, REFORGE, EXCHANGE
@@ -113,17 +129,36 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
 
     public ResonanceForgeScreen(ResonanceForgeMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
-        imageWidth = SIDE_X + SIDE_W;
-        imageHeight = H;
-        inventoryLabelY = imageHeight - 94;
+        imageWidth = Paper.STAGE_W;
+        imageHeight = Paper.STAGE_H;
+        inventoryLabelX = INV_SX;
+        inventoryLabelY = INV_SY - 12;
     }
 
     @Override
     protected void init() {
         super.init();
-        // 左の細工の板 (幅 PART_W) も入れた三枚をまとめて真ん中に置く。細工の有無で真ん中の板が動かず、狭い画面 (GUI 3 の 427) でも
-        // 細工の板が左の端からはみ出さない (2026-11-15 の見直し)
-        leftPos = (width - imageWidth - PANEL_GAP - PART_W) / 2 + PANEL_GAP + PART_W;
+        // 舞台を GUI の等倍で真ん中に (黒い紙と山は窓の端まで)。枠を舞台の場所へ動かす (画面の側だけ。サーバーは枠の場所を使わない)
+        fit.fit(width, height, imageWidth, imageHeight, 1f, 1f);
+        int[] r = fit.screenRect(0, 0, imageWidth, imageHeight);
+        leftPos = r[0];
+        topPos = r[1];
+        for (int i = 0; i < menu.slots.size(); i++) {
+            net.minecraft.world.inventory.Slot slot = menu.slots.get(i);
+            if (i == 0) {
+                slot.x = GEAR_SX + 1;
+                slot.y = GEAR_SY + 1;
+            } else if (i == 1) {
+                slot.x = MAT_SX + 1;
+                slot.y = MAT_SY + 1;
+            } else if (i < 29) {
+                slot.x = INV_SX + 1 + (i - 2) % 9 * 18;
+                slot.y = INV_SY + 1 + (i - 2) / 9 * 18;
+            } else {
+                slot.x = INV_SX + 1 + (i - 29) * 18;
+                slot.y = INV_SY + 1 + 58;
+            }
+        }
         int sx = leftPos + SIDE_X;
         enhanceButton = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.forge.enhance"),
                 b -> press(ForgeRules.canMerge(menu.gear()) ? ResonanceForgeMenu.BUTTON_MERGE : ResonanceForgeMenu.BUTTON_ENHANCE))
@@ -419,6 +454,13 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     }
 
     @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        // 薄く暗くしてから舞台 (AbstractContainerScreen は renderBackground の中で renderBg を呼ぶ)
+        Paper.dim(g, width, height);
+        renderBg(g, partialTick, mouseX, mouseY);
+    }
+
+    @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.render(g, mouseX, mouseY, partialTick);
         renderParts(g, mouseX, mouseY);
@@ -446,8 +488,24 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
         int x = leftPos;
         int y = topPos;
-        jp.revati.skyabyss.client.ui.Golden.panel(g, new jp.revati.skyabyss.client.ui.Golden.Box(x, y, MAIN_W, H));
-        jp.revati.skyabyss.client.ui.Golden.panel(g, new jp.revati.skyabyss.client.ui.Golden.Box(x + SIDE_X, y, SIDE_W, H));
+        fit.fit(width, height, imageWidth, imageHeight, 1f, 1f);
+        fit.begin(g);
+        // 窓が舞台よりずっと大きい (GUI 2 など) ときは、窓の端まで敷かずに舞台の大きさの一枚の紙にする (箱の画面は大きくできないため)
+        jp.revati.skyabyss.client.ui.UiFit back = fit;
+        int bw = width;
+        int bh = height;
+        if (width > imageWidth * 3 / 2 || height > imageHeight * 3 / 2) {
+            bw = imageWidth + 24;
+            bh = imageHeight + 24;
+            back = new jp.revati.skyabyss.client.ui.UiFit();
+            back.fit(bw, bh, imageWidth, imageHeight, 1f, 1f);
+        }
+        jp.revati.skyabyss.client.ui.ShopStage.backdrop(g, back, bw, bh);
+        jp.revati.skyabyss.client.ui.ShopStage.title(g, font, title);
+        // 装備の枠を立てる桃色の台
+        Paper.cut(g, "forge_plinth", new float[] {GEAR_SX - 16, GEAR_SY + 20, GEAR_SX + 34, GEAR_SY + 19, GEAR_SX + 30, GEAR_SY + 28, GEAR_SX - 12, GEAR_SY + 29},
+                Paper.PINK, Paper.BLACK_LO, 2, 2);
+        fit.end(g);
         for (net.minecraft.world.inventory.Slot slot : menu.slots) {
             if (slot.isActive()) {
                 jp.revati.skyabyss.client.ui.Golden.slot(g, x + slot.x - 1, y + slot.y - 1, 18);
@@ -463,10 +521,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
             jp.revati.skyabyss.client.ui.Golden.tab(g, font, new jp.revati.skyabyss.client.ui.Golden.Box(tx, ty, TAB_W, TAB_H),
                     Component.translatable(TAB_KEYS[t.ordinal()]), t == shownTab(), hover);
         }
-        // 材料の枠の縁 (絵に焼き込まれていないので描く)
-        int mx = x + ResonanceForgeMenu.MATERIAL_X - 1;
-        int my = y + ResonanceForgeMenu.MATERIAL_Y - 1;
-        Paper.edge(g, mx, my, mx + 18, my + 18, Paper.EDGE);
+
         if (shownTab() == Tab.REFORGE && sub == Sub.REFORGE && AffixRules.eligible(menu.gear())) {
             int count = AffixRules.offers(menu.gear()).size();
             for (int i = 0; i < AffixRules.MAX_TRIALS; i++) {
@@ -475,15 +530,10 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                 boolean hover = i < count && mouseX >= cx && mouseX < cx + CARD_W && mouseY >= cy && mouseY < cy + CARD_H;
                 int state = i == selected ? 2 : hover ? 1 : 0;
                 // 候補の札: 欄の地。選んだ札は金の縁、重ねた札は淡い縁、まだ試していない枠は縁だけ暗く
-                jp.revati.skyabyss.client.ui.Golden.Box card = new jp.revati.skyabyss.client.ui.Golden.Box(cx, cy, CARD_W, CARD_H - 1);
-                jp.revati.skyabyss.client.ui.Golden.recess(g, card);
-                if (state == 2) {
-                    jp.revati.skyabyss.client.ui.Golden.selected(g, card);
-                    Paper.edge(g, cx, cy, cx + CARD_W, cy + CARD_H - 1, 0xFF000000 | Paper.ON_BLACK_PINK);
-                } else if (state == 1) {
-                    Paper.edge(g, cx, cy, cx + CARD_W, cy + CARD_H - 1, Paper.EDGE);
-                } else if (i >= count) {
-                    g.fill(cx + 1, cy + 1, cx + CARD_W - 1, cy + CARD_H - 2, 0x60000000);
+                // 帳面の上: 選んだ札は桃色の紙、乗せた札は明るい生成り、まだ試していない枠は薄く
+                g.fill(cx, cy, cx + CARD_W, cy + CARD_H - 1, state == 2 ? Paper.PINK : state == 1 ? Paper.CREAM_HI : Paper.CREAM_LO);
+                if (state != 2 && i >= count) {
+                    g.fill(cx + 1, cy + 1, cx + CARD_W - 1, cy + CARD_H - 2, Paper.CREAM);
                 }
             }
         }
@@ -492,8 +542,10 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     @Override
     protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
         g.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, TEXT, false);
-        g.drawString(font, Component.translatable("gui.skyabyss.forge.material"), ResonanceForgeMenu.MATERIAL_X - 2, ResonanceForgeMenu.MATERIAL_Y - 12, DIM, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.forge.material"), MAT_SX, MAT_SY - 11, Paper.ON_BLACK_SOFT, false);
         gearInfo(g);
+        // つまみの中身は帳面の上 (字は墨へ写す)
+        Paper.inkBegin();
         switch (shownTab()) {
             case ENHANCE -> enhancePanel(g);
             case POWDER -> powderPanel(g);
@@ -506,6 +558,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
             }
             case EXCHANGE -> exchangePanel(g);
         }
+        Paper.inkEnd();
     }
 
     // ---------------------------------------------------------------- 右: 粉 (差す・外す・合わせる)
@@ -631,28 +684,28 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     private void gearInfo(GuiGraphics g) {
         ItemStack gear = menu.gear();
         if (gear.isEmpty()) {
-            drawWrapped(g, Component.translatable("gui.skyabyss.forge.empty"), INFO_X, 19, 94, 3, TEXT);
+            drawWrapped(g, Component.translatable("gui.skyabyss.forge.empty"), INFO_X, INFO_Y, 136, 3, Paper.ON_BLACK_SOFT);
             return;
         }
-        drawWrapped(g, gear.getHoverName(), INFO_X, 19, 94, 1, TEXT);
+        drawWrapped(g, gear.getHoverName(), INFO_X, INFO_Y, 136, 1, OK);
         if (gear.getItem() instanceof ModGear mg) {
             Component tier = Component.translatable(mg.tier().translationKey());
             Component line = mg.enhanceable()
                     ? tier.copy().append(Component.literal("  +" + ModGear.enhance(gear) + "/" + ModGear.MAX_ENHANCE))
                     : tier;
-            g.drawString(font, line, INFO_X, 29, 0xFF000000 | mg.tier().color.getValue(), false);
+            g.drawString(font, line, INFO_X, INFO_Y + 10, 0xFF000000 | mg.tier().color.getValue(), false);
         }
-        int y = 40;
+        int y = INFO_Y + 21;
         if (!AffixRules.eligible(gear)) {
-            drawWrapped(g, Component.translatable("gui.skyabyss.forge.no_affix"), INFO_X, y, 94, 3, DIM);
+            drawWrapped(g, Component.translatable("gui.skyabyss.forge.no_affix"), INFO_X, y, 136, 3, DIM);
             return;
         }
         if (!gear.has(ModDataComponents.AFFIXES.get())) {
-            drawWrapped(g, Component.translatable("gear.skyabyss.affix_unrolled"), INFO_X, y, 94, 3, DIM);
+            drawWrapped(g, Component.translatable("gear.skyabyss.affix_unrolled"), INFO_X, y, 136, 3, DIM);
             return;
         }
         for (Affix a : AffixRules.affixes(gear)) {
-            drawWrapped(g, AffixRules.line(a, AffixRules.wide(gear)), INFO_X - 4, y, 98, 1, TEXT);
+            drawWrapped(g, AffixRules.line(a, AffixRules.wide(gear)), INFO_X, y, 136, 1, TEXT);
             y += 10;
         }
     }
@@ -719,14 +772,11 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
 
     private int partAt(int mx, int my) {
         java.util.List<Integer> parts = shownParts();
-        int x0 = leftPos - PANEL_GAP - PART_W + 6;
-        int y0 = topPos + 16;
-        for (int k = 0; k < parts.size(); k++) {
-            int px = x0 + (k % PART_COLS) * 18;
-            int py = y0 + (k / PART_COLS) * 18;
-            if (py + 18 > topPos + H) {
-                break;
-            }
+        int x0 = leftPos + PART_SX;
+        int y0 = topPos + PART_SY;
+        for (int k = 0; k < parts.size() && k < PART_MAX; k++) {
+            int px = x0 + k * 18;
+            int py = y0;
             if (mx >= px && mx < px + 18 && my >= py && my < py + 18) {
                 return parts.get(k);
             }
@@ -739,19 +789,16 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         if (parts.isEmpty()) {
             return;
         }
-        int x = leftPos - PANEL_GAP - PART_W;
-        jp.revati.skyabyss.client.ui.Golden.panel(g, new jp.revati.skyabyss.client.ui.Golden.Box(x, topPos, PART_W, H));
-        g.drawString(font, Component.translatable("skyabyss_pouch.category.parts"), x + 6, topPos + 6, Paper.ON_BLACK_HI, false);
+        // 帳面の下の端に一列 (生成りの窪みの枠)。押すと材料の枠へ
+        g.drawString(font, Component.translatable("skyabyss_pouch.category.parts"), leftPos + 14, topPos + PART_SY + 5, Paper.INK_SOFT, false);
         jp.revati.skyabyss.pouch.PouchData d = jp.revati.skyabyss.pouch.Pouch.data(minecraft.player);
         int hover = partAt(mouseX, mouseY);
-        for (int k = 0; k < parts.size(); k++) {
-            int px = x + 6 + (k % PART_COLS) * 18;
-            int py = topPos + 16 + (k / PART_COLS) * 18;
-            if (py + 18 > topPos + H) {
-                break;
-            }
+        for (int k = 0; k < parts.size() && k < PART_MAX; k++) {
+            int px = leftPos + PART_SX + k * 18;
+            int py = topPos + PART_SY;
             ItemStack s = d.part(parts.get(k));
-            g.fill(px, py, px + 17, py + 17, parts.get(k) == hover ? 0x60E45A9C : 0x40000000);
+            g.fill(px - 1, py - 1, px + 17, py + 17, Paper.CREAM_LO);
+            g.fill(px, py, px + 17, py + 17, parts.get(k) == hover ? Paper.PINK_HI : 0xFFDCD2C2);
             g.renderItem(s, px, py);
             g.renderItemDecorations(font, s, px, py);
         }
@@ -859,6 +906,6 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
 
     @Override
     public int[] textBounds() {
-        return new int[] {leftPos - PANEL_GAP - PART_W, topPos, imageWidth + PANEL_GAP + PART_W, imageHeight};
+        return new int[] {leftPos, topPos, imageWidth, imageHeight};
     }
 }

@@ -9,6 +9,7 @@ import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.client.rebirth.TitleTagClient;
 import jp.revati.skyabyss.client.ui.FitText;
 import jp.revati.skyabyss.client.ui.Golden;
+import jp.revati.skyabyss.client.ui.LedgerStage;
 import jp.revati.skyabyss.client.ui.UiFit;
 import jp.revati.skyabyss.endgame.Profile;
 import jp.revati.skyabyss.facility.guild.GuildData;
@@ -38,40 +39,42 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import jp.revati.skyabyss.client.ui.Paper;
 
 // プロフィール (持ち物の画面の右上の札から開く。自分のことを見る・決める画面)。
-//   左      人形・名前と名札の称号 (名前の上)・組合の旗と名前
-//   右の上  つまみ三つ: わたし (職・転生・鐘銭・遊んだ時間・倒した数・称号・名声・図鑑・塔) / 称号 (一覧から選ぶ) / 見え方 (名札と背の飾りの設定・順位表)
+//   人形・名前と名札の称号 (名前の上)・組合の旗と名前。つまみ三つ: わたし (職・転生・鐘銭・遊んだ時間・倒した数・称号・名声・図鑑・塔) /
+//   称号 (一覧から選ぶ) / 見え方 (名札と背の飾りの設定・順位表)
 //   中身はサーバーへ頼む (Profile.Request → Snapshot)。称号と転生は同期してある RebirthData を読む。
-//   板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 見出しの帯の右につまみ、脇の列 (左) に人形と名前と組合、主の列 (右) に中身
+// 組み方は帳の類の「黒に書いて、目録は帯に」(client/ui/LedgerStage。docs/design/56 の 2.1):
+//   左の黒い紙に題・組合 (左の列)・大きな人形と、その下に称号と名前。右の生成りの帯 (目録) の上につまみ、その下につまみの中身
+//   (わたし = 数の表、称号 = 一覧 (選んでいる称号は桃色の付箋)、見え方 = 切り替えの釦と注)
 //   E で持ち物へ戻る。J/K は記録と技へ
 public class ProfileScreen extends Screen {
     static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/profile/profile.png");
     static final int TEX_W = 1024;
     static final int TEX_H = 512;
-    static final Golden.Layout LAYOUT = Golden.Layout.large(0);
-    static final int W = Golden.L_W;
-    static final int H = Golden.L_H;
-    static final Golden.Box SIDE = LAYOUT.body().minor(true);
-    static final Golden.Box MAIN = LAYOUT.body().major(false);
-    // 人形の枠 (脇の列の上)
-    static final int DOLL_X0 = SIDE.x() + Golden.S8;
-    static final int DOLL_Y0 = SIDE.y() + Golden.S5;
-    static final int DOLL_X1 = SIDE.right() - Golden.S8;
-    static final int DOLL_Y1 = DOLL_Y0 + 105;
-    // 主の列の中の字の左右
-    static final int BODY_X = MAIN.x() + Golden.S8;
-    static final int BODY_R = MAIN.right() - Golden.S8;
-    // つまみ (見出しの帯の右寄せ)
-    static final int SUB_W = Golden.S55;
-    static final int SUB_GAP = Golden.S3;
+    static final int W = LedgerStage.W;
+    static final int H = LedgerStage.H;
+    // 人形の枠 (左の黒い紙の真ん中)
+    static final int DOLL_X0 = 104;
+    static final int DOLL_Y0 = 40;
+    static final int DOLL_X1 = 246;
+    static final int DOLL_Y1 = 168;
+    // 組合 (左の列)
+    static final int GUILD_X = LedgerStage.PAGE_X;
+    static final int GUILD_Y = 46;
+    static final int GUILD_W = 80;
+    // 右の帯の中
+    static final int BODY_X = LedgerStage.INDEX_X;
+    static final int BODY_R = LedgerStage.INDEX_X + LedgerStage.INDEX_W - 4;
+    // つまみ (帯の上の端)
+    static final int SUB_W = 35;
+    static final int SUB_GAP = 2;
     static final int SUB_H = Golden.BTN;
-    static final int SUB_X = LAYOUT.head().right() - 3 * SUB_W - 2 * SUB_GAP;
-    static final int SUB_Y = LAYOUT.head().y() + 4;
-    static final int ROW = Golden.ROW;
-    static final int ME_ROW = Golden.ROW;
-    static final int LIST_Y = MAIN.y() + Golden.S5;
-    static final int LIST_ROWS = (MAIN.h() - 2 * Golden.S5 - Golden.ROW - Golden.S3) / ROW;
+    static final int SUB_X = LedgerStage.INDEX_X - 2;
+    static final int SUB_Y = 12;
+    static final int ROW = 13;
+    static final int ME_ROW = 13;
+    static final int LIST_Y = LedgerStage.LIST_Y + 2;
+    static final int LIST_ROWS = (214 - LIST_Y - ROW) / ROW;
 
-    static final int TITLE = Paper.ON_BLACK_HI;
     static final int TEXT = Golden.TEXT;
     static final int SOFT = Paper.ON_BLACK_SOFT;
     static final int DIM = Paper.ON_BLACK_DIM;
@@ -98,8 +101,6 @@ public class ProfileScreen extends Screen {
             new Toggle("prism_still", RebirthConfig.PRISM_STILL));
 
     private final UiFit fit = new UiFit();
-    private final int left = 0;
-    private final int top = 0;
     private int scroll;
     private List<FormattedCharSequence> pendingTip;
     private ItemStack banner = ItemStack.EMPTY;
@@ -107,6 +108,12 @@ public class ProfileScreen extends Screen {
 
     public ProfileScreen() {
         super(Component.translatable("gui.skyabyss.profile.title"));
+    }
+
+    // 撮影用: つまみを選んで開く
+    public ProfileScreen page(int which) {
+        sub = Math.max(ME, Math.min(LOOKS, which));
+        return this;
     }
 
     public static void receive(Profile.Snapshot snap) {
@@ -128,24 +135,24 @@ public class ProfileScreen extends Screen {
             sub = ME;
         }
         for (int i = 0; i <= LOOKS; i++) {
-            addRenderableWidget(new SubTab(left + SUB_X + i * (SUB_W + SUB_GAP), top + SUB_Y, i));
+            addRenderableWidget(new SubTab(SUB_X + i * (SUB_W + SUB_GAP), SUB_Y, i));
         }
         if (sub == LOOKS) {
-            int y = MAIN.y() + Golden.S5;
+            int y = LIST_Y;
             int bw = BODY_R - BODY_X;
             for (Toggle t : TOGGLES) {
                 addRenderableWidget(Paper.tag(label(t), btn -> {
                     t.value.set(!RebirthConfig.on(t.value));
                     RebirthConfig.CLIENT_SPEC.save();
                     btn.setMessage(label(t));
-                }).bounds(left + BODY_X, y, bw, Golden.BTN).build());
-                y += Golden.BTN + Golden.S5;
+                }).bounds(BODY_X, y, bw, Golden.BTN).build());
+                y += Golden.BTN + 3;
             }
             addRenderableWidget(Paper.tag(boardLabel(hidden()), btn -> {
                 boolean now = !hidden();
                 PacketDistributor.sendToServer(new RebirthNet.HiddenPayload(now));
                 btn.setMessage(boardLabel(now));
-            }).bounds(left + BODY_X, y, bw, Golden.BTN).build());
+            }).bounds(BODY_X, y, bw, Golden.BTN).build());
         }
         PacketDistributor.sendToServer(new Profile.Request());
     }
@@ -181,35 +188,38 @@ public class ProfileScreen extends Screen {
     }
 
     @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        Paper.dim(g, width, height);
+    }
+
+    @Override
     public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        fit.fit(width, height, W, H, 3f);
         renderBackground(g, screenX, screenY, partialTick);
         pendingTip = null;
         int mx = (int) Math.floor(fit.x(screenX));
         int my = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
-        Golden.panel(g, LAYOUT.panel());
-        Golden.headLine(g, LAYOUT);
-        Golden.recess(g, SIDE);
-        Golden.recess(g, MAIN);
-        g.drawString(font, title, LAYOUT.head().x() + Golden.S5, Golden.textY(LAYOUT.head().y(), LAYOUT.head().h()), TITLE, false);
+        LedgerStage.backdrop(g, fit, width, height);
+        LedgerStage.pageTitle(g, font, title, null);
         fit.end(g);
         // 人形は画面の座標で描く (切り抜きが板の変換を通らないため)
         if (minecraft != null && minecraft.player != null) {
-            int[] r = fit.screenRect(left + DOLL_X0, top + DOLL_Y0, DOLL_X1 - DOLL_X0, DOLL_Y1 - DOLL_Y0);
-            InventoryScreen.renderEntityInInventoryFollowsMouse(g, r[0], r[1], r[0] + r[2], r[1] + r[3] - 4, Math.round(36 * fit.scale()), 0.0625f,
+            int[] r = fit.screenRect(DOLL_X0, DOLL_Y0, DOLL_X1 - DOLL_X0, DOLL_Y1 - DOLL_Y0);
+            InventoryScreen.renderEntityInInventoryFollowsMouse(g, r[0], r[1], r[0] + r[2], r[1] + r[3] - 4, Math.round(52 * fit.scale()), 0.0625f,
                     screenX, screenY, minecraft.player);
         }
         fit.begin(g);
         g.pose().pushPose();
         g.pose().translate(0, 0, 100);
-        for (net.minecraft.client.gui.components.Renderable r : renderables) {
-            r.render(g, mx, my, partialTick);
-        }
         renderSide(g, mx, my);
         switch (sub) {
             case TITLES -> renderTitles(g, mx, my);
             case LOOKS -> renderLooks(g);
             default -> renderMe(g, mx, my);
+        }
+        for (net.minecraft.client.gui.components.Renderable r : renderables) {
+            r.render(g, mx, my, partialTick);
         }
         g.pose().popPose();
         fit.end(g);
@@ -230,28 +240,30 @@ public class ProfileScreen extends Screen {
         return mx >= x && mx < x + w && my >= y && my < y + h;
     }
 
-    // ---------------------------------------------------------------- 左: 名前と称号・組合
+    // ---------------------------------------------------------------- 左の黒い紙: 名前と称号・組合
     private void renderSide(GuiGraphics g, int mx, int my) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) {
             return;
         }
-        int cx = SIDE.cx();
-        int tw = SIDE.w() - 2 * Golden.S8;
+        int cx = (DOLL_X0 + DOLL_X1) / 2;
+        int tw = DOLL_X1 - DOLL_X0 + 10;
         Component name = mc.player.getName();
         Component title = TitleTagClient.text(mc.player);
-        int ny = DOLL_Y1 + Golden.S3;
+        int ny = DOLL_Y1 + 2;
         if (title != null) {
-            FitText.drawCentered(g, font, title, cx, Golden.textY(ny, ROW), tw, TitleTagClient.COLOR, false);
-            ny += ROW;
+            FitText.drawCentered(g, font, title, cx, ny, tw, TitleTagClient.COLOR, false);
+            ny += 12;
         }
-        FitText.drawCentered(g, font, name, cx, Golden.textY(ny, ROW), tw, TEXT, false);
-        // 組合 (脇の列の下の端)
-        int gy = SIDE.bottom() - Golden.S5 - 2 * ROW;
-        Golden.rule(g, SIDE.x() + Golden.S8, SIDE.right() - Golden.S8, gy - Golden.S3);
+        FitText.drawCentered(g, font, name, cx, ny, tw, TEXT, false);
+        // 組合 (左の列)
+        int gy = GUILD_Y;
         CompoundTag guild = data == null || !data.contains("guild") ? null : data.getCompound("guild");
         if (guild == null) {
-            FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.profile.no_guild"), cx, Golden.textY(gy + ROW / 2, ROW), tw, DIM, false);
+            for (FormattedCharSequence line : jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.profile.no_guild"), GUILD_W)) {
+                g.drawString(font, line, GUILD_X, gy, DIM, false);
+                gy += 11;
+            }
             return;
         }
         String key = guild.getString("pattern") + "/" + guild.getInt("color") + "/" + guild.getInt("accent");
@@ -259,13 +271,20 @@ public class ProfileScreen extends Screen {
             banner = GuildEmblems.banner(mc.level.registryAccess(), guild.getString("pattern"), guild.getInt("color"), guild.getInt("accent"));
             bannerKey = key;
         }
-        g.renderItem(banner, SIDE.x() + Golden.S8, gy + 5);
+        g.pose().pushPose();
+        g.pose().translate(GUILD_X, gy, 0);
+        g.pose().scale(2f, 2f, 1f);
+        g.renderItem(banner, 0, 0);
+        g.pose().popPose();
         int tagColor = GuildData.textColor(guild.getInt("color"));
         Component tag = Component.literal("[" + guild.getString("tag") + "]").withStyle(s -> s.withColor(tagColor));
-        int gx = SIDE.x() + Golden.S8 + 16 + Golden.S5;
-        g.drawString(font, tag, gx, Golden.textY(gy, ROW), TEXT, false);
-        FitText.draw(g, font, Component.literal(guild.getString("name")), gx, Golden.textY(gy + ROW, ROW), SIDE.right() - Golden.S8 - gx, SOFT, false);
-        if (in(mx, my, SIDE.x(), gy, SIDE.w(), 2 * ROW)) {
+        g.drawString(font, tag, GUILD_X, gy + 36, TEXT, false);
+        int ly = gy + 48;
+        for (FormattedCharSequence line : jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.literal(guild.getString("name")), GUILD_W)) {
+            g.drawString(font, line, GUILD_X, ly, SOFT, false);
+            ly += 11;
+        }
+        if (in(mx, my, GUILD_X, gy, GUILD_W, ly - gy)) {
             int rank = guild.getInt("rank");
             tip(List.of(Component.literal(guild.getString("name")),
                     Component.translatable("gui.skyabyss.profile.rank." + (rank == GuildData.RANK_LEADER ? "leader" : rank == GuildData.RANK_OFFICER ? "officer" : "member"))
@@ -273,17 +292,17 @@ public class ProfileScreen extends Screen {
         }
     }
 
-    // ---------------------------------------------------------------- わたし
+    // ---------------------------------------------------------------- わたし (右の帯の数の表)
     private void renderMe(GuiGraphics g, int mx, int my) {
         if (data == null) {
-            g.drawCenteredString(font, Component.translatable("gui.skyabyss.journey.loading"), MAIN.cx(), Golden.textY(MAIN.y() + MAIN.h() / 2 - 6, ROW), SOFT);
+            FitText.draw(g, font, Component.translatable("gui.skyabyss.journey.loading"), BODY_X, LIST_Y + 2, BODY_R - BODY_X, Paper.INK_SOFT, false);
             return;
         }
         Minecraft mc = Minecraft.getInstance();
         RebirthData rd = RebirthView.data(mc.player);
         Job job = Job.byId(data.getString("job"));
         int level = data.getInt("level");
-        int y = MAIN.y() + Golden.S5;
+        int y = LIST_Y;
         rowIndex = 0;
         row(g, y, "job", job == null ? Component.translatable("gui.skyabyss.profile.none")
                 : Component.translatable("gui.skyabyss.profile.job_value", Component.translatable(job.nameKey()), level));
@@ -312,25 +331,29 @@ public class ProfileScreen extends Screen {
         row(g, y, "tower", Component.translatable("gui.skyabyss.profile.times", data.getInt("tower")));
         y += ME_ROW;
         row(g, y, "fish", Component.literal(data.getInt("fish") + " / " + data.getInt("fish_total")));
-        if (in(mx, my, left + BODY_X, MAIN.y() + Golden.S5 + 8 * ME_ROW, BODY_R - BODY_X, 2 * ME_ROW)) {
+        if (in(mx, my, BODY_X - 4, LIST_Y + 8 * ME_ROW, BODY_R - BODY_X + 4, 2 * ME_ROW)) {
             tip(List.of(Component.translatable("gui.skyabyss.profile.see_journey").withStyle(s -> s.withColor(SOFT))));
         }
     }
 
-    // 数の表の一行 (1 行おきに地の色を変えて、目で横に追いやすく)
+    // 数の表の一行 (墨の字。行のあいだに点線)
     private int rowIndex;
 
     private void row(GuiGraphics g, int y, String key, Component value) {
-        if (rowIndex++ % 2 == 0) {
-            Golden.stripe(g, new Golden.Box(MAIN.x() + 2, y, MAIN.w() - 4, ME_ROW));
+        if (rowIndex++ > 0) {
+            for (int d = BODY_X; d < BODY_R; d += 3) {
+                g.fill(d, y - 1, d + 1, y, Paper.CREAM_LO);
+            }
         }
-        int ty = Golden.textY(y, ME_ROW);
-        g.drawString(font, Component.translatable("gui.skyabyss.profile.row." + key), left + BODY_X, ty, SOFT, false);
-        int w = Math.min(font.width(value), 110);
-        FitText.draw(g, font, value, left + BODY_R - w, ty, 110, TEXT, false);
+        Component label = Component.translatable("gui.skyabyss.profile.row." + key);
+        int lw = font.width(label);
+        g.drawString(font, label, BODY_X, y + 2, Paper.INK_SOFT, false);
+        int room = BODY_R - BODY_X - lw - 4;
+        int w = Math.min(font.width(value), room);
+        FitText.draw(g, font, Component.literal(value.getString()), BODY_R - w, y + 2, room, Paper.INK, false);
     }
 
-    // ---------------------------------------------------------------- 称号
+    // ---------------------------------------------------------------- 称号 (右の帯の一覧)
     private void renderTitles(GuiGraphics g, int mx, int my) {
         Minecraft mc = Minecraft.getInstance();
         RebirthData d = RebirthView.data(mc.player);
@@ -339,39 +362,43 @@ public class ProfileScreen extends Screen {
         scroll = Mth.clamp(scroll, 0, Math.max(0, total - LIST_ROWS));
         for (int i = 0; i < LIST_ROWS && scroll + i < total; i++) {
             int idx = scroll + i;
-            int y = top + LIST_Y + i * ROW;
-            boolean hover = in(mx, my, left + BODY_X - 2, y, BODY_R - BODY_X - 4, ROW);
-            if (hover) {
-                g.fill(left + BODY_X - 2, y, left + BODY_R - 6, y + ROW, 0x24FFFFFF);
-            }
-            int ty = Golden.textY(y, ROW);
+            int y = LIST_Y + i * ROW;
+            boolean hover = in(mx, my, BODY_X - 4, y, BODY_R - BODY_X + 4, ROW);
+            boolean sel;
+            boolean has = true;
+            String shown;
             if (idx == 0) {
-                boolean sel = d.title().isEmpty();
-                g.drawString(font, (sel ? "▶ " : "  ") + Component.translatable("skyabyss_rebirth.gui.no_title").getString(), left + BODY_X, ty,
-                        sel ? GOLD : hover ? TEXT : SOFT, false);
-                continue;
+                sel = d.title().isEmpty();
+                shown = Component.translatable("skyabyss_rebirth.gui.no_title").getString();
+            } else {
+                RebirthTitles.Title ti = all.get(idx - 1);
+                has = RebirthTitles.has(d.unlocked(), ti);
+                sel = ti.id().equals(d.title());
+                Component name = Component.translatable("title.skyabyss_rebirth." + ti.id());
+                shown = has ? name.getString() : "？ " + "・".repeat(Math.min(6, name.getString().length()));
+                if (hover) {
+                    Component how = Component.translatable("title.skyabyss_rebirth." + ti.id() + ".how");
+                    tip(has ? List.of(name.copy().withStyle(s -> s.withColor(TitleTagClient.COLOR)), how.copy().withStyle(s -> s.withColor(SOFT)))
+                            : List.of(Component.translatable("skyabyss_rebirth.gui.locked_how", how).withStyle(s -> s.withColor(SOFT))));
+                }
             }
-            RebirthTitles.Title ti = all.get(idx - 1);
-            boolean has = RebirthTitles.has(d.unlocked(), ti);
-            boolean sel = ti.id().equals(d.title());
-            Component name = Component.translatable("title.skyabyss_rebirth." + ti.id());
-            String shown = has ? name.getString() : "？ " + "・".repeat(Math.min(6, name.getString().length()));
-            FitText.draw(g, font, Component.literal((sel ? "▶ " : "  ") + shown), left + BODY_X, ty, BODY_R - BODY_X - 8, sel ? GOLD : has ? TEXT : DIM, false);
-            if (hover) {
-                Component how = Component.translatable("title.skyabyss_rebirth." + ti.id() + ".how");
-                tip(has ? List.of(name.copy().withStyle(s -> s.withColor(TitleTagClient.COLOR)), how.copy().withStyle(s -> s.withColor(SOFT)))
-                        : List.of(Component.translatable("skyabyss_rebirth.gui.locked_how", how).withStyle(s -> s.withColor(SOFT))));
+            if (sel) {
+                LedgerStage.flag(g, y, ROW);
+            } else if (hover) {
+                LedgerStage.hover(g, y, ROW);
             }
+            FitText.draw(g, font, Component.literal(shown), BODY_X, y + 3, BODY_R - BODY_X - 4, sel ? LedgerStage.ON_PINK : has ? Paper.INK : 0x8A8086, false);
         }
         if (total > LIST_ROWS) {
             int barH = LIST_ROWS * ROW;
             int knob = Math.max(10, barH * LIST_ROWS / total);
-            int ky = top + LIST_Y + (barH - knob) * scroll / Math.max(1, total - LIST_ROWS);
-            g.fill(left + BODY_R + 1, top + LIST_Y, left + BODY_R + 3, top + LIST_Y + barH, 0x30FFFFFF);
-            g.fill(left + BODY_R + 1, ky, left + BODY_R + 3, ky + knob, 0xA0FFFFFF);
+            int ky = LIST_Y + (barH - knob) * scroll / Math.max(1, total - LIST_ROWS);
+            int bx = LedgerStage.INDEX_X + LedgerStage.INDEX_W - 2;
+            g.fill(bx, LIST_Y, bx + 1, LIST_Y + barH, Paper.CREAM_LO);
+            g.fill(bx - 1, ky, bx + 2, ky + knob, Paper.PINK);
         }
-        g.drawString(font, Component.translatable("gui.skyabyss.profile.count", Long.bitCount(d.unlocked()), RebirthTitles.MAX), left + BODY_X,
-                Golden.textY(MAIN.bottom() - Golden.S5 - ROW, ROW), DIM, false);
+        FitText.draw(g, font, Component.translatable("gui.skyabyss.profile.count", Long.bitCount(d.unlocked()), RebirthTitles.MAX), BODY_X, 203,
+                BODY_R - BODY_X, Paper.INK_SOFT, false);
     }
 
     // 一覧の並び: 解けた称号を先に (どちらも元の並び順のまま)
@@ -390,17 +417,24 @@ public class ProfileScreen extends Screen {
         return out;
     }
 
-    // ---------------------------------------------------------------- 見え方
+    // ---------------------------------------------------------------- 見え方 (釦の下に注)
     private void renderLooks(GuiGraphics g) {
-        FitText.draw(g, font, Component.translatable("gui.skyabyss.profile.looks_note"), left + BODY_X, Golden.textY(MAIN.bottom() - Golden.S5 - ROW, ROW), BODY_R - BODY_X, DIM, false);
+        int y = LIST_Y + (TOGGLES.size() + 1) * (Golden.BTN + 3) + 4;
+        for (FormattedCharSequence line : jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.profile.looks_note"), BODY_R - BODY_X)) {
+            if (y + 9 > 214) {
+                break;
+            }
+            g.drawString(font, line, BODY_X, y, Paper.INK_SOFT, false);
+            y += 11;
+        }
     }
 
     @Override
     public boolean mouseClicked(double screenX, double screenY, int button) {
         double mx = fit.x(screenX);
         double my = fit.y(screenY);
-        if (sub == TITLES && button == 0 && mx >= left + BODY_X - 2 && mx < left + BODY_R - 6 && my >= top + LIST_Y && my < top + LIST_Y + LIST_ROWS * ROW) {
-            int idx = scroll + (int) ((my - (top + LIST_Y)) / ROW);
+        if (sub == TITLES && button == 0 && mx >= BODY_X - 4 && mx < BODY_R && my >= LIST_Y && my < LIST_Y + LIST_ROWS * ROW) {
+            int idx = scroll + (int) ((my - LIST_Y) / ROW);
             Minecraft mc = Minecraft.getInstance();
             if (idx == 0) {
                 PacketDistributor.sendToServer(new RebirthNet.SelectTitlePayload(""));
@@ -432,7 +466,7 @@ public class ProfileScreen extends Screen {
         return super.mouseReleased(fit.x(screenX), fit.y(screenY), button);
     }
 
-    // 右の上のつまみ (わたし・称号・見え方)
+    // 右の帯の上のつまみ (わたし・称号・見え方)
     private final class SubTab extends AbstractButton {
         private final int which;
 
@@ -452,7 +486,7 @@ public class ProfileScreen extends Screen {
 
         @Override
         protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-            Golden.tab(g, font, new Golden.Box(getX(), getY(), SUB_W, SUB_H), getMessage(), sub == which, isHoveredOrFocused());
+            Paper.tab(g, font, getX(), getY(), SUB_W, SUB_H, getMessage(), sub == which, isHoveredOrFocused());
         }
 
         @Override

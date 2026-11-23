@@ -1,0 +1,969 @@
+# UI 3 周目の清書の確かめ (店 C・帳 C・集まり A・選ぶ A・会話 A)・3 周目の残り (野営地・募集・塔の受付・言伝ての板・K の頁・称号・プロフィール・取引所・ギルド・巡りの報い・封切り師)
+# SKYABYSS_UI_SKIN=a bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/paper_round3.txt -PshotsName=paper_round3
+world paper_round3 flat
+size 1920 1080
+timeout 600
+render 4
+clouds off
+guiscale 4
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss playtest skip opening
+cmd skyabyss cinematic stop
+cmd skyabyss level set @p 12
+cmd skyabyss job choose mage
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+
+cmd skyabyss facility coins 5000
+cmd skyabyss quest start @s main_song
+wait 20
+cmd execute at @s run summon skyabyss:attendant ~ ~ ~3 {NoAI:1b,Role:"tool_merchant",Variant:1,Rotation:[180f,0f],PersistenceRequired:1b}
+window 1920 1080
+guiscale 4
+wait 10
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop smithy
+wait 12
+overlap shop_1920_g4
+shot shop_1920_g4
+close
+wait 4
+cmd skyabyss cinematic stop
+cmd skyabyss facility act buyback
+wait 12
+overlap buyback_1920_g4
+shot buyback_1920_g4
+close
+wait 4
+cmd skyabyss cinematic stop
+cmd skyabyss facility act mount_shop
+wait 12
+overlap mount_1920_g4
+shot mount_1920_g4
+close
+wait 4
+open quests
+wait 8
+overlap quests_1920_g4
+shot quests_1920_g4
+close
+wait 2
+open notices
+wait 8
+overlap notices_1920_g4
+shot notices_1920_g4
+close
+wait 2
+open records_demo
+wait 8
+overlap records_demo_1920_g4
+shot records_demo_1920_g4
+close
+wait 2
+open town_guide_demo
+wait 8
+overlap town_guide_demo_1920_g4
+shot town_guide_demo_1920_g4
+close
+wait 2
+open party_demo
+wait 8
+overlap party_demo_1920_g4
+shot party_demo_1920_g4
+close
+wait 2
+open shrine_demo
+wait 8
+overlap shrine_demo_1920_g4
+shot shrine_demo_1920_g4
+close
+wait 2
+open shrine_demo_codex
+wait 8
+overlap shrine_demo_codex_1920_g4
+shot shrine_demo_codex_1920_g4
+close
+wait 2
+open shrine_demo_vow
+wait 8
+overlap shrine_demo_vow_1920_g4
+shot shrine_demo_vow_1920_g4
+close
+wait 2
+open shrine_demo_rewards
+wait 8
+overlap shrine_demo_rewards_1920_g4
+shot shrine_demo_rewards_1920_g4
+close
+wait 2
+open shrine_demo_how
+wait 8
+overlap shrine_demo_how_1920_g4
+shot shrine_demo_how_1920_g4
+close
+wait 2
+open deep_choice
+wait 8
+overlap deep_choice_1920_g4
+shot deep_choice_1920_g4
+close
+wait 2
+open route_boon_demo
+wait 8
+overlap route_boon_demo_1920_g4
+shot route_boon_demo_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss dev talk "skyabyss:attendant_tool_merchant"
+wait 30
+overlap talk_1920_g4
+shot talk_1920_g4
+close
+wait 4
+# 3 周目の残り (1920_g4)
+open circuit_camp_demo
+wait 10
+overlap circuit_camp_demo_1920_g4
+shot circuit_camp_demo_1920_g4
+close
+wait 2
+open party_finder_demo
+wait 10
+overlap party_finder_demo_1920_g4
+shot party_finder_demo_1920_g4
+close
+wait 2
+open tower_desk
+wait 10
+overlap tower_desk_1920_g4
+shot tower_desk_1920_g4
+close
+wait 2
+open tower_desk_join
+wait 10
+overlap tower_desk_join_1920_g4
+shot tower_desk_join_1920_g4
+close
+wait 2
+open board_demo
+wait 10
+overlap board_demo_1920_g4
+shot board_demo_1920_g4
+close
+wait 2
+open journey
+wait 10
+overlap journey_1920_g4
+shot journey_1920_g4
+close
+wait 2
+open growth
+wait 10
+overlap growth_1920_g4
+shot growth_1920_g4
+close
+wait 2
+open hunt
+wait 10
+overlap hunt_1920_g4
+shot hunt_1920_g4
+close
+wait 2
+open rebirth
+wait 10
+overlap rebirth_1920_g4
+shot rebirth_1920_g4
+close
+wait 2
+open profile
+wait 10
+overlap profile_1920_g4
+shot profile_1920_g4
+close
+wait 2
+open profile_titles
+wait 10
+overlap profile_titles_1920_g4
+shot profile_titles_1920_g4
+close
+wait 2
+open profile_looks
+wait 10
+overlap profile_looks_1920_g4
+shot profile_looks_1920_g4
+close
+wait 2
+open trade_demo_0
+wait 10
+overlap trade_demo_0_1920_g4
+shot trade_demo_0_1920_g4
+close
+wait 2
+open trade_demo_1
+wait 10
+overlap trade_demo_1_1920_g4
+shot trade_demo_1_1920_g4
+close
+wait 2
+open trade_demo_2
+wait 10
+overlap trade_demo_2_1920_g4
+shot trade_demo_2_1920_g4
+close
+wait 2
+open trade_demo_3
+wait 10
+overlap trade_demo_3_1920_g4
+shot trade_demo_3_1920_g4
+close
+wait 2
+open trade_demo_4
+wait 10
+overlap trade_demo_4_1920_g4
+shot trade_demo_4_1920_g4
+close
+wait 2
+open guild_demo_list
+wait 10
+overlap guild_demo_list_1920_g4
+shot guild_demo_list_1920_g4
+close
+wait 2
+open guild_demo_0
+wait 10
+overlap guild_demo_0_1920_g4
+shot guild_demo_0_1920_g4
+close
+wait 2
+open guild_demo_1
+wait 10
+overlap guild_demo_1_1920_g4
+shot guild_demo_1_1920_g4
+close
+wait 2
+open guild_demo_2
+wait 10
+overlap guild_demo_2_1920_g4
+shot guild_demo_2_1920_g4
+close
+wait 2
+open guild_demo_3
+wait 10
+overlap guild_demo_3_1920_g4
+shot guild_demo_3_1920_g4
+close
+wait 2
+open reward_demo
+wait 10
+overlap reward_demo_1920_g4
+shot reward_demo_1920_g4
+close
+wait 2
+open reward_done
+wait 10
+overlap reward_done_1920_g4
+shot reward_done_1920_g4
+close
+wait 2
+open box_demo_list
+wait 10
+overlap box_demo_list_1920_g4
+shot box_demo_list_1920_g4
+close
+wait 2
+open box_demo_spin
+wait 10
+overlap box_demo_spin_1920_g4
+shot box_demo_spin_1920_g4
+close
+wait 2
+open box_demo_card
+wait 10
+overlap box_demo_card_1920_g4
+shot box_demo_card_1920_g4
+close
+wait 2
+open box_demo_summary
+wait 10
+overlap box_demo_summary_1920_g4
+shot box_demo_summary_1920_g4
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss_forge open
+wait 14
+overlap forge_1920_g4
+shot forge_1920_g4
+close
+wait 3
+cmd skyabyss cinematic stop
+cmd skyabyss facility act stash
+wait 14
+overlap stash_1920_g4
+shot stash_1920_g4
+close
+wait 3
+open tower_desk_many
+wait 10
+overlap tower_desk_many_1920_g4
+shot tower_desk_many_1920_g4
+close
+wait 2
+open hunt_demo
+wait 10
+overlap hunt_demo_1920_g4
+shot hunt_demo_1920_g4
+close
+wait 2
+cmd skyabyss level set @p 50
+wait 4
+open soul
+wait 10
+overlap soul_1920_g4
+shot soul_1920_g4
+close
+wait 2
+open soul_terms
+wait 10
+overlap soul_terms_1920_g4
+shot soul_terms_1920_g4
+close
+wait 2
+cmd skyabyss level set @p 12
+wait 4
+window 1920 1080
+guiscale 2
+wait 10
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop smithy
+wait 12
+overlap shop_1920_g2
+shot shop_1920_g2
+close
+wait 4
+cmd skyabyss cinematic stop
+cmd skyabyss facility act buyback
+wait 12
+overlap buyback_1920_g2
+shot buyback_1920_g2
+close
+wait 4
+cmd skyabyss cinematic stop
+cmd skyabyss facility act mount_shop
+wait 12
+overlap mount_1920_g2
+shot mount_1920_g2
+close
+wait 4
+open quests
+wait 8
+overlap quests_1920_g2
+shot quests_1920_g2
+close
+wait 2
+open notices
+wait 8
+overlap notices_1920_g2
+shot notices_1920_g2
+close
+wait 2
+open records_demo
+wait 8
+overlap records_demo_1920_g2
+shot records_demo_1920_g2
+close
+wait 2
+open town_guide_demo
+wait 8
+overlap town_guide_demo_1920_g2
+shot town_guide_demo_1920_g2
+close
+wait 2
+open party_demo
+wait 8
+overlap party_demo_1920_g2
+shot party_demo_1920_g2
+close
+wait 2
+open shrine_demo
+wait 8
+overlap shrine_demo_1920_g2
+shot shrine_demo_1920_g2
+close
+wait 2
+open shrine_demo_codex
+wait 8
+overlap shrine_demo_codex_1920_g2
+shot shrine_demo_codex_1920_g2
+close
+wait 2
+open shrine_demo_vow
+wait 8
+overlap shrine_demo_vow_1920_g2
+shot shrine_demo_vow_1920_g2
+close
+wait 2
+open shrine_demo_rewards
+wait 8
+overlap shrine_demo_rewards_1920_g2
+shot shrine_demo_rewards_1920_g2
+close
+wait 2
+open shrine_demo_how
+wait 8
+overlap shrine_demo_how_1920_g2
+shot shrine_demo_how_1920_g2
+close
+wait 2
+open deep_choice
+wait 8
+overlap deep_choice_1920_g2
+shot deep_choice_1920_g2
+close
+wait 2
+open route_boon_demo
+wait 8
+overlap route_boon_demo_1920_g2
+shot route_boon_demo_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss dev talk "skyabyss:attendant_tool_merchant"
+wait 30
+overlap talk_1920_g2
+shot talk_1920_g2
+close
+wait 4
+# 3 周目の残り (1920_g2)
+open circuit_camp_demo
+wait 10
+overlap circuit_camp_demo_1920_g2
+shot circuit_camp_demo_1920_g2
+close
+wait 2
+open party_finder_demo
+wait 10
+overlap party_finder_demo_1920_g2
+shot party_finder_demo_1920_g2
+close
+wait 2
+open tower_desk
+wait 10
+overlap tower_desk_1920_g2
+shot tower_desk_1920_g2
+close
+wait 2
+open tower_desk_join
+wait 10
+overlap tower_desk_join_1920_g2
+shot tower_desk_join_1920_g2
+close
+wait 2
+open board_demo
+wait 10
+overlap board_demo_1920_g2
+shot board_demo_1920_g2
+close
+wait 2
+open journey
+wait 10
+overlap journey_1920_g2
+shot journey_1920_g2
+close
+wait 2
+open growth
+wait 10
+overlap growth_1920_g2
+shot growth_1920_g2
+close
+wait 2
+open hunt
+wait 10
+overlap hunt_1920_g2
+shot hunt_1920_g2
+close
+wait 2
+open rebirth
+wait 10
+overlap rebirth_1920_g2
+shot rebirth_1920_g2
+close
+wait 2
+open profile
+wait 10
+overlap profile_1920_g2
+shot profile_1920_g2
+close
+wait 2
+open profile_titles
+wait 10
+overlap profile_titles_1920_g2
+shot profile_titles_1920_g2
+close
+wait 2
+open profile_looks
+wait 10
+overlap profile_looks_1920_g2
+shot profile_looks_1920_g2
+close
+wait 2
+open trade_demo_0
+wait 10
+overlap trade_demo_0_1920_g2
+shot trade_demo_0_1920_g2
+close
+wait 2
+open trade_demo_1
+wait 10
+overlap trade_demo_1_1920_g2
+shot trade_demo_1_1920_g2
+close
+wait 2
+open trade_demo_2
+wait 10
+overlap trade_demo_2_1920_g2
+shot trade_demo_2_1920_g2
+close
+wait 2
+open trade_demo_3
+wait 10
+overlap trade_demo_3_1920_g2
+shot trade_demo_3_1920_g2
+close
+wait 2
+open trade_demo_4
+wait 10
+overlap trade_demo_4_1920_g2
+shot trade_demo_4_1920_g2
+close
+wait 2
+open guild_demo_list
+wait 10
+overlap guild_demo_list_1920_g2
+shot guild_demo_list_1920_g2
+close
+wait 2
+open guild_demo_0
+wait 10
+overlap guild_demo_0_1920_g2
+shot guild_demo_0_1920_g2
+close
+wait 2
+open guild_demo_1
+wait 10
+overlap guild_demo_1_1920_g2
+shot guild_demo_1_1920_g2
+close
+wait 2
+open guild_demo_2
+wait 10
+overlap guild_demo_2_1920_g2
+shot guild_demo_2_1920_g2
+close
+wait 2
+open guild_demo_3
+wait 10
+overlap guild_demo_3_1920_g2
+shot guild_demo_3_1920_g2
+close
+wait 2
+open reward_demo
+wait 10
+overlap reward_demo_1920_g2
+shot reward_demo_1920_g2
+close
+wait 2
+open reward_done
+wait 10
+overlap reward_done_1920_g2
+shot reward_done_1920_g2
+close
+wait 2
+open box_demo_list
+wait 10
+overlap box_demo_list_1920_g2
+shot box_demo_list_1920_g2
+close
+wait 2
+open box_demo_spin
+wait 10
+overlap box_demo_spin_1920_g2
+shot box_demo_spin_1920_g2
+close
+wait 2
+open box_demo_card
+wait 10
+overlap box_demo_card_1920_g2
+shot box_demo_card_1920_g2
+close
+wait 2
+open box_demo_summary
+wait 10
+overlap box_demo_summary_1920_g2
+shot box_demo_summary_1920_g2
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss_forge open
+wait 14
+overlap forge_1920_g2
+shot forge_1920_g2
+close
+wait 3
+cmd skyabyss cinematic stop
+cmd skyabyss facility act stash
+wait 14
+overlap stash_1920_g2
+shot stash_1920_g2
+close
+wait 3
+open tower_desk_many
+wait 10
+overlap tower_desk_many_1920_g2
+shot tower_desk_many_1920_g2
+close
+wait 2
+open hunt_demo
+wait 10
+overlap hunt_demo_1920_g2
+shot hunt_demo_1920_g2
+close
+wait 2
+cmd skyabyss level set @p 50
+wait 4
+open soul
+wait 10
+overlap soul_1920_g2
+shot soul_1920_g2
+close
+wait 2
+open soul_terms
+wait 10
+overlap soul_terms_1920_g2
+shot soul_terms_1920_g2
+close
+wait 2
+cmd skyabyss level set @p 12
+wait 4
+window 1280 720
+guiscale 3
+wait 10
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop smithy
+wait 12
+overlap shop_1280_g3
+shot shop_1280_g3
+close
+wait 4
+cmd skyabyss cinematic stop
+cmd skyabyss facility act buyback
+wait 12
+overlap buyback_1280_g3
+shot buyback_1280_g3
+close
+wait 4
+cmd skyabyss cinematic stop
+cmd skyabyss facility act mount_shop
+wait 12
+overlap mount_1280_g3
+shot mount_1280_g3
+close
+wait 4
+open quests
+wait 8
+overlap quests_1280_g3
+shot quests_1280_g3
+close
+wait 2
+open notices
+wait 8
+overlap notices_1280_g3
+shot notices_1280_g3
+close
+wait 2
+open records_demo
+wait 8
+overlap records_demo_1280_g3
+shot records_demo_1280_g3
+close
+wait 2
+open town_guide_demo
+wait 8
+overlap town_guide_demo_1280_g3
+shot town_guide_demo_1280_g3
+close
+wait 2
+open party_demo
+wait 8
+overlap party_demo_1280_g3
+shot party_demo_1280_g3
+close
+wait 2
+open shrine_demo
+wait 8
+overlap shrine_demo_1280_g3
+shot shrine_demo_1280_g3
+close
+wait 2
+open shrine_demo_codex
+wait 8
+overlap shrine_demo_codex_1280_g3
+shot shrine_demo_codex_1280_g3
+close
+wait 2
+open shrine_demo_vow
+wait 8
+overlap shrine_demo_vow_1280_g3
+shot shrine_demo_vow_1280_g3
+close
+wait 2
+open shrine_demo_rewards
+wait 8
+overlap shrine_demo_rewards_1280_g3
+shot shrine_demo_rewards_1280_g3
+close
+wait 2
+open shrine_demo_how
+wait 8
+overlap shrine_demo_how_1280_g3
+shot shrine_demo_how_1280_g3
+close
+wait 2
+open deep_choice
+wait 8
+overlap deep_choice_1280_g3
+shot deep_choice_1280_g3
+close
+wait 2
+open route_boon_demo
+wait 8
+overlap route_boon_demo_1280_g3
+shot route_boon_demo_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss dev talk "skyabyss:attendant_tool_merchant"
+wait 30
+overlap talk_1280_g3
+shot talk_1280_g3
+close
+wait 4
+# 3 周目の残り (1280_g3)
+open circuit_camp_demo
+wait 10
+overlap circuit_camp_demo_1280_g3
+shot circuit_camp_demo_1280_g3
+close
+wait 2
+open party_finder_demo
+wait 10
+overlap party_finder_demo_1280_g3
+shot party_finder_demo_1280_g3
+close
+wait 2
+open tower_desk
+wait 10
+overlap tower_desk_1280_g3
+shot tower_desk_1280_g3
+close
+wait 2
+open tower_desk_join
+wait 10
+overlap tower_desk_join_1280_g3
+shot tower_desk_join_1280_g3
+close
+wait 2
+open board_demo
+wait 10
+overlap board_demo_1280_g3
+shot board_demo_1280_g3
+close
+wait 2
+open journey
+wait 10
+overlap journey_1280_g3
+shot journey_1280_g3
+close
+wait 2
+open growth
+wait 10
+overlap growth_1280_g3
+shot growth_1280_g3
+close
+wait 2
+open hunt
+wait 10
+overlap hunt_1280_g3
+shot hunt_1280_g3
+close
+wait 2
+open rebirth
+wait 10
+overlap rebirth_1280_g3
+shot rebirth_1280_g3
+close
+wait 2
+open profile
+wait 10
+overlap profile_1280_g3
+shot profile_1280_g3
+close
+wait 2
+open profile_titles
+wait 10
+overlap profile_titles_1280_g3
+shot profile_titles_1280_g3
+close
+wait 2
+open profile_looks
+wait 10
+overlap profile_looks_1280_g3
+shot profile_looks_1280_g3
+close
+wait 2
+open trade_demo_0
+wait 10
+overlap trade_demo_0_1280_g3
+shot trade_demo_0_1280_g3
+close
+wait 2
+open trade_demo_1
+wait 10
+overlap trade_demo_1_1280_g3
+shot trade_demo_1_1280_g3
+close
+wait 2
+open trade_demo_2
+wait 10
+overlap trade_demo_2_1280_g3
+shot trade_demo_2_1280_g3
+close
+wait 2
+open trade_demo_3
+wait 10
+overlap trade_demo_3_1280_g3
+shot trade_demo_3_1280_g3
+close
+wait 2
+open trade_demo_4
+wait 10
+overlap trade_demo_4_1280_g3
+shot trade_demo_4_1280_g3
+close
+wait 2
+open guild_demo_list
+wait 10
+overlap guild_demo_list_1280_g3
+shot guild_demo_list_1280_g3
+close
+wait 2
+open guild_demo_0
+wait 10
+overlap guild_demo_0_1280_g3
+shot guild_demo_0_1280_g3
+close
+wait 2
+open guild_demo_1
+wait 10
+overlap guild_demo_1_1280_g3
+shot guild_demo_1_1280_g3
+close
+wait 2
+open guild_demo_2
+wait 10
+overlap guild_demo_2_1280_g3
+shot guild_demo_2_1280_g3
+close
+wait 2
+open guild_demo_3
+wait 10
+overlap guild_demo_3_1280_g3
+shot guild_demo_3_1280_g3
+close
+wait 2
+open reward_demo
+wait 10
+overlap reward_demo_1280_g3
+shot reward_demo_1280_g3
+close
+wait 2
+open reward_done
+wait 10
+overlap reward_done_1280_g3
+shot reward_done_1280_g3
+close
+wait 2
+open box_demo_list
+wait 10
+overlap box_demo_list_1280_g3
+shot box_demo_list_1280_g3
+close
+wait 2
+open box_demo_spin
+wait 10
+overlap box_demo_spin_1280_g3
+shot box_demo_spin_1280_g3
+close
+wait 2
+open box_demo_card
+wait 10
+overlap box_demo_card_1280_g3
+shot box_demo_card_1280_g3
+close
+wait 2
+open box_demo_summary
+wait 10
+overlap box_demo_summary_1280_g3
+shot box_demo_summary_1280_g3
+close
+wait 2
+cmd skyabyss cinematic stop
+cmd skyabyss_forge open
+wait 14
+overlap forge_1280_g3
+shot forge_1280_g3
+close
+wait 3
+cmd skyabyss cinematic stop
+cmd skyabyss facility act stash
+wait 14
+overlap stash_1280_g3
+shot stash_1280_g3
+close
+wait 3
+open tower_desk_many
+wait 10
+overlap tower_desk_many_1280_g3
+shot tower_desk_many_1280_g3
+close
+wait 2
+open hunt_demo
+wait 10
+overlap hunt_demo_1280_g3
+shot hunt_demo_1280_g3
+close
+wait 2
+cmd skyabyss level set @p 50
+wait 4
+open soul
+wait 10
+overlap soul_1280_g3
+shot soul_1280_g3
+close
+wait 2
+open soul_terms
+wait 10
+overlap soul_terms_1280_g3
+shot soul_terms_1280_g3
+close
+wait 2
+cmd skyabyss level set @p 12
+wait 4
+quit

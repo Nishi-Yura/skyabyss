@@ -1,6 +1,5 @@
 package jp.revati.skyabyss.client.mount;
 
-import jp.revati.skyabyss.client.facility.FacilityUi;
 import jp.revati.skyabyss.client.ui.Golden;
 import jp.revati.skyabyss.client.ui.TextClip;
 import jp.revati.skyabyss.facility.FacilitySetup;
@@ -20,19 +19,22 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import jp.revati.skyabyss.client.ui.Paper;
+import jp.revati.skyabyss.client.ui.ShopStage;
 
 // 厩舎の画面 (docs/design/38 の 5 章)。左に見た目の一覧 (押すと買う・選ぶ)、右に今の見た目の姿 (一覧に触れるとその見た目)、
 // 速さ・跳びの段 (押すと一段上げる)、笛をもらう釦。決めるのはサーバー (MountService)。押すたびに新しい持ち物が届いて描き直す。
-// 板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 見出しの帯に名前と銭、脇の列 (左) に見た目の一覧 (一行 26)、主の列 (右) に姿 (89)・段 (一行 21)・笛・手引き
+// 組み方は店の類の「帳面と台」(client/ui/ShopStage。docs/design/56 の 2.1): 左の帳面に見た目の一覧 (名前 …… 値段。乗せた行・今の見た目は桃色)、
+// 右の黒い紙に今の見た目 (一覧に触れるとその見た目) を台に立てて、名前・説明・性能の段 (押すと一段上げる)・笛・名付け。手持ちは山の上
 public class MountShopScreen extends Screen {
-    private static final Golden.Layout LAYOUT = Golden.Layout.large(0);
-    private static final Golden.Box LEFT = LAYOUT.body().minor(true);
-    private static final Golden.Box RIGHT = LAYOUT.body().major(false);
-    private static final Golden.Box LOOKS = LEFT.afterTop(Golden.ROW);
-    // 見た目の絵の枠 (性能の行が三つになったので、一行ぶん低くした)
-    private static final Golden.Box PREVIEW = RIGHT.top(Golden.S89 - Golden.S21);
-    private static final int LOOK_H = 2 * Golden.ROW;
-    private static final int STAT_H = Golden.S21;
+    private static final int STAT_H = 14;
+    private static final int RX = ShopStage.RIGHT_X;
+    private static final int RW = ShopStage.RIGHT_W;
+    private static final int STAT_Y = 145;
+    private static final int WHISTLE_Y = STAT_Y + 3 * STAT_H + 2;
+    private static final int NAME_W = 52;
+    private static final int TIER_STEP = 5;
+    private static final int LABEL_W = 50;
+    private static final int UP_W = RW - LABEL_W - MountStats.MAX_TIERS * TIER_STEP - 4;
 
     private MountNetwork.View view;
     private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
@@ -51,13 +53,13 @@ public class MountShopScreen extends Screen {
 
     @Override
     protected void init() {
-        fit.fit(width, height, Golden.L_W, Golden.L_H, 3f);
+        fit.fit(width, height, ShopStage.W, ShopStage.H, 3f);
         // 今の見た目が見える所から
         scroll = Math.max(0, Math.min(maxScroll(), view.chosen() - visibleRows() + 1));
     }
 
     private int visibleRows() {
-        return Math.min(MountLook.values().length, (LOOKS.h() - 4) / LOOK_H);
+        return Math.min(MountLook.values().length, ShopStage.ROWS);
     }
 
     private int maxScroll() {
@@ -78,155 +80,110 @@ public class MountShopScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fill(0, 0, width, height, 0xA00E0D14);
+        Paper.dim(g, width, height);
     }
-
-    private int lookY() {
-        return LOOKS.y() + 2;
-    }
-
-    private int statY() {
-        return PREVIEW.bottom() + Golden.S5;
-    }
-
-    private int whistleY() {
-        return statY() + MountStats.KEYS.length * STAT_H + Golden.S5;
-    }
-
-    private static final int NAME_W = 52;
 
     @Override
     public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        fit.fit(width, height, ShopStage.W, ShopStage.H, 3f);
         renderBackground(g, screenX, screenY, partialTick);
         int mouseX = (int) Math.floor(fit.x(screenX));
         int mouseY = (int) Math.floor(fit.y(screenY));
         Font font = Minecraft.getInstance().font;
         fit.begin(g);
-        Golden.panel(g, LAYOUT.panel());
-        Golden.headLine(g, LAYOUT);
-        Golden.Box head = LAYOUT.head();
-        int hy = Golden.textY(head.y(), head.h());
-        FacilityUi.gem(g, head.x() + 4, head.y() + head.h() / 2);
-        g.drawString(font, title, head.x() + 10, hy, FacilityUi.TEXT, false);
-        String coins = Integer.toString(view.coins());
-        int cx = head.right() - Golden.S5 - font.width(coins);
-        g.drawString(font, coins, cx, hy, FacilityUi.GOLD, false);
-        g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), cx - 18, head.y() + (head.h() - 16) / 2);
-        // 絆 (乗った距離の段)。見出しの銭の左に
-        Component bond = Component.translatable("gui.skyabyss.mount.bond", Component.translatable("gui.skyabyss.mount.bond." + view.bond()),
-                String.format("%.1f", view.ridden() / 1000.0));
-        int bw = Math.min(font.width(bond), cx - 24 - (head.x() + 10 + font.width(title) + 12));
-        TextClip.line(g, font, bond, cx - 24 - bw, hy, bw, FacilityUi.GOLD, false);
-
+        ShopStage.backdrop(g, fit, width, height);
+        // 帳面の上の辺: 一覧の見出し (つまみの位置に札を一枚)
+        Paper.tab(g, font, ShopStage.tabX(0), ShopStage.TAB_Y, 74, 13, Component.translatable("gui.skyabyss.mount.looks"), true, false);
         // 見た目の一覧
-        int lx = LOOKS.x() + 1;
-        int lw = LOOKS.w() - 2;
-        g.drawString(font, Component.translatable("gui.skyabyss.mount.looks"), LEFT.x() + Golden.S5, Golden.textY(LEFT.y(), Golden.ROW), FacilityUi.TEAL, false);
         int rows = visibleRows();
-        Golden.recess(g, LOOKS);
-        // 上と下にまだあるときの印
-        if (scroll > 0) {
-            g.drawString(font, "▲", LEFT.right() - 20, Golden.textY(LEFT.y(), Golden.ROW), FacilityUi.TEAL, false);
-        }
-        if (scroll < maxScroll()) {
-            g.drawString(font, "▼", LEFT.right() - 10, Golden.textY(LEFT.y(), Golden.ROW), FacilityUi.TEAL, false);
-        }
-        MountLook hoverLook = null;
+        int hoverRow = ShopStage.rowAt(mouseX, mouseY);
+        MountLook hoverLook = hoverRow >= 0 && scroll + hoverRow < MountLook.values().length ? MountLook.values()[scroll + hoverRow] : null;
+        int hotIndex = hoverLook != null ? hoverLook.ordinal() : view.chosen();
         for (int i = 0; i < rows && scroll + i < MountLook.values().length; i++) {
             MountLook look = MountLook.values()[scroll + i];
-            int ry = lookY() + i * LOOK_H;
-            boolean hover = mouseX >= lx && mouseX < lx + lw && mouseY >= ry && mouseY < ry + LOOK_H;
-            boolean chosen = view.owns(look) && view.chosen() == look.ordinal();
-            if (chosen) {
-                Golden.selected(g, new Golden.Box(lx, ry, lw, LOOK_H));
-            } else if (hover) {
-                g.fill(lx, ry, lx + lw, ry + LOOK_H, FacilityUi.ROW_HOVER);
-            } else if (look.ordinal() % 2 == 1) {
-                g.fill(lx, ry, lx + lw, ry + LOOK_H, FacilityUi.ROW);
+            boolean hot = look.ordinal() == hotIndex;
+            if (hot) {
+                ShopStage.hot(g, i);
             }
-            if (hover) {
-                hoverLook = look;
-            }
-            lookRow(g, font, look, lx, ry, lw, chosen);
+            lookRow(g, font, look, ShopStage.rowY(i), hot);
         }
-
-        // 姿の欄 (姿そのものは変換の外で描く: 切り抜きが板の変換を通らないため)
-        int rx = RIGHT.x();
-        int rw = RIGHT.w();
+        ShopStage.scroll(g, scroll, MountLook.values().length);
+        ShopStage.hint(g, font, Component.translatable("gui.skyabyss.mount.hint"));
+        // 右: 名前と絆
+        ShopStage.title(g, font, title);
+        Component bond = Component.translatable("gui.skyabyss.mount.bond", Component.translatable("gui.skyabyss.mount.bond." + view.bond()),
+                String.format("%.1f", view.ridden() / 1000.0));
+        TextClip.line(g, font, bond, RX, 25, RW, 0xFF000000 | Paper.ON_BLACK_SOFT, false);
         MountLook shown = hoverLook != null ? hoverLook : MountLook.byOrdinal(view.chosen());
-        Golden.recess(g, PREVIEW);
+        // 台 (姿そのものは変換の外で描く: 切り抜きが変換を通らないため)
+        ShopStage.plinth(g, net.minecraft.world.item.ItemStack.EMPTY, mouseX, mouseY);
         fit.end(g);
-        int[] pr = fit.screenRect(PREVIEW.x() + 1, PREVIEW.y() + 1, PREVIEW.w() - 2, PREVIEW.h() - 2);
+        int[] pr = fit.screenRect(272, 34, 116, 66);
         renderPreview(g, shown, pr[0], pr[1], pr[2], pr[3], screenX, screenY);
         fit.begin(g);
         g.pose().pushPose();
         g.pose().translate(0, 0, 200);
-        TextClip.line(g, font, Component.translatable(shown.nameKey()), rx + Golden.S5, Golden.textY(PREVIEW.y() + 2, Golden.ROW), rw - 2 * Golden.S5, FacilityUi.TEXT, false);
-        TextClip.line(g, font, Component.translatable(shown.nameKey() + ".desc"), rx + Golden.S5, Golden.textY(PREVIEW.bottom() - 2 - Golden.ROW, Golden.ROW), rw - 2 * Golden.S5,
-                FacilityUi.DIM, false);
-        g.pose().popPose();
-
+        TextClip.line(g, font, Component.translatable(shown.nameKey()), RX, 113, RW, 0xFFFFF6EA, false);
+        // 説明は二行まで折り返す (字は等倍。三行目からは流す)
+        java.util.List<net.minecraft.util.FormattedCharSequence> desc = jp.revati.skyabyss.client.ui.Marquee.joinRest(
+                jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable(shown.nameKey() + ".desc"), RW), 2);
+        for (int l = 0; l < desc.size(); l++) {
+            jp.revati.skyabyss.client.ui.Marquee.draw(g, font, desc.get(l), RX, 124 + l * 10, RW, 0xFF000000 | Paper.ON_BLACK_SOFT, false);
+        }
         // 性能の段 (速さ・跳び・乗れる人数。体力は段がない)
         for (int k = 0; k < MountStats.KEYS.length; k++) {
-            statRow(g, font, k, rx + Golden.S5, statY() + k * STAT_H, rw - 2 * Golden.S5, mouseX, mouseY);
+            statRow(g, font, k, RX, STAT_Y + k * STAT_H, mouseX, mouseY);
         }
-        // 笛
-        int wy = whistleY();
+        // 笛と名付け (絆 II から)
         boolean canName = view.bond() >= 2;
-        int ww = canName ? rw - NAME_W - 4 : rw;
-        boolean hw = mouseX >= rx && mouseX < rx + ww && mouseY >= wy && mouseY < wy + Golden.BTN;
-        g.fill(rx, wy, rx + ww, wy + Golden.BTN, view.whistle() ? 0xFF161B22 : hw ? 0xFF3A3644 : 0xFF2C2434);
-        g.renderOutline(rx, wy, ww, Golden.BTN, view.whistle() ? FacilityUi.LINE : FacilityUi.TEAL);
-        TextClip.line(g, font, Component.translatable(view.whistle() ? "gui.skyabyss.mount.whistle_have" : "gui.skyabyss.mount.whistle_get"),
-                rx + Golden.S5, Golden.textY(wy, Golden.BTN), ww - 2 * Golden.S5, view.whistle() ? FacilityUi.DIM : 0xFFFFFFFF, false);
-        // 名付ける (絆 II から。笛の行の右)
+        int ww = canName ? RW - NAME_W - 4 : RW;
+        boolean hw = mouseX >= RX && mouseX < RX + ww && mouseY >= WHISTLE_Y && mouseY < WHISTLE_Y + Golden.BTN;
+        Paper.button(g, font, RX, WHISTLE_Y, ww, Golden.BTN, Component.translatable(view.whistle() ? "gui.skyabyss.mount.whistle_have" : "gui.skyabyss.mount.whistle_get"),
+                !view.whistle(), Paper.state(!view.whistle(), hw));
         if (canName) {
-            int nx = rx + rw - NAME_W;
-            boolean hn = mouseX >= nx && mouseX < nx + NAME_W && mouseY >= wy && mouseY < wy + Golden.BTN;
-            g.fill(nx, wy, nx + NAME_W, wy + Golden.BTN, hn ? 0xFF3A3644 : 0xFF2C2434);
-            g.renderOutline(nx, wy, NAME_W, Golden.BTN, FacilityUi.TEAL);
-            TextClip.line(g, font, Component.translatable("gui.skyabyss.mount.name_button"), nx + 4, Golden.textY(wy, Golden.BTN), NAME_W - 8, 0xFFFFFFFF, false);
+            int nx = RX + RW - NAME_W;
+            boolean hn = mouseX >= nx && mouseX < nx + NAME_W && mouseY >= WHISTLE_Y && mouseY < WHISTLE_Y + Golden.BTN;
+            Paper.button(g, font, nx, WHISTLE_Y, NAME_W, Golden.BTN, Component.translatable("gui.skyabyss.mount.name_button"), false, Paper.state(true, hn));
         }
-        TextClip.line(g, font, Component.translatable("gui.skyabyss.mount.hint"), rx + Golden.S5, Golden.textY(RIGHT.bottom() - Golden.ROW, Golden.ROW), rw - 2 * Golden.S5,
-                0xFF000000 | Paper.ON_BLACK_DIM, false);
+        ShopStage.purse(g, font, new ItemStack(FacilitySetup.BELL_COIN.get()), view.coins());
+        g.pose().popPose();
         fit.end(g);
     }
 
-    private void lookRow(GuiGraphics g, Font font, MountLook look, int x, int y, int rw, boolean chosen) {
+    private void lookRow(GuiGraphics g, Font font, MountLook look, int y, boolean hot) {
         boolean owned = view.owns(look);
         boolean locked = !owned && view.chapter() < look.chapter;
-        int color = locked ? FacilityUi.DIM : FacilityUi.TEXT;
+        boolean chosen = owned && view.chosen() == look.ordinal();
         String price = Integer.toString(look.price);
-        int tw = !owned && !locked ? 6 + 18 + font.width(price) + 2 : 0;
-        TextClip.line(g, font, Component.translatable(look.nameKey()), x + Golden.S5, Golden.textY(y, Golden.ROW), rw - Golden.S8 - tw - 4, color, false);
+        boolean sale = !owned && !locked;
+        int x = ShopStage.LIST_X + 4;
+        int right = ShopStage.LIST_X + ShopStage.LIST_W - 4 - (sale ? 17 + font.width(price) : 0);
+        int w = right - x - 6;
+        Component name = Component.literal(Component.translatable(look.nameKey()).getString());
+        TextClip.line(g, font, name, x, y + 2, w, hot ? 0xFFFFF6EA : 0xFF000000 | (locked ? Paper.INK_SOFT : Paper.INK), false);
         Component sub;
-        int subColor;
         if (chosen) {
             sub = Component.translatable("gui.skyabyss.mount.chosen");
-            subColor = FacilityUi.TEAL;
         } else if (owned) {
             sub = Component.translatable("gui.skyabyss.mount.owned");
-            subColor = FacilityUi.TEAL;
         } else if (locked) {
             sub = Component.translatable(look.lockedKey("gui.skyabyss.mount.locked"), look.chapter - 1);
-            subColor = FacilityUi.DIM;
         } else {
             sub = Component.translatable("gui.skyabyss.mount.for_sale");
-            subColor = FacilityUi.DIM;
         }
         // 乗れる人数の最大 (見た目ごと)
         sub = Component.translatable("gui.skyabyss.mount.seats_max", sub, look.maxSeats);
-        TextClip.line(g, font, sub, x + Golden.S5, Golden.textY(y + Golden.ROW, Golden.ROW), rw - Golden.S8 - tw - 4, subColor, false);
-        if (tw > 0) {
-            int tx = x + rw - 3 - tw;
-            FacilityUi.tag(g, tx, y + 4, tw, 18);
-            g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), tx + 2, y + 5);
-            g.drawString(font, price, tx + 20, Golden.textY(y, LOOK_H), view.coins() >= look.price ? FacilityUi.GOLD : FacilityUi.LACK, false);
+        TextClip.line(g, font, sub, x, y + 13, w, hot ? 0xFFFFF6EA : 0xFF000000 | (chosen || owned ? Paper.INK_HEAD : Paper.INK_SOFT), false);
+        if (sale) {
+            ShopStage.leader(g, x + Math.min(font.width(name), w) + 4, right - 2, y + 8, hot);
+            g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), right, y + 3);
+            boolean enough = view.coins() >= look.price;
+            g.drawString(font, price, right + 17, y + 8, hot ? (enough ? ShopStage.ON_PINK : 0x5A0820) : enough ? Paper.INK : ShopStage.LACK, false);
         }
     }
 
-    // 段の一行 (高さ 21): 名前・段の箱・上げる札 (銭と値段)
-    private void statRow(GuiGraphics g, Font font, int kind, int x, int y, int rw, int mx, int my) {
+    // 段の一行 (高さ 16): 名前・段の菱・上げる札 (銭と値段)
+    private void statRow(GuiGraphics g, Font font, int kind, int x, int y, int mx, int my) {
         int tier = view.tier(kind);
         boolean maxed = tier >= MountStats.tiers(MountStats.ROW_KIND[kind]);
         Component label = Component.translatable("mount.skyabyss.stat." + MountStats.KEYS[kind]);
@@ -235,32 +192,31 @@ public class MountShopScreen extends Screen {
             jp.revati.skyabyss.mount.MountLook chosen = jp.revati.skyabyss.mount.MountLook.values()[Math.max(0, Math.min(jp.revati.skyabyss.mount.MountLook.values().length - 1, view.chosen()))];
             label = Component.translatable("mount.skyabyss.stat.seats_now", MountStats.seats(tier, chosen));
         }
-        g.drawString(font, label, x, Golden.textY(y, STAT_H), FacilityUi.TEXT, false);
-        int px = x + Golden.S34;
+        TextClip.line(g, font, label, x, y + 4, LABEL_W - 2, 0xFF000000 | Golden.TEXT, false);
+        int px = x + LABEL_W;
         for (int i = 0; i < MountStats.tiers(MountStats.ROW_KIND[kind]); i++) {
-            int bx = px + i * 9;
-            g.fill(bx, y + 7, bx + 7, y + 14, i < tier ? FacilityUi.GOLD : 0xFF2A2F38);
-            g.renderOutline(bx, y + 7, 7, 7, FacilityUi.LINE);
+            Paper.pin(g, px + i * TIER_STEP + 2, y + 8, 2, i < tier);
         }
-        int bw = rw - Golden.S34 - MountStats.MAX_TIERS * 9 - Golden.S5;
-        int bx = x + rw - bw;
+        int bx = x + RW - UP_W;
         if (maxed) {
-            TextClip.line(g, font, Component.translatable("gui.skyabyss.mount.max"), bx + 2, Golden.textY(y, STAT_H), bw - 2, FacilityUi.TEAL, false);
+            TextClip.line(g, font, Component.translatable("gui.skyabyss.mount.max"), bx + 2, y + 4, UP_W - 2, 0xFF000000 | Paper.ON_BLACK_PINK, false);
             return;
         }
         int price = MountStats.price(MountStats.ROW_KIND[kind], tier + 1);
         boolean hover = statHit(kind, mx, my);
-        g.fill(bx, y + 1, bx + bw, y + STAT_H - 1, hover ? 0xFF3A3644 : 0xFF1E1C28);
-        g.renderOutline(bx, y + 1, bw, STAT_H - 2, hover ? FacilityUi.TEAL : FacilityUi.LINE);
-        g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), bx + 1, y + 2);
-        g.drawString(font, Integer.toString(price), bx + 19, Golden.textY(y, STAT_H), view.coins() >= price ? FacilityUi.GOLD : FacilityUi.LACK, false);
+        int[] d = Paper.slip(g, bx, y + 1, UP_W, 13, hover ? Paper.CREAM_HI : Paper.CREAM, 0, hover ? Paper.HOVER : Paper.REST);
+        g.pose().pushPose();
+        g.pose().translate(bx + 3 + d[0], y + 2 + d[1], 0);
+        g.pose().scale(0.75f, 0.75f, 1f);
+        g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), 0, 0);
+        g.pose().popPose();
+        TextClip.line(g, font, Component.literal(Integer.toString(price)), bx + 16 + d[0], y + 4 + d[1], UP_W - 18, view.coins() >= price ? 0xFF000000 | Paper.INK : 0xFF000000 | ShopStage.LACK, false);
     }
 
     private boolean statHit(int kind, double mx, double my) {
-        int y = statY() + kind * STAT_H;
-        int bw = RIGHT.w() - 2 * Golden.S5 - Golden.S34 - MountStats.MAX_TIERS * 9 - Golden.S5;
-        int bx = RIGHT.right() - Golden.S5 - bw;
-        return mx >= bx && mx < bx + bw && my >= y && my < y + STAT_H;
+        int y = STAT_Y + kind * STAT_H;
+        int bx = RX + RW - UP_W;
+        return mx >= bx && mx < bx + UP_W && my >= y && my < y + STAT_H;
     }
 
     private void renderPreview(GuiGraphics g, MountLook look, int x, int y, int pw, int ph, int mx, int my) {
@@ -286,7 +242,7 @@ public class MountShopScreen extends Screen {
     public boolean mouseScrolled(double sx, double sy, double dx, double dy) {
         double mx = fit.x(sx);
         double my = fit.y(sy);
-        if (LOOKS.contains(mx, my) && dy != 0) {
+        if (mx < ShopStage.LIST_X + ShopStage.LIST_W && dy != 0) {
             scroll = Math.max(0, Math.min(maxScroll(), scroll - (int) Math.signum(dy)));
             return true;
         }
@@ -298,10 +254,9 @@ public class MountShopScreen extends Screen {
         double mx = fit.x(sx);
         double my = fit.y(sy);
         if (button == 0) {
-            int lx = LOOKS.x() + 1;
-            int lw = LOOKS.w() - 2;
-            int index = scroll + (int) ((my - lookY()) / LOOK_H);
-            if (mx >= lx && mx < lx + lw && my >= lookY() && my < lookY() + visibleRows() * LOOK_H && index < MountLook.values().length) {
+            int r = ShopStage.rowAt(mx, my);
+            int index = scroll + r;
+            if (r >= 0 && r < visibleRows() && index < MountLook.values().length) {
                 MountLook look = MountLook.values()[index];
                 if (view.owns(look)) {
                     if (view.chosen() != look.ordinal()) {
@@ -318,13 +273,13 @@ public class MountShopScreen extends Screen {
                     return true;
                 }
             }
-            int wy = whistleY();
-            int nx = RIGHT.right() - NAME_W;
-            if (view.bond() >= 2 && mx >= nx && mx < RIGHT.right() && my >= wy && my < wy + Golden.BTN) {
+            int nx = RX + RW - NAME_W;
+            if (view.bond() >= 2 && mx >= nx && mx < RX + RW && my >= WHISTLE_Y && my < WHISTLE_Y + Golden.BTN) {
                 Minecraft.getInstance().setScreen(new MountNameScreen(this, view.name()));
                 return true;
             }
-            if (mx >= RIGHT.x() && mx < RIGHT.right() && my >= wy && my < wy + Golden.BTN && !view.whistle()) {
+            int ww = view.bond() >= 2 ? RW - NAME_W - 4 : RW;
+            if (mx >= RX && mx < RX + ww && my >= WHISTLE_Y && my < WHISTLE_Y + Golden.BTN && !view.whistle()) {
                 send(MountNetwork.WHISTLE, 0);
                 return true;
             }

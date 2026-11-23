@@ -2,18 +2,19 @@ package jp.revati.skyabyss.client.box;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import jp.revati.skyabyss.item.GearTier;
 import jp.revati.skyabyss.item.ModGear;
 import jp.revati.skyabyss.loot.box.BoxKind;
 import jp.revati.skyabyss.loot.box.BoxNetwork;
 import jp.revati.skyabyss.loot.box.LootBoxSetup;
 import jp.revati.skyabyss.loot.box.LootBoxes;
-import jp.revati.skyabyss.loot.box.SealedBoxItem;
 import net.minecraft.Util;
+import jp.revati.skyabyss.client.ui.FitText;
 import jp.revati.skyabyss.client.ui.Golden;
+import jp.revati.skyabyss.client.ui.PickStage;
+import jp.revati.skyabyss.client.ui.ShopStage;
+import jp.revati.skyabyss.client.ui.UiFit;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
@@ -30,29 +31,33 @@ import jp.revati.skyabyss.client.ui.Paper;
 //   一覧: 持っている箱 (種類・帯・数) から選び「開ける」「まとめて開ける」
 //   ルーレット: 横に流れる品の帯が 3〜4 秒でゆっくり止まり、真ん中の枠に当たり (帯と当たりはサーバーが決めて送る。画面は見せるだけ)。
 //               止まる前後の品は表のいちばん上の階級 (惜しい品)。品が枠を通るたびに刻み、止まると階級ごとの音
-//   当たり: 大きなカード (名前・階級・特性・必要 Lv)。「もう一つ開ける」「一覧へ」
+//   当たり: 大きな札 (名前・階級・特性・必要 Lv)。「もう一つ開ける」「一覧へ」
 //   まとめて: 一つ 1 秒で回し、最後に当たりの一覧。Esc で終わりまで飛ばす
-// 板は黄金比の大きい板 (356x220。client/ui/Golden。docs/design/56)。GUI の座標に等倍で置く (1280x720 の GUI 3 でちょうど入る)。
-// 一覧は脇の列 (左。21 角の枠に箱の絵を等倍で 5 列)、選んだ箱の説明は主の列 (右。行 13)、釦は下の段。品の絵は整数倍だけ (帯は 2 倍、札は 3 倍)
+// 組み方 (docs/design/56 の 2.1): 一覧は店の類の「帳面と台」(client/ui/ShopStage。帳面に箱を一つ一行、右の黒い紙の台に選んだ箱と説明と釦)。
+// ルーレット・当たり・まとめは選ぶ類の「三枚を扇に」(client/ui/PickStage) の舞台: 品は生成りの札で、影は階級の色 (意味の色を黒の側に)。
+// 品の絵は整数倍だけ (帯は 2 倍、札は 4 倍)
 public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
-    static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
-    static final int W = Golden.L_W, H = Golden.L_H;
-    static final Golden.Box LIST = LAYOUT.body().minor(true);
-    static final Golden.Box INFO = LAYOUT.body().major(false);
-    static final int CELL = Golden.S21 + Golden.S3, COLS = 5;
-    static final int SUM_COLS = 13;
+    static final int W = Paper.STAGE_W, H = Paper.STAGE_H;
+    // ルーレットの帯 (舞台の横いっぱい) と品の札
+    static final int BAND_X0 = 14, BAND_X1 = 394, BAND_Y = 72;
     static final int RC = Golden.S34;
     static final int ROW = Golden.ROW;
-    static final int GOLD = 0xFFF89CD2, TEXT = 0xFFECE4D6, DIM = 0xFF9A929C, LINE = 0xFF3A3644;
+    // まとめの札
+    static final int SUM_COLS = 12, SUM_CELL = 30, SUM_TILE = 26, SUM_Y = 38;
+    // 当たりの札 (左に傾けた生成りの大きな札)
+    static final int CARD_CX = 84, CARD_CY = 118;
+    static final int TEXT = 0xFFECE4D6, DIM = 0xFF9A929C;
     static final float SINGLE_MS = 3800f, BATCH_MS = 1100f;
 
     enum Mode {
         LIST, WAIT, SPIN, CARD, SUMMARY
     }
 
+    private final UiFit fit = new UiFit();
     private List<String> kinds = new ArrayList<>();
     private List<Integer> counts = new ArrayList<>();
     private int selected;
+    private int scroll;
     private Mode mode = Mode.LIST;
     private BoxNetwork.Result result;
     private int spinIndex;
@@ -88,16 +93,9 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
         return i < 0 ? 0 : counts.get(i);
     }
 
-    private int left() {
-        return (width - W) / 2;
-    }
-
-    private int top() {
-        return (height - H) / 2;
-    }
-
     @Override
     protected void init() {
+        fit.fit(width, height, W, H, 3f);
         rebuild();
     }
 
@@ -106,23 +104,22 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
         return false;
     }
 
-    // ---------------------------------------------------------------- ボタン (下の段)
+    // ---------------------------------------------------------------- ボタン
     private void rebuild() {
         clearWidgets();
-        int x = left(), y = top();
-        Golden.Box foot = LAYOUT.foot();
-        int fy = y + foot.y() + 4;
+        int fy = PickStage.H - 20;
         switch (mode) {
             case LIST -> {
                 String k = selectedKind();
                 if (k != null) {
                     int n = countOf(k);
+                    // 右の黒い紙の下 (台の説明の下)
                     addRenderableWidget(Paper.tag(Component.translatable("skyabyss_box.screen.open"), b -> request(k, 1))
-                            .bounds(x + INFO.x(), fy, Golden.S89, Golden.BTN).primary().build());
+                            .bounds(ShopStage.RIGHT_X, 180, ShopStage.RIGHT_W, Golden.BTN).primary().build());
                     if (n > 1) {
                         int all = Math.min(n, LootBoxes.MAX_BATCH);
                         addRenderableWidget(Paper.tag(Component.translatable("skyabyss_box.screen.open_all", all), b -> request(k, all))
-                                .bounds(x + INFO.x() + Golden.S89 + Golden.S5, fy, Golden.S89 + Golden.S21, Golden.BTN).build());
+                                .bounds(ShopStage.RIGHT_X, 197, ShopStage.RIGHT_W, Golden.BTN).build());
                     }
                 }
             }
@@ -130,13 +127,13 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
                 String k = result.kind();
                 if (countOf(k) > 0) {
                     addRenderableWidget(Paper.tag(Component.translatable("skyabyss_box.screen.again"), b -> request(k, 1))
-                            .bounds(x + W / 2 - Golden.S89 - Golden.S3, fy, Golden.S89, Golden.BTN).build());
+                            .bounds(W / 2 - Golden.S89 - Golden.S3, fy, Golden.S89, Golden.BTN).primary().build());
                 }
                 addRenderableWidget(Paper.tag(Component.translatable("skyabyss_box.screen.back"), b -> toList())
-                        .bounds(x + W / 2 + Golden.S3, fy, Golden.S89, Golden.BTN).build());
+                        .bounds(W / 2 + Golden.S3, fy, Golden.S89, Golden.BTN).build());
             }
             case SUMMARY -> addRenderableWidget(Paper.tag(Component.translatable("skyabyss_box.screen.back"), b -> toList())
-                    .bounds(x + W / 2 - Golden.S89 / 2, fy, Golden.S89, Golden.BTN).build());
+                    .bounds(W / 2 - Golden.S89 / 2, fy, Golden.S89, Golden.BTN).build());
             default -> {
             }
         }
@@ -245,39 +242,77 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
         return s.getItem() instanceof ModGear g ? g.tier() : GearTier.COMMON;
     }
 
+    // 撮影用: 見本の箱で開く (which = list / spin / card / summary)
+    public static Screen demo(String which) {
+        List<String> kinds = new ArrayList<>();
+        List<Integer> counts = new ArrayList<>();
+        for (int i = 0; i < Math.min(9, BoxKind.ALL.size()); i++) {
+            kinds.add(BoxKind.ALL.get(i).id());
+            counts.add(1 + i * 2);
+        }
+        BoxScreen s = new BoxScreen(new BoxNetwork.View(kinds, counts));
+        if (which.equals("list")) {
+            return s;
+        }
+        BoxKind k = BoxKind.ALL.get(0);
+        List<Item> pool = LootBoxes.pool(k);
+        List<ItemStack> gear = new ArrayList<>();
+        int n = which.equals("summary") ? 20 : 1;
+        for (int i = 0; i < n && !pool.isEmpty(); i++) {
+            gear.add(new ItemStack(pool.get(i % pool.size())));
+        }
+        List<List<ItemStack>> reels = new ArrayList<>();
+        for (int r = 0; r < n; r++) {
+            List<ItemStack> reel = new ArrayList<>();
+            for (int i = 0; i < LootBoxes.REEL && !pool.isEmpty(); i++) {
+                reel.add(new ItemStack(pool.get((i * 7 + r) % pool.size())));
+            }
+            reels.add(reel);
+        }
+        return s.demo(new BoxNetwork.Result(k.id(), gear, reels), which.equals("spin") ? Mode.SPIN : which.equals("card") ? Mode.CARD : Mode.SUMMARY);
+    }
+
+    // 撮影用: 見本の結果で当たりの札・まとめ・ルーレットを開く
+    BoxScreen demo(BoxNetwork.Result r, Mode m) {
+        result = r;
+        spinIndex = 0;
+        mode = m;
+        if (m == Mode.SPIN) {
+            startSpin();
+        }
+        return this;
+    }
+
     // ---------------------------------------------------------------- 描く
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fill(0, 0, width, height, 0xB0000000);
-        int x = left(), y = top();
-        g.pose().pushPose();
-        g.pose().translate(x, y, 0);
-        Golden.panel(g, LAYOUT.panel());
-        Golden.headLine(g, LAYOUT);
-        g.pose().popPose();
-        switch (mode) {
-            case LIST, WAIT -> drawList(g, x, y, mouseX, mouseY);
-            case SPIN -> drawSpin(g, x, y);
-            case CARD -> drawCard(g, x, y);
-            case SUMMARY -> drawSummary(g, x, y);
-        }
+        Paper.dim(g, width, height);
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
-        ItemStack hover = hovered(mouseX, mouseY);
+    public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        fit.fit(width, height, W, H, 3f);
+        renderBackground(g, screenX, screenY, partialTick);
+        int mx = (int) Math.floor(fit.x(screenX));
+        int my = (int) Math.floor(fit.y(screenY));
+        fit.begin(g);
+        ItemStack hover = ItemStack.EMPTY;
+        switch (mode) {
+            case LIST, WAIT -> hover = drawList(g, mx, my);
+            case SPIN -> drawSpin(g);
+            case CARD -> hover = drawCard(g, mx, my);
+            case SUMMARY -> hover = drawSummary(g, mx, my);
+        }
+        for (var r : renderables) {
+            r.render(g, mx, my, partialTick);
+        }
+        fit.end(g);
         if (!hover.isEmpty()) {
-            g.renderTooltip(font, hover, mouseX, mouseY);
+            g.renderTooltip(font, hover, screenX, screenY);
         }
     }
 
-    // 欄 (板の中の座標 b を、板の左上 x, y からの所に)
-    private static void recess(GuiGraphics g, int x, int y, Golden.Box b) {
-        Golden.recess(g, new Golden.Box(x + b.x(), y + b.y(), b.w(), b.h()));
-    }
-
-    // 品の絵を整数倍で (k = 1, 2, 3)
+    // 品の絵を整数倍で (k = 1, 2, 3, 4)
     private void item(GuiGraphics g, ItemStack s, int x, int y, int k) {
         g.pose().pushPose();
         g.pose().translate(x, y, 0);
@@ -292,111 +327,90 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
         return item == null ? ItemStack.EMPTY : new ItemStack(item);
     }
 
-    private static int boxColor(String kind) {
-        BoxKind k = BoxKind.byId(kind);
-        return 0xFF000000 | (k == null ? 0x808080 : SealedBoxItem.color(k));
-    }
-
-    // 文の行 (行 13)。maxY を越える行は描かない。描いた下端を返す
+    // 文の行 (行 11)。maxY を越える行は描かない。描いた下端を返す
     private int lines(GuiGraphics g, List<Component> lines, int x, int y, int w, int maxY, int color) {
         for (Component c : lines) {
             for (FormattedCharSequence s : jp.revati.skyabyss.client.ui.JpWrap.split(font, c, w)) {
-                if (y + ROW > maxY) {
+                if (y + 9 > maxY) {
                     return y;
                 }
-                g.drawString(font, s, x, Golden.textY(y, ROW), color, false);
-                y += ROW;
+                g.drawString(font, s, x, y, color, false);
+                y += 11;
             }
         }
         return y;
     }
 
-    private int cellX(int x, int i) {
-        return x + LIST.x() + Golden.S5 + (i % COLS) * CELL;
-    }
-
-    private int cellY(int y, int i) {
-        return y + LIST.y() + Golden.S5 + (i / COLS) * CELL;
-    }
-
-    private void drawList(GuiGraphics g, int x, int y, int mx, int my) {
-        Golden.Box head = LAYOUT.head();
-        g.drawString(font, title, x + head.x() + Golden.S5, y + Golden.textY(head.y(), head.h()), GOLD, false);
-        recess(g, x, y, LIST);
-        recess(g, x, y, INFO);
+    // 一覧 (帳面と台)。台の品に指があればその品を返す
+    private ItemStack drawList(GuiGraphics g, int mx, int my) {
+        ShopStage.backdrop(g, fit, width, height);
+        ShopStage.title(g, font, title);
+        scroll = Mth.clamp(scroll, 0, Math.max(0, kinds.size() - ShopStage.ROWS));
         if (kinds.isEmpty()) {
-            Golden.empty(g, font, new Golden.Box(x + INFO.x(), y + INFO.y(), INFO.w(), INFO.h()), Component.translatable("skyabyss_box.screen.none"));
-            return;
+            lines(g, List.of(Component.translatable("skyabyss_box.screen.none")), ShopStage.LIST_X + 8, ShopStage.LIST_Y + 60, ShopStage.LIST_W - 16, 190, Paper.INK_SOFT);
         }
-        int cs = Golden.S21;
-        for (int i = 0; i < kinds.size(); i++) {
-            int cx = cellX(x, i), cy = cellY(y, i);
-            if (cy + cs > y + LIST.bottom() - 2) {
-                break;
+        for (int i = 0; i < ShopStage.ROWS && i + scroll < kinds.size(); i++) {
+            int k = i + scroll;
+            boolean hot = k == selected;
+            if (hot) {
+                ShopStage.hot(g, i);
             }
-            boolean sel = i == selected;
-            int col = boxColor(kinds.get(i));
-            g.fill(cx, cy, cx + cs, cy + cs, sel ? col : 0xFF0E0D14);
-            g.fill(cx + 1, cy + 1, cx + cs - 1, cy + cs - 1, sel ? 0xFF2A2632 : 0xFF1E1C28);
-            g.fill(cx + 1, cy + cs - 2, cx + cs - 1, cy + cs - 1, col);
-            item(g, boxStack(kinds.get(i)), cx + 2, cy + 2, 1);
-            String n = String.valueOf(counts.get(i));
-            g.pose().pushPose();
-            g.pose().translate(0, 0, 200);
-            g.drawString(font, n, cx + cs - font.width(n), cy + cs - 8, 0xFFFFFFFF, true);
-            g.pose().popPose();
+            int y = ShopStage.rowY(i);
+            ItemStack s = boxStack(kinds.get(k));
+            item(g, s, ShopStage.LIST_X + 2, y + 4, 1);
+            String n = "×" + counts.get(k);
+            int nw = font.width(n);
+            int right = ShopStage.LIST_X + ShopStage.LIST_W - 4;
+            Component name = Component.literal(s.getHoverName().getString());
+            int tx = ShopStage.LIST_X + 22;
+            int tw = Math.min(font.width(name), right - nw - 10 - tx);
+            FitText.draw(g, font, name, tx, y + 8, tw, hot ? ShopStage.ON_PINK : Paper.INK, false);
+            ShopStage.leader(g, tx + tw + 4, right - nw - 3, y + 14, hot);
+            g.drawString(font, n, right - nw, y + 8, hot ? ShopStage.ON_PINK : Paper.INK_HEAD, false);
         }
-        // 右: 選んだ箱
-        String k = selectedKind();
-        int px = x + INFO.x() + Golden.S8;
-        int pw = INFO.w() - 2 * Golden.S8;
-        int bottom = y + INFO.bottom() - 2;
-        if (k != null) {
-            ItemStack s = boxStack(k);
-            item(g, s, px, y + INFO.y() + Golden.S5, 2);
-            int ty = lines(g, List.of(s.getHoverName()), px + 32 + Golden.S8, y + INFO.y() + Golden.S5 + 3, pw - 32 - Golden.S8, bottom, 0xFFFFFFFF);
-            ty = Math.max(ty, y + INFO.y() + Golden.S5 + 32 + Golden.S3);
-            List<Component> tip = new ArrayList<>(Screen.getTooltipFromItem(minecraft, s));
-            tip.remove(0);
-            ty = lines(g, tip, px, ty, pw, bottom - ROW, DIM);
-            g.drawString(font, Component.translatable("skyabyss_box.screen.count", countOf(k)), px, Golden.textY(Math.min(ty, bottom - ROW), ROW), TEXT, false);
-        }
+        ShopStage.scroll(g, scroll, kinds.size());
         if (mode == Mode.WAIT) {
-            Component w = Component.translatable("skyabyss_box.screen.cutting");
-            Golden.Box foot = LAYOUT.foot();
-            g.drawString(font, w, x + foot.x() + Golden.S5, y + Golden.textY(foot.y(), foot.h()), GOLD, false);
+            ShopStage.hint(g, font, Component.translatable("skyabyss_box.screen.cutting"));
         }
+        // 右: 選んだ箱を台に、名前・数・説明
+        String k = selectedKind();
+        if (k == null) {
+            return ItemStack.EMPTY;
+        }
+        ItemStack s = boxStack(k);
+        boolean over = ShopStage.plinth(g, s, mx, my);
+        FitText.draw(g, font, Component.literal(s.getHoverName().getString()), ShopStage.RIGHT_X, 114, ShopStage.RIGHT_W, 0xFFF6EA, false);
+        g.drawString(font, Component.translatable("skyabyss_box.screen.count", countOf(k)), ShopStage.RIGHT_X, 126, Paper.ON_BLACK_HI, false);
+        List<Component> tip = new ArrayList<>(Screen.getTooltipFromItem(minecraft, s));
+        tip.remove(0);
+        tip.removeIf(c -> c.getString().isBlank());
+        lines(g, tip, ShopStage.RIGHT_X, 140, ShopStage.RIGHT_W, 176, Paper.ON_BLACK_SOFT);
+        return over ? s : ItemStack.EMPTY;
     }
 
-    private void drawSpin(GuiGraphics g, int x, int y) {
+    private void drawSpin(GuiGraphics g) {
+        PickStage.backdrop(g, fit, width, height);
         ItemStack box = boxStack(result.kind());
-        Component head = box.getHoverName();
-        Golden.Box hb = LAYOUT.head();
-        int hy = y + Golden.textY(hb.y(), hb.h());
-        g.drawString(font, head, x + (W - font.width(head)) / 2, hy, boxColor(result.kind()), false);
-        if (result.gear().size() > 1) {
-            String n = (spinIndex + 1) + " / " + result.gear().size();
-            g.drawString(font, n, x + hb.right() - Golden.S5 - font.width(n), hy, DIM, false);
-        }
+        PickStage.title(g, font, box.getHoverName(), result.gear().size() > 1 ? Component.literal((spinIndex + 1) + " / " + result.gear().size()) : null);
         List<ItemStack> reel = result.reels().get(spinIndex);
-        Golden.Box body = LAYOUT.body();
         int bandH = RC + Golden.S8;
-        int bandY = y + body.y() + (body.h() - bandH) / 2 - Golden.S13;
-        int cx = x + W / 2;
-        recess(g, x, y, new Golden.Box(body.x(), bandY - y, body.w(), bandH));
+        int bandY = BAND_Y;
+        int cx = W / 2;
+        // 帯の地 (黒の上に一段沈んだ黒)
+        g.fill(BAND_X0, bandY, BAND_X1, bandY + bandH, Paper.BLACK_LO);
         float off = offset();
-        int[] clip = {x + body.x() + 1, bandY + 1, x + body.right() - 1, bandY + bandH - 1};
-        g.enableScissor(clip[0], clip[1], clip[2], clip[3]);
+        jp.revati.skyabyss.client.ui.TextClip.clipPosed(g, BAND_X0 + 1, bandY + 1, BAND_X1 - BAND_X0 - 2, bandH - 2);
         for (int i = 0; i < reel.size(); i++) {
             float ix = cx + i * RC - off - RC / 2f;
-            if (ix < x - RC || ix > x + W) {
+            if (ix < BAND_X0 - RC || ix > BAND_X1) {
                 continue;
             }
             int ixi = Math.round(ix);
             ItemStack s = reel.get(i);
             int col = 0xFF000000 | tier(s).rgb();
-            g.fill(ixi + 1, bandY + 4, ixi + RC - 1, bandY + bandH - 4, 0xFF1E1C28);
-            g.fill(ixi + 1, bandY + bandH - 6, ixi + RC - 1, bandY + bandH - 4, col);
+            // 品の札 (生成り。下の端に階級の色)
+            g.fill(ixi + 2, bandY + 4, ixi + RC - 2, bandY + bandH - 4, Paper.CREAM);
+            g.fill(ixi + 2, bandY + bandH - 7, ixi + RC - 2, bandY + bandH - 4, col);
             item(g, s, ixi + 1, bandY + 4, 2);
         }
         g.disableScissor();
@@ -409,117 +423,113 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
             }
             lastTick = idx;
         }
-        // 真ん中の枠
+        // 真ん中の枠 (止まると階級の色) と上下の桃色の菱
         int fx = cx - RC / 2 - 2;
-        int frame = landed ? (0xFF000000 | tier(result.gear().get(spinIndex)).rgb()) : GOLD;
+        int frame = landed ? (0xFF000000 | tier(result.gear().get(spinIndex)).rgb()) : Paper.PINK;
         g.renderOutline(fx, bandY + 1, RC + 4, bandH - 2, frame);
-        g.renderOutline(fx - 1, bandY, RC + 6, bandH, (frame & 0x00FFFFFF) | 0x60000000);
-        g.fill(cx - 3, bandY - 4, cx + 4, bandY - 2, GOLD);
-        g.fill(cx - 1, bandY - 2, cx + 2, bandY, GOLD);
-        g.fill(cx - 3, bandY + bandH + 2, cx + 4, bandY + bandH + 4, GOLD);
-        g.fill(cx - 1, bandY + bandH, cx + 2, bandY + bandH + 2, GOLD);
+        g.renderOutline(fx - 1, bandY, RC + 6, bandH, frame);
+        Paper.pin(g, cx, bandY - 4, 3, true);
+        Paper.pin(g, cx, bandY + bandH + 4, 3, true);
         if (landed) {
             ItemStack win = result.gear().get(spinIndex);
-            float a = Mth.clamp((Util.getMillis() - landedAt) / 250f, 0f, 1f);
-            int alpha = (int) (a * 255) << 24;
             Component name = win.getHoverName();
-            int ny = bandY + bandH + Golden.S8;
-            g.drawString(font, name, x + (W - font.width(name)) / 2, Golden.textY(ny, ROW), (tier(win).rgb() & 0xFFFFFF) | Math.max(0x08000000, alpha), false);
-            Component tl = Component.translatable(tier(win).translationKey());
-            g.drawString(font, tl, x + (W - font.width(tl)) / 2, Golden.textY(ny + ROW, ROW), (DIM & 0xFFFFFF) | Math.max(0x08000000, alpha), false);
+            int ny = bandY + bandH + 14;
+            FitText.drawCentered(g, font, name, cx, ny, W - 40, 0xFF000000 | tier(win).rgb(), false);
+            FitText.drawCentered(g, font, Component.translatable(tier(win).translationKey()), cx, ny + 12, W - 40, DIM, false);
         }
-        Component hint = Component.translatable("skyabyss_box.screen.skip");
-        Golden.Box foot = LAYOUT.foot();
-        g.drawString(font, hint, x + (W - font.width(hint)) / 2, y + Golden.textY(foot.y(), foot.h()), 0xFF000000 | Paper.ON_BLACK_DIM, false);
+        PickStage.hint(g, font, Component.translatable("skyabyss_box.screen.skip"));
     }
 
-    private void drawCard(GuiGraphics g, int x, int y) {
+    // 当たりの札。品に指があればその品を返す
+    private ItemStack drawCard(GuiGraphics g, int mx, int my) {
+        PickStage.backdrop(g, fit, width, height);
         ItemStack win = result.gear().get(0);
         int col = 0xFF000000 | tier(win).rgb();
-        Golden.Box body = LAYOUT.body();
-        Golden.Box head = LAYOUT.head();
-        g.drawString(font, win.getHoverName(), x + head.x() + Golden.S5, y + Golden.textY(head.y(), head.h()), col, false);
-        // 品の絵 (3 倍) は 55 角の枠に
-        int bx = x + body.x();
-        int by = y + body.y();
-        int box = Golden.S55;
-        g.fill(bx, by, bx + box, by + box, col);
-        g.fill(bx + 1, by + 1, bx + box - 1, by + box - 1, 0xFF0E0D14);
-        g.fill(bx + 1, by + box - 3, bx + box - 1, by + box - 1, col);
-        item(g, win, bx + 4, by + 3, 3);
+        // 題は当たりの名前 (階級の色。黒の上)
+        Paper.pin(g, 14, 13, 3, true);
+        FitText.draw(g, font, win.getHoverName(), 22, 9, 360, col, false);
+        FitText.draw(g, font, Component.translatable(tier(win).translationKey()), 22, 21, 200, Paper.ON_BLACK_SOFT, false);
+        // 左に傾けた大きな生成りの札 (影は階級の色) に、品を 4 倍で
+        Paper.cut(g, "box_card", Paper.rotRect(CARD_CX, CARD_CY, PickStage.CARD_W, PickStage.CARD_H, -4), Paper.CREAM, col, 3, 4);
+        item(g, win, CARD_CX - 32, CARD_CY - 52, 4);
+        FitText.drawCentered(g, font, Component.literal(win.getHoverName().getString()), CARD_CX, CARD_CY + 26, PickStage.CARD_W - 16, Paper.INK, false);
+        FitText.drawCentered(g, font, Component.literal(Component.translatable(tier(win).translationKey()).getString()), CARD_CX, CARD_CY + 40,
+                PickStage.CARD_W - 16, Paper.INK_SOFT, false);
+        // 右の黒い紙: 品の説明
         List<Component> tip = new ArrayList<>(Screen.getTooltipFromItem(minecraft, win));
         tip.remove(0);
-        lines(g, tip, bx + box + Golden.S8, by, body.w() - box - Golden.S8, y + body.bottom(), DIM);
-    }
-
-    private void drawSummary(GuiGraphics g, int x, int y) {
-        Golden.Box head = LAYOUT.head();
-        g.drawString(font, Component.translatable("skyabyss_box.screen.summary", result.gear().size()), x + head.x() + Golden.S5, y + Golden.textY(head.y(), head.h()), GOLD, false);
-        int cs = Golden.S21;
-        for (int i = 0; i < result.gear().size() && i < maxSummary(); i++) {
-            int cx = sumX(x, i), cy = sumY(y, i);
-            ItemStack s = result.gear().get(i);
-            int col = 0xFF000000 | tier(s).rgb();
-            g.fill(cx, cy, cx + cs, cy + cs, 0xFF0E0D14);
-            g.fill(cx + 1, cy + 1, cx + cs - 1, cy + cs - 1, 0xFF1E1C28);
-            g.fill(cx + 1, cy + cs - 2, cx + cs - 1, cy + cs - 1, col);
-            item(g, s, cx + 2, cy + 2, 1);
-        }
+        lines(g, tip, 156, 40, 236, 196, DIM);
+        boolean over = mx >= CARD_CX - 34 && mx < CARD_CX + 34 && my >= CARD_CY - 54 && my < CARD_CY + 14;
+        return over ? win : ItemStack.EMPTY;
     }
 
     private int maxSummary() {
-        return SUM_COLS * (LAYOUT.body().h() / CELL);
+        return SUM_COLS * ((196 - SUM_Y) / SUM_CELL);
     }
 
-    private int sumX(int x, int i) {
-        return x + LAYOUT.body().x() + (LAYOUT.body().w() - SUM_COLS * CELL + Golden.S3) / 2 + (i % SUM_COLS) * CELL;
+    private int sumX(int i) {
+        return (W - SUM_COLS * SUM_CELL) / 2 + (i % SUM_COLS) * SUM_CELL + (SUM_CELL - SUM_TILE) / 2;
     }
 
-    private int sumY(int y, int i) {
-        return y + LAYOUT.body().y() + (i / SUM_COLS) * CELL;
+    private int sumY(int i) {
+        return SUM_Y + (i / SUM_COLS) * SUM_CELL;
     }
 
-    private ItemStack hovered(int mx, int my) {
-        int x = left(), y = top();
-        int cs = Golden.S21;
-        if (mode == Mode.SUMMARY && result != null) {
-            for (int i = 0; i < result.gear().size() && i < maxSummary(); i++) {
-                int cx = sumX(x, i), cy = sumY(y, i);
-                if (mx >= cx && mx < cx + cs && my >= cy && my < cy + cs) {
-                    return result.gear().get(i);
-                }
+    // まとめ: 開けた品の札 (生成り、影は階級の色)。指の下の品を返す
+    private ItemStack drawSummary(GuiGraphics g, int mx, int my) {
+        PickStage.backdrop(g, fit, width, height);
+        PickStage.title(g, font, Component.translatable("skyabyss_box.screen.summary", result.gear().size()), null);
+        ItemStack hover = ItemStack.EMPTY;
+        for (int i = 0; i < result.gear().size() && i < maxSummary(); i++) {
+            int x = sumX(i);
+            int y = sumY(i);
+            ItemStack s = result.gear().get(i);
+            boolean on = mx >= x && mx < x + SUM_TILE && my >= y && my < y + SUM_TILE;
+            float ang = ((i * 5) % 7 - 3) * 1.2f;
+            Paper.cut(g, "box_sum" + i, Paper.rotRect(x + SUM_TILE / 2f, y + SUM_TILE / 2f - (on ? 2 : 0), SUM_TILE, SUM_TILE, ang), on ? Paper.PINK : Paper.CREAM,
+                    0xFF000000 | tier(s).rgb(), 2, on ? 5 : 3);
+            item(g, s, x + 5, y + 5 - (on ? 2 : 0), 1);
+            if (on) {
+                hover = s;
             }
         }
-        int bx = x + LAYOUT.body().x();
-        int by = y + LAYOUT.body().y();
-        if (mode == Mode.CARD && result != null && mx >= bx && mx < bx + Golden.S55 && my >= by && my < by + Golden.S55) {
-            return result.gear().get(0);
-        }
-        return ItemStack.EMPTY;
+        return hover;
     }
 
     // ---------------------------------------------------------------- 押す
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(double screenX, double screenY, int button) {
+        double mx = fit.x(screenX);
+        double my = fit.y(screenY);
         if (mode == Mode.LIST && button == 0) {
-            int x = left(), y = top();
-            int cs = Golden.S21;
-            for (int i = 0; i < kinds.size(); i++) {
-                int cx = cellX(x, i), cy = cellY(y, i);
-                if (mouseX >= cx && mouseX < cx + cs && mouseY >= cy && mouseY < cy + cs) {
-                    if (selected != i) {
-                        selected = i;
-                        play(SoundEvents.UI_BUTTON_CLICK.value(), 0.4f, 1.3f);
-                        rebuild();
-                    }
-                    return true;
+            int r = ShopStage.rowAt(mx, my);
+            if (r >= 0 && r + scroll < kinds.size()) {
+                if (selected != r + scroll) {
+                    selected = r + scroll;
+                    play(SoundEvents.UI_BUTTON_CLICK.value(), 0.4f, 1.3f);
+                    rebuild();
                 }
+                return true;
             }
         }
         if (mode == Mode.SPIN && button == 0) {
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(mx, my, button);
+    }
+
+    @Override
+    public boolean mouseReleased(double screenX, double screenY, int button) {
+        return super.mouseReleased(fit.x(screenX), fit.y(screenY), button);
+    }
+
+    @Override
+    public boolean mouseScrolled(double screenX, double screenY, double dx, double dy) {
+        if (mode == Mode.LIST && dy != 0) {
+            scroll -= (int) Math.signum(dy);
+            return true;
+        }
+        return super.mouseScrolled(screenX, screenY, dx, dy);
     }
 
     @Override
@@ -542,6 +552,7 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
 
     @Override
     public int[] textBounds() {
-        return new int[] {left(), top(), W, H};
+        fit.fit(width, height, W, H, 3f);
+        return fit.screenRect(0, 0, W, H);
     }
 }

@@ -45,6 +45,20 @@ public final class StashTabs {
         return null;
     }
 
+    // 箱の画面 (GlassChestScreen) は頁のつまみを自分で描いて押す (帳面の上の辺)。ここの札は出さない
+    private static AbstractContainerScreen<?> outside(Screen s) {
+        return s instanceof jp.revati.skyabyss.client.inventory.GlassChestScreen ? null : stash(s);
+    }
+
+    // この箱の頁の数 (預かり所でなければ 0)
+    public static int pages(AbstractContainerScreen<?> cs) {
+        return stash(cs) == null ? 0 : pages;
+    }
+
+    public static int page() {
+        return page;
+    }
+
     private static int x(AbstractContainerScreen<?> cs) {
         return cs.getGuiLeft() + cs.getXSize() + 2;
     }
@@ -59,7 +73,7 @@ public final class StashTabs {
 
     @SubscribeEvent
     static void onRender(ScreenEvent.Render.Post event) {
-        AbstractContainerScreen<?> cs = stash(event.getScreen());
+        AbstractContainerScreen<?> cs = outside(event.getScreen());
         if (cs == null) {
             return;
         }
@@ -88,7 +102,7 @@ public final class StashTabs {
 
     @SubscribeEvent
     static void onClick(ScreenEvent.MouseButtonPressed.Pre event) {
-        AbstractContainerScreen<?> cs = stash(event.getScreen());
+        AbstractContainerScreen<?> cs = outside(event.getScreen());
         if (cs == null || event.getButton() != GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             return;
         }
@@ -118,7 +132,7 @@ public final class StashTabs {
         }
     }
 
-    private static void go(AbstractContainerScreen<?> cs, int to) {
+    public static void go(AbstractContainerScreen<?> cs, int to) {
         if (to == page || holding(cs)) {
             return;
         }

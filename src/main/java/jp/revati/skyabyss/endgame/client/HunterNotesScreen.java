@@ -6,6 +6,7 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 import jp.revati.skyabyss.Hp;
+import jp.revati.skyabyss.client.ui.LedgerStage;
 import jp.revati.skyabyss.client.ui.UiFit;
 import jp.revati.skyabyss.endgame.HunterNotes;
 import net.minecraft.client.Minecraft;
@@ -28,30 +29,26 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import jp.revati.skyabyss.client.ui.Paper;
 
 // 狩人の手帳 (endgame/HunterNotes)。旅の記録の図鑑の枠を押すと開く。見るだけの画面:
-//   左  敵の並び (図鑑の順。倒していない型は「？？？」、慣れた型は金の印)。ホイールで送る
-//   右  選んだ敵の頁: 倒した数・次の頁まで・出る所・強さ・狩りの慣れ・見た技
+//   敵の並び (図鑑の順。倒していない型は「？？？」、慣れた型は桃色の菱)。ホイールで送る
+//   選んだ敵の頁: 倒した数・次の頁まで・出る所・強さ・狩りの慣れ・見た技
 // Esc で旅の記録へ戻る。中身は開いたときにサーバーへ頼む (Request → Snapshot)。
-// 板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 敵の並びは脇の列 (左)、頁は主の列 (右)、下の段に動かし方
+// 組み方は帳の類の「黒に書いて、目録は帯に」(client/ui/LedgerStage。docs/design/56 の 2.1):
+//   左の黒い紙に選んだ敵の頁 (題は名前、添えに倒した数、右下で姿が回る)。右の生成りの帯 (目録) に敵の並び (選んだ敵は桃色の付箋)。左下の山の上に動かし方
 public class HunterNotesScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
-    private static final int BG = 0x05070F;
-    private static final int GOLD = 0xF89CD2;
-    private static final int TEAL = 0xFFF6EA;
-    private static final int TEXT = 0xECE4D6;
+    private static final int GOLD = Paper.ON_BLACK_PINK;
+    private static final int TEXT = jp.revati.skyabyss.client.ui.Golden.TEXT;
     private static final int DIM = Paper.ON_BLACK_SOFT;
-    private static final int FAINT = Paper.ON_BLACK_DIM;
 
-    private static final jp.revati.skyabyss.client.ui.Golden.Layout LAYOUT = jp.revati.skyabyss.client.ui.Golden.Layout.large(jp.revati.skyabyss.client.ui.Golden.FOOT);
-    private static final jp.revati.skyabyss.client.ui.Golden.Box LIST_BOX = LAYOUT.body().minor(true);
-    private static final jp.revati.skyabyss.client.ui.Golden.Box PAGE_BOX = LAYOUT.body().major(false);
-    private static final int W = jp.revati.skyabyss.client.ui.Golden.L_W;
-    private static final int H = jp.revati.skyabyss.client.ui.Golden.L_H;
-    private static final int ROW_H = jp.revati.skyabyss.client.ui.Golden.ROW;
-    private static final int LIST_X = LIST_BOX.x() + 2;
-    private static final int LIST_Y = LIST_BOX.y() + 2;
-    private static final int LIST_W = LIST_BOX.w() - 8;
-    private static final int ROWS = (LIST_BOX.h() - 4) / ROW_H;
-    private static final int PAGE_X = PAGE_BOX.x();
-    private static final int PAGE_W = PAGE_BOX.w();
+    private static final int W = LedgerStage.W;
+    private static final int H = LedgerStage.H;
+    private static final int ROW_H = 13;
+    private static final int LIST_X = LedgerStage.INDEX_X;
+    private static final int LIST_Y = LedgerStage.LIST_Y;
+    private static final int LIST_W = LedgerStage.INDEX_W - 6;
+    private static final int ROWS = LedgerStage.LIST_H / ROW_H;
+    private static final int PAGE_X = LedgerStage.PAGE_X;
+    private static final int PAGE_W = LedgerStage.PAGE_W;
+    private static final int PAGE_BOTTOM = LedgerStage.FOOT_Y - 4;
 
     @Nullable
     private static CompoundTag data;
@@ -78,9 +75,46 @@ public class HunterNotesScreen extends Screen implements jp.revati.skyabyss.clie
         }
     }
 
+    // 撮影の見本 (サーバーへ頼まない)
+    private boolean demo;
+
+    // 撮影用: 見本の手帳 (慣れた敵・頁の途中の敵・まだの敵)
+    public static HunterNotesScreen demo() {
+        ListTag foes = new ListTag();
+        String[] ids = {"minecraft:zombie", "minecraft:skeleton", "minecraft:spider", "minecraft:creeper", "minecraft:husk", "minecraft:stray"};
+        int[] ns = {HunterNotes.FAMILIAR + 12, HunterNotes.STATS + 1, HunterNotes.HABITAT + 1, 3, 0, 0};
+        for (int i = 0; i < ids.length; i++) {
+            CompoundTag e = new CompoundTag();
+            e.putString("id", ids[i]);
+            e.putInt("n", ns[i]);
+            e.putFloat("hp", 20f + i * 6);
+            e.putFloat("atk", 3f + i);
+            ListTag rs = new ListTag();
+            rs.add(net.minecraft.nbt.StringTag.valueOf("meadow"));
+            rs.add(net.minecraft.nbt.StringTag.valueOf("whale"));
+            e.put("regions", rs);
+            e.putInt("time", i % 3);
+            foes.add(e);
+        }
+        CompoundTag d = new CompoundTag();
+        d.put("foes", foes);
+        data = d;
+        HunterNotesScreen s = new HunterNotesScreen();
+        s.demo = true;
+        return s;
+    }
+
     @Override
     protected void init() {
-        PacketDistributor.sendToServer(new HunterNotes.Request());
+        fit.fit(width, height, W, H, 3f);
+        if (!demo) {
+            PacketDistributor.sendToServer(new HunterNotes.Request());
+        }
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        Paper.dim(g, width, height);
     }
 
     @Override
@@ -128,7 +162,7 @@ public class HunterNotesScreen extends Screen implements jp.revati.skyabyss.clie
     public boolean mouseClicked(double screenX, double screenY, int button) {
         double mx = fit.x(screenX);
         double my = fit.y(screenY);
-        if (button == 0 && mx >= LIST_X && mx < LIST_X + LIST_W && my >= LIST_Y && my < LIST_Y + ROWS * ROW_H) {
+        if (button == 0 && mx >= LIST_X - 4 && mx < LIST_X + LIST_W + 4 && my >= LIST_Y && my < LIST_Y + ROWS * ROW_H) {
             int i = scroll + (int) ((my - LIST_Y) / ROW_H);
             if (i < foes().size()) {
                 selected = i;
@@ -139,9 +173,6 @@ public class HunterNotesScreen extends Screen implements jp.revati.skyabyss.clie
     }
 
     // ---------------------------------------------------------------- 絵
-    private static int argb(float alpha, int rgb) {
-        return (Mth.clamp((int) (alpha * 255f), 0, 255) << 24) | (rgb & 0xFFFFFF);
-    }
 
     private static Component name(CompoundTag e) {
         if (!known(e)) {
@@ -152,17 +183,12 @@ public class HunterNotesScreen extends Screen implements jp.revati.skyabyss.clie
 
     @Override
     public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
-        g.fill(0, 0, width, height, argb(0.80f, BG));
-        fit.fit(width, height, W, H, 3f, 0.5f);
+        fit.fit(width, height, W, H, 3f);
+        renderBackground(g, screenX, screenY, partialTick);
         int mx = (int) Math.floor(fit.x(screenX));
         int my = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
-        var head = LAYOUT.head();
-        jp.revati.skyabyss.client.ui.Golden.panel(g, LAYOUT.panel());
-        jp.revati.skyabyss.client.ui.Golden.headLine(g, LAYOUT);
-        jp.revati.skyabyss.client.ui.Golden.recess(g, LIST_BOX);
-        jp.revati.skyabyss.client.ui.Golden.recess(g, PAGE_BOX);
-        g.drawString(font, title, head.x() + 5, jp.revati.skyabyss.client.ui.Golden.textY(head.y(), head.h()), argb(1f, GOLD), false);
+        LedgerStage.backdrop(g, fit, width, height);
         ListTag l = foes();
         int known = 0;
         for (int i = 0; i < l.size(); i++) {
@@ -170,52 +196,52 @@ public class HunterNotesScreen extends Screen implements jp.revati.skyabyss.clie
                 known++;
             }
         }
-        Component count = Component.translatable("gui.skyabyss.hunt.count", known, l.size());
-        g.drawString(font, count, head.right() - 5 - font.width(count), jp.revati.skyabyss.client.ui.Golden.textY(head.y(), head.h()), argb(1f, TEAL), false);
+        LedgerStage.indexHead(g, font, Component.translatable("gui.skyabyss.hunt.count", known, l.size()));
+        LedgerStage.footHint(g, font, Component.translatable("gui.skyabyss.hunt.help"), PAGE_X, PAGE_W);
         if (data == null) {
-            g.drawCenteredString(font, Component.translatable("gui.skyabyss.journey.loading"), W / 2, H / 2, argb(1f, DIM));
+            LedgerStage.pageTitle(g, font, title, null);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.journey.loading"), PAGE_X, LedgerStage.BODY_Y, PAGE_W, DIM, false);
             fit.end(g);
             return;
         }
         renderList(g, l, mx, my);
         renderPage(g, selected < l.size() ? l.getCompound(selected) : null);
-        var foot = LAYOUT.foot();
-        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.hunt.help"), foot.x() + 5,
-                jp.revati.skyabyss.client.ui.Golden.textY(foot.y(), foot.h()), foot.w() - 10, argb(1f, FAINT), false);
         fit.end(g);
     }
 
+    // 敵の並び (右の帯。字は墨)
     private void renderList(GuiGraphics g, ListTag l, int mx, int my) {
         for (int r = 0; r < ROWS && scroll + r < l.size(); r++) {
             int i = scroll + r;
             CompoundTag e = l.getCompound(i);
             int y = LIST_Y + r * ROW_H;
             boolean on = i == selected;
-            boolean hover = mx >= LIST_X && mx < LIST_X + LIST_W && my >= y && my < y + ROW_H;
+            boolean hover = mx >= LIST_X - 4 && mx < LIST_X + LIST_W + 4 && my >= y && my < y + ROW_H;
             if (on) {
-                jp.revati.skyabyss.client.ui.Golden.selected(g, new jp.revati.skyabyss.client.ui.Golden.Box(LIST_X, y, LIST_W, ROW_H));
+                LedgerStage.flag(g, y, ROW_H);
             } else if (hover) {
-                g.fill(LIST_X, y, LIST_X + LIST_W, y + ROW_H, argb(0.5f, 0x1E5552));
+                LedgerStage.hover(g, y, ROW_H);
             }
             int n = e.getInt("n");
             boolean familiar = n >= HunterNotes.FAMILIAR;
             String num = n > 0 ? String.valueOf(n) : "";
             int numW = font.width(num);
-            Component nm = name(e);
-            String shown = font.plainSubstrByWidth(nm.getString(), LIST_W - 14 - numW);
-            int ty = jp.revati.skyabyss.client.ui.Golden.textY(y, ROW_H);
-            g.drawString(font, shown, LIST_X + 10, ty, argb(1f, !known(e) ? FAINT : on ? GOLD : TEXT), false);
-            g.drawString(font, num, LIST_X + LIST_W - 3 - numW, ty, argb(1f, familiar ? GOLD : DIM), false);
-            if (familiar) {
-                g.fill(LIST_X + 3, y + 5, LIST_X + 7, y + 9, argb(1f, GOLD));
+            Component nm = Component.literal(name(e).getString());
+            int ty = y + 3;
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, nm, LIST_X + 8, ty, LIST_W - 12 - numW, on ? LedgerStage.ON_PINK : !known(e) ? 0x8A8086 : Paper.INK, false);
+            g.drawString(font, num, LIST_X + LIST_W - numW, ty, on ? LedgerStage.ON_PINK : familiar ? Paper.INK_HEAD : Paper.INK_SOFT, false);
+            if (familiar && !on) {
+                Paper.pin(g, LIST_X + 3, y + 6, 2, true);
             }
         }
-        // 送りの目印
+        // 送りの糸 (帯の右の辺)
         if (l.size() > ROWS) {
             int barH = ROWS * ROW_H;
             int knobH = Math.max(8, barH * ROWS / l.size());
             int knobY = LIST_Y + (barH - knobH) * scroll / Math.max(1, l.size() - ROWS);
-            g.fill(LIST_X + LIST_W + 2, knobY, LIST_X + LIST_W + 4, knobY + knobH, argb(1f, 0x4A4450));
+            int bx = LedgerStage.INDEX_X + LedgerStage.INDEX_W - 2;
+            g.fill(bx, LIST_Y, bx + 1, LIST_Y + barH, Paper.CREAM_LO);
+            g.fill(bx - 1, knobY, bx + 2, knobY + knobH, Paper.PINK);
         }
     }
 
@@ -223,31 +249,27 @@ public class HunterNotesScreen extends Screen implements jp.revati.skyabyss.clie
         if (e == null) {
             return;
         }
-        int x = PAGE_X + 8;
-        int y = PAGE_BOX.y() + 2;
-        int tw = PAGE_W - 16;
+        int x = PAGE_X;
+        int y = LedgerStage.BODY_Y - 2;
+        int tw = PAGE_W;
         if (!known(e)) {
+            LedgerStage.pageTitle(g, font, name(e), null);
             for (FormattedCharSequence s : jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.hunt.empty"), tw)) {
-                g.drawString(font, s, x, jp.revati.skyabyss.client.ui.Golden.textY(y, ROW_H), argb(1f, DIM), false);
+                g.drawString(font, s, x, y + 2, DIM, false);
                 y += ROW_H;
             }
             return;
         }
         model(g, e.getString("id"));
         int n = e.getInt("n");
-        Component kills = Component.translatable("gui.skyabyss.hunt.kills", n);
-        int kw = font.width(kills);
-        jp.revati.skyabyss.client.ui.FitText.draw(g, font, name(e), x, jp.revati.skyabyss.client.ui.Golden.textY(y, ROW_H), tw - kw - 5, argb(1f, GOLD), false);
-        g.drawString(font, kills, PAGE_X + PAGE_W - 8 - kw, jp.revati.skyabyss.client.ui.Golden.textY(y, ROW_H), argb(1f, TEAL), false);
-        y += ROW_H + 3;
-        jp.revati.skyabyss.client.ui.Golden.rule(g, x, x + tw, y - 2);
+        LedgerStage.pageTitle(g, font, name(e), Component.translatable("gui.skyabyss.hunt.kills", n));
         // 次の頁まで
         Component next = n < HunterNotes.HABITAT ? Component.translatable("gui.skyabyss.hunt.next", HunterNotes.HABITAT - n, Component.translatable("gui.skyabyss.hunt.page.habitat"))
                 : n < HunterNotes.STATS ? Component.translatable("gui.skyabyss.hunt.next", HunterNotes.STATS - n, Component.translatable("gui.skyabyss.hunt.page.stats"))
                 : n < HunterNotes.FAMILIAR ? Component.translatable("gui.skyabyss.hunt.next", HunterNotes.FAMILIAR - n, Component.translatable("gui.skyabyss.hunt.page.familiar"))
                 : null;
         if (next != null) {
-            jp.revati.skyabyss.client.ui.FitText.draw(g, font, next, x, jp.revati.skyabyss.client.ui.Golden.textY(y, ROW_H), tw, argb(1f, DIM), false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, next, x, y + 2, tw, DIM, false);
             y += ROW_H;
         }
         List<Component> lines = new ArrayList<>();
@@ -275,15 +297,15 @@ public class HunterNotesScreen extends Screen implements jp.revati.skyabyss.clie
             }
             lines.add(all.withColor(TEXT));
         }
-        int bottom = PAGE_BOX.bottom() - 2;
+        int bottom = PAGE_BOTTOM;
         // 姿の横では字を狭く (重ねない)
-        int modelTop = PAGE_BOX.bottom() - MODEL;
+        int modelTop = PAGE_BOTTOM - MODEL;
         for (Component c : lines) {
             for (FormattedCharSequence s : jp.revati.skyabyss.client.ui.JpWrap.split(font, c, y + ROW_H > modelTop ? tw - MODEL : tw)) {
                 if (y + ROW_H > bottom) {
                     return;
                 }
-                g.drawString(font, s, x, jp.revati.skyabyss.client.ui.Golden.textY(y, ROW_H), -1, false);
+                g.drawString(font, s, x, y + 2, -1, false);
                 y += ROW_H;
             }
         }
@@ -315,7 +337,7 @@ public class HunterNotesScreen extends Screen implements jp.revati.skyabyss.clie
         float size = Math.max(le.getBbHeight(), le.getBbWidth());
         float scale = Mth.clamp((MODEL - 16f) / size, 3f, 40f);
         float cx = PAGE_X + PAGE_W - MODEL / 2f;
-        float cy = PAGE_BOX.bottom() - MODEL / 2f;
+        float cy = PAGE_BOTTOM - MODEL / 2f;
         Quaternionf pose = new Quaternionf().rotateZ((float) Math.PI).rotateX((float) Math.toRadians(-12));
         try {
             net.minecraft.client.gui.screens.inventory.InventoryScreen.renderEntityInInventory(g, cx, cy, scale,
@@ -327,7 +349,7 @@ public class HunterNotesScreen extends Screen implements jp.revati.skyabyss.clie
     }
 
     // 頁の右下の姿の広さ (正方形)
-    private static final int MODEL = jp.revati.skyabyss.client.ui.Golden.S89;
+    private static final int MODEL = 80;
 
     private static MutableComponent head(String key) {
         return Component.translatable(key).withColor(GOLD);
@@ -359,7 +381,7 @@ public class HunterNotesScreen extends Screen implements jp.revati.skyabyss.clie
 
     @Override
     public int[] textBounds() {
-        fit.fit(width, height, W, H, 3f, 0.5f);
+        fit.fit(width, height, W, H, 3f);
         return fit.screenRect(0, 0, W, H);
     }
 }

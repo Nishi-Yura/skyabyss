@@ -1,5 +1,6 @@
 package jp.revati.skyabyss.client.facility;
 
+import jp.revati.skyabyss.client.ui.LedgerStage;
 import jp.revati.skyabyss.client.ui.Golden;
 import jp.revati.skyabyss.client.ui.ScrollPanel;
 import jp.revati.skyabyss.facility.KeepRecords;
@@ -15,12 +16,12 @@ import jp.revati.skyabyss.client.ui.Paper;
 // 空見の砦の老兵の「試練の記録」(docs/design/35 の 3.2。中身は facility.KeepRecords)。施設の画面と同じ石板と骨の枠。
 //   上に巨神のつまみ 4 つ (出会っていない巨神は「？」)、その巨神の順路の記録 (越えた回数・最速)、試練の一覧 (見ていない試練は「？？？」、済んだ回数、修飾の帯、任意の目標の印)。
 //   下に称号の数と済んだ試練の合計
-// 板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 見出しの帯の右に巨神のつまみ、一行目に順路の記録、その下に試練の一覧 (行 13・送れる)、下の段に合計
+// 組み方は帳の類の「黒に書いて、目録は帯に」(client/ui/LedgerStage。docs/design/56 の 2.1): 順路の記録と試練の一覧は左の黒い紙にじかに、
+// 巨神のつまみは右の生成りの帯の目録 (選んだ巨神は桃色の付箋)、合計は目録の下
 public class RecordsScreen extends Screen {
-    private static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
-    private static final Golden.Box LIST = LAYOUT.body().afterTop(Golden.ROW);
+    private static final Golden.Box LIST = new Golden.Box(LedgerStage.PAGE_X - 6, LedgerStage.BODY_Y, LedgerStage.PAGE_W + 6, LedgerStage.BODY_H);
     private static final int ROW_H = Golden.ROW;
-    private static final int TAB_W = Golden.S34;
+    private static final int TAB_ROW = 16;
     private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
 
     private final KeepRecords.View view;
@@ -48,74 +49,64 @@ public class RecordsScreen extends Screen {
 
     @Override
     protected void init() {
-        fit.fit(width, height, Golden.L_W, Golden.L_H, 3f);
-        w = Golden.L_W;
-        h = Golden.L_H;
-        x0 = 0;
-        y0 = 0;
-        rows.setViewport(LIST.x() + 2, LIST.y() + 2, LIST.w() - 3, LIST.h() - 4);
+        fit.fit(width, height, LedgerStage.W, LedgerStage.H, 3f);
+        rows.setViewport(LIST.x() + 2, LIST.y(), LIST.w() - 2, LIST.h());
     }
 
-    // つまみ i の幅と左端 (見出しの帯の右寄せ)
-    private int tabW(int i) {
-        KeepRecords.TitanPage p = view.pages().get(i);
-        Component c = p.met() ? Component.translatable("progress.skyabyss.titan." + p.titan()) : Component.literal("？");
-        return Math.max(TAB_W, font.width(c) + 10);
-    }
-
-    private int tabX(int i) {
-        int x = LAYOUT.head().right();
-        for (int k = view.pages().size() - 1; k >= i; k--) {
-            x -= tabW(k) + (k < view.pages().size() - 1 ? Golden.S3 : 0);
-        }
-        return x;
+    // 目録の i 行目の上の端
+    private static int tabY(int i) {
+        return LedgerStage.LIST_Y + i * TAB_ROW;
     }
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fill(0, 0, width, height, 0xA00E0D14);
+        Paper.dim(g, width, height);
     }
 
     @Override
     public void render(GuiGraphics g, int sx, int sy, float partialTick) {
+        fit.fit(width, height, LedgerStage.W, LedgerStage.H, 3f);
         renderBackground(g, sx, sy, partialTick);
         int mx = (int) Math.floor(fit.x(sx));
         int my = (int) Math.floor(fit.y(sy));
         fit.begin(g);
-        Golden.panel(g, LAYOUT.panel());
-        Golden.headLine(g, LAYOUT);
+        LedgerStage.backdrop(g, fit, width, height);
         Font font = this.font;
-        Golden.Box head = LAYOUT.head();
-        FacilityUi.gem(g, head.x() + 4, head.y() + head.h() / 2);
-        g.drawString(font, title, head.x() + 10, Golden.textY(head.y(), head.h()), FacilityUi.TEXT, false);
-        // つまみ (見出しの帯の右寄せ)
-        int ty = head.y() + 4;
+        LedgerStage.indexHead(g, font, title);
+        // 巨神のつまみ (目録)
         for (int i = 0; i < view.pages().size(); i++) {
             KeepRecords.TitanPage p = view.pages().get(i);
             Component c = p.met() ? Component.translatable("progress.skyabyss.titan." + p.titan()) : Component.literal("？");
-            int tx = tabX(i);
-            int tw = tabW(i);
+            int ty = tabY(i);
             boolean on = page == i;
-            boolean hover = mx >= tx && mx < tx + tw && my >= ty && my < ty + Golden.BTN;
-            Golden.tab(g, font, new Golden.Box(tx, ty, tw, Golden.BTN), p.stopped() ? c.copy().withStyle(st -> st.withColor(Paper.ON_BLACK_PINK)) : c, on, hover);
+            if (on) {
+                LedgerStage.flag(g, ty, TAB_ROW - 2);
+            } else if (LedgerStage.in(mx, my, LedgerStage.INDEX_X - 4, ty, LedgerStage.INDEX_W + 6, TAB_ROW - 2)) {
+                LedgerStage.hover(g, ty, TAB_ROW - 2);
+            }
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.literal(c.getString()), LedgerStage.INDEX_X + 9, ty + 3, LedgerStage.INDEX_W - 12,
+                    on ? LedgerStage.ON_PINK : p.stopped() ? Paper.INK_HEAD : Paper.INK, false);
         }
-        Golden.Box foot = LAYOUT.foot();
-        g.drawString(font, Component.translatable("gui.skyabyss.records.foot", view.totalCleared(), view.titles()), foot.x() + Golden.S5,
-                Golden.textY(foot.y(), foot.h()), FacilityUi.DIM, false);
+        // 合計 (目録の下)
+        int fy = tabY(Math.max(4, view.pages().size())) + 8;
+        Paper.inkBegin();
+        for (net.minecraft.util.FormattedCharSequence l : font.split(Component.translatable("gui.skyabyss.records.foot", view.totalCleared(), view.titles()), LedgerStage.INDEX_W - 4)) {
+            g.drawString(font, l, LedgerStage.INDEX_X + 2, fy, Paper.INK_SOFT, false);
+            fy += ROW_H;
+        }
+        Paper.inkEnd();
         if (view.pages().isEmpty()) {
             fit.end(g);
             return;
         }
         KeepRecords.TitanPage p = view.pages().get(page);
         int x = LIST.x();
-        int y = Golden.textY(LAYOUT.body().y(), Golden.ROW);
         long best = p.routeBest() / 20;
         Component route = p.routeClears() <= 0 ? Component.translatable("gui.skyabyss.records.route_none")
                 : Component.translatable("gui.skyabyss.records.route", p.routeClears(), String.format("%d:%02d", best / 60, best % 60));
-        g.drawString(font, route, x, y, FacilityUi.TEXT, false);
+        LedgerStage.pageTitle(g, font, p.met() ? Component.translatable("progress.skyabyss.titan." + p.titan()) : Component.literal("？"), route);
         int ly = LIST.y();
         int lw = LIST.w();
-        Golden.recess(g, LIST);
         if (!p.met()) {
             g.drawString(font, Component.translatable("gui.skyabyss.records.unmet"), x + Golden.S8, Golden.textY(ly + 2, Golden.ROW), FacilityUi.DIM, false);
         } else {
@@ -129,17 +120,17 @@ public class RecordsScreen extends Screen {
                 KeepRecords.Row r = p.rows().get(i);
                 Trial.Def def = TrialCatalog.get(r.cellId());
                 Component name = r.seen() && def != null ? Component.translatable(def.nameKey()) : Component.translatable("trial.skyabyss.unknown");
-                jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(name.getString()), x + Golden.S8, Golden.textY(ry, ROW_H), 130, r.seen() ? FacilityUi.TEXT : FacilityUi.DIM, false);
+                jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(name.getString()), x + Golden.S8, Golden.textY(ry, ROW_H), 100, r.seen() ? FacilityUi.TEXT : FacilityUi.DIM, false);
                 if (!r.seen()) {
                     continue;
                 }
                 Component n = Component.translatable("gui.skyabyss.trial.codex.cleared", r.cleared());
-                g.drawString(font, n, x + 144, Golden.textY(ry, ROW_H), r.cleared() > 0 ? FacilityUi.TEAL : FacilityUi.DIM, false);
+                jp.revati.skyabyss.client.ui.FitText.draw(g, font, n, x + 112, Golden.textY(ry, ROW_H), 50, r.cleared() > 0 ? FacilityUi.TEAL : FacilityUi.DIM, false);
                 if (r.modsTotal() > 0) {
-                    int bx = x + 212;
-                    int bw = Golden.S55;
-                    g.fill(bx, ry + 5, bx + bw, ry + 8, 0xFF0E0D14);
-                    g.fill(bx, ry + 5, bx + Math.min(bw, bw * r.modsSeen() / r.modsTotal()), ry + 8, FacilityUi.TEAL);
+                    int bx = x + 166;
+                    int bw = Golden.S34;
+                    g.fill(bx, ry + 5, bx + bw, ry + 8, 0xFF3A3644);
+                    g.fill(bx, ry + 5, bx + Math.min(bw, bw * r.modsSeen() / r.modsTotal()), ry + 8, 0xFFE45A9C);
                     g.drawString(font, r.modsSeen() + "/" + r.modsTotal(), bx + bw + 4, Golden.textY(ry, ROW_H), FacilityUi.DIM, false);
                 }
                 if (r.goals() > 0) {
@@ -147,7 +138,7 @@ public class RecordsScreen extends Screen {
                 }
             }
             rows.end(g);
-            rows.drawBar(g, 0xFF0E0D14, FacilityUi.TEAL);
+            rows.drawBar(g, 0xFF0E0D14, 0xFFE45A9C);
         }
         fit.end(g);
     }
@@ -180,11 +171,8 @@ public class RecordsScreen extends Screen {
             if (rows.mouseClicked(mx, my, button)) {
                 return true;
             }
-            int ty = LAYOUT.head().y() + 4;
             for (int i = 0; i < view.pages().size(); i++) {
-                int tx = tabX(i);
-                int tw = tabW(i);
-                if (mx >= tx && mx < tx + tw && my >= ty && my < ty + Golden.BTN) {
+                if (LedgerStage.in(mx, my, LedgerStage.INDEX_X - 4, tabY(i), LedgerStage.INDEX_W + 6, TAB_ROW - 2)) {
                     page = i;
                     rows.setScroll(0);
                     Minecraft.getInstance().getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(

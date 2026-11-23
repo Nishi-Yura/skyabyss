@@ -1,47 +1,40 @@
 package jp.revati.skyabyss.tower.client;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import jp.revati.skyabyss.tower.TowerDeskState;
+import jp.revati.skyabyss.client.ui.FitText;
 import jp.revati.skyabyss.client.ui.Golden;
+import jp.revati.skyabyss.client.ui.JpWrap;
+import jp.revati.skyabyss.client.ui.Paper;
+import jp.revati.skyabyss.client.ui.PartyStage;
+import jp.revati.skyabyss.tower.TowerDeskState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
-import jp.revati.skyabyss.client.ui.Paper;
 
 // 塔の受付の画面 (あいだの塔。docs/design/54 の 2.2)。2026-11-02 の声「なぜ大規模レイドの入り方がチャット？これまで通り UI 出したらいいんじゃない」。
-//   上: 今日の挑戦 (一人一日一回)。中: 隊 (作る・入る・抜ける・隊の人)。隊長には今週の賭け (三つまで) と「塔へ入る」。下: 塔の店・記録の板・閉じる。
 //   押した釦は受付の命令 (/skyabyss_tower …) を送る。サーバーが確かめ、受付のそばの人の画面を新しくする (TowerDeskState の open = false)
-//   板は黄金比の大きい板 (client/ui/Golden。docs/design/56): 中身は上から今日の挑戦・決まり・隊・隊の人、左の列に作る・入る、右の列に入れる隊、隊長は賭け (二列)。下の段に店・記録・閉じる
+// 組み方は集まりの類の「扇に並ぶ顔札」(client/ui/PartyStage。docs/design/56 の 2.1):
+//   左上に題・今日の挑戦・今週の主の構え・隊の行、その下に釦 (隊を作る / 塔へ入る・隊を抜ける)。隊の人は扇の札 (隊長は桃色で菱)。
+//   隊が無いときは札の代わりに入れる隊の釦を縦に。右の生成りの帯に、隊長は今週の賭け (三つまで)、ほかは手引き。下の山の上に塔の店・記録・閉じる
 public final class TowerDeskScreen extends Screen {
-    static final Golden.Layout LAYOUT = Golden.Layout.large(Golden.FOOT);
-    static final int W = Golden.L_W;
-    static final int H = Golden.L_H;
-    static final int GOLD = Paper.ON_BLACK_PINK;
-    static final int TEXT = Golden.TEXT;
-    static final int SOFT = Paper.ON_BLACK_SOFT;
-    static final int DENY = Golden.DENY;
     static final int ROW = Golden.ROW;
-    // 釦の行 (高さ 13 + あいだ 5)
-    static final int STEP = Golden.BTN + Golden.S5;
-    static final Golden.Box BODY = LAYOUT.body();
-    static final Golden.Box LEFT = BODY.minor(true);
-    static final Golden.Box RIGHT = BODY.major(false);
-    // 縦の位置 (中身の上から)
-    static final int Y_SQUAD = BODY.y() + 2 * ROW + Golden.S5;
-    static final int Y_BUTTONS = Y_SQUAD + 2 * ROW + Golden.S5;
-    static final int Y_WAGERS = Y_BUTTONS + STEP;
+    // 釦の行 (高さ 13 + あいだ 3)
+    static final int STEP = Golden.BTN + 3;
+    static final int Y_BUTTONS = 66;
+    // 右の帯 (PartyStage.STRIP より上から)
+    static final float[] STRIP = {270, 30, 400, 32, 398, 196, 274, 192};
+    static final int WAGER_TOP = 76;
+    static final int WAGER_BOTTOM = 186;
 
     private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
     private TowerDeskState state;
-    private int left;
-    private int top;
     private final net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> openedIn;
 
     TowerDeskScreen(TowerDeskState state) {
@@ -57,6 +50,18 @@ public final class TowerDeskScreen extends Screen {
                 List.of("half_heal", "no_revive", "fast_adds", "short_time", "fast_moon", "hard_eyes"), List.of("half_heal", "fast_moon"), 3, 30, "star"));
     }
 
+    // 撮影用: 隊長で、隊に七人の見本 (札は 4 枚まで、残りは名前の行)
+    public static TowerDeskScreen sampleMany() {
+        return new TowerDeskScreen(new TowerDeskState(true, false, "Dev", List.of("Dev", "ミナト", "カイ", "Nagi", "Isana", "Sora", "Umi"), true, 12, List.of(), List.of(),
+                List.of("half_heal", "no_revive", "fast_adds", "short_time", "fast_moon", "hard_eyes"), List.of("half_heal"), 3, 30, "star"));
+    }
+
+    // 撮影用: 隊が無く、入れる隊が三つある見本
+    public static TowerDeskScreen sampleJoin() {
+        return new TowerDeskScreen(new TowerDeskState(true, false, "", List.of(), false, 12, List.of("ミナト", "Nagi", "Isana"), List.of(3, 1, 11),
+                List.of(), List.of(), 3, 30, "star"));
+    }
+
     public static void receive(TowerDeskState state) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen instanceof TowerDeskScreen s) {
@@ -67,55 +72,59 @@ public final class TowerDeskScreen extends Screen {
         }
     }
 
+    private int wagerStep() {
+        int n = Math.max(1, state.wagers().size());
+        return Math.min(STEP, (WAGER_BOTTOM - WAGER_TOP) / n);
+    }
+
     @Override
     protected void init() {
-        fit.fit(width, height, W, H, 3f);
-        left = 0;
-        top = 0;
+        fit.fit(width, height, PartyStage.W, PartyStage.H, 3f);
+        int x = PartyStage.HEAD_X;
         int y = Y_BUTTONS;
         if (state.leader().isEmpty()) {
             Button create = Paper.tag(Component.translatable("gui.skyabyss.tower_desk.create"), b -> cmd("create"))
-                    .bounds(LEFT.x(), y, LEFT.w(), Golden.BTN).build();
+                    .bounds(x, y, 89, Golden.BTN).primary().build();
             create.active = !state.usedToday();
             addRenderableWidget(create);
+            // 入れる隊 (札の代わりに縦に)
             for (int i = 0; i < Math.min(4, state.joinLeaders().size()); i++) {
                 String leader = state.joinLeaders().get(i);
                 Button join = Paper.tag(Component.translatable("gui.skyabyss.tower_desk.join", leader, state.joinCounts().get(i), state.max()), b -> cmd("join " + leader))
-                        .bounds(RIGHT.x(), y + i * STEP, RIGHT.w(), Golden.BTN).build();
+                        .bounds(x, y + 26 + i * (STEP + 2), 180, Golden.BTN).build();
                 join.active = !state.usedToday();
                 addRenderableWidget(join);
             }
         } else {
             if (state.isLeader()) {
                 addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.tower_desk.start"), b -> cmd("start"))
-                        .bounds(LEFT.x(), y, LEFT.w(), Golden.BTN).build());
+                        .bounds(x, y, 89, Golden.BTN).primary().build());
             }
-            Golden.Box quitBox = state.isLeader() ? RIGHT : LEFT;
             addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.tower_desk.quit"), b -> cmd("quit"))
-                    .bounds(quitBox.x(), y, Math.min(quitBox.w(), Golden.S89 + Golden.S34), Golden.BTN).build());
+                    .bounds(state.isLeader() ? x + 95 : x, y, 89, Golden.BTN).build());
             if (state.isLeader()) {
-                // 今週の賭け: 押すと選ぶ / 外す (三つまで)。二列
-                int colW = (BODY.w() - Golden.GAP) / 2;
+                // 今週の賭け (右の帯): 押すと選ぶ / 外す (三つまで)
+                int sx = PartyStage.STRIP_X;
+                int step = wagerStep();
                 for (int i = 0; i < state.wagers().size(); i++) {
                     String id = state.wagers().get(i);
                     boolean on = state.chosen().contains(id);
                     Component label = Component.literal(on ? "✔ " : "").append(Component.translatable("message.skyabyss.tower.wager." + id));
                     Button w = Paper.tag(label, b -> cmd("wager " + id))
-                            .bounds(BODY.x() + (i % 2) * (colW + Golden.GAP), Y_WAGERS + ROW + 3 + (i / 2) * STEP, colW, Golden.BTN)
+                            .bounds(sx, WAGER_TOP + i * step, PartyStage.STRIP_W - 6, Golden.BTN)
                             .tooltip(Tooltip.create(Component.translatable("message.skyabyss.tower.wager." + id + ".desc"))).build();
                     w.active = on || state.chosen().size() < state.pickMax();
                     addRenderableWidget(w);
                 }
             }
         }
-        Golden.Box foot = LAYOUT.foot();
-        int by = foot.y() + 4;
-        addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.tower_desk.shop"), b -> cmd("shop")).bounds(foot.x(), by, Golden.S89, Golden.BTN).build());
+        int fy = PartyStage.FOOT_Y;
+        addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.tower_desk.shop"), b -> cmd("shop")).bounds(20, fy, 80, Golden.BTN).build());
         addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.tower_desk.records"), b -> {
             cmd("records");
             Minecraft.getInstance().setScreen(new ChatScreen(""));
-        }).bounds(foot.x() + Golden.S89 + Golden.S5, by, Golden.S89, Golden.BTN).build());
-        addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.tower_desk.close"), b -> onClose()).bounds(foot.right() - Golden.S89, by, Golden.S89, Golden.BTN).build());
+        }).bounds(106, fy, 80, Golden.BTN).build());
+        addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.tower_desk.close"), b -> onClose()).bounds(316, fy, 76, Golden.BTN).build());
     }
 
     private void cmd(String sub) {
@@ -136,39 +145,69 @@ public final class TowerDeskScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(g, mouseX, mouseY, partialTick);
+        Paper.dim(g, width, height);
+    }
+
+    // 名前から顔の id (いま繋がっていればその人の、いなければ名前から決まる顔)
+    private String faceId(String name) {
+        PlayerInfo info = minecraft.getConnection() == null ? null : minecraft.getConnection().getPlayerInfo(name);
+        return info != null ? info.getProfile().getId().toString() : name;
     }
 
     @Override
     public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
+        fit.fit(width, height, PartyStage.W, PartyStage.H, 3f);
         renderBackground(g, screenX, screenY, partialTick);
         int mouseX = (int) Math.floor(fit.x(screenX));
         int mouseY = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
-        Golden.panel(g, LAYOUT.panel());
-        Golden.headLine(g, LAYOUT);
-        Golden.Box head = LAYOUT.head();
-        g.drawString(font, title, head.x() + Golden.S5, Golden.textY(head.y(), head.h()), GOLD, false);
-        int x = BODY.x() + Golden.S5;
-        int tw = BODY.w() - Golden.S13;
-        // 今日の挑戦と決まり
+        PartyStage.backdrop(g, fit, width, height);
+        PartyStage.title(g, font, title);
+        int x = PartyStage.HEAD_X;
+        int tw = PartyStage.HEAD_W;
+        // 今日の挑戦と、今週の主の構え
         Component today = Component.translatable(state.usedToday() ? "gui.skyabyss.tower_desk.used" : "gui.skyabyss.tower_desk.ready");
-        jp.revati.skyabyss.client.ui.FitText.draw(g, font, today, x, Golden.textY(BODY.y(), ROW), tw, state.usedToday() ? DENY : TEXT, false);
-        // 決まりの行に、今週の主の構え (TowerStance)
-        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.tower_desk.rule_stance",
-                Component.translatable("message.skyabyss.tower.stance." + state.stance())), x, Golden.textY(BODY.y() + ROW, ROW), tw, SOFT, false);
+        FitText.draw(g, font, today, x, 26, tw, state.usedToday() ? Golden.DENY : PartyStage.ON_PINK, false);
+        FitText.draw(g, font, Component.translatable("gui.skyabyss.tower_desk.rule_stance",
+                Component.translatable("message.skyabyss.tower.stance." + state.stance())), x, 38, tw, Paper.ON_BLACK_SOFT, false);
         // 隊
         Component sq = state.leader().isEmpty() ? Component.translatable("gui.skyabyss.tower_desk.no_squad")
                 : Component.translatable("gui.skyabyss.tower_desk.squad", state.leader(), state.members().size(), state.max());
-        jp.revati.skyabyss.client.ui.FitText.draw(g, font, sq, x, Golden.textY(Y_SQUAD, ROW), tw, GOLD, false);
-        Component second = !state.members().isEmpty() ? Component.literal(String.join("、", state.members()))
-                : state.joinLeaders().isEmpty() ? Component.translatable("gui.skyabyss.tower_desk.hint") : null;
-        if (second != null) {
-            jp.revati.skyabyss.client.ui.FitText.draw(g, font, second, x, Golden.textY(Y_SQUAD + ROW, ROW), tw, TEXT, false);
+        FitText.draw(g, font, sq, x, 50, tw, Paper.ON_BLACK_PINK, false);
+        // 隊の人の札
+        List<String> members = state.members();
+        // 札は 4 枚まで (扇が下の釦にかからないように)。5 人目からは札の上の行に名前を並べる
+        int n = Math.max(2, Math.min(4, members.size()));
+        for (int i = 0; i < Math.min(4, members.size()); i++) {
+            String m = members.get(i);
+            boolean leader = m.equals(state.leader());
+            int[] c = PartyStage.cardAt(i, n);
+            PartyStage.card(g, i, n, leader);
+            PartyStage.face(g, faceId(m), c[0], c[1]);
+            PartyStage.cardText(g, font, c[0], c[1], Component.literal(m), null, null, leader);
+            if (leader) {
+                PartyStage.leaderPin(g, c[0], c[1]);
+            }
         }
-        if (state.isLeader()) {
-            jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.tower_desk.wagers", state.pickMax(), state.bonusPct(), state.chosen().size()),
-                    x, Golden.textY(Y_WAGERS, ROW), tw, SOFT, false);
+        if (members.size() > 4) {
+            Component more = Component.literal("+" + (members.size() - 4) + "  " + String.join("、", members.subList(4, members.size())));
+            if (font.width(more) > tw) {
+                more = Component.literal("+" + (members.size() - 4));
+            }
+            g.drawString(font, more, x, 84, Paper.ON_BLACK_SOFT, false);
+        }
+        // 右の帯: 隊長は今週の賭け、ほかは手引き
+        // 帯は上へ伸ばす (賭けの見出しが三行になるため)
+        Paper.cut(g, "tower_strip", STRIP, Paper.CREAM, Paper.PINK_LO, 3, 4);
+        Component strip = state.isLeader() ? Component.translatable("gui.skyabyss.tower_desk.wagers", state.pickMax(), state.bonusPct(), state.chosen().size())
+                : Component.translatable("gui.skyabyss.tower_desk.hint");
+        int sy = 38;
+        for (FormattedCharSequence line : JpWrap.split(font, Component.literal(strip.getString()), PartyStage.STRIP_W - 4)) {
+            if (state.isLeader() && sy + 9 > WAGER_TOP - 2) {
+                break;
+            }
+            g.drawString(font, line, PartyStage.STRIP_X, sy, state.isLeader() ? Paper.INK_HEAD : Paper.INK_SOFT, false);
+            sy += 11;
         }
         for (net.minecraft.client.gui.components.Renderable r : renderables) {
             r.render(g, mouseX, mouseY, partialTick);
