@@ -69,6 +69,15 @@ else:
     n = json.loads(out.read_text(encoding='utf-8'))
     OC = [e for e in d['elements'] if e.get('type') != 'mesh']; OM = {e['name']: e for e in d['elements'] if e.get('type') == 'mesh'}
     NC = [e for e in n['elements'] if e.get('type') != 'mesh']; NM = {e['name']: e for e in n['elements'] if e.get('type') == 'mesh'}
+    # --edited: Blockbench で名前を付けて足した箱 (元に無い名前・読み込みの既定名 cube / g_root 以外) は、その名前と UV のまま残す
+    ADDED = [e for e in NC if '--edited' in sys.argv and e['name'] not in ('cube', 'g_root') and e['name'] not in {o['name'] for o in OC}]
+    NC = [e for e in NC if e not in ADDED]
+    for e in ADDED:
+        e['autouv'] = 0
+        for fc in e['faces'].values():
+            fc['texture'] = 0
+    if ADDED:
+        print('足した箱', [e['name'] for e in ADDED])
     assert len(OC) == len(NC), f'cubes {len(OC)} -> {len(NC)}'
     assert sorted(OM) == sorted(NM), 'mesh names'
 
@@ -93,7 +102,9 @@ else:
     assert ALLOW or worst < 0.05, f'a cube moved by {worst}'
     for name, o in OM.items():
         e = NM[name]; VO = world(o); VN = world(e); m = {}
-        for ok, p in VO.items():
+        if ALLOW and len(VO) == len(VN):   # Blockbench で頂点を動かした: place_mesh に渡した順 (= 元の並び) で対応を取る
+            m = dict(zip(VO, VN))
+        for ok, p in ([] if m else VO.items()):
             best = min(VN, key=lambda nk: sum((VN[nk][j] - p[j]) ** 2 for j in range(3)))
             assert sum((VN[best][j] - p[j]) ** 2 for j in range(3)) < 1e-3, (name, ok)
             m[ok] = best
@@ -112,7 +123,7 @@ else:
     n['groups'] = []; n['outliner'] = [e['uuid'] for e in n['elements']]
     # 元の並びへ
     order = {e['name']: k for k, e in enumerate(d['elements'])}
-    n['elements'].sort(key=lambda e: order[e['name']]); n['outliner'] = [e['uuid'] for e in n['elements']]
+    n['elements'].sort(key=lambda e: order.get(e['name'], len(order))); n['outliner'] = [e['uuid'] for e in n['elements']]
     out.write_text(json.dumps(n, ensure_ascii=False), encoding='utf-8')
     look = ROOT / 'src/main/resources/assets/skyabyss/lowpoly/look/a' / f'{i}.json'
     before = json.loads(look.read_text(encoding='utf-8'))

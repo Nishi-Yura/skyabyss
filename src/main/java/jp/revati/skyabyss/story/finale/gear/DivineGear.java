@@ -66,7 +66,8 @@ public final class DivineGear {
     static final String GIVEN = "skyabyss_divine_given";
 
     // 防具 (頭・胴・脚・靴の防御と強靭。塔の防具と同じ段) と 4 部位の効果、装飾、二本目の効き方
-    public static final int[][] ARMOR_DEFENSE = {{7, 11, 9, 7}, {5, 9, 7, 5}, {5, 8, 6, 5}};
+    // 重の組は 4 部位で 30 (属性の防御の上限。2026-11-24 まで 34 で、超えた 4 は効いていなかった)
+    public static final int[][] ARMOR_DEFENSE = {{6, 10, 8, 6}, {5, 9, 7, 5}, {5, 8, 6, 5}};
     public static final float[] ARMOR_TOUGHNESS = {6f, 4f, 3f};
     public static final double BELLKEEPER_TAKEN = 0.92;
     public static final double BELLKEEPER_PUSH_RADIUS = 4;

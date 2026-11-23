@@ -1,0 +1,79 @@
+world shots flat
+size 960 540
+timeout 3000
+render 8
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+hud off
+cmd gamemode creative
+armortier auto
+armorlevel 0
+camera minecraft:overworld 0 -60 0 180 0
+waitchunks
+cmd item replace entity @s armor.feet with skyabyss:divine_mistwalker_boots
+cmd item replace entity @s armor.legs with skyabyss:divine_mistwalker_leggings
+cmd item replace entity @s armor.chest with skyabyss:divine_mistwalker_chestplate
+cmd item replace entity @s armor.head with skyabyss:divine_mistwalker_helmet
+perspective back
+look 180 0
+wait 12
+shot divine_mistwalker_b0
+look 180 -60
+wait 5
+shot divine_mistwalker_bup
+look 180 60
+wait 5
+shot divine_mistwalker_bdn
+perspective front
+look 180 -50
+wait 5
+shot divine_mistwalker_fup
+look 180 50
+wait 5
+shot divine_mistwalker_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot divine_mistwalker_1up
+look 180 80
+wait 5
+shot divine_mistwalker_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:tower_halo_boots
+cmd item replace entity @s armor.legs with skyabyss:tower_halo_leggings
+cmd item replace entity @s armor.chest with skyabyss:tower_halo_chestplate
+cmd item replace entity @s armor.head with skyabyss:tower_halo_helmet
+perspective back
+look 180 0
+wait 12
+shot tower_halo_b0
+look 180 -60
+wait 5
+shot tower_halo_bup
+look 180 60
+wait 5
+shot tower_halo_bdn
+perspective front
+look 180 -50
+wait 5
+shot tower_halo_fup
+look 180 50
+wait 5
+shot tower_halo_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot tower_halo_1up
+look 180 80
+wait 5
+shot tower_halo_1dn
+hud off

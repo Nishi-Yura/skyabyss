@@ -17,7 +17,7 @@ import net.minecraft.world.item.TooltipFlag;
 // ×1.8 では満月の矢の傷の切り上げが雷翼の弓と同じ 11 になり、階級の差が出なかった。2026-10-24)。
 // 本領は「雲穿ち」の書き換え「天落とし」(Rune.SKY_FALL。主の手に持つあいだだけ)
 public class AbyssBowItem extends BowItem implements ModGear {
-    public static final double DAMAGE = 2.0;
+    public static final double DAMAGE = 2.23;   // 2026-11-24: 必要 Lv 22 の矢の目安 B(22) × 1.25 (item/TierFloor.ARTIFACT_BOW)
 
     // 一体への 1 秒あたり (満月で撃ち続ける。雷翼の弓と同じ式)
     public static double dps(int enhance) {

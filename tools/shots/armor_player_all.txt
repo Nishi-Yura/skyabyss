@@ -1,0 +1,1129 @@
+world shots flat
+size 960 540
+timeout 3000
+render 8
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd fill -20 -61 -20 20 -61 20 minecraft:smooth_basalt destroy
+cmd kill @e[type=!minecraft:player,distance=..64]
+hud off
+cmd gamemode creative
+armortier auto
+armorlevel 0
+camera minecraft:overworld 0 -60 0 180 0
+waitchunks
+cmd item replace entity @s armor.feet with skyabyss:abyss_diver_boots
+cmd item replace entity @s armor.legs with skyabyss:abyss_diver_leggings
+cmd item replace entity @s armor.chest with skyabyss:abyss_diver_chestplate
+cmd item replace entity @s armor.head with skyabyss:abyss_diver_helmet
+perspective back
+look 180 0
+wait 12
+shot abyss_diver_b0
+look 180 -60
+wait 5
+shot abyss_diver_bup
+look 180 60
+wait 5
+shot abyss_diver_bdn
+perspective front
+look 180 -50
+wait 5
+shot abyss_diver_fup
+look 180 50
+wait 5
+shot abyss_diver_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot abyss_diver_1up
+look 180 80
+wait 5
+shot abyss_diver_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:ash_walking_boots
+cmd item replace entity @s armor.legs with skyabyss:ash_walking_leggings
+cmd item replace entity @s armor.chest with skyabyss:ash_walking_chestplate
+cmd item replace entity @s armor.head with skyabyss:ash_walking_helmet
+perspective back
+look 180 0
+wait 12
+shot ash_walking_b0
+look 180 -60
+wait 5
+shot ash_walking_bup
+look 180 60
+wait 5
+shot ash_walking_bdn
+perspective front
+look 180 -50
+wait 5
+shot ash_walking_fup
+look 180 50
+wait 5
+shot ash_walking_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot ash_walking_1up
+look 180 80
+wait 5
+shot ash_walking_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:divine_bellkeeper_boots
+cmd item replace entity @s armor.legs with skyabyss:divine_bellkeeper_leggings
+cmd item replace entity @s armor.chest with skyabyss:divine_bellkeeper_chestplate
+cmd item replace entity @s armor.head with skyabyss:divine_bellkeeper_helmet
+perspective back
+look 180 0
+wait 12
+shot divine_bellkeeper_b0
+look 180 -60
+wait 5
+shot divine_bellkeeper_bup
+look 180 60
+wait 5
+shot divine_bellkeeper_bdn
+perspective front
+look 180 -50
+wait 5
+shot divine_bellkeeper_fup
+look 180 50
+wait 5
+shot divine_bellkeeper_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot divine_bellkeeper_1up
+look 180 80
+wait 5
+shot divine_bellkeeper_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:divine_lampkeeper_boots
+cmd item replace entity @s armor.legs with skyabyss:divine_lampkeeper_leggings
+cmd item replace entity @s armor.chest with skyabyss:divine_lampkeeper_chestplate
+cmd item replace entity @s armor.head with skyabyss:divine_lampkeeper_helmet
+perspective back
+look 180 0
+wait 12
+shot divine_lampkeeper_b0
+look 180 -60
+wait 5
+shot divine_lampkeeper_bup
+look 180 60
+wait 5
+shot divine_lampkeeper_bdn
+perspective front
+look 180 -50
+wait 5
+shot divine_lampkeeper_fup
+look 180 50
+wait 5
+shot divine_lampkeeper_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot divine_lampkeeper_1up
+look 180 80
+wait 5
+shot divine_lampkeeper_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:divine_mistwalker_boots
+cmd item replace entity @s armor.legs with skyabyss:divine_mistwalker_leggings
+cmd item replace entity @s armor.chest with skyabyss:divine_mistwalker_chestplate
+cmd item replace entity @s armor.head with skyabyss:divine_mistwalker_helmet
+perspective back
+look 180 0
+wait 12
+shot divine_mistwalker_b0
+look 180 -60
+wait 5
+shot divine_mistwalker_bup
+look 180 60
+wait 5
+shot divine_mistwalker_bdn
+perspective front
+look 180 -50
+wait 5
+shot divine_mistwalker_fup
+look 180 50
+wait 5
+shot divine_mistwalker_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot divine_mistwalker_1up
+look 180 80
+wait 5
+shot divine_mistwalker_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:ember_boots
+cmd item replace entity @s armor.legs with skyabyss:ember_leggings
+cmd item replace entity @s armor.chest with skyabyss:ember_chestplate
+cmd item replace entity @s armor.head with skyabyss:ember_helmet
+perspective back
+look 180 0
+wait 12
+shot ember_b0
+look 180 -60
+wait 5
+shot ember_bup
+look 180 60
+wait 5
+shot ember_bdn
+perspective front
+look 180 -50
+wait 5
+shot ember_fup
+look 180 50
+wait 5
+shot ember_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot ember_1up
+look 180 80
+wait 5
+shot ember_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:ironclad_boots
+cmd item replace entity @s armor.legs with skyabyss:ironclad_leggings
+cmd item replace entity @s armor.chest with skyabyss:ironclad_chestplate
+cmd item replace entity @s armor.head with skyabyss:ironclad_helmet
+perspective back
+look 180 0
+wait 12
+shot ironclad_b0
+look 180 -60
+wait 5
+shot ironclad_bup
+look 180 60
+wait 5
+shot ironclad_bdn
+perspective front
+look 180 -50
+wait 5
+shot ironclad_fup
+look 180 50
+wait 5
+shot ironclad_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot ironclad_1up
+look 180 80
+wait 5
+shot ironclad_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:moon_walker_boots
+cmd item replace entity @s armor.legs with skyabyss:moon_walker_leggings
+cmd item replace entity @s armor.chest with skyabyss:moon_walker_chestplate
+cmd item replace entity @s armor.head with skyabyss:moon_walker_helmet
+perspective back
+look 180 0
+wait 12
+shot moon_walker_b0
+look 180 -60
+wait 5
+shot moon_walker_bup
+look 180 60
+wait 5
+shot moon_walker_bdn
+perspective front
+look 180 -50
+wait 5
+shot moon_walker_fup
+look 180 50
+wait 5
+shot moon_walker_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot moon_walker_1up
+look 180 80
+wait 5
+shot moon_walker_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:peak_crossing_boots
+cmd item replace entity @s armor.legs with skyabyss:peak_crossing_leggings
+cmd item replace entity @s armor.chest with skyabyss:peak_crossing_chestplate
+cmd item replace entity @s armor.head with skyabyss:peak_crossing_helmet
+perspective back
+look 180 0
+wait 12
+shot peak_crossing_b0
+look 180 -60
+wait 5
+shot peak_crossing_bup
+look 180 60
+wait 5
+shot peak_crossing_bdn
+perspective front
+look 180 -50
+wait 5
+shot peak_crossing_fup
+look 180 50
+wait 5
+shot peak_crossing_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot peak_crossing_1up
+look 180 80
+wait 5
+shot peak_crossing_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:sky_stone_boots
+cmd item replace entity @s armor.legs with skyabyss:sky_stone_leggings
+cmd item replace entity @s armor.chest with skyabyss:sky_stone_chestplate
+cmd item replace entity @s armor.head with skyabyss:sky_stone_helmet
+perspective back
+look 180 0
+wait 12
+shot sky_stone_b0
+look 180 -60
+wait 5
+shot sky_stone_bup
+look 180 60
+wait 5
+shot sky_stone_bdn
+perspective front
+look 180 -50
+wait 5
+shot sky_stone_fup
+look 180 50
+wait 5
+shot sky_stone_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot sky_stone_1up
+look 180 80
+wait 5
+shot sky_stone_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:stone_whale_boots
+cmd item replace entity @s armor.legs with skyabyss:stone_whale_leggings
+cmd item replace entity @s armor.chest with skyabyss:stone_whale_chestplate
+cmd item replace entity @s armor.head with skyabyss:stone_whale_helmet
+perspective back
+look 180 0
+wait 12
+shot stone_whale_b0
+look 180 -60
+wait 5
+shot stone_whale_bup
+look 180 60
+wait 5
+shot stone_whale_bdn
+perspective front
+look 180 -50
+wait 5
+shot stone_whale_fup
+look 180 50
+wait 5
+shot stone_whale_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot stone_whale_1up
+look 180 80
+wait 5
+shot stone_whale_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:thunder_wing_boots
+cmd item replace entity @s armor.legs with skyabyss:thunder_wing_leggings
+cmd item replace entity @s armor.chest with skyabyss:thunder_wing_chestplate
+cmd item replace entity @s armor.head with skyabyss:thunder_wing_helmet
+perspective back
+look 180 0
+wait 12
+shot thunder_wing_b0
+look 180 -60
+wait 5
+shot thunder_wing_bup
+look 180 60
+wait 5
+shot thunder_wing_bdn
+perspective front
+look 180 -50
+wait 5
+shot thunder_wing_fup
+look 180 50
+wait 5
+shot thunder_wing_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot thunder_wing_1up
+look 180 80
+wait 5
+shot thunder_wing_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:tide_shell_boots
+cmd item replace entity @s armor.legs with skyabyss:tide_shell_leggings
+cmd item replace entity @s armor.chest with skyabyss:tide_shell_chestplate
+cmd item replace entity @s armor.head with skyabyss:tide_shell_helmet
+perspective back
+look 180 0
+wait 12
+shot tide_shell_b0
+look 180 -60
+wait 5
+shot tide_shell_bup
+look 180 60
+wait 5
+shot tide_shell_bdn
+perspective front
+look 180 -50
+wait 5
+shot tide_shell_fup
+look 180 50
+wait 5
+shot tide_shell_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot tide_shell_1up
+look 180 80
+wait 5
+shot tide_shell_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:tide_wader_boots
+cmd item replace entity @s armor.legs with skyabyss:tide_wader_leggings
+cmd item replace entity @s armor.chest with skyabyss:tide_wader_chestplate
+cmd item replace entity @s armor.head with skyabyss:tide_wader_helmet
+perspective back
+look 180 0
+wait 12
+shot tide_wader_b0
+look 180 -60
+wait 5
+shot tide_wader_bup
+look 180 60
+wait 5
+shot tide_wader_bdn
+perspective front
+look 180 -50
+wait 5
+shot tide_wader_fup
+look 180 50
+wait 5
+shot tide_wader_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot tide_wader_1up
+look 180 80
+wait 5
+shot tide_wader_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:tower_bridge_boots
+cmd item replace entity @s armor.legs with skyabyss:tower_bridge_leggings
+cmd item replace entity @s armor.chest with skyabyss:tower_bridge_chestplate
+cmd item replace entity @s armor.head with skyabyss:tower_bridge_helmet
+perspective back
+look 180 0
+wait 12
+shot tower_bridge_b0
+look 180 -60
+wait 5
+shot tower_bridge_bup
+look 180 60
+wait 5
+shot tower_bridge_bdn
+perspective front
+look 180 -50
+wait 5
+shot tower_bridge_fup
+look 180 50
+wait 5
+shot tower_bridge_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot tower_bridge_1up
+look 180 80
+wait 5
+shot tower_bridge_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:tower_halo_boots
+cmd item replace entity @s armor.legs with skyabyss:tower_halo_leggings
+cmd item replace entity @s armor.chest with skyabyss:tower_halo_chestplate
+cmd item replace entity @s armor.head with skyabyss:tower_halo_helmet
+perspective back
+look 180 0
+wait 12
+shot tower_halo_b0
+look 180 -60
+wait 5
+shot tower_halo_bup
+look 180 60
+wait 5
+shot tower_halo_bdn
+perspective front
+look 180 -50
+wait 5
+shot tower_halo_fup
+look 180 50
+wait 5
+shot tower_halo_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot tower_halo_1up
+look 180 80
+wait 5
+shot tower_halo_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:tower_scale_boots
+cmd item replace entity @s armor.legs with skyabyss:tower_scale_leggings
+cmd item replace entity @s armor.chest with skyabyss:tower_scale_chestplate
+cmd item replace entity @s armor.head with skyabyss:tower_scale_helmet
+perspective back
+look 180 0
+wait 12
+shot tower_scale_b0
+look 180 -60
+wait 5
+shot tower_scale_bup
+look 180 60
+wait 5
+shot tower_scale_bdn
+perspective front
+look 180 -50
+wait 5
+shot tower_scale_fup
+look 180 50
+wait 5
+shot tower_scale_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot tower_scale_1up
+look 180 80
+wait 5
+shot tower_scale_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wayfarer_boots
+cmd item replace entity @s armor.legs with skyabyss:wayfarer_leggings
+cmd item replace entity @s armor.chest with skyabyss:wayfarer_chestplate
+cmd item replace entity @s armor.head with skyabyss:wayfarer_helmet
+perspective back
+look 180 0
+wait 12
+shot wayfarer_b0
+look 180 -60
+wait 5
+shot wayfarer_bup
+look 180 60
+wait 5
+shot wayfarer_bdn
+perspective front
+look 180 -50
+wait 5
+shot wayfarer_fup
+look 180 50
+wait 5
+shot wayfarer_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wayfarer_1up
+look 180 80
+wait 5
+shot wayfarer_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:whale_road_boots
+cmd item replace entity @s armor.legs with skyabyss:whale_road_leggings
+cmd item replace entity @s armor.chest with skyabyss:whale_road_chestplate
+cmd item replace entity @s armor.head with skyabyss:whale_road_helmet
+perspective back
+look 180 0
+wait 12
+shot whale_road_b0
+look 180 -60
+wait 5
+shot whale_road_bup
+look 180 60
+wait 5
+shot whale_road_bdn
+perspective front
+look 180 -50
+wait 5
+shot whale_road_fup
+look 180 50
+wait 5
+shot whale_road_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot whale_road_1up
+look 180 80
+wait 5
+shot whale_road_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wild_ashleather_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_ashleather_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_ashleather_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_ashleather_helmet
+perspective back
+look 180 0
+wait 12
+shot wild_ashleather_b0
+look 180 -60
+wait 5
+shot wild_ashleather_bup
+look 180 60
+wait 5
+shot wild_ashleather_bdn
+perspective front
+look 180 -50
+wait 5
+shot wild_ashleather_fup
+look 180 50
+wait 5
+shot wild_ashleather_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wild_ashleather_1up
+look 180 80
+wait 5
+shot wild_ashleather_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wild_belfry_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_belfry_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_belfry_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_belfry_helmet
+perspective back
+look 180 0
+wait 12
+shot wild_belfry_b0
+look 180 -60
+wait 5
+shot wild_belfry_bup
+look 180 60
+wait 5
+shot wild_belfry_bdn
+perspective front
+look 180 -50
+wait 5
+shot wild_belfry_fup
+look 180 50
+wait 5
+shot wild_belfry_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wild_belfry_1up
+look 180 80
+wait 5
+shot wild_belfry_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wild_cloudknight_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_cloudknight_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_cloudknight_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_cloudknight_helmet
+perspective back
+look 180 0
+wait 12
+shot wild_cloudknight_b0
+look 180 -60
+wait 5
+shot wild_cloudknight_bup
+look 180 60
+wait 5
+shot wild_cloudknight_bdn
+perspective front
+look 180 -50
+wait 5
+shot wild_cloudknight_fup
+look 180 50
+wait 5
+shot wild_cloudknight_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wild_cloudknight_1up
+look 180 80
+wait 5
+shot wild_cloudknight_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wild_copperwire_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_copperwire_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_copperwire_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_copperwire_helmet
+perspective back
+look 180 0
+wait 12
+shot wild_copperwire_b0
+look 180 -60
+wait 5
+shot wild_copperwire_bup
+look 180 60
+wait 5
+shot wild_copperwire_bdn
+perspective front
+look 180 -50
+wait 5
+shot wild_copperwire_fup
+look 180 50
+wait 5
+shot wild_copperwire_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wild_copperwire_1up
+look 180 80
+wait 5
+shot wild_copperwire_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wild_deepwarden_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_deepwarden_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_deepwarden_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_deepwarden_helmet
+perspective back
+look 180 0
+wait 12
+shot wild_deepwarden_b0
+look 180 -60
+wait 5
+shot wild_deepwarden_bup
+look 180 60
+wait 5
+shot wild_deepwarden_bdn
+perspective front
+look 180 -50
+wait 5
+shot wild_deepwarden_fup
+look 180 50
+wait 5
+shot wild_deepwarden_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wild_deepwarden_1up
+look 180 80
+wait 5
+shot wild_deepwarden_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wild_delver_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_delver_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_delver_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_delver_helmet
+perspective back
+look 180 0
+wait 12
+shot wild_delver_b0
+look 180 -60
+wait 5
+shot wild_delver_bup
+look 180 60
+wait 5
+shot wild_delver_bdn
+perspective front
+look 180 -50
+wait 5
+shot wild_delver_fup
+look 180 50
+wait 5
+shot wild_delver_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wild_delver_1up
+look 180 80
+wait 5
+shot wild_delver_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wild_fortress_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_fortress_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_fortress_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_fortress_helmet
+perspective back
+look 180 0
+wait 12
+shot wild_fortress_b0
+look 180 -60
+wait 5
+shot wild_fortress_bup
+look 180 60
+wait 5
+shot wild_fortress_bdn
+perspective front
+look 180 -50
+wait 5
+shot wild_fortress_fup
+look 180 50
+wait 5
+shot wild_fortress_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wild_fortress_1up
+look 180 80
+wait 5
+shot wild_fortress_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wild_hanged_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_hanged_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_hanged_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_hanged_helmet
+perspective back
+look 180 0
+wait 12
+shot wild_hanged_b0
+look 180 -60
+wait 5
+shot wild_hanged_bup
+look 180 60
+wait 5
+shot wild_hanged_bdn
+perspective front
+look 180 -50
+wait 5
+shot wild_hanged_fup
+look 180 50
+wait 5
+shot wild_hanged_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wild_hanged_1up
+look 180 80
+wait 5
+shot wild_hanged_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wild_lampkeeper_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_lampkeeper_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_lampkeeper_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_lampkeeper_helmet
+perspective back
+look 180 0
+wait 12
+shot wild_lampkeeper_b0
+look 180 -60
+wait 5
+shot wild_lampkeeper_bup
+look 180 60
+wait 5
+shot wild_lampkeeper_bdn
+perspective front
+look 180 -50
+wait 5
+shot wild_lampkeeper_fup
+look 180 50
+wait 5
+shot wild_lampkeeper_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wild_lampkeeper_1up
+look 180 80
+wait 5
+shot wild_lampkeeper_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wild_lurelight_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_lurelight_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_lurelight_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_lurelight_helmet
+perspective back
+look 180 0
+wait 12
+shot wild_lurelight_b0
+look 180 -60
+wait 5
+shot wild_lurelight_bup
+look 180 60
+wait 5
+shot wild_lurelight_bdn
+perspective front
+look 180 -50
+wait 5
+shot wild_lurelight_fup
+look 180 50
+wait 5
+shot wild_lurelight_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wild_lurelight_1up
+look 180 80
+wait 5
+shot wild_lurelight_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wild_oilskin_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_oilskin_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_oilskin_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_oilskin_helmet
+perspective back
+look 180 0
+wait 12
+shot wild_oilskin_b0
+look 180 -60
+wait 5
+shot wild_oilskin_bup
+look 180 60
+wait 5
+shot wild_oilskin_bdn
+perspective front
+look 180 -50
+wait 5
+shot wild_oilskin_fup
+look 180 50
+wait 5
+shot wild_oilskin_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wild_oilskin_1up
+look 180 80
+wait 5
+shot wild_oilskin_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wild_oldsoldier_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_oldsoldier_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_oldsoldier_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_oldsoldier_helmet
+perspective back
+look 180 0
+wait 12
+shot wild_oldsoldier_b0
+look 180 -60
+wait 5
+shot wild_oldsoldier_bup
+look 180 60
+wait 5
+shot wild_oldsoldier_bdn
+perspective front
+look 180 -50
+wait 5
+shot wild_oldsoldier_fup
+look 180 50
+wait 5
+shot wild_oldsoldier_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wild_oldsoldier_1up
+look 180 80
+wait 5
+shot wild_oldsoldier_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wild_ramfleece_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_ramfleece_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_ramfleece_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_ramfleece_helmet
+perspective back
+look 180 0
+wait 12
+shot wild_ramfleece_b0
+look 180 -60
+wait 5
+shot wild_ramfleece_bup
+look 180 60
+wait 5
+shot wild_ramfleece_bdn
+perspective front
+look 180 -50
+wait 5
+shot wild_ramfleece_fup
+look 180 50
+wait 5
+shot wild_ramfleece_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wild_ramfleece_1up
+look 180 80
+wait 5
+shot wild_ramfleece_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wild_sailcloth_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_sailcloth_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_sailcloth_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_sailcloth_helmet
+perspective back
+look 180 0
+wait 12
+shot wild_sailcloth_b0
+look 180 -60
+wait 5
+shot wild_sailcloth_bup
+look 180 60
+wait 5
+shot wild_sailcloth_bdn
+perspective front
+look 180 -50
+wait 5
+shot wild_sailcloth_fup
+look 180 50
+wait 5
+shot wild_sailcloth_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wild_sailcloth_1up
+look 180 80
+wait 5
+shot wild_sailcloth_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wild_saltplate_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_saltplate_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_saltplate_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_saltplate_helmet
+perspective back
+look 180 0
+wait 12
+shot wild_saltplate_b0
+look 180 -60
+wait 5
+shot wild_saltplate_bup
+look 180 60
+wait 5
+shot wild_saltplate_bdn
+perspective front
+look 180 -50
+wait 5
+shot wild_saltplate_fup
+look 180 50
+wait 5
+shot wild_saltplate_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wild_saltplate_1up
+look 180 80
+wait 5
+shot wild_saltplate_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wild_soot_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_soot_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_soot_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_soot_helmet
+perspective back
+look 180 0
+wait 12
+shot wild_soot_b0
+look 180 -60
+wait 5
+shot wild_soot_bup
+look 180 60
+wait 5
+shot wild_soot_bdn
+perspective front
+look 180 -50
+wait 5
+shot wild_soot_fup
+look 180 50
+wait 5
+shot wild_soot_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wild_soot_1up
+look 180 80
+wait 5
+shot wild_soot_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wild_stargazer_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_stargazer_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_stargazer_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_stargazer_helmet
+perspective back
+look 180 0
+wait 12
+shot wild_stargazer_b0
+look 180 -60
+wait 5
+shot wild_stargazer_bup
+look 180 60
+wait 5
+shot wild_stargazer_bdn
+perspective front
+look 180 -50
+wait 5
+shot wild_stargazer_fup
+look 180 50
+wait 5
+shot wild_stargazer_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wild_stargazer_1up
+look 180 80
+wait 5
+shot wild_stargazer_1dn
+hud off
+cmd item replace entity @s armor.feet with skyabyss:wild_windweave_boots
+cmd item replace entity @s armor.legs with skyabyss:wild_windweave_leggings
+cmd item replace entity @s armor.chest with skyabyss:wild_windweave_chestplate
+cmd item replace entity @s armor.head with skyabyss:wild_windweave_helmet
+perspective back
+look 180 0
+wait 12
+shot wild_windweave_b0
+look 180 -60
+wait 5
+shot wild_windweave_bup
+look 180 60
+wait 5
+shot wild_windweave_bdn
+perspective front
+look 180 -50
+wait 5
+shot wild_windweave_fup
+look 180 50
+wait 5
+shot wild_windweave_fdn
+perspective first
+hud on
+look 180 -80
+wait 5
+shot wild_windweave_1up
+look 180 80
+wait 5
+shot wild_windweave_1dn
+hud off
