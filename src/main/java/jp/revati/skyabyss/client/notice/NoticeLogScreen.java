@@ -37,7 +37,7 @@ public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client
         return switch (kind) {
             case NARRATE -> 0xFFFFF6EA;
             case HINT -> 0xFFB8B8C8;
-            case LEVEL_UP, GAIN, PLACE, ALERT -> 0xFFF89CD2;
+            case LEVEL_UP, GAIN, PLACE, ALERT -> 0xFFF2C47C;
             default -> 0xFFFFF6EA;
         };
     }
@@ -92,7 +92,6 @@ public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client
         LedgerStage.backdrop(g, fit, width, height, LedgerStage.HEAD_NONE, false);
         LedgerStage.indexHead(g, font, title);
         List<Row> rows = rows(font, list.width() - TIME_W - ScrollPanel.GUTTER);
-        Paper.inkBegin();
         jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.literal(Integer.toString(NoticeLog.entries().size())), LedgerStage.INDEX_X + 2, 32, LedgerStage.INDEX_W - 4,
                 Paper.INK_HEAD, false);
         int hy = 48;
@@ -100,7 +99,6 @@ public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client
             g.drawString(font, l, LedgerStage.INDEX_X + 2, hy, Paper.INK_SOFT, false);
             hy += ROW_H;
         }
-        Paper.inkEnd();
         list.setContentHeight(rows.size() * ROW_H);
         if (rows.isEmpty()) {
             Golden.empty(g, font, BODY, Component.translatable("gui.skyabyss.notice.log_empty"));
@@ -117,7 +115,7 @@ public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client
             g.drawString(font, r.text(), list.x() + TIME_W, ty, r.color(), false);
         }
         list.end(g);
-        list.drawBar(g, EDGE_IN, 0x88E45A9C);
+        list.drawBar(g, EDGE_IN, 0x88C48A44);
         fit.end(g);
     }
 

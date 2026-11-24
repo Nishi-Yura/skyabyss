@@ -123,7 +123,7 @@ public class TownGuideScreen extends Screen {
                 if (l.head) {
                     // 見出し: 色の札と種類の名前、下に細い線
                     g.fill(rows.x() + 2, y + 4, rows.x() + 8, y + 10, c);
-                    g.renderOutline(rows.x() + 1, y + 3, 8, 8, 0xFF0E0D14);
+                    g.renderOutline(rows.x() + 1, y + 3, 8, 8, 0xFF0F121A);
                     g.drawString(font, Component.translatable("gui.skyabyss.town_guide.group." + l.group.id), rows.x() + 13, Golden.textY(y, lh), c, false);
                     g.fill(rows.x() + 2, y + lh - 1, right - 2, y + lh, (c & 0x00FFFFFF) | 0x50000000);
                 } else {
@@ -138,7 +138,7 @@ public class TownGuideScreen extends Screen {
                     }
                     // 灯りの印 (小さな菱形の灯)
                     int lx = rows.x() + 6;
-                    g.fill(lx - 1, y + 3, lx + 2, y + 10, 0xFF0E0D14);
+                    g.fill(lx - 1, y + 3, lx + 2, y + 10, 0xFF0F121A);
                     g.fill(lx, y + 4, lx + 1, y + 9, c);
                     g.fill(lx - 2, y + 5, lx + 3, y + 8, c);
                     g.fill(lx - 3, y + 6, lx + 4, y + 7, (c & 0x00FFFFFF) | 0x80000000);
@@ -160,22 +160,17 @@ public class TownGuideScreen extends Screen {
                     int room = right - 10 - fw - dx;
                     // ひとことは入るときだけ (縮めた字は使わない。入らない分は流す)
                     Component desc = Component.translatable("gui.skyabyss.town_guide.place." + e.id() + ".desc");
-                    if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
-                        // 板の側: 行に入るときだけ等倍で。入らないものは右の欄に (乗せた行・案内中の行)
-                        if (font.width(desc) <= room) {
-                            g.drawString(font, desc, dx, Golden.textY(y, lh), FacilityUi.DIM, false);
-                        }
-                    } else if (room > 30) {
-                        jp.revati.skyabyss.client.ui.Marquee.draw(g, font, Component.translatable("gui.skyabyss.town_guide.place." + e.id() + ".desc").getVisualOrderText(), dx,
-                                Golden.textY(y, lh), room, FacilityUi.DIM, false);
+                    // 行に入るときだけ等倍で。入らないものは右の欄に (乗せた行・案内中の行)
+                    if (font.width(desc) <= room) {
+                        g.drawString(font, desc, dx, Golden.textY(y, lh), FacilityUi.DIM, false);
                     }
                 }
             }
             y += lh;
         }
         rows.end(g);
-        rows.drawBar(g, 0xFF0E0D14, FacilityUi.TEAL);
-        if (jp.revati.skyabyss.client.ui.UiLook.plate() && shown != null) {
+        rows.drawBar(g, 0xFF0F121A, FacilityUi.TEAL);
+        if (shown != null) {
             // 乗せた行 (なければ案内中の行) のひとことを、右の欄の手引きの下に
             int dy = hy + 6;
             jp.revati.skyabyss.client.ui.Plate.rule(g, LedgerStage.INDEX_X - 4, dy - 4, LedgerStage.INDEX_W + 8);

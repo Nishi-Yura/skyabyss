@@ -1,0 +1,99 @@
+# 旅の地図の枠 (鐘の銅。docs/design/56 の 4.1)。三つの見た目 × 寄せ・引き、子の海図を重ねた姿
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/map_frame.txt -PshotsName=map_frame
+world map_frame flat
+size 1920 1080
+timeout 600
+render 4
+clouds off
+guiscale 4
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss playtest skip opening
+cmd skyabyss cinematic stop
+cmd skyabyss level set @p 30
+cmd skyabyss job choose mage
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+
+window 1920 1080
+guiscale 4
+wait 10
+mapscale near
+mapstyle slate
+open travel_map_demo
+wait 10
+overlap map_slate_near_1920_g4
+shot map_slate_near_1920_g4
+mapscale far
+wait 6
+overlap map_slate_far_1920_g4
+shot map_slate_far_1920_g4
+close
+wait 4
+mapscale near
+mapstyle parchment
+open travel_map_demo
+wait 10
+overlap map_parch_near_1920_g4
+shot map_parch_near_1920_g4
+mapscale far
+wait 6
+shot map_parch_far_1920_g4
+close
+wait 4
+mapscale near
+mapstyle ink
+open travel_map_demo
+wait 10
+overlap map_ink_near_1920_g4
+shot map_ink_near_1920_g4
+mapscale far
+wait 6
+shot map_ink_far_1920_g4
+close
+wait 4
+mapscale near
+mapstyle slate
+open travel_map_voyage_demo
+wait 10
+overlap map_voyage_1920_g4
+shot map_voyage_1920_g4
+close
+wait 4
+mapstyle parchment
+open travel_map_voyage_demo
+wait 10
+overlap map_voyage_parch_1920_g4
+shot map_voyage_parch_1920_g4
+close
+wait 4
+mapstyle ink
+open travel_map_voyage_demo
+wait 10
+overlap map_voyage_ink_1920_g4
+shot map_voyage_ink_1920_g4
+close
+wait 4
+mapstyle slate
+window 1280 720
+guiscale 3
+wait 10
+open travel_map_demo
+wait 10
+overlap map_slate_near_1280_g3
+shot map_slate_near_1280_g3
+close
+wait 4
+mapstyle parchment
+open travel_map_demo
+wait 10
+overlap map_parch_near_1280_g3
+shot map_parch_near_1280_g3
+close
+wait 4
+mapstyle slate

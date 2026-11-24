@@ -24,28 +24,24 @@ shot day_world
 cmd gamemode creative
 wait 10
 
-uilook paper
 open job_choice_warrior
 hover 300 132
 wait 30
 shot day_paper_warrior
 close
 wait 4
-uilook a
 open job_choice_warrior
 hover 300 132
 wait 30
 shot day_a_warrior
 close
 wait 4
-uilook b
 open job_choice_warrior
 hover 300 132
 wait 30
 shot day_b_warrior
 close
 wait 4
-uilook c
 open job_choice_warrior
 hover 300 132
 wait 30
@@ -61,32 +57,27 @@ wait 60
 shot night_world
 cmd gamemode creative
 wait 10
-uilook paper
 open job_room_mage
 hover 300 132
 wait 30
 shot night_paper_mage
 close
 wait 4
-uilook a
 open job_room_mage
 hover 300 132
 wait 30
 shot night_a_mage
 close
 wait 4
-uilook b
 open job_room_mage
 hover 300 132
 wait 30
 shot night_b_mage
 close
 wait 4
-uilook c
 open job_room_mage
 hover 300 132
 wait 30
 shot night_c_mage
 close
 wait 4
-uilook paper

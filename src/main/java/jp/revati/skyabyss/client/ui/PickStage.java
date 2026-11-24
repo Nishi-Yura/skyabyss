@@ -40,31 +40,27 @@ public final class PickStage {
 
     // 右の列の沈んだ欄 (板の側だけ)
     public static void column(GuiGraphics g) {
-        if (UiLook.plate()) {
-            Plate.well(g, COL_X, COL_Y, COL_W, COL_BOTTOM - COL_Y);
-        }
+        Plate.well(g, COL_X, COL_Y, COL_W, COL_BOTTOM - COL_Y);
     }
 
     // 右の列の字の始まり
     public static int colY(int paperY) {
-        return UiLook.plate() ? COL_Y + 6 : paperY;
+        return COL_Y + 6;
     }
 
     // 右の下の段の沈んだ欄 (板の側だけ。決めの釦を置く)
     public static void footRight(GuiGraphics g) {
-        if (UiLook.plate()) {
-            Plate.well(g, COL_X, PLATE_FOOT_Y, COL_W, PLATE_FOOT_H);
-        }
+        Plate.well(g, COL_X, PLATE_FOOT_Y, COL_W, PLATE_FOOT_H);
     }
 
     // 下の段の釦の y (板の側は沈んだ欄の真ん中)
     public static int footBtn(int paperY) {
-        return UiLook.plate() ? PLATE_FOOT_Y + (PLATE_FOOT_H - Golden.BTN) / 2 : paperY;
+        return PLATE_FOOT_Y + (PLATE_FOOT_H - Golden.BTN) / 2;
     }
 
     // 札の高さ (板の側は見出しの段と下の段のあいだに収める)
     public static int cardH() {
-        return UiLook.plate() ? 148 : CARD_H;
+        return 148;
     }
 
     // 動き (docs/design/56 の 2.1「動き」): 画面が替わったら開いた時を覚える。題は左から入り、札は一枚ずつ配られる
@@ -89,15 +85,12 @@ public final class PickStage {
     public static void title(GuiGraphics g, Font font, Component title, Component sub) {
         track();
         float a = jp.revati.skyabyss.rpg.client.skill.SkillStage.out(since(0, 240));
-        boolean plate = UiLook.plate();
-        if (plate) {
-            Plate.headBand(g, 5, W - 10, sub != null ? HEAD_SUB : HEAD_ONE);
-        }
-        Paper.pin(g, 14, plate ? 12 : 13, 3, true);
+        Plate.headBand(g, 5, W - 10, sub != null ? HEAD_SUB : HEAD_ONE);
+        Paper.pin(g, 14, 12, 3, true);
         int dx = Math.round((1f - a) * -12f);
-        int h = jp.revati.skyabyss.rpg.client.skill.SkillStage.big(g, font, title, 22 + dx, plate ? 7 : 8, 250, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_HI, a));
+        int h = jp.revati.skyabyss.rpg.client.skill.SkillStage.big(g, font, title, 22 + dx, 7, 250, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_HI, a));
         if (sub != null) {
-            FitText.draw(g, font, sub, 22 + dx, plate ? 7 + h + 2 : 8 + h + 3, 250, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_SOFT, a), false);
+            FitText.draw(g, font, sub, 22 + dx, 7 + h + 2, 250, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_SOFT, a), false);
         }
     }
 
@@ -110,10 +103,7 @@ public final class PickStage {
         }
         int[] c = center(i, n, false);
         g.pose().pushPose();
-        g.pose().translate(c[0], c[1] + (1f - d) * (UiLook.plate() ? 14f : 60f), 0);
-        if (!UiLook.plate()) {
-            g.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees((1f - d) * (i - (n - 1) / 2f) * 10f));
-        }
+        g.pose().translate(c[0], c[1] + (1f - d) * (14f), 0);
         g.pose().translate(-c[0], -c[1], 0);
         return true;
     }
@@ -136,7 +126,7 @@ public final class PickStage {
     public static int[] center(int i, int n, boolean lift) {
         int step = n <= 2 ? 128 : 82;
         int x0 = n <= 2 ? 76 : 60;
-        int cy = UiLook.plate() ? 121 - (lift ? 4 : 0) : 122 + (n == 3 && i == 1 ? -4 : 2) - (lift ? 10 : 0);
+        int cy = 121 - (lift ? 4 : 0);
         return new int[] {x0 + i * step, cy};
     }
 
@@ -148,13 +138,8 @@ public final class PickStage {
     // 札を一枚 (pink = 乗せている・選んでいる)
     public static void card(GuiGraphics g, int i, int n, boolean lift, boolean pink) {
         int[] c = center(i, n, lift);
-        if (UiLook.plate()) {
-            // 板の絵柄: 札はまっすぐな升 (乗せた札・選んだ札は灯る)
-            Plate.tile(g, c[0] - CARD_W / 2, c[1] - cardH() / 2, CARD_W, cardH(), pink ? Plate.ON : Plate.REST, Plate.GOLD);
-            return;
-        }
-        Paper.cut(g, "pick_card" + i, Paper.rotRect(c[0], c[1], CARD_W, CARD_H, tilt(i, n)), pink ? Paper.PINK : Paper.CREAM,
-                pink ? Paper.BLACK_LO : Paper.PINK_LO, 2, 4);
+        // 板の絵柄: 札はまっすぐな升 (乗せた札・選んだ札は灯る)
+        Plate.tile(g, c[0] - CARD_W / 2, c[1] - cardH() / 2, CARD_W, cardH(), pink ? Plate.ON : Plate.REST, Plate.GOLD);
     }
 
     // 指の下の札 (右の札が上に重なるので、右から調べる。なければ -1)
@@ -176,18 +161,14 @@ public final class PickStage {
 
     // 下の山の上の手引き
     public static void hint(GuiGraphics g, Font font, Component text) {
-        if (UiLook.plate()) {
-            // 板の側: 左の下の段の沈んだ欄に、縮めずに 2 行まで折り返す
-            Plate.well(g, 8, PLATE_FOOT_Y, COL_X - 12, PLATE_FOOT_H);
-            int c = 0xFF000000 | Plate.pal().inkSoft;
-            java.util.List<net.minecraft.util.FormattedCharSequence> lines = Marquee.joinRest(font.split(text, COL_X - 26), 2);
-            int y = lines.size() == 1 ? PLATE_FOOT_Y + (PLATE_FOOT_H - 8) / 2 : PLATE_FOOT_Y + 2;
-            for (net.minecraft.util.FormattedCharSequence l : lines) {
-                Marquee.draw(g, font, l, 14, y, COL_X - 26, c, false);
-                y += 10;
-            }
-            return;
+        // 板の側: 左の下の段の沈んだ欄に、縮めずに 2 行まで折り返す
+        Plate.well(g, 8, PLATE_FOOT_Y, COL_X - 12, PLATE_FOOT_H);
+        int c = 0xFF000000 | Plate.pal().inkSoft;
+        java.util.List<net.minecraft.util.FormattedCharSequence> lines = Marquee.joinRest(font.split(text, COL_X - 26), 2);
+        int y = lines.size() == 1 ? PLATE_FOOT_Y + (PLATE_FOOT_H - 8) / 2 : PLATE_FOOT_Y + 2;
+        for (net.minecraft.util.FormattedCharSequence l : lines) {
+            Marquee.draw(g, font, l, 14, y, COL_X - 26, c, false);
+            y += 10;
         }
-        FitText.draw(g, font, text, 14, 211, 250, ON_PINK, false);
     }
 }

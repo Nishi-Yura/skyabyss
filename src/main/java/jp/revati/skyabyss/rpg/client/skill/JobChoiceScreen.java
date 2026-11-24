@@ -39,31 +39,7 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
     private static long closedAt;
     static final int W = 408;
     static final int H = 228;
-    // 左の字の欄
-    private static final int LX = 18;
-    // 札 (下に横並び)
-    private static final int CARD_X = 14;
-    private static final int CARD_Y = 180;
-    private static final int CARD_W = 44;
-    private static final int CARD_H = 50;
-    private static final int CARD_STEP = 47;
-    // 決めの釦
-    private static final int CTA_X = 296;
-    private static final int CTA_Y = 205;
-    private static final int CTA_W = 104;
-    private static final int CTA_H = 17;
     private static final int ARM_TICKS = 80;
-    // 姿の台紙 (尖った窓の形)
-    private static final float[] ARCH = {8, 176, 6, 62, 14, 32, 34, 8, 56, 0, 78, 8, 98, 32, 106, 62, 104, 176};
-    private static final int ARCH_X = 262;
-    private static final int ARCH_Y = 30;
-    private static final int FIG_X0 = 268;
-    private static final int FIG_X1 = 352;
-    private static final int FIG_Y0 = 64;
-    private static final int FIG_Y1 = 200;
-    // 浮かぶ菱 {x, y, 大きさ, 桃色なら 1}
-    private static final int[][] DIAMONDS = {{240, 30, 3, 1}, {388, 40, 5, 1}, {396, 84, 2, 0}, {250, 162, 2, 1}, {390, 140, 4, 0},
-            {240, 154, 2, 0}, {372, 112, 2, 1}, {150, 20, 2, 0}, {206, 54, 3, 1}};
     // 職ごとの間合い (0 近く・1 中ほど・2 遠く) と難しさ (1..5)。並びは Job の並び。遊びの数値ではなく、選ぶ人への目安
     private static final int[][] STYLE = {
             {0, 1}, // 戦士: 壁。崩れにくく、始めやすい
@@ -72,9 +48,6 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
             {2, 3}, // 弓使い: 遠くから射抜き、罠で縛る
             {0, 4}, // 暗殺者: 速く強いが、当たると脆い
             {1, 3}}; // 呪術師: 仲間を支え、敵を崩す
-    // 動きの長さ (ミリ秒)
-    private static final int ENTER = 260;
-    private static final int STAGGER = 45;
     private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
 
     private Job picked;
@@ -149,9 +122,7 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
             }
         }
         if (switching) {
-            addRenderableWidget(plate()
-                    ? new Plate.Btn(PX + PW - 7 - 44, PY + 5, 44, 13, Component.translatable("gui.skyabyss.job_room.later"), b -> onClose(), false)
-                    : new Paper.Tag(356, 8, 44, 14, Component.translatable("gui.skyabyss.job_room.later"), b -> onClose(), false));
+            addRenderableWidget(new Plate.Btn(PX + PW - 7 - 44, PY + 5, 44, 13, Component.translatable("gui.skyabyss.job_room.later"), b -> onClose(), false));
         }
     }
 
@@ -184,12 +155,8 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
         }
         pick(j);
         liftV[i] += 0.12f;
-        if (plate()) {
-            // 板の絵柄では、職ごとに高さの違う小さな澄んだ音
-            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.AMETHYST_BLOCK_CHIME, 0.8f + i * 0.09f, 0.55f));
-        } else {
-            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0f, 1.0f));
-        }
+        // 板の絵柄では、職ごとに高さの違う小さな澄んだ音
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.AMETHYST_BLOCK_CHIME, 0.8f + i * 0.09f, 0.55f));
     }
 
     @Override
@@ -215,14 +182,6 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
     private static float out(float t) {
         t = clamp01(t);
         return 1f - (1f - t) * (1f - t) * (1f - t);
-    }
-
-    // 少し行き過ぎて戻る
-    private static float back(float t) {
-        t = clamp01(t);
-        float c = 1.7f;
-        float u = t - 1f;
-        return 1f + (c + 1f) * u * u * u + c * u * u;
     }
 
     private float since(long from, long delay, int span) {
@@ -273,25 +232,13 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
     // ---------- 当たり ----------
     // 札の左上 {x, y} (配られる動き・持ち上がりを含む)
     private float[] card(int i) {
-        if (plate()) {
-            return new float[] {IX + i * JT_STEP, JT_Y};
-        }
-        float deal = back(open(160 + i * STAGGER, 320));
-        float x = CARD_X + i * CARD_STEP;
-        float y = CARD_Y + (1f - deal) * 60f - lift[i] * 14f;
-        // 決めたら、ほかの札は順に山へ沈み、選んだ札は少し高く上がる
-        if (decidedAt > 0) {
-            boolean chosen = picked != null && picked.ordinal() == i;
-            y += chosen ? -out(leave(0, 320)) * 12f : out(leave(Math.abs(i - (picked == null ? 0 : picked.ordinal())) * 40L, 260)) * 70f;
-        }
-        return new float[] {x, y};
+        return new float[] {IX + i * JT_STEP, JT_Y};
     }
 
     private int cardAt(double mx, double my) {
         for (int i = 0; i < Job.values().length; i++) {
             float[] c = card(i);
-            if (plate() ? mx >= c[0] && mx < c[0] + JT_W && my >= c[1] && my < c[1] + JT_H
-                    : mx >= c[0] && mx < c[0] + CARD_W && my >= c[1] && my < Math.max(c[1] + CARD_H, CARD_Y + CARD_H)) {
+            if (mx >= c[0] && mx < c[0] + JT_W && my >= c[1] && my < c[1] + JT_H) {
                 return i;
             }
         }
@@ -299,10 +246,7 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
     }
 
     private boolean overCta(double mx, double my) {
-        if (plate()) {
-            return mx >= SC_X && mx < SC_X + SC_W && my >= PCTA_Y && my < PCTA_Y + PCTA_H;
-        }
-        return mx >= CTA_X && mx < CTA_X + CTA_W && my >= CTA_Y && my < CTA_Y + CTA_H;
+        return mx >= SC_X && mx < SC_X + SC_W && my >= PCTA_Y && my < PCTA_Y + PCTA_H;
     }
 
     @Override
@@ -374,396 +318,13 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
         return clock() - closedAt >= REOPEN_MS;
     }
 
-    // ---------- 描く ----------
-    // 黒い紙は窓の端まで (論理の座標で、窓の四隅まで)
-    private int[] sheetBox() {
-        int x0 = (int) Math.floor(fit.x(0));
-        int y0 = (int) Math.floor(fit.y(0));
-        int x1 = (int) Math.ceil(fit.x(width));
-        int y1 = (int) Math.ceil(fit.y(height));
-        return new int[] {x0, y0, x1 - x0, y1 - y0};
-    }
-
-    private void renderBlack(GuiGraphics g) {
-        int[] b = sheetBox();
-        int sw = b[2];
-        int sh = b[3];
-        Paper.draw(g, "job_black", sw + "x" + sh, b[0], b[1], sw, sh, s -> s.poly(new float[] {
-                7, 10, sw * 0.22f, 6, sw * 0.47f, 9, sw * 0.71f, 4, sw - 9, 8,
-                sw - 5, sh * 0.30f, sw - 8, sh * 0.62f, sw - 4, sh - 12,
-                sw * 0.64f, sh - 6, sw * 0.31f, sh - 9, 10, sh - 5,
-                5, sh * 0.58f, 8, sh * 0.27f}, Paper.BLACK));
-    }
-
-    // 桃色の山 (二重。奥の山は暗く高く、手前の山は札を挿す)。開くとせり上がる
-    private void renderHills(GuiGraphics g, float par, boolean front) {
-        int[] b = sheetBox();
-        int sw = b[2];
-        int sh = b[3];
-        int ox = -b[0];
-        int oy = -b[1];
-        float rise = (1f - out(open(front ? 60 : 0, 380))) * (front ? 40 : 30) + out(leave(front ? 260 : 300, 300)) * 24f;
-        g.pose().pushPose();
-        g.pose().translate(par * (front ? 1.6f : 0.8f), rise, 0);
-        Paper.draw(g, front ? "job_hill_f" : "job_hill_b", ox + "," + oy + "," + sw + "x" + sh, b[0], b[1], sw, sh, s -> {
-            float base = oy + 228;
-            float[][] peaks = front
-                    ? new float[][] {{-20, -8}, {ox + 30, -22}, {ox + 80, -14}, {ox + 132, -26}, {ox + 186, -12}, {ox + 238, -24}, {ox + 284, -10},
-                            {ox + 330, -18}, {ox + 380, -6}, {ox + 430, -16}, {sw + 20, -10}}
-                    : new float[][] {{-20, -20}, {ox + 50, -44}, {ox + 110, -30}, {ox + 170, -52}, {ox + 226, -36}, {ox + 262, -58},
-                            {ox + 316, -70}, {ox + 362, -46}, {ox + 400, -60}, {ox + 440, -34}, {sw + 20, -40}};
-            float[] hill = new float[peaks.length * 2 + 4];
-            for (int i = 0; i < peaks.length; i++) {
-                hill[i * 2] = peaks[i][0];
-                hill[i * 2 + 1] = base + peaks[i][1];
-            }
-            hill[peaks.length * 2] = sw + 20;
-            hill[peaks.length * 2 + 1] = sh + 60;
-            hill[peaks.length * 2 + 2] = -20;
-            hill[peaks.length * 2 + 3] = sh + 60;
-            s.poly(hill, front ? Paper.PINK_LO : 0xFF3A2236);
-            if (front) {
-                for (int i = 0; i + 1 < peaks.length; i++) {
-                    float ax = peaks[i][0];
-                    float ay = base + peaks[i][1];
-                    float bx = peaks[i + 1][0];
-                    float by = base + peaks[i + 1][1];
-                    int n = (int) Math.max(1, Math.abs(bx - ax));
-                    for (int k = 0; k <= n; k++) {
-                        s.px(Math.round(ax + (bx - ax) * k / n), Math.round(ay + (by - ay) * k / n), Paper.PINK);
-                    }
-                }
-            }
-        });
-        g.pose().popPose();
-    }
-
     @Override
     public void render(GuiGraphics g, int screenX, int screenY, float partialTick) {
         layout();
-        if (plate()) {
-            renderPlate(g, screenX, screenY, partialTick);
-            return;
-        }
-        renderBackground(g, screenX, screenY, partialTick);
-        int mouseX = (int) Math.floor(fit.x(screenX));
-        int mouseY = (int) Math.floor(fit.y(screenY));
-        int hover = decidedAt > 0 ? -1 : cardAt(mouseX, mouseY);
-        // 札に乗せ替えたら小さく鳴らす (手ざわり)
-        if (hover != lastHover && hover >= 0) {
-            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), 2.0f, 0.12f));
-        }
-        lastHover = hover;
-        stepLift(hover);
-        // 決めたら字は入りより速く退く
-        exitMul = 1f - out(leave(0, 180));
-        // マウスに合わせた紙の層のずれ (-1..1)。画素の単位にそろえる
-        float unit = fit.pixelUnit();
-        float px = Mth.clamp((mouseX - W / 2f) / (W / 2f), -1f, 1f);
-        float py = Mth.clamp((mouseY - H / 2f) / (H / 2f), -1f, 1f);
-        float parX = Math.round(px * 2f / unit) * unit;
-        float parY = Math.round(py * 1.5f / unit) * unit;
-        long now = clock();
-
-        fit.begin(g);
-        renderBlack(g);
-        // 漂う菱
-        for (int k = 0; k < DIAMONDS.length; k++) {
-            int[] d = DIAMONDS[k];
-            float bob = Math.round((float) Math.sin(now / 900.0 + k * 1.7) * 1.5f / unit) * unit;
-            float a = out(open(200 + k * 30L, 400));
-            if (a <= 0f) {
-                continue;
-            }
-            g.pose().pushPose();
-            g.pose().translate(-parX * 0.5f, bob - parY * 0.5f + (1f - a) * 6f, 0);
-            boolean pink = d[3] == 1;
-            Paper.draw(g, "job_dm_" + d[2] + (pink ? "p" : "g"), "", d[0] - d[2] - 1, d[1] - d[2] - 1, d[2] * 2 + 3, d[2] * 2 + 3,
-                    s -> s.diamond(d[2] + 1, d[2] + 1, d[2], pink ? Paper.PINK : Paper.GREY, pink ? Paper.PINK_HI : 0xFFD8D2CA));
-            g.pose().popPose();
-        }
-        renderHills(g, parX, false);
-        // 台紙が立つ (下から起き上がる)
-        float stand = back(open(80, 360));
-        g.pose().pushPose();
-        g.pose().translate(-parX * 0.6f, (1f - stand) * 30f - parY * 0.6f, 0);
-        Paper.draw(g, "job_arch3", "", ARCH_X - 2, ARCH_Y - 2, 116, 186, s -> s.layer(shift(ARCH, 2, 2), Paper.CREAM, Paper.PINK, 5, 4));
-        // 見せ絵: 始めの武器を大きく (台紙からはみ出す)。職を替えると右から振り込まれる
-        if (picked != null && swap(0, 340) > 0f) {
-            float e = back(swap(0, 340));
-            g.pose().pushPose();
-            g.pose().translate(300 + (1f - e) * 34f - parX * 0.4f, 104 - (1f - e) * 6f, -140);
-            g.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees((1f - e) * 18f));
-            g.pose().scale(8f, 8f, 1f);
-            g.renderItem(JobChoice.starter(picked), -8, -8);
-            g.pose().popPose();
-        }
-        g.pose().popPose();
-        fit.end(g);
-        // 自分の姿 (台紙の前。窓の座標で描く。台紙と一緒に立つ)
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player != null && stand > 0.6f) {
-            int[] r = fit.screenRect(FIG_X0, FIG_Y0, FIG_X1 - FIG_X0, FIG_Y1 - FIG_Y0);
-            int lift0 = Math.round((1f - stand) * 30f * fit.scale());
-            int size = Math.round(56 * fit.scale());
-            InventoryScreen.renderEntityInInventoryFollowsMouse(g, r[0], r[1] + lift0, r[0] + r[2], r[1] + r[3] + lift0, size, 0.0625f, screenX, screenY, mc.player);
-        }
-        g.pose().pushPose();
-        g.pose().translate(0, 0, 200);
-        fit.begin(g);
-        if (picked != null && swap(120, 300) > 0f) {
-            // 窓の肩に木の印 (判子のように押される)
-            float st = back(swap(120, 300));
-            float sc = 1f + (1f - st) * 0.6f;
-            g.pose().pushPose();
-            g.pose().translate(350 - parX * 0.6f, 38 + (1f - stand) * 30f - parY * 0.6f, 0);
-            g.pose().scale(sc, sc, 1f);
-            g.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees((1f - st) * -20f));
-            Paper.draw(g, "job_seal", "", -15, -15, 30, 30, s -> {
-                s.diamond(15, 15, 14, Paper.BLACK_LO, 0);
-                s.diamond(14, 14, 14, Paper.PINK, Paper.PINK_HI);
-                s.diamond(14, 14, 11, Paper.CREAM, 0);
-            });
-            SkillHud.drawIcon(g, picked.tree.iconIndex(), -9, -9, 16);
-            g.pose().popPose();
-        }
-        renderHills(g, parX, true);
-        renderCards(g, hover);
-        renderCta(g, mouseX, mouseY, partialTick);
-        for (net.minecraft.client.gui.components.Renderable r : renderables) {
-            r.render(g, mouseX, mouseY, partialTick);
-        }
-        if (picked == null) {
-            renderLead(g);
-        } else {
-            renderInfo(g, mouseX, mouseY);
-        }
-        fit.end(g);
-        g.pose().popPose();
+        renderPlate(g, screenX, screenY, partialTick);
     }
 
-    // 札: 生成りの紙に武器の絵 (2 倍) と職の名。選んだ札は桃色、いまの職には菱を留める
-    private void renderCards(GuiGraphics g, int hover) {
-        Job cur = switching ? current() : null;
-        Job[] jobs = Job.values();
-        for (int i = 0; i < jobs.length; i++) {
-            Job j = jobs[i];
-            boolean on = j == picked;
-            float[] c = card(i);
-            int body = on ? Paper.PINK : i == hover ? Paper.CREAM_HI : Paper.CREAM;
-            float tilt = (i % 2 == 0 ? -2.5f : 2f) * (1f - Mth.clamp(lift[i], 0f, 1f));
-            g.pose().pushPose();
-            g.pose().translate(c[0] + CARD_W / 2f, c[1] + CARD_H / 2f, 0);
-            g.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees(tilt));
-            int sh = on ? 4 : 2;
-            Paper.draw(g, "job_card2_" + (on ? "on" : i == hover ? "hi" : "lo"), "", -CARD_W / 2 - 1, -CARD_H / 2 - 1, CARD_W + 7, CARD_H + 7, s -> {
-                float[] p = Paper.quad(1, 1, CARD_W, CARD_H, 0, 0, 0, 0);
-                s.poly(p, on ? Paper.PINK_LO : Paper.BLACK_LO, sh, sh);
-                s.poly(p, body);
-                // 札の上の切り込み (山の形の飾り)
-                s.poly(new float[] {CARD_W / 2f - 3, 1, CARD_W / 2f + 4, 1, CARD_W / 2f + 0.5f, 5}, on ? Paper.PINK_LO : Paper.CREAM_LO);
-            });
-            g.pose().pushPose();
-            g.pose().translate(0, -6, 0);
-            g.pose().scale(2f, 2f, 1f);
-            g.renderItem(JobChoice.starter(j), -8, -8);
-            g.pose().popPose();
-            Component name = Component.translatable(j.nameKey());
-            g.pose().pushPose();
-            g.pose().translate(0, 0, 250);
-            g.drawString(font, name, -font.width(name) / 2, CARD_H / 2 - 13, on ? Paper.ON_BLACK_HI : Paper.INK, false);
-            if (j == cur) {
-                Paper.draw(g, "job_pin2", "", CARD_W / 2 - 7, -CARD_H / 2 - 4, 9, 9, s -> s.diamond(4, 4, 4, Paper.PINK_HI, 0xFFFFFFFF));
-            }
-            g.pose().popPose();
-            g.pose().popPose();
-        }
-    }
-
-    // 決めの釦: 乗せると浮き、押すと沈む。一度目で「もう一度押して決める」になり、残り時間の帯が減る
-    private void renderCta(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        boolean enabled = ctaEnabled();
-        boolean over = overCta(mouseX, mouseY);
-        boolean decided = decidedAt > 0;
-        int state = decided ? Paper.PRESS : !enabled ? Paper.FLAT : ctaDown && over ? Paper.PRESS : over || armed ? Paper.HOVER : Paper.REST;
-        float in = out(open(420, 300));
-        String key = decided ? "gui.skyabyss.job_choice.decided"
-                : switching && picked != null && picked == current() ? "gui.skyabyss.job_room.same"
-                : armed ? (switching ? "gui.skyabyss.job_room.confirm" : "gui.skyabyss.job_choice.confirm")
-                : switching ? "gui.skyabyss.job_room.switch_btn" : "gui.skyabyss.job_choice.start";
-        Component label = Component.translatable(key);
-        g.pose().pushPose();
-        // 入りは右から、決めたあとは押したまま少し待って右へ退く
-        g.pose().translate((1f - in) * 30f + out(leave(320, 240)) * 40f, 0, 0);
-        Paper.button(g, font, CTA_X, CTA_Y, CTA_W, CTA_H, label, true, state);
-        if (armed) {
-            float left = (armedTicks - partialTick) / ARM_TICKS;
-            int bw = Math.round((CTA_W - 10) * clamp01(left));
-            int dy = state == Paper.PRESS ? 1 : -1;
-            g.fill(CTA_X + 6, CTA_Y + CTA_H - 3 + dy, CTA_X + 6 + bw, CTA_Y + CTA_H - 2 + dy, Paper.CREAM);
-        }
-        g.pose().popPose();
-    }
-
-    // 職を選ぶ前: 導きの一行と、札を指す手がかり
-    private void renderLead(GuiGraphics g) {
-        float a = out(open(250, ENTER));
-        int dx = Math.round((1f - a) * -10f);
-        g.drawString(font, title, LX + dx, 16, fade(Paper.ON_BLACK_PINK, a), false);
-        Component lead = Component.translatable(switching ? "gui.skyabyss.job_room.lead" : "gui.skyabyss.job_choice.lead");
-        int y = 34;
-        for (net.minecraft.util.FormattedCharSequence line : TextWrap.split(font, lead, 200)) {
-            g.drawString(font, line, LX + dx, y, fade(Paper.ON_BLACK, a), false);
-            y += 12;
-        }
-        g.drawString(font, Component.translatable("gui.skyabyss.job_choice.pick_short"), LX + dx, y + 6, fade(Paper.ON_BLACK_DIM, a), false);
-    }
-
-    private void renderInfo(GuiGraphics g, int mouseX, int mouseY) {
-        int[] style = STYLE[Math.min(picked.ordinal(), STYLE.length - 1)];
-        // 字は左から入る (段ごとに少し遅れて)
-        float a0 = out(swap(0, ENTER));
-        float a1 = out(swap(STAGGER, ENTER));
-        float a2 = out(swap(STAGGER * 2L, ENTER));
-        float a3 = out(swap(STAGGER * 3L, ENTER));
-        // 小さな題と番号
-        Component no = Component.literal(String.format("%02d / %02d", picked.ordinal() + 1, Job.values().length));
-        g.drawString(font, title, LX, 14, fade(Paper.ON_BLACK_PINK, 1f), false);
-        g.drawString(font, no, LX + font.width(title) + 8, 14, fade(Paper.ON_BLACK_DIM, 1f), false);
-        // 大きな職の名 (3 倍)
-        Component name = Component.translatable(picked.nameKey());
-        g.pose().pushPose();
-        g.pose().translate(LX + (1f - a0) * -14f, 30, 0);
-        g.pose().scale(3f, 3f, 1f);
-        g.drawString(font, name, 0, 0, fade(Paper.ON_BLACK_HI, a0), false);
-        g.pose().popPose();
-        // 木の判子 (押される)
-        Component tree = Component.translatable(picked.tree.nameKey());
-        float st = back(swap(90, 280));
-        int tw = font.width(tree) + 12;
-        float sx = LX + font.width(name) * 3 + 10 + tw / 2f;
-        g.pose().pushPose();
-        g.pose().translate(sx, 44, 0);
-        float sc = 1f + (1f - st) * 0.5f;
-        g.pose().scale(sc, sc, 1f);
-        g.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees(-4f + (1f - st) * -10f));
-        if (st > 0f && exitMul > 0.3f) {
-            Paper.cut(g, "job_stamp2_" + tw, Paper.quad(-tw / 2f, -7, tw, 14, 1, -1, 1, -1), Paper.PINK, Paper.PINK_LO, 2, 2);
-            g.drawString(font, tree, -tw / 2 + 6, -4, Paper.ON_BLACK_HI, false);
-        }
-        g.pose().popPose();
-        // 役目の一行
-        g.drawString(font, Component.translatable(picked.nameKey() + ".role"), LX + Math.round((1f - a1) * -10f), 64, fade(Paper.ON_BLACK, a1), false);
-        // 間合いと難しさ
-        int y = 84;
-        int dx2 = Math.round((1f - a2) * -10f);
-        Component rl = Component.translatable("gui.skyabyss.job_choice.range");
-        g.drawString(font, rl, LX + dx2, y, fade(Paper.ON_BLACK_SOFT, a2), false);
-        int tx = LX + dx2 + 40;
-        // 近・中・遠の三つの点を線で結び、その職の所に桃色の菱
-        g.fill(tx + 3, y + 3, tx + 3 + 56, y + 4, fade(Paper.GREY_LO, a2));
-        String[] marks = {"near", "mid", "far"};
-        for (int k = 0; k < 3; k++) {
-            int mx = tx + 3 + k * 28;
-            boolean on = k == style[0];
-            if (on && a2 * exitMul > 0.3f) {
-                int ox = mx;
-                Paper.draw(g, "job_rmark", "", ox - 4, y - 1, 9, 9, s -> s.diamond(4, 4, 4, Paper.PINK, Paper.PINK_HI));
-            } else {
-                g.fill(mx - 1, y + 2, mx + 2, y + 5, fade(Paper.GREY, a2));
-            }
-        }
-        Component rv = Component.translatable("gui.skyabyss.job_choice.range." + marks[style[0]]);
-        g.drawString(font, rv, tx + 70, y, fade(Paper.ON_BLACK_PINK, a2), false);
-        // 難しさ (間合いと同じ行の右)
-        int dfx = LX + dx2 + 150;
-        Component dl = Component.translatable("gui.skyabyss.job_choice.rate.difficulty");
-        g.drawString(font, dl, dfx, y, fade(Paper.ON_BLACK_SOFT, a2), false);
-        for (int k = 0; k < 5; k++) {
-            boolean on = k < style[1];
-            int cx = dfx + font.width(dl) + 9 + k * 10;
-            String key = on ? "job_dfon" : "job_dfoff";
-            if (a2 * exitMul < 0.3f) {
-                continue;
-            }
-            Paper.draw(g, key, "", cx - 3, y + 1, 7, 7, s -> s.diamond(3, 3, 3, on ? Paper.PINK : Paper.EDGE, on ? Paper.PINK_HI : 0));
-        }
-        // 使える技 (全部。3 列。最初に覚える技は桃色の台。乗せると特徴)
-        int dx3 = Math.round((1f - a3) * -10f);
-        List<Skill> actives = new ArrayList<>();
-        for (Skill s : Skill.inTree(picked.tree)) {
-            if (s.active && !s.keystone()) {
-                actives.add(s);
-            }
-        }
-        actives.sort(java.util.Comparator.comparingInt((Skill s) -> s.tier).thenComparingInt(s -> s.column));
-        Skill first = JobChoice.firstSkill(picked);
-        Skill tip = null;
-        if (!actives.isEmpty()) {
-            y = 104;
-            Component head = Component.translatable("gui.skyabyss.job_choice.skills_head");
-            g.drawString(font, head, LX + dx3, y, fade(Paper.ON_BLACK_PINK, a3), false);
-            if (first != null) {
-                g.drawString(font, Component.translatable("gui.skyabyss.job_choice.first_hint"), LX + dx3 + font.width(head) + 8, y, fade(Paper.ON_BLACK_DIM, a3), false);
-            }
-            y += 13;
-            for (int k = 0; k < actives.size(); k++) {
-                Skill s = actives.get(k);
-                float pop = back(swap(STAGGER * 3L + k * 35L, 260));
-                int x = LX + k * 30;
-                boolean hot = k == demoHover || (mouseX >= x && mouseX < x + 26 && mouseY >= y - 2 && mouseY < y + 26);
-                int yy = y + Math.round((1f - pop) * 8f) - (hot ? 2 : 0);
-                boolean isFirst = s == first;
-                if (pop * exitMul > 0.3f) {
-                    int under = hot ? Paper.PINK : Paper.BLACK_LO;
-                    Paper.draw(g, "job_skt_" + (hot ? "h" : "n"), "", x - 1, yy - 1, 32, 32, p -> p.layer(Paper.quad(1, 1, 26, 26, 0, 0, 0, 0), Paper.CREAM, under, 2, 2));
-                    SkillHud.drawIcon(g, s.iconIndex(), x + 1, yy + 1, 24);
-                    if (isFirst) {
-                        Paper.draw(g, "job_skpin", "", x + 20, yy - 4, 9, 9, p -> p.diamond(4, 4, 4, Paper.PINK, Paper.PINK_HI));
-                    }
-                }
-                if (hot) {
-                    tip = s;
-                }
-            }
-        }
-        // 右上: 替えられること (島) と、使った点 (職の間)
-        Component foot;
-        if (switching) {
-            Minecraft mc = Minecraft.getInstance();
-            int spent = mc.player == null ? 0 : jp.revati.skyabyss.rpg.skill.SkillManager.get(mc.player).nodeSpent(picked);
-            foot = Component.translatable("gui.skyabyss.job_room.points_short", spent);
-            g.drawString(font, foot, 350 - font.width(foot), 11, fade(Paper.ON_BLACK_SOFT, 1f), false);
-        } else {
-            foot = Component.translatable("gui.skyabyss.job_choice.switch_short");
-            g.drawString(font, foot, 400 - font.width(foot), 11, fade(Paper.ON_BLACK_DIM, 1f), false);
-        }
-        // 乗せた技の詳細: 名・特徴・マナとクールダウン・効き目 (折り返す)
-        if (tip != null) {
-            List<net.minecraft.util.FormattedCharSequence> lines = new ArrayList<>();
-            MutableComponent head = Component.translatable(tip.nameKey()).withColor(Paper.ON_BLACK_PINK);
-            if (tip == first) {
-                head.append(Component.translatable("gui.skyabyss.job_choice.first_tag").withColor(Paper.ON_BLACK_SOFT));
-            }
-            lines.add(head.getVisualOrderText());
-            if (I18n.exists(tip.typeKey())) {
-                lines.add(Component.translatable(tip.typeKey()).withColor(Paper.ON_BLACK_SOFT).getVisualOrderText());
-            }
-            int cd = jp.revati.skyabyss.rpg.skill.SkillRules.cooldownTicks(tip, 1);
-            String sec = String.format(java.util.Locale.ROOT, cd % 20 == 0 ? "%.0f" : "%.1f", cd / 20f);
-            lines.add(Component.translatable("gui.skyabyss.job_choice.cost", jp.revati.skyabyss.rpg.skill.SkillRules.manaCost(tip, 1), sec)
-                    .withColor(Paper.ON_BLACK_SOFT).getVisualOrderText());
-            lines.addAll(TextWrap.split(font, Component.translatable(tip.effectKey(), jp.revati.skyabyss.rpg.skill.SkillRules.describeArgs(tip, 1))
-                    .withColor(Paper.ON_BLACK), 190));
-            if (demoHover >= 0) {
-                g.renderTooltip(font, lines, LX + demoHover * 30 + 20, y + 20);
-            } else {
-                g.renderTooltip(font, lines, mouseX, mouseY);
-            }
-        }
-    }
-
-    // ================= 画素の板の絵柄 (UiLook.plate()。2026-11-24 の試作。部品は client/ui/Plate) =================
+    // ================= 画素の板の絵柄 (部品は client/ui/Plate) =================
     // 真ん中に板を一枚 (後ろの景色はぼかして見せる)。上 = 見出し、左 = 職の名・役目・目盛り・技の升、左下 = 六つの職の升、
     // 右 = 見せ絵の窓 (止まった月と自分の姿と始めの武器)、その下に決めの釦。
     // 動き: 板が浮かび上がる → 見出しの線を光が渡る → 窓が上下に開く → 中身が左から順に出る。職を替えると窓の絵が左から拭われて替わり、
@@ -794,14 +355,6 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
 
     private static long clock() {
         return net.minecraft.Util.getMillis() / Math.max(1, slow);
-    }
-
-    private static boolean plate() {
-        return jp.revati.skyabyss.client.ui.UiLook.plate();
-    }
-
-    private static boolean deep() {
-        return jp.revati.skyabyss.client.ui.UiLook.get() == jp.revati.skyabyss.client.ui.UiLook.DEEP;
     }
 
     // これから描く絵・字・塗りの濃さ (板の濃さを掛ける)
@@ -845,7 +398,7 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
         base = out(open(0, 160)) * (1f - gone);
         float rise = snap((1f - out(open(0, 220))) * 6f - gone * 4f);
         Plate.backdrop(g, width, height, base);
-        boolean bleed = deep();
+        boolean bleed = false;
 
         fit.begin(g);
         g.pose().pushPose();
@@ -853,7 +406,6 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
         tex(g, 1f);
         Plate.panel(g, PX, PY, PW, PH, HEAD, ac);
         renderPlateHead(g, p, ac);
-        Plate.textWell(g, IX - 3, 37, 244, 116);
         if (!bleed) {
             Plate.well(g, SC_X - 1, SC_Y - 1, SC_W + 2, SC_H + 2);
         }
@@ -952,12 +504,12 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
     // 見出し: 鐘の印・題・番号、右に替えられること (島) か使った点 (職の間)
     private void renderPlateHead(GuiGraphics g, Plate.Pal p, Plate.Accent ac) {
         int y = PY + 8;
-        int headRgb = deep() ? ac.hi() & 0xFFFFFF : p.inkHead;
-        Plate.bell(g, IX, y - 1, 0xFF000000 | (p.lightPanel ? 0x7A5A22 : headRgb));
+        int headRgb = p.inkHead;
+        Plate.bell(g, IX, y - 1, 0xFF000000 | headRgb);
         g.drawString(font, title, IX + 13, y, ink(headRgb, 1f), false);
         if (picked != null) {
             Component no = Component.literal(String.format("%02d / %02d", picked.ordinal() + 1, Job.values().length));
-            g.drawString(font, no, IX + 13 + font.width(title) + 8, y, ink(p.lightPanel ? p.inkSoft : p.dim, 1f), false);
+            g.drawString(font, no, IX + 13 + font.width(title) + 8, y, ink(p.dim, 1f), false);
         }
         if (switching) {
             if (picked != null) {
@@ -968,7 +520,7 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
             }
         } else {
             Component foot = Component.translatable("gui.skyabyss.job_choice.switch_short");
-            g.drawString(font, foot, PX + PW - 9 - font.width(foot), y, ink(p.lightPanel ? p.inkSoft : p.dim, 1f), false);
+            g.drawString(font, foot, PX + PW - 9 - font.width(foot), y, ink(p.dim, 1f), false);
         }
     }
 
@@ -1127,7 +679,7 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
         if (!actives.isEmpty()) {
             int dx3 = Math.round(snap((1f - a3) * -5f));
             Component head = Component.translatable("gui.skyabyss.job_choice.skills_head");
-            g.drawString(font, head, IX + dx3, 101, fade(deep() ? acHi : p.head, a3), false);
+            g.drawString(font, head, IX + dx3, 101, fade(p.head, a3), false);
             if (first != null) {
                 g.drawString(font, Component.translatable("gui.skyabyss.job_choice.first_hint"), IX + dx3 + font.width(head) + 8, 101, fade(p.dim, a3), false);
             }
@@ -1160,7 +712,7 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
         }
         if (tip != null) {
             List<net.minecraft.util.FormattedCharSequence> lines = new ArrayList<>();
-            MutableComponent head = Component.translatable(tip.nameKey()).withColor(deep() ? acHi : p.head);
+            MutableComponent head = Component.translatable(tip.nameKey()).withColor(p.head);
             if (tip == first) {
                 head.append(Component.translatable("gui.skyabyss.job_choice.first_tag").withColor(p.soft));
             }
@@ -1181,15 +733,6 @@ public class JobChoiceScreen extends Screen implements jp.revati.skyabyss.client
                 g.renderTooltip(font, lines, mouseX, mouseY);
             }
         }
-    }
-
-    private static float[] shift(float[] p, float dx, float dy) {
-        float[] o = p.clone();
-        for (int i = 0; i < o.length; i += 2) {
-            o[i] += dx;
-            o[i + 1] += dy;
-        }
-        return o;
     }
 
     @Override

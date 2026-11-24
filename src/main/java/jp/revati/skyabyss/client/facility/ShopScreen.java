@@ -264,7 +264,7 @@ public class ShopScreen extends Screen {
         int px = v.locked() ? ShopStage.LIST_X + ShopStage.LIST_W - 4 : ShopStage.LIST_X + ShopStage.LIST_W - 4 - priceW(font, v);
         rowText(g, font, v.stack(), name, sub.isEmpty() ? null : Component.literal(sub.toString()), v.left() == 0 ? ShopStage.LACK : Paper.INK_HEAD, y, px, hot, v.locked());
         if (!v.locked()) {
-            price(g, font, v, px, y + 3, hot ? ShopStage.ON_PINK : Paper.INK, hot ? 0x5A0820 : ShopStage.LACK);
+            price(g, font, v, px, y + 3, hot ? ShopStage.ON_PINK : Paper.INK, hot ? 0xF0607A : ShopStage.LACK);
         }
     }
 
@@ -295,7 +295,7 @@ public class ShopScreen extends Screen {
         rowText(g, font, v.item(), v.item().getHoverName(), Component.translatable("gui.skyabyss.shop.sold_line", v.item().getCount()), Paper.INK_HEAD, y, px, hot, false);
         g.renderItem(coin(), px, y + 3);
         boolean enough = view.coins() >= v.coins();
-        g.drawString(font, Integer.toString(v.coins()), px + 17, y + 8, hot ? (enough ? ShopStage.ON_PINK : 0x5A0820) : enough ? Paper.INK : ShopStage.LACK, false);
+        g.drawString(font, Integer.toString(v.coins()), px + 17, y + 8, hot ? (enough ? ShopStage.ON_PINK : 0xF0607A) : enough ? Paper.INK : ShopStage.LACK, false);
     }
 
     @Override

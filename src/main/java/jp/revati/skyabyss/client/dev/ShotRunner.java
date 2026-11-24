@@ -814,11 +814,6 @@ public final class ShotRunner {
                 jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen.slow = Math.max(1, line.intArg(0));
                 return true;
             }
-            case "uilook" -> {
-                // uilook <paper|a|b|c> : 画面の絵柄を切り替える (a = 鐘の銅・b = 空見の石板・c = 淵の石。client/ui/UiLook)
-                jp.revati.skyabyss.client.ui.UiLook.set(jp.revati.skyabyss.client.ui.UiLook.parse(line.arg(0)));
-                return true;
-            }
             case "guiscale" -> {
                 mc.options.guiScale().set(line.intArg(0));
                 mc.resizeDisplay();

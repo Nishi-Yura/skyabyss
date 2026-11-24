@@ -207,7 +207,7 @@ final class ExtPage {
             if (!isOpen) {
                 // 閉じた枠: 生成りの台紙を少し沈めた升に、開く Lv を墨で
                 g.fill(sx, sy, sx + SLOT, sy + SLOT, 0xFFB8AEA4);
-                g.fill(sx + 1, sy + 1, sx + SLOT - 1, sy + SLOT - 1, 0xFFD8D0C4);
+                g.fill(sx + 1, sy + 1, sx + SLOT - 1, sy + SLOT - 1, 0xFF0C0E15);
                 String need = i < 4 ? String.valueOf(new int[] {20, 30, 40, 50}[i]) : "転";
                 g.drawString(font, need, sx + (SLOT - font.width(need)) / 2 + 1, sy + 7, Paper.INK_SOFT, false);
                 if (hover) {
@@ -384,7 +384,7 @@ final class ExtPage {
                 pts[i * 2] = pad + (float) Math.cos(a) * rad * ALTAR_R[i];
                 pts[i * 2 + 1] = pad + (float) Math.sin(a) * rad * ALTAR_R[i];
             }
-            s.layer(pts, Paper.CREAM, Paper.PINK_LO, 3, 4);
+            s.layer(pts, 0xFF232A3C, Paper.PINK_LO, 3, 4);
         });
         for (int i = 0; i < Aspects.MAX_SLOTS; i++) {
             double a = Math.toRadians(-90 + 72 * i);
@@ -410,10 +410,10 @@ final class ExtPage {
     // 試練の板 (TrialBoardScreen) も SkillScreenAccess.aspectTile からこれを使う
     static void paperTile(GuiGraphics g, Font font, int x, int y, int s, Aspect a, int lv, boolean hover, boolean worn, boolean onCream, int seq) {
         boolean known = lv > 0;
-        int body = !known ? (onCream ? 0xFFB8AEA4 : Paper.GREY_LO) : onCream ? Paper.BLACK_LO : hover ? 0xFFFFF6EA : Paper.CREAM;
-        int under = worn ? Paper.PINK_LO : onCream ? 0xFFB8AEA4 : Paper.BLACK_LO;
+        int body = !known ? (onCream ? 0xFF0A0C12 : Paper.GREY_LO) : onCream ? Paper.BLACK_LO : hover ? 0xFF2E3750 : 0xFF232A3C;
+        int under = worn ? Paper.PINK_LO : onCream ? 0xFF0A0C12 : Paper.BLACK_LO;
         int off = worn ? 3 : 1;
-        float tilt = jp.revati.skyabyss.client.ui.UiLook.plate() ? 0f : seq % 3 == 0 ? -2.5f : seq % 3 == 1 ? 1.5f : 3f;
+        float tilt = 0f;
         int lift = hover && known ? 1 : 0;
         String name = "aspect_tile_" + s + "_" + Integer.toHexString(body) + "_" + Integer.toHexString(under) + "_" + off + "_" + tilt;
         Paper.draw(g, name, "", x - 4, y - 4 - lift, s + 9, s + 9,

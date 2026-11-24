@@ -32,18 +32,12 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     private static final int SHEET_W = 256;
     private static final int SHEET_H = 96;
 
-    private static final int BG = 0x05070F;
     private static final int CARD = 0x16151E;
-    private static final int GOLD = 0xF89CD2;
+    private static final int GOLD = 0xF2C47C;
     private static final int TEAL = 0xFFF6EA;
     private static final int TEXT = 0xECE4D6;
-    private static final int DIM = 0x9A929C;
+    private static final int DIM = 0xA9ABB8;
     private static final int GOOD = 0x7BD66B;
-    private static final int RARE = 0xF89CD2;
-    private static final int EXTREME = 0xC25BD6;
-    private static final int COMMON = 0x4A6A72;
-    private static final int ABYSS = 0xD8343C;
-
     // 組み方は選ぶ類の「三枚を扇に」(UI の 3 周目で選ぶ A。docs/design/56 の 2.1)。舞台は論理の 408x228:
     // 左上に題・巨神と周回・称号、右の端につまみを縦の短冊で、その下に「仲間と渡る」。中身は左の黒い紙の上 (いまの三つは扇の札)。
     // 下の山の上に順路の記録と歌片、「歌片を作る」と深淵のつまみ
@@ -54,15 +48,13 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     // 深淵のつまみ・歌片を作る (下の山の上)
     private static final int ABYSS_W = 92;
     private static final int CRAFT_W = 76;
-    private static final int FOOT_BTN_Y_PAPER = 207;
-
     // 板の側 (docs/design/56 の 2.1「選ぶ型」): 見出しの段 (y 38) の下へ頁の中身を 4 だけ下げ、下の段は沈んだ欄の真ん中
     private static int footY() {
-        return jp.revati.skyabyss.client.ui.UiLook.plate() ? 204 : FOOT_BTN_Y_PAPER;
+        return 204;
     }
 
     private static int contentDy() {
-        return jp.revati.skyabyss.client.ui.UiLook.plate() ? 4 : 0;
+        return 4;
     }
     private static final int CRAFT_X = W - 12 - ABYSS_W - 6 - CRAFT_W;
     private static final int ABYSS_X = W - 12 - ABYSS_W;
@@ -89,7 +81,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
 
     // いまの三つの i 枚目の札の真ん中
     private static int[] cardCenter(int i, boolean lift) {
-        return new int[] {CONTENT.x() + 56 + i * 114, CONTENT.y() + 82 + (i == 1 ? -4 : 2) - (lift ? (jp.revati.skyabyss.client.ui.UiLook.plate() ? 4 : 8) : 0)};
+        return new int[] {CONTENT.x() + 56 + i * 114, CONTENT.y() + 82 + (i == 1 ? -4 : 2) - (lift ? (4) : 0)};
     }
 
     private int hoverCard(double mx, double my) {
@@ -247,15 +239,6 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         return (Mth.clamp((int) (alpha * 255f), 0, 255) << 24) | (rgb & 0xFFFFFF);
     }
 
-    private void frame(GuiGraphics g, int x, int y, int w, int h, int line, int fill) {
-        g.fill(x, y, x + w, y + h, 0xFF03050A);
-        g.fill(x + 1, y + 1, x + w - 1, y + h - 1, argb(1f, line));
-        g.fill(x + 2, y + 2, x + w - 2, y + h - 2, argb(1f, fill));
-        g.fill(x + 2, y + 2, x + w - 2, y + 3, argb(0.10f, 0xFFFFFF));
-        g.fill(x + 2, y + 2, x + 3, y + h - 2, argb(0.06f, 0xFFFFFF));
-        g.fill(x + 2, y + h - 3, x + w - 2, y + h - 2, argb(0.35f, 0x000000));
-    }
-
     // 絵の番号 (icons.png。8 列 × 3 行、32 px)
     private static final int I_WALK = 0, I_WIT = 1, I_FIGHT_SLOT = 2, I_LAYOUT = 3, I_NUMBER = 4, I_ENEMY = 5, I_HAZARD = 6, I_GOAL = 7;
     private static final int I_KIND = 8, I_QUIET = 15, I_EXTREME = 16, I_UNKNOWN = 17;
@@ -274,10 +257,6 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
             case WIT -> I_WIT;
             case FIGHT -> I_FIGHT_SLOT;
         };
-    }
-
-    private static int rarityColor(int r) {
-        return r >= 3 ? ABYSS : r == 2 ? EXTREME : r == 1 ? RARE : COMMON;
     }
 
     static String stars(int tier) {
@@ -315,10 +294,8 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         int mouseY = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
         jp.revati.skyabyss.client.ui.Paper.stage(g, fit, width, height, "trial", PEAKS, DIAMONDS);
-        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
-            jp.revati.skyabyss.client.ui.Plate.headBand(g, 5, TAB_X - 12, 38);
-            jp.revati.skyabyss.client.ui.Plate.well(g, 8, 199, W - 16, 22);
-        }
+        jp.revati.skyabyss.client.ui.Plate.headBand(g, 5, TAB_X - 12, 38);
+        jp.revati.skyabyss.client.ui.Plate.well(g, 8, 199, W - 16, 22);
         // 題・巨神と周回・称号 (左上)
         // 題: 小さな題 (巨神の祠・周目) と、2 倍の巨神の名。称号は名の右に判で (無ければ出さない)
         float h0 = jp.revati.skyabyss.rpg.client.skill.SkillStage.out(since(0, 240));
@@ -383,7 +360,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     // 誓いの頁: 一行目に段と素材の倍率 (選べないときは理由)、その下に誓いを一つずつ (立てているものは金)
     private static final int VOW_TOP = CONTENT.y() + ROW + Golden.S5;
     private static final int VOW_ROW = ROW + Golden.S5;
-    private static final int SOFT_DESC = 0x9A929C;
+    private static final int SOFT_DESC = 0xA9ABB8;
 
     private int vowRowAt(double mx, double my) {
         if (mx < CONTENT.x() || mx >= CONTENT.right() || my < VOW_TOP) {
@@ -429,8 +406,8 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
                 break;
             }
             boolean hover = i == hoverRow;
-            g.fill(CONTENT.x(), y, CONTENT.right(), y + VOW_ROW - 2, argb(1f, v.on() ? 0x3A1A2E : hover ? 0x24202E : CARD));
-            Paper.edge(g, CONTENT.x(), y, CONTENT.right(), y + VOW_ROW - 2, argb(1f, v.on() ? GOLD : hover ? TEAL : 0x2C2834));
+            g.fill(CONTENT.x(), y, CONTENT.right(), y + VOW_ROW - 2, argb(1f, v.on() ? 0x33291C : hover ? 0x283046 : CARD));
+            Paper.edge(g, CONTENT.x(), y, CONTENT.right(), y + VOW_ROW - 2, argb(1f, v.on() ? GOLD : hover ? TEAL : 0x2A3044));
             Component name = Component.translatable("vow.skyabyss." + v.id()).copy().append(Component.literal("  +" + v.points()));
             int ty = Golden.textY(y, VOW_ROW - 2);
             // 立てた誓いは桃色の菱。立てた / 降ろした瞬間は菱が大きく浮いて押される
@@ -614,9 +591,6 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
             }
             g.pose().pushPose();
             g.pose().translate(c[0], c[1] + (1f - deal) * 60f, 0);
-            if (!jp.revati.skyabyss.client.ui.UiLook.plate()) {
-                g.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees((1f - deal) * (i - 1) * 10f));
-            }
             g.pose().translate(-c[0], -c[1], 0);
             jp.revati.skyabyss.client.ui.Paper.cut(g, "trial_card" + i, jp.revati.skyabyss.client.ui.Paper.rotRect(c[0], c[1], CARD_W, CARD_H, CARD_TILT[i]),
                     lift ? jp.revati.skyabyss.client.ui.Paper.PINK : jp.revati.skyabyss.client.ui.Paper.CREAM,
@@ -717,7 +691,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
                 if (r.modsTotal() > 0) {
                     int bx = x0 + 252;
                     int bw = Golden.S34 + Golden.S8;
-                    g.fill(bx, y + 5, bx + bw, y + 8, 0xFF0E0D14);
+                    g.fill(bx, y + 5, bx + bw, y + 8, 0xFF0F121A);
                     g.fill(bx, y + 5, bx + Math.min(bw, bw * r.modsSeen() / r.modsTotal()), y + 8, argb(1f, TEAL));
                     g.drawString(font, r.modsSeen() + "/" + r.modsTotal(), bx + bw + 3, ty, argb(1f, DIM), false);
                 }

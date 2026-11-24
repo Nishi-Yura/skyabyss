@@ -120,10 +120,8 @@ public class JourneyScreen extends Screen {
             FitText.draw(g, font, Component.translatable("gui.skyabyss.journey.loading"), ROW_X, 100, ROW_W, SOFT, false);
         } else {
             renderLands(g, mx, my);
-            Paper.inkBegin();
             renderCodex(g, mx, my);
             renderMastery(g, mx, my);
-            Paper.inkEnd();
         }
         for (net.minecraft.client.gui.components.Renderable r : renderables) {
             r.render(g, mx, my, partialTick);
@@ -201,7 +199,7 @@ public class JourneyScreen extends Screen {
             }
             if (in(mx, my, x, y, ROW_W, ROW_H)) {
                 List<Component> lines = new ArrayList<>();
-                lines.add(RegionFame.landName(region).copy().withColor(jp.revati.skyabyss.client.ui.UiLook.plate() ? jp.revati.skyabyss.client.ui.Plate.textColor(GOLD) & 0xFFFFFF : GOLD));
+                lines.add(RegionFame.landName(region).copy().withColor(GOLD));
                 if (town) {
                     int t = RegionFame.tier(fame);
                     lines.add(Component.translatable("gui.skyabyss.journey.tip.fame", fame,
@@ -264,11 +262,9 @@ public class JourneyScreen extends Screen {
         int w = SIDE_W - 4;
         int y = CODEX_Y;
         boolean hot = codexHit(mx, my);
-        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
-            // 板の側: 押せる所 (狩人の手帳へ) は升
-            jp.revati.skyabyss.client.ui.Plate.tile(g, SIDE_X - 4, CODEX_Y - 4, SIDE_W + 4, CODEX_BOTTOM - CODEX_Y + 4,
-                    hot ? jp.revati.skyabyss.client.ui.Plate.HOVER : jp.revati.skyabyss.client.ui.Plate.REST, jp.revati.skyabyss.client.ui.Plate.GOLD);
-        }
+        // 板の側: 押せる所 (狩人の手帳へ) は升
+        jp.revati.skyabyss.client.ui.Plate.tile(g, SIDE_X - 4, CODEX_Y - 4, SIDE_W + 4, CODEX_BOTTOM - CODEX_Y + 4,
+                hot ? jp.revati.skyabyss.client.ui.Plate.HOVER : jp.revati.skyabyss.client.ui.Plate.REST, jp.revati.skyabyss.client.ui.Plate.GOLD);
         LedgerStage.section(g, font, Component.translatable("gui.skyabyss.journey.codex"), x, y, 11, Paper.INK_HEAD);
         ListTag sets = data.getList("sets", Tag.TAG_COMPOUND);
         int done = 0;
@@ -296,7 +292,7 @@ public class JourneyScreen extends Screen {
         }
         if (hot) {
             List<Component> lines = new ArrayList<>();
-            lines.add(Component.translatable("gui.skyabyss.journey.codex").withColor(jp.revati.skyabyss.client.ui.UiLook.plate() ? jp.revati.skyabyss.client.ui.Plate.textColor(GOLD) & 0xFFFFFF : GOLD));
+            lines.add(Component.translatable("gui.skyabyss.journey.codex").withColor(GOLD));
             for (int i = 0; i < sets.size(); i++) {
                 CompoundTag s = sets.getCompound(i);
                 boolean full = s.getInt("owned") >= s.getInt("total");
@@ -340,7 +336,7 @@ public class JourneyScreen extends Screen {
             y += 11;
         }
         if (in(mx, my, SIDE_X - 4, MASTERY_Y, SIDE_W + 4, MASTERY_BOTTOM - MASTERY_Y)) {
-            tip(List.of(Component.translatable("gui.skyabyss.journey.mastery").withColor(jp.revati.skyabyss.client.ui.UiLook.plate() ? jp.revati.skyabyss.client.ui.Plate.textColor(GOLD) & 0xFFFFFF : GOLD),
+            tip(List.of(Component.translatable("gui.skyabyss.journey.mastery").withColor(GOLD),
                     Component.translatable("gui.skyabyss.journey.tip.mastery").withColor(TEXT)));
         }
     }

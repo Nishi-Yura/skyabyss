@@ -17,7 +17,6 @@ window 1920 1080
 guiscale 4
 wait 10
 
-uilook a
 open job_choice_warrior
 hover 300 132
 wait 30
@@ -52,7 +51,6 @@ shot a_assassin_tilehover
 close
 wait 4
 
-uilook b
 open job_choice_warrior
 hover 300 132
 wait 30
@@ -74,7 +72,6 @@ shot b_room_mage
 close
 wait 4
 
-uilook c
 open job_choice_warrior
 hover 300 132
 wait 30
@@ -96,7 +93,6 @@ shot c_room_mage
 close
 wait 4
 
-uilook a
 open job_choice_warrior
 hover 300 132
 wait 30
@@ -107,7 +103,6 @@ overlap a_armed
 shot a_armed
 close
 wait 4
-uilook a
 open job_choice_warrior
 hover 300 132
 wait 1
@@ -157,7 +152,6 @@ wait 4
 window 1280 720
 guiscale 3
 wait 20
-uilook a
 open job_choice_warrior
 hover 300 132
 wait 30
@@ -165,7 +159,6 @@ overlap a_warrior_1280
 shot a_warrior_1280
 close
 wait 4
-uilook b
 open job_choice_warrior
 hover 300 132
 wait 30
@@ -173,7 +166,6 @@ overlap b_warrior_1280
 shot b_warrior_1280
 close
 wait 4
-uilook c
 open job_choice_warrior
 hover 300 132
 wait 30
@@ -181,4 +173,3 @@ overlap c_warrior_1280
 shot c_warrior_1280
 close
 wait 4
-uilook paper

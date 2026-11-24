@@ -1,8 +1,8 @@
-"""伝承の書のテクスチャ (GUI の見開き・しおりなどの部品・知らせの札・アイテム 2 種) を作る。
+"""伝承の書のアイテムの絵 (書と破れた頁) を作る。見開きの案 (a/b/c) は見比べの絵だけで、ゲームの画面は client/ui/BookPlate がコードで描く。
 
 使い方 (リポジトリ直下):
     python tools/gen/story/gen_lore_book.py            3 案 (a/b/c) を docs/review/lore_book_roughs/ に書き、比較画像を作る
-    python tools/gen/story/gen_lore_book.py --install b  b 案をゲームの場所 (textures/gui/lore/, textures/item/) へ写す
+    python tools/gen/story/gen_lore_book.py --install b  b 案のアイテムの絵をゲームの場所 (textures/item/) へ写す
 
 3 案:
   a = 羊皮紙と革: こげ茶の革の表紙に縫い目、温かい羊皮紙、青緑のしおり紐
@@ -10,7 +10,6 @@
   c = 鯨骨の装丁: 象牙色の骨の表紙に真鍮の留め具、羊皮紙、青緑のしおり紐
 
 密度は 32px (GUI の 1 単位 = 2 画素)。見開きは 304x192 単位 = 608x384 画素。
-部品の位置は LoreBookScreen の Sprite と合わせる (変えたら両方直す)。
 乱数は seed 付きの numpy 生成器だけを使う。
 """
 from __future__ import annotations
@@ -22,7 +21,6 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))  # paper_cut (切り絵の部品)
 
 ROOT = Path(__file__).resolve().parent.parent.parent.parent
 OUT = ROOT / "docs/review/lore_book_roughs"
@@ -88,44 +86,6 @@ STYLES = {
         tab_off=hx("b8ab88"), tab_on=hx("eadbb9"), tab_line=hx("6f6450"),
     ),
 }
-
-
-# 切り絵 (今の絵柄。docs/design/56 の 2.1)。アイテムの絵は b のまま (install でアイテムは写さない)
-STYLES["p"] = dict(STYLES["b"], name="切り絵")
-
-
-def book_p():
-    import paper_cut as pc
-    img = pc.sheet_black(BW, BH)
-    pc.page(img, 20, 18, 294, 364, -7, 8, -5)
-    pc.page(img, 314, 16, 588, 366, 8, 7, 4)
-    for x1, x2 in ((36, 288), (320, 572)):
-        pc.rule(img, x1, x2, 54)
-    # 飾りは左右をそろえない: 右上の角に桃色の留め、左の縁に灰の小さな菱、右の頁の下にしおりの紙
-    pc.pin(img, 597, 10, 6)
-    pc.diamond(img, 6, 206, 3, pc.GREY_LO, pc.GREY)
-    pc.layer(img, [(468, 352), (482, 352), (482, 383), (468, 377)], pc.PINK, pc.BLACK_LO, 2, 0)
-    return img
-
-
-def widgets_p():
-    import paper_cut as pc
-    img = Image.new("RGBA", (WW, WH), (0, 0, 0, 0))
-
-    def put(part, rect):
-        img.paste(part, (rect[0], rect[1]), part)
-
-    put(pc.tab(TAB_OFF[2], TAB_OFF[3], False), TAB_OFF)
-    put(pc.tab(TAB_ON[2], TAB_ON[3], True), TAB_ON)
-    put(pc.mark("known"), MARK_KNOWN)
-    put(pc.mark("locked"), MARK_LOCKED)
-    put(pc.mark("new"), MARK_NEW)
-    put(pc.arrow(True), ARROW_UP)
-    put(pc.arrow(False), ARROW_DOWN)
-    put(pc.row_selected(ROW_SELECTED[2], ROW_SELECTED[3]), ROW_SELECTED)
-    put(pc.ink_bar(INK_BAR[2], INK_BAR[3]), INK_BAR)
-    put(pc.toast(TOAST[2], TOAST[3]), TOAST)
-    return img
 
 
 # ---------------------------------------------------------------- 道具
@@ -223,8 +183,6 @@ def hline(img, x1, x2, y, color, alpha=255, width=2):
 
 # ---------------------------------------------------------------- 見開き
 def book(style, st):
-    if style == "p":
-        return book_p()
     rng = np.random.default_rng(1234)
     # 表紙
     n = fbm(BW, BH, rng, cells=(32, 16, 8, 4))
@@ -415,8 +373,6 @@ def toast(st, rng):
 
 
 def widgets(style, st):
-    if style == "p":
-        return widgets_p()
     rng = np.random.default_rng(99)
     img = Image.new("RGBA", (WW, WH), (0, 0, 0, 0))
 
@@ -630,13 +586,8 @@ def compare(images):
 
 def install(style):
     src = OUT / style
-    gui = TEX / "gui/lore"
-    gui.mkdir(parents=True, exist_ok=True)
-    shutil.copy(src / "book.png", gui / "book.png")
-    shutil.copy(src / "widgets.png", gui / "widgets.png")
-    if style != "p":
-        shutil.copy(src / "lore_book.png", TEX / "item/lore_book.png")
-        shutil.copy(src / "lore_page.png", TEX / "item/lore_page.png")
+    shutil.copy(src / "lore_book.png", TEX / "item/lore_book.png")
+    shutil.copy(src / "lore_page.png", TEX / "item/lore_page.png")
     print("installed", style)
 
 

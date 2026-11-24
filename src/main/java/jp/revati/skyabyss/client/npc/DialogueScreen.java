@@ -29,10 +29,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public class DialogueScreen extends Screen {
     private static final int TEXT = 0xFFE9E3D4;
     private static final int NAME = 0xFFFFF6EA;
-    private static final int SOFT = 0xFF9A929C;
-    private static final int GOLD = 0xFFF89CD2;
-    private static final int PANEL = 0xF2101318;
-    private static final int EDGE = 0xFFC9A85C;
+    private static final int SOFT = 0xFFA9ABB8;
+    private static final int GOLD = 0xFFF2C47C;
     private static final int EDGE_IN = 0xFF1C1A26;
     private static final int HOVER = 0x30E45A9C;
     // 行は 13 (docs/design/56)
@@ -42,8 +40,6 @@ public class DialogueScreen extends Screen {
     private static final int PORTRAIT_PX = 128;
     private int face = 64;
     private int facePx = 1;
-    // 選択肢の印 (「1◆」) の幅
-    private static final int MARK_W = 18;
     // 1 tick に出す字の数 (2 = 毎秒 40 字)
     private static final float CHARS_PER_TICK = 2.0f;
 
@@ -145,7 +141,7 @@ public class DialogueScreen extends Screen {
         for (int k = 0; k < i; k++) {
             y += optionH(k) + 4;
         }
-        return new int[] {panelX + panelW - OPT_W - (jp.revati.skyabyss.client.ui.UiLook.plate() ? 0 : i * 3), y};
+        return new int[] {panelX + panelW - OPT_W - (0), y};
     }
 
     // 本文の欄 (真ん中。目盛りつきで送る)
@@ -158,7 +154,7 @@ public class DialogueScreen extends Screen {
 
     private int faceColH() {
         // 板の側は名前の升を札の内側に収める分だけ高く
-        return face + (jp.revati.skyabyss.client.ui.UiLook.plate() ? 46 : 40);
+        return face + (46);
     }
 
     // 選択肢は右の列にいつも見えている
@@ -216,7 +212,7 @@ public class DialogueScreen extends Screen {
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         // ぼかさず、下を少し暗くするだけ (相手の顔と景色が見えるように)。切り絵なので段なしの一枚
-        g.fill(0, height * 3 / 5, width, height, 0x700E0D14);
+        g.fill(0, height * 3 / 5, width, height, 0x700F121A);
     }
 
     @Override
@@ -234,27 +230,17 @@ public class DialogueScreen extends Screen {
         int y = panelY;
         // 黒い帯 (窓の幅いっぱい。上の辺は手で決めた点で、少しずつ斜めに切る)
         int bw = width;
-        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
-            // 板の絵柄: 窓の幅いっぱいの板 (左右と下の縁は窓の外。上の銅の縁だけが見える)
-            jp.revati.skyabyss.client.ui.Plate.panel(g, -8, y - 2, bw + 16, height - y + 12, 0, jp.revati.skyabyss.client.ui.Plate.GOLD);
-        } else {
-            jp.revati.skyabyss.client.ui.Paper.cut(g, "talk_band", new float[] {-4, y + 2, bw * 0.38f, y - 2, bw * 0.81f, y + 3, bw + 4, y - 1, bw + 4, height + 4, -4, height + 4},
-                    jp.revati.skyabyss.client.ui.Paper.BLACK, jp.revati.skyabyss.client.ui.Paper.PINK_LO, 0, -3);
-        }
+        // 板の絵柄: 窓の幅いっぱいの板 (左右と下の縁は窓の外。上の銅の縁だけが見える)
+        jp.revati.skyabyss.client.ui.Plate.panel(g, -8, y - 2, bw + 16, height - y + 12, 0, jp.revati.skyabyss.client.ui.Plate.GOLD);
         // 顔の札 (傾けて、帯の上へはみ出す)
         int cw = faceColW();
         int ch = faceColH();
         float ccx = x + cw / 2f;
         float ccy = y + ch / 2f - 18;
-        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
-            jp.revati.skyabyss.client.ui.Plate.tile(g, Math.round(ccx - cw / 2f), Math.round(ccy - ch / 2f), cw, ch, jp.revati.skyabyss.client.ui.Plate.REST, jp.revati.skyabyss.client.ui.Plate.GOLD);
-        } else {
-            jp.revati.skyabyss.client.ui.Paper.cut(g, "talk_card", jp.revati.skyabyss.client.ui.Paper.rotRect(ccx, ccy, cw, ch, -4), jp.revati.skyabyss.client.ui.Paper.CREAM,
-                    jp.revati.skyabyss.client.ui.Paper.BLACK_LO, 3, 3);
-        }
+        jp.revati.skyabyss.client.ui.Plate.tile(g, Math.round(ccx - cw / 2f), Math.round(ccy - ch / 2f), cw, ch, jp.revati.skyabyss.client.ui.Plate.REST, jp.revati.skyabyss.client.ui.Plate.GOLD);
         int fx = Math.round(ccx - face / 2f);
         int fy = Math.round(ccy - ch / 2f + 6);
-        g.fill(fx - 1, fy - 1, fx + face + 1, fy + face + 1, 0xFF0E0D14);
+        g.fill(fx - 1, fy - 1, fx + face + 1, fy + face + 1, 0xFF0F121A);
         // 画面の画素に合わせた整数倍 (facePx 画素 = 絵の 1 画素)。GUI 単位に直した倍率で拡大する
         float k = facePx / (float) Math.max(1.0, Minecraft.getInstance().getWindow().getGuiScale());
         g.pose().pushPose();
@@ -265,36 +251,24 @@ public class DialogueScreen extends Screen {
         // 親しさ (札の上、顔の下に墨で) と名前 (札の足に貼った桃色の短冊)
         int affinity = Minecraft.getInstance().player == null ? 0 : NpcBonds.of(Minecraft.getInstance().player).affinity(show.role());
         int tier = Affinity.tier(affinity);
-        jp.revati.skyabyss.client.ui.Paper.inkBegin();
         jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.npc.tier." + tier), Math.round(ccx), fy + face + 3, cw - 6, SOFT, false);
         drawMarks(g, Math.round(ccx), fy + face + 13, tier);
-        jp.revati.skyabyss.client.ui.Paper.inkEnd();
         Component name = Component.literal(Component.translatable("entity." + show.role().replace(':', '.')).getString());
         int sw = Math.max(cw + 4, Math.min(cw + 40, font.width(name) + 18));
         int sy = fy + face + 23;
         // 名前の短冊は、開いて少しあとに大きく浮いてから押される
         float press = jp.revati.skyabyss.rpg.client.skill.SkillStage.back((nowD - openedAtD - 120) / 240f);
         float ps = 1f + (1f - press) * 0.4f;
-        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
-            // 板の側: 名前は札の内側の灯った升 (札の幅にそろえ、はみ出さない)
-            int nx = Math.round(ccx - cw / 2f) + 3;
-            int ny = Math.round(ccy - ch / 2f) + ch - 17;
-            g.pose().pushPose();
-            g.pose().translate(nx + (cw - 6) / 2f, ny + 7, 0);
-            g.pose().scale(ps, ps, 1f);
-            g.pose().translate(-(nx + (cw - 6) / 2f), -(ny + 7), 0);
-            jp.revati.skyabyss.client.ui.Plate.tile(g, nx, ny, cw - 6, 14, jp.revati.skyabyss.client.ui.Plate.ON, jp.revati.skyabyss.client.ui.Plate.GOLD);
-            jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, name, nx + (cw - 6) / 2, ny + 3, cw - 12, NAME, false);
-            g.pose().popPose();
-        } else {
+        // 板の側: 名前は札の内側の灯った升 (札の幅にそろえ、はみ出さない)
+        int nx = Math.round(ccx - cw / 2f) + 3;
+        int ny = Math.round(ccy - ch / 2f) + ch - 17;
         g.pose().pushPose();
-        g.pose().translate(x - 4 + sw / 2f, sy + 7, 0);
+        g.pose().translate(nx + (cw - 6) / 2f, ny + 7, 0);
         g.pose().scale(ps, ps, 1f);
-        g.pose().translate(-(x - 4 + sw / 2f), -(sy + 7), 0);
-        jp.revati.skyabyss.client.ui.Paper.slip(g, x - 4, sy, sw, 14, jp.revati.skyabyss.client.ui.Paper.PINK, jp.revati.skyabyss.client.ui.Paper.CREAM, jp.revati.skyabyss.client.ui.Paper.REST);
-        jp.revati.skyabyss.client.ui.FitText.draw(g, font, name, x + 6, sy + 3, sw - 14, NAME, false);
+        g.pose().translate(-(nx + (cw - 6) / 2f), -(ny + 7), 0);
+        jp.revati.skyabyss.client.ui.Plate.tile(g, nx, ny, cw - 6, 14, jp.revati.skyabyss.client.ui.Plate.ON, jp.revati.skyabyss.client.ui.Plate.GOLD);
+        jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, name, nx + (cw - 6) / 2, ny + 3, cw - 12, NAME, false);
         g.pose().popPose();
-        }
         // 本文 (一字ずつ。帯にじかに生成りの字で)
         int tx = x + textX;
         body.begin(g);
@@ -310,12 +284,10 @@ public class DialogueScreen extends Screen {
             ty += LINE_H;
         }
         body.end(g);
-        body.drawBar(g, EDGE_IN, jp.revati.skyabyss.client.ui.UiLook.plate() ? 0x88C48A44 : 0x88E45A9C);
+        body.drawBar(g, EDGE_IN, 0x88C48A44);
         boolean more = show.hasNext() && show.options().isEmpty();
-        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
-            // 板の側: 選択肢の列は沈んだ欄 (本文の欄と同じ高さ。字を送っているあいだも同じ所に)
-            jp.revati.skyabyss.client.ui.Plate.well(g, panelX + panelW - OPT_W - 4, panelY + PAD - 4, OPT_W + 8, panelH - 2 * PAD + 8);
-        }
+        // 板の側: 選択肢の列は沈んだ欄 (本文の欄と同じ高さ。字を送っているあいだも同じ所に)
+        jp.revati.skyabyss.client.ui.Plate.well(g, panelX + panelW - OPT_W - 4, panelY + PAD - 4, OPT_W + 8, panelH - 2 * PAD + 8);
         if (fullyShown() && !more) {
             // 選択肢 (右の列に短冊を縦に。選んでいるものは桃色で浮く)
             List<NpcNetwork.OptionView> opts = options();

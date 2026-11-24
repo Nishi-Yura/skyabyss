@@ -228,7 +228,7 @@ public class HunterNotesScreen extends Screen implements jp.revati.skyabyss.clie
             int numW = font.width(num);
             Component nm = Component.literal(name(e).getString());
             int ty = y + 3;
-            jp.revati.skyabyss.client.ui.FitText.draw(g, font, nm, LIST_X + 8, ty, LIST_W - 12 - numW, on ? LedgerStage.ON_PINK : !known(e) ? 0x8A8086 : Paper.INK, false);
+            jp.revati.skyabyss.client.ui.FitText.draw(g, font, nm, LIST_X + 8, ty, LIST_W - 12 - numW, on ? LedgerStage.ON_PINK : !known(e) ? 0x6C7084 : Paper.INK, false);
             g.drawString(font, num, LIST_X + LIST_W - numW, ty, on ? LedgerStage.ON_PINK : familiar ? Paper.INK_HEAD : Paper.INK_SOFT, false);
             if (familiar && !on) {
                 Paper.pin(g, LIST_X + 3, y + 6, 2, true);
@@ -352,7 +352,7 @@ public class HunterNotesScreen extends Screen implements jp.revati.skyabyss.clie
     private static final int MODEL = 80;
 
     private static MutableComponent head(String key) {
-        return Component.translatable(key).withColor(jp.revati.skyabyss.client.ui.UiLook.plate() ? jp.revati.skyabyss.client.ui.Plate.textColor(GOLD) & 0xFFFFFF : GOLD);
+        return Component.translatable(key).withColor(GOLD);
     }
 
     private static String shown(float v) {

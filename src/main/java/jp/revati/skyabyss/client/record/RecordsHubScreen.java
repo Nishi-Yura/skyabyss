@@ -149,7 +149,7 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
             g.drawString(font, wrapped.get(i), LIST.x() + Golden.S8, Golden.textY(y, LINE_H), Golden.TEXT, false);
         }
         panel.end(g);
-        panel.drawBar(g, 0xFF1C1A26, 0x88E45A9C);
+        panel.drawBar(g, 0xFF1C1A26, 0x88C48A44);
         for (net.minecraft.client.gui.components.Renderable r : renderables) {
             r.render(g, mx, my, partialTick);
         }
@@ -230,7 +230,7 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
     // 撮影用: 見本の頁 (`open jp.revati.skyabyss.client.record.RecordsHubScreen$Sample`)
     public static final class Sample extends RecordsHubScreen {
         public Sample() {
-            super(RecordsHub.FISHING, false, List.of(Component.literal("釣り大会（今週）").withStyle(s -> s.withColor(0xF89CD2)),
+            super(RecordsHub.FISHING, false, List.of(Component.literal("釣り大会（今週）").withStyle(s -> s.withColor(0xF2C47C)),
                     Component.literal("1. Alice　黄金のマス 52.3 cm"), Component.literal("2. Bob　岩魚 41.0 cm"), Component.empty(),
                     Component.literal("自分の一番: 岩魚 38.2 cm")));
         }

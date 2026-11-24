@@ -46,7 +46,7 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
     static final int SUM_COLS = 12, SUM_CELL = 30, SUM_TILE = 26, SUM_Y = 38;
     // 当たりの札 (左に傾けた生成りの大きな札)
     static final int CARD_CX = 84, CARD_CY = 118;
-    static final int TEXT = 0xFFECE4D6, DIM = 0xFF9A929C;
+    static final int TEXT = 0xFFECE4D6, DIM = 0xFFA9ABB8;
     static final float SINGLE_MS = 3800f, BATCH_MS = 1100f;
 
     enum Mode {
@@ -409,7 +409,7 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
             ItemStack s = reel.get(i);
             int col = 0xFF000000 | tier(s).rgb();
             // 品の札 (生成り。下の端に階級の色)
-            g.fill(ixi + 2, bandY + 4, ixi + RC - 2, bandY + bandH - 4, jp.revati.skyabyss.client.ui.Plate.card(Paper.CREAM));
+            g.fill(ixi + 2, bandY + 4, ixi + RC - 2, bandY + bandH - 4, 0xFF202534);
             g.fill(ixi + 2, bandY + bandH - 7, ixi + RC - 2, bandY + bandH - 4, col);
             item(g, s, ixi + 1, bandY + 4, 2);
         }

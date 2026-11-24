@@ -186,7 +186,7 @@ public final class RebirthScreen extends Screen implements jp.revati.skyabyss.cl
             } else if (hover) {
                 LedgerStage.hover(g, y, ROW);
             }
-            FitText.draw(g, font, Component.literal(shown), LX, y + 3, LW, sel ? LedgerStage.ON_PINK : has ? Paper.INK : 0x8A8086, false);
+            FitText.draw(g, font, Component.literal(shown), LX, y + 3, LW, sel ? LedgerStage.ON_PINK : has ? Paper.INK : 0x6C7084, false);
         }
         if (total > ROWS) {
             int barH = ROWS * ROW;

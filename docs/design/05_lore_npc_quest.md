@@ -466,9 +466,9 @@ assets/skyabyss_lore/lang/{ja_jp,en_us}.json   伝承の文 (題・本文・碑�
 
 ## 9. テクスチャ
 
-- 生成: `tools/gen/story/gen_lore_book.py`（Pillow、seed 付き）。3 案を `docs/review/lore_book_roughs/{a,b,c}/` に書き、`compare.png` を作る。`--install b` で採用案をゲームの場所へ写す。
-- 作るもの: 見開き `textures/gui/lore/book.png`（608×384）、部品 `textures/gui/lore/widgets.png`（512×256。しおり 2 種、菱形の印 3 種、矢印 2 種、選んだ行の青緑のにじみ、伏せ字の墨の帯、知らせの札）、アイテム `textures/item/lore_book.png` と `lore_page.png`（32×32）。部品の位置は `LoreBookScreen` の `Sprite` と合わせてある。
-- **採用: b 碑文の石板**。青灰の石の表紙、縁に青緑の光る刻線と菱形、少し冷たい羊皮紙の頁。背中の碑文（淡い青の光る字）と同じ色の縁取りで「碑文を写した書」に見え、羊皮紙との明暗差が大きく字が読みやすい（00 の 10）。本文の「表紙は石のように冷たく」も b に合わせた。
+- 画面の書は絵を使わず、鐘の銅の部品（`client/ui/BookPlate`）でコードが描く（56 の 2.1「本」）。
+- アイテムの絵: `tools/gen/story/gen_lore_book.py`（Pillow、seed 付き）が `textures/item/lore_book.png` と `lore_page.png`（32×32）を作る（`--install b`）。
+- 画面の書の見た目は 56 の 2.1「本」（石と銅の表紙に生成りの頁。本文の「表紙は石のように冷たく」はこの表紙）。
 - 書は紺の表紙に青緑の菱形、頁は羊皮紙に罫線。32px でつぶれず、手に持った姿も崩れない。
 
 ---

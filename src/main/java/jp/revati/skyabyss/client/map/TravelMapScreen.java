@@ -11,6 +11,7 @@ import com.mojang.math.Axis;
 import jp.revati.skyabyss.Config;
 import jp.revati.skyabyss.SkyAbyss;
 import jp.revati.skyabyss.client.quest.ObjectiveStrip;
+import jp.revati.skyabyss.client.ui.Plate;
 import jp.revati.skyabyss.map.MapMarks;
 import jp.revati.skyabyss.party.PartyLocator;
 import jp.revati.skyabyss.party.client.PartyMarkers;
@@ -37,11 +38,10 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // 巨神の子に乗っているとき (chart != null) は、子の海図 (旧 TravelChartScreen) をこの画面に重ねる: 行ける行き先の印が光り、
 // 印か右の一覧で選んで「出発」。印の出どころはサーバーの MapMarks (一か所) と、クライアントが持つ自分・仲間・墓・目的の標。
 // 見た目は 3 案 (設定 mapStyle。SLATE = 石板の枠に丸い海図 (既定)、PARCHMENT = 骨の枠に羊皮紙、INK = 枠なしの墨の夜図)。
-// 絵は tools/gen/world/gen_travel_map_assets.py (印 marks.png・地 paper.png・A の海図 disc_a.png)、一覧の行とつまみは海図の chart.png
+// 絵は tools/gen/world/gen_travel_map_assets.py (印 marks.png・地 paper.png)。枠・一覧・釦は鐘の銅の板 (client/ui/Plate)、海図の chart.png は行を消す印だけ
 public class TravelMapScreen extends Screen {
     static final ResourceLocation MARKS = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/map/marks.png");
     static final ResourceLocation PAPER = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/map/paper.png");
-    static final ResourceLocation DISC_A = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/map/disc_a.png");
     static final ResourceLocation CHART = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/travel/chart.png");
 
     // 印の絵の番号 (marks.png の並び。tools/gen/world/gen_travel_map_assets.py の SPRITES と同じ)
@@ -398,9 +398,9 @@ public class TravelMapScreen extends Screen {
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         // 景色を少し暗くする (INK は地図そのものが景色の上に乗るので、ここで濃く)
         if (style() == Config.MapStyle.INK) {
-            g.fill(0, 0, width, height, 0xC00E0D14);
+            g.fill(0, 0, width, height, 0xC00F121A);
         } else {
-            g.fill(0, 0, width, height, 0x900E0D14);
+            g.fill(0, 0, width, height, 0x900F121A);
         }
     }
 
@@ -478,31 +478,18 @@ public class TravelMapScreen extends Screen {
     private void drawSheet(GuiGraphics g, Palette p) {
         Config.MapStyle st = style();
         if (st == Config.MapStyle.SLATE) {
-            tile(g, 0, fx, fy, fw, fh);
-            frame(g, fx, fy, fw, fh, false);
+            // 鐘の銅の板 (docs/design/56 の 2.1)。行き先の一覧は沈んだ欄
+            Plate.panelFor(g, "travel_map", fx, fy, fw, fh, 0);
             if (chart != null) {
-                recess(g, listX - 4, fy + 14, LIST_W, fh - 28);
+                Plate.wellFor(g, "travel_map_list", listX - 4, fy + 14, LIST_W, fh - 28);
             }
             return;
         }
         switch (st) {
-            case SLATE -> {
-                tile(g, 0, fx, fy, fw, fh);
-                frame(g, fx, fy, fw, fh, false);
-                if (chart != null) {
-                    recess(g, listX - 4, fy + 14, LIST_W, fh - 28);
-                }
-                // 丸い海図 (海図の画面と同じ雲の海)
-                int r = (int) Math.round(radius * 256 / 250.0);
-                g.blit(DISC_A, cx - r, cy - r, r * 2, r * 2, 0, 0, 512, 512, 512, 512);
-                circle(g, cx, cy, radius + 1, 0xFF6E6654, 1, 0);
-                circle(g, cx, cy, radius + 2, 0xFFC4BAA0, 2, 0);
-                circle(g, cx, cy, radius + 3, 0xFFE2D9C2, 1, 0);
-                circle(g, cx, cy, radius + 4, 0xFF0C0E12, 1, 0);
-            }
             case PARCHMENT -> {
-                frame(g, fx, fy, fw, fh, true);
-                int inset = 4;
+                // 銅の縁の内側に羊皮紙
+                Plate.panelFor(g, "travel_map", fx, fy, fw, fh, 0);
+                int inset = 5;
                 g.enableScissor(fx + inset, fy + inset, fx + fw - inset, fy + fh - inset);
                 tile(g, 1, fx + inset, fy + inset, fw - inset * 2, fh - inset * 2);
                 g.disableScissor();
@@ -512,8 +499,7 @@ public class TravelMapScreen extends Screen {
                     outlineRect(g, fx + inset + i, fy + inset + i, fw - (inset + i) * 2, fh - (inset + i) * 2, a | 0x4A3018);
                 }
                 if (chart != null) {
-                    g.fill(listX - 4, fy + 14, listX - 4 + LIST_W, fy + fh - 14, 0xE0141820);
-                    outlineRect(g, listX - 4, fy + 14, LIST_W, fh - 28, 0xFF6B5236);
+                    Plate.wellFor(g, "travel_map_list", listX - 4, fy + 14, LIST_W, fh - 28);
                 }
             }
             case INK -> {
@@ -521,11 +507,11 @@ public class TravelMapScreen extends Screen {
                 tile(g, 2, 0, 0, width, height);
                 g.setColor(1f, 1f, 1f, 1f);
                 for (int[] c : new int[][]{{8, 8}, {width - 9, 8}, {8, height - 9}, {width - 9, height - 9}}) {
-                    gem(g, c[0], c[1]);
+                    Plate.gem(g, c[0], c[1], 3, Plate.pal().f);
                 }
                 if (chart != null) {
                     g.fill(listX - 4, fy + 14, listX - 4 + LIST_W, fy + fh - 14, 0x90080B10);
-                    g.fill(listX - 5, fy + 14, listX - 4, fy + fh - 14, 0x804A9AA0);
+                    g.fill(listX - 5, fy + 14, listX - 4, fy + fh - 14, 0x80C48A44);
                 }
             }
         }
@@ -754,7 +740,7 @@ public class TravelMapScreen extends Screen {
     private void drawHeader(GuiGraphics g, Palette p, int mouseX, int mouseY) {
         boolean shadow = style() != Config.MapStyle.PARCHMENT;
         Component t = chart != null ? chartTitle() : title;
-        g.drawString(font, t, fx + 14, fy + 10, p.pale(), shadow);
+        g.drawString(font, t, fx + 14, fy + 10, style() == Config.MapStyle.PARCHMENT ? p.pale() : 0xFF000000 | Plate.pal().head, shadow);
         if (chart != null) {
             Component sub = chart.leader() ? Component.translatable("gui.skyabyss.travel.choose")
                     : Component.translatable("gui.skyabyss.travel.leader_chooses", chart.leaderName());
@@ -767,14 +753,15 @@ public class TravelMapScreen extends Screen {
         // 目盛り: 右ほど寄せている (対数)。開いたときの二つの縮尺 (町のまわり・世界) に刻み
         double span = Math.log(MAX_RANGE / MIN_RANGE);
         int gy = y + ZB / 2;
-        g.fill(gaugeX, gy, gaugeX + GAUGE_W, gy + 1, p.ring() | 0xFF000000);
+        g.fill(gaugeX, gy, gaugeX + GAUGE_W, gy + 1, Plate.pal().fLo);
         for (double mark : new double[] {NEAR, FAR}) {
             int mx = gaugeX + (int) Math.round((1 - Math.log(mark / MIN_RANGE) / span) * GAUGE_W);
             g.fill(mx, gy - 2, mx + 1, gy + 3, p.dim());
         }
         int kx = gaugeX + (int) Math.round(Mth.clamp(1 - Math.log(view / MIN_RANGE) / span, 0, 1) * GAUGE_W);
-        g.fill(kx - 2, gy - 3, kx + 3, gy + 4, 0xFF0C0E12);
-        g.fill(kx - 1, gy - 2, kx + 2, gy + 3, p.accent());
+        g.fill(kx - 2, gy - 3, kx + 3, gy + 4, Plate.pal().outline);
+        g.fill(kx - 1, gy - 2, kx + 2, gy + 3, Plate.pal().f);
+        g.fill(kx - 1, gy - 2, kx + 2, gy - 1, Plate.pal().fHi);
         Component sc = Component.translatable("gui.skyabyss.map.scale", String.format("%,d", (int) Math.round(view / 10.0) * 10));
         g.drawString(font, sc, minusX() - 6 - font.width(sc), fy + 10, p.text(), shadow);
         Component foot = sheet == null ? Component.translatable("gui.skyabyss.map.waiting")
@@ -785,12 +772,13 @@ public class TravelMapScreen extends Screen {
     private void zoomButton(GuiGraphics g, Palette p, int x, int y, boolean plus, int mouseX, int mouseY) {
         boolean can = plus ? target > MIN_RANGE + 1e-6 : target < MAX_RANGE - 1e-6;
         boolean hover = can && inside(mouseX, mouseY, x, y, ZB, ZB);
-        g.fill(x, y, x + ZB, y + ZB, 0xFF0C0E12);
-        g.fill(x + 1, y + 1, x + ZB - 1, y + ZB - 1, hover ? 0xFF2A5E6A : 0xFF1C222C);
-        int c = !can ? p.lost() : hover ? 0xFFFFFFFF : p.accent();
-        g.fill(x + 3, y + ZB / 2, x + ZB - 3, y + ZB / 2 + 1, c);
+        // 小さな升 (押せないときは平ら)。印は鐘の金
+        int state = !can ? Plate.FLAT : hover ? Plate.HOVER : Plate.REST;
+        Plate.tile(g, x, y, ZB, ZB, state, Plate.GOLD);
+        int c = !can ? 0xFF000000 | Plate.pal().dim : hover ? 0xFFFFFFFF : 0xFF000000 | Plate.pal().head;
+        g.fill(x + 3, y + ZB / 2 - 1, x + ZB - 3, y + ZB / 2, c);
         if (plus) {
-            g.fill(x + ZB / 2, y + 3, x + ZB / 2 + 1, y + ZB - 3, c);
+            g.fill(x + ZB / 2, y + 2, x + ZB / 2 + 1, y + ZB - 4, c);
         }
     }
 
@@ -1096,7 +1084,7 @@ public class TravelMapScreen extends Screen {
             int y = listY + i * ROW_H;
             boolean hover = d.valid() && inside(mouseX, mouseY, x, y, ROW_W, ROW_H - 1);
             boolean sel = d.id().equals(selected);
-            chartBlit(g, x, y, sel ? 544 : hover ? 272 : 0, 384, 264, 44);
+            Plate.tile(g, x, y, ROW_W, ROW_H - 1, sel ? Plate.ON : hover ? Plate.HOVER : Plate.REST, Plate.GOLD);
             int color = !d.valid() ? SLATE.lost() : reachable(d) ? SLATE.text() : SLATE.dim();
             if (d.kind() == 2 && d.valid() && reachable(d)) {
                 color = 0xFF000000 | TravelDest.titanColor(d.name());
@@ -1108,10 +1096,10 @@ public class TravelMapScreen extends Screen {
             }
         }
         if (scroll > 0) {
-            chartBlit(g, listX + ROW_W - 9, listY - 9, 512, 432, 16, 16);
+            jp.revati.skyabyss.client.ui.BookPlate.arrow(g, listX + ROW_W - 9, listY - 9, true, 0xFF000000 | Plate.pal().head);
         }
         if (scroll + listRows < dests.size()) {
-            chartBlit(g, listX + ROW_W - 9, listY + listRows * ROW_H, 528, 432, 16, 16);
+            jp.revati.skyabyss.client.ui.BookPlate.arrow(g, listX + ROW_W - 9, listY + listRows * ROW_H, false, 0xFF000000 | Plate.pal().head);
         }
         if (dests.size() <= 1) {
             g.drawString(font, Component.translatable("gui.skyabyss.travel.no_waymarks"), listX + 4, listY + ROW_H + 4, SLATE.dim(), false);
@@ -1138,14 +1126,13 @@ public class TravelMapScreen extends Screen {
 
     private void drawButtons(GuiGraphics g, Palette p, int mouseX, int mouseY) {
         button(g, departX(), Component.translatable(chart.chosen().isEmpty() ? "gui.skyabyss.travel.depart" : "gui.skyabyss.travel.departing"),
-                canDepart(), mouseX, mouseY);
-        button(g, leaveX(), Component.translatable("gui.skyabyss.travel.disembark"), canLeave(), mouseX, mouseY);
+                canDepart(), true, mouseX, mouseY);
+        button(g, leaveX(), Component.translatable("gui.skyabyss.travel.disembark"), canLeave(), false, mouseX, mouseY);
     }
 
-    private void button(GuiGraphics g, int x, Component label, boolean active, int mouseX, int mouseY) {
+    private void button(GuiGraphics g, int x, Component label, boolean active, boolean primary, int mouseX, int mouseY) {
         boolean hover = active && inside(mouseX, mouseY, x, btnY, BTN_W, BTN_H);
-        chartBlit(g, x, btnY, !active ? 256 : hover ? 128 : 0, 432, 120, 32);
-        g.drawCenteredString(font, label, x + BTN_W / 2, btnY + 4, active ? (hover ? SLATE.pale() : SLATE.text()) : SLATE.dim());
+        Plate.button(g, font, x, btnY, BTN_W, BTN_H, label, primary, !active ? Plate.FLAT : hover ? Plate.HOVER : Plate.REST, Plate.GOLD);
     }
 
     // ---------------------------------------------------------------- 操作
@@ -1321,10 +1308,8 @@ public class TravelMapScreen extends Screen {
         int x = layerX();
         int y = layerY();
         int h = 13 + MapPrefs.Layer.values().length * LAYER_ROW + 2;
-        g.fill(x, y, x + LAYER_W, y + h, 0xC00A0D12);
-        outlineRect(g, x, y, LAYER_W, h, (p.ring() & 0xFFFFFF) | 0xFF000000);
-        g.fill(x + 1, y + 1, x + LAYER_W - 1, y + 12, 0x60000000);
-        g.drawString(font, Component.translatable("gui.skyabyss.map.layers"), x + 4, y + 3, p.accent(), false);
+        Plate.hudCard(g, x, y, x + LAYER_W, y + h, 0, 1f);
+        g.drawString(font, Component.translatable("gui.skyabyss.map.layers"), x + 4, y + 3, Plate.hudHead(1f), false);
         for (MapPrefs.Layer l : MapPrefs.Layer.values()) {
             int ry = y + 13 + l.ordinal() * LAYER_ROW;
             boolean on = MapPrefs.shows(l);
@@ -1335,8 +1320,11 @@ public class TravelMapScreen extends Screen {
             // 入り切りの小さな四角
             int bx = x + 4;
             int by = ry + 3;
-            g.fill(bx, by, bx + 6, by + 6, 0xFF05070A);
-            g.fill(bx + 1, by + 1, bx + 5, by + 5, on ? p.accent() : 0xFF2A2E36);
+            g.fill(bx, by, bx + 6, by + 6, Plate.pal().outline);
+            g.fill(bx + 1, by + 1, bx + 5, by + 5, on ? Plate.pal().f : Plate.pal().well);
+            if (on) {
+                g.fill(bx + 1, by + 1, bx + 5, by + 2, Plate.pal().fHi);
+            }
             // 組の絵 (小さく)
             int ix = x + 17;
             int iy = ry + LAYER_ROW / 2;
@@ -1352,7 +1340,7 @@ public class TravelMapScreen extends Screen {
                 sprite(g, layerSprite(l), 0, 0, 0, on ? 1f : 0.4f);
             }
             g.pose().popPose();
-            g.drawString(font, Component.translatable(l.key()), x + 25, ry + 2, on ? p.text() : p.dim(), false);
+            g.drawString(font, Component.translatable(l.key()), x + 25, ry + 2, on ? Plate.hudText(1f) : Plate.hudSoft(1f), false);
         }
     }
 
@@ -1452,79 +1440,6 @@ public class TravelMapScreen extends Screen {
             }
         }
         g.disableScissor();
-    }
-
-    // 骨の枠 (gen_forge_assets.bone_frame と同じ作り。半分の画素で描く)。thin = 羊皮紙のまわりの細めの枠
-    private static void frame(GuiGraphics g, int x, int y, int w, int h, boolean thin) {
-        g.pose().pushPose();
-        g.pose().scale(0.5f, 0.5f, 1f);
-        int x0 = x * 2;
-        int y0 = y * 2;
-        int x1 = x0 + w * 2 - 1;
-        int y1 = y0 + h * 2 - 1;
-        int band = thin ? 5 : 6;
-        rect2(g, x0, y0, x1, y1, 0xFF0C0E12);
-        for (int i = 1; i <= band; i++) {
-            int c = i <= 2 ? 0xFFE2D9C2 : i <= 4 ? 0xFFC4BAA0 : 0xFFA0967C;
-            rect2(g, x0 + i, y0 + i, x1 - i, y1 - i, c);
-        }
-        for (int i = 1; i <= band; i++) {
-            int shade = i <= 3 ? 0xFF6E6654 : 0xFFA0967C;
-            g.fill(x1 - i, y0 + i, x1 - i + 1, y1 - i + 1, shade);
-            g.fill(x0 + i, y1 - i, x1 - i + 1, y1 - i + 1, shade);
-        }
-        rect2(g, x0 + band + 1, y0 + band + 1, x1 - band - 1, y1 - band - 1, 0xFF0C0E12);
-        for (int tx = x0 + 24; tx < x1 - 16; tx += 24) {
-            g.fill(tx, y0 + 2, tx + 1, y0 + band + 1, 0xFF6E6654);
-            g.fill(tx + 1, y0 + 2, tx + 2, y0 + band + 1, 0xFFE2D9C2);
-            g.fill(tx, y1 - band, tx + 1, y1 - 1, 0xFF6E6654);
-        }
-        for (int ty = y0 + 24; ty < y1 - 16; ty += 24) {
-            g.fill(x0 + 2, ty, x0 + band + 1, ty + 1, 0xFF6E6654);
-            g.fill(x1 - band, ty, x1 - 1, ty + 1, 0xFF6E6654);
-        }
-        for (int[] c : new int[][]{{x0 + 7, y0 + 7}, {x1 - 7, y0 + 7}, {x0 + 7, y1 - 7}, {x1 - 7, y1 - 7}}) {
-            gem2(g, c[0], c[1], 6);
-        }
-        g.pose().popPose();
-    }
-
-    private static void rect2(GuiGraphics g, int x0, int y0, int x1, int y1, int c) {
-        g.fill(x0, y0, x1 + 1, y0 + 1, c);
-        g.fill(x0, y1, x1 + 1, y1 + 1, c);
-        g.fill(x0, y0, x0 + 1, y1 + 1, c);
-        g.fill(x1, y0, x1 + 1, y1 + 1, c);
-    }
-
-    // 青緑のひし形 (半分の画素の座標で)
-    private static void gem2(GuiGraphics g, int cx, int cy, int r) {
-        for (int dy = -r; dy <= r; dy++) {
-            int half = r - Math.abs(dy);
-            g.fill(cx - half, cy + dy, cx + half + 1, cy + dy + 1, 0xFF0C0E12);
-            if (half >= 1) {
-                g.fill(cx - half + 1, cy + dy, cx + half, cy + dy + 1, 0xFF2A5E6A);
-            }
-            // 右上の明るい面
-            if (dy < 0 && half >= 2) {
-                g.fill(cx, cy + dy, cx + half - 1, cy + dy + 1, 0xFF7FD6D0);
-            }
-        }
-        g.fill(cx - 1, cy - r + 3, cx, cy - r + 4, 0xFF9FE8FF);
-    }
-
-    private static void gem(GuiGraphics g, int x, int y) {
-        g.pose().pushPose();
-        g.pose().scale(0.5f, 0.5f, 1f);
-        gem2(g, x * 2, y * 2, 6);
-        g.pose().popPose();
-    }
-
-    private static void recess(GuiGraphics g, int x, int y, int w, int h) {
-        g.fill(x, y, x + w, y + h, 0xFF0F1117);
-        g.fill(x, y, x + w, y + 1, 0xFF0C0E12);
-        g.fill(x, y, x + 1, y + h, 0xFF0C0E12);
-        g.fill(x + 1, y + h - 1, x + w, y + h, 0xFF343A48);
-        g.fill(x + w - 1, y + 1, x + w, y + h, 0xFF343A48);
     }
 
     private static void outlineRect(GuiGraphics g, int x, int y, int w, int h, int c) {

@@ -387,7 +387,7 @@ public class ProfileScreen extends Screen {
             } else if (hover) {
                 LedgerStage.hover(g, y, ROW);
             }
-            FitText.draw(g, font, Component.literal(shown), BODY_X, y + 3, BODY_R - BODY_X - 4, sel ? LedgerStage.ON_PINK : has ? Paper.INK : 0x8A8086, false);
+            FitText.draw(g, font, Component.literal(shown), BODY_X, y + 3, BODY_R - BODY_X - 4, sel ? LedgerStage.ON_PINK : has ? Paper.INK : 0x6C7084, false);
         }
         if (total > LIST_ROWS) {
             int barH = LIST_ROWS * ROW;

@@ -41,26 +41,17 @@ public final class ShopStage {
     public static final int RIGHT_W = 136;
     // 字の色
     public static final int ON_PINK = 0xFFF6EA;
-    public static final int LACK = 0xB0102C;
+    public static final int LACK = 0xF0607A;
     public static final int LACK_ON_BLACK = 0xF0607A;
-
-    private static final float[][] PEAKS = {{-20, -2}, {60, -6}, {150, -2}, {240, -8}, {262, -24}, {300, -12}, {340, -30}, {372, -14}, {428, -22}};
-    private static final int[][] DIAMONDS = {{250, 30, 2, 1}, {398, 112, 3, 0}, {256, 150, 2, 0}};
 
     // 黒い紙・山・帳面 (fit.begin のあと)
     public static void backdrop(GuiGraphics g, UiFit fit, int width, int height) {
-        if (UiLook.plate()) {
-            // 板を一枚 (見出しの段につまみと店の名前)。左に品の欄、右上に品を立てる窓、その下に名前・値段・説明
-            track();
-            float a = jp.revati.skyabyss.rpg.client.skill.SkillStage.out((net.minecraft.Util.getMillis() - openedAt) / 160f);
-            Plate.fade(g, a);
-            Plate.panel(g, 0, 0, W, H, 24, Plate.GOLD);
-            Plate.well(g, LIST_X - 2, LIST_Y, LIST_W + 7, ROWS * ROW_H + 2);
-            Plate.textWell(g, RIGHT_X - 3, 111, RIGHT_W + 6, 88);
-            return;
-        }
-        Paper.stage(g, fit, width, height, "shop", PEAKS, DIAMONDS);
-        Paper.cut(g, "shop_ledger", LEDGER, Paper.CREAM, Paper.PINK_LO, 4, 4);
+        // 板を一枚 (見出しの段につまみと店の名前)。左に品の欄、右上に品を立てる窓、その下に名前・値段・説明
+        track();
+        float a = jp.revati.skyabyss.rpg.client.skill.SkillStage.out((net.minecraft.Util.getMillis() - openedAt) / 160f);
+        Plate.fade(g, a);
+        Plate.panel(g, 0, 0, W, H, 24, Plate.GOLD);
+        Plate.well(g, LIST_X - 2, LIST_Y, LIST_W + 7, ROWS * ROW_H + 2);
     }
 
     // 板の絵柄で、欄を画面の側で敷くとき (作業台): 入りの透かしと板と見出しの段だけ
@@ -147,25 +138,20 @@ public final class ShopStage {
         hotY = hotFrom + (hotTarget - hotFrom) * jp.revati.skyabyss.rpg.client.skill.SkillStage.out((now - hotAt) / 140f);
         g.pose().pushPose();
         g.pose().translate(0, Math.round(hotY) - y, 0);
-        if (UiLook.plate()) {
-            // 乗せた行: 少し明るい帯と、左に金の印
-            Plate.Pal p = Plate.pal();
-            int fill = Plate.mix(p.well, Plate.GOLD.mid(), 0.20f);
-            g.fill(LIST_X - 1, y + 1, LIST_X + LIST_W + 4, y + ROW_H - 1, fill);
-            g.fill(LIST_X - 1, y + 1, LIST_X + LIST_W + 4, y + 2, Plate.mix(fill, 0xFFFFFFFF, 0.16f));
-            g.fill(LIST_X - 1, y + ROW_H - 2, LIST_X + LIST_W + 4, y + ROW_H - 1, Plate.mix(fill, 0xFF000000, 0.35f));
-            g.fill(LIST_X - 1, y + 1, LIST_X + 1, y + ROW_H - 1, 0xFF000000 | (UiLook.get() == UiLook.DEEP ? 0xF2C47C : p.head));
-            g.pose().popPose();
-            return;
-        }
-        Paper.cut(g, "shop_hot", new float[] {LIST_X - 2, y - 1, LIST_X + LIST_W + 2, y - 2, LIST_X + LIST_W + 3, y + ROW_H - 2, LIST_X - 1, y + ROW_H - 1}, Paper.PINK, 0, 0, 0);
+        // 乗せた行: 少し明るい帯と、左に金の印
+        Plate.Pal p = Plate.pal();
+        int fill = Plate.mix(p.well, Plate.GOLD.mid(), 0.20f);
+        g.fill(LIST_X - 1, y + 1, LIST_X + LIST_W + 4, y + ROW_H - 1, fill);
+        g.fill(LIST_X - 1, y + 1, LIST_X + LIST_W + 4, y + 2, Plate.mix(fill, 0xFFFFFFFF, 0.16f));
+        g.fill(LIST_X - 1, y + ROW_H - 2, LIST_X + LIST_W + 4, y + ROW_H - 1, Plate.mix(fill, 0xFF000000, 0.35f));
+        g.fill(LIST_X - 1, y + 1, LIST_X + 1, y + ROW_H - 1, 0xFF000000 | p.head);
         g.pose().popPose();
     }
 
     // 名前から値段までの点線
     public static void leader(GuiGraphics g, int x0, int x1, int y, boolean hot) {
         for (int d = x0; d < x1; d += 3) {
-            g.fill(d, y, d + 1, y + 1, hot ? 0xFFFFF6EA : UiLook.plate() ? 0xFF000000 | Plate.pal().dim : Paper.PINK);
+            g.fill(d, y, d + 1, y + 1, hot ? 0xFFFFF6EA : 0xFF000000 | Plate.pal().dim);
         }
     }
 
@@ -178,14 +164,9 @@ public final class ShopStage {
         int len = ROWS * ROW_H - 8;
         int bar = Math.max(12, len * ROWS / n);
         int by = top + (len - bar) * scroll / Math.max(1, n - ROWS);
-        if (UiLook.plate()) {
-            g.fill(235, top, 236, top + len, Plate.pal().wellBR);
-            g.fill(234, by, 237, by + bar, Plate.pal().f);
-            g.fill(234, by, 237, by + 1, Plate.pal().fHi);
-            return;
-        }
-        g.fill(235, top, 236, top + len, Paper.CREAM_LO);
-        g.fill(234, by, 237, by + bar, Paper.PINK);
+        g.fill(235, top, 236, top + len, Plate.pal().wellBR);
+        g.fill(234, by, 237, by + bar, Plate.pal().f);
+        g.fill(234, by, 237, by + 1, Plate.pal().fHi);
     }
 
     public static void empty(GuiGraphics g, Font font, Component text) {
@@ -198,20 +179,15 @@ public final class ShopStage {
 
     // color = -1 なら添えの色
     public static void hint(GuiGraphics g, Font font, Component text, int color) {
-        if (UiLook.plate()) {
-            // 板の絵柄: 品の欄の下に沈んだ欄。手引きは 2 行まで折り返す (それでも入らない分は 2 行目に詰める)
-            Plate.well(g, LIST_X - 2, FOOT_Y, LIST_W + 7, FOOT_H);
-            int c = color == -1 ? 0xFF000000 | Plate.pal().inkSoft : 0xFF000000 | color;
-            List<FormattedCharSequence> lines = Marquee.joinRest(font.split(text, LIST_W - 8), 2);
-            int y = lines.size() == 1 ? FOOT_Y + (FOOT_H - 8) / 2 : FOOT_Y + 2;
-            for (FormattedCharSequence l : lines) {
-                Marquee.draw(g, font, l, LIST_X + 4, y, LIST_W - 8, c, false);
-                y += 10;
-            }
-            return;
+        // 板の絵柄: 品の欄の下に沈んだ欄。手引きは 2 行まで折り返す (それでも入らない分は 2 行目に詰める)
+        Plate.well(g, LIST_X - 2, FOOT_Y, LIST_W + 7, FOOT_H);
+        int c = color == -1 ? 0xFF000000 | Plate.pal().inkSoft : 0xFF000000 | color;
+        List<FormattedCharSequence> lines = Marquee.joinRest(font.split(text, LIST_W - 8), 2);
+        int y = lines.size() == 1 ? FOOT_Y + (FOOT_H - 8) / 2 : FOOT_Y + 2;
+        for (FormattedCharSequence l : lines) {
+            Marquee.draw(g, font, l, LIST_X + 4, y, LIST_W - 8, c, false);
+            y += 10;
         }
-        // 長い手引きは縮めずに横へ流す
-        Marquee.draw(g, font, text.getVisualOrderText(), LIST_X + 4, HINT_Y, LIST_W - 8, color == -1 ? Paper.INK_SOFT : color, false);
     }
 
     // 店の名前 (右上)
@@ -219,33 +195,19 @@ public final class ShopStage {
         track();
         float a = jp.revati.skyabyss.rpg.client.skill.SkillStage.out((net.minecraft.Util.getMillis() - openedAt) / 240f);
         int dx = Math.round((1f - a) * -10f);
-        if (UiLook.plate()) {
-            // 見出しの段の右に、板の字の色で (入れば 2 倍)
-            int c = jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Plate.pal().inkHead, a);
-            if (font.width(title) * 2 <= RIGHT_W) {
-                jp.revati.skyabyss.rpg.client.skill.SkillStage.big(g, font, title, RIGHT_X + dx, 5, RIGHT_W, c);
-            } else {
-                FitText.draw(g, font, title, RIGHT_X + dx, 10, RIGHT_W, c, false);
-            }
-            return;
-        }
-        // 入れば 2 倍 (題の線 y 21 の上に収まる)
+        // 見出しの段の右に、板の字の色で (入れば 2 倍)
+        int c = jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Plate.pal().inkHead, a);
         if (font.width(title) * 2 <= RIGHT_W) {
-            jp.revati.skyabyss.rpg.client.skill.SkillStage.big(g, font, title, RIGHT_X + dx, 4, RIGHT_W, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_HI, a));
+            jp.revati.skyabyss.rpg.client.skill.SkillStage.big(g, font, title, RIGHT_X + dx, 5, RIGHT_W, c);
         } else {
-            FitText.draw(g, font, title, RIGHT_X + dx, 10, RIGHT_W, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_PINK, a), false);
+            FitText.draw(g, font, title, RIGHT_X + dx, 10, RIGHT_W, c, false);
         }
-        g.fill(RIGHT_X, 21, RIGHT_X + RIGHT_W, 22, Paper.PINK_LO);
     }
 
     // 台の上の品 (大きく)。品の上に指があるか を返す (詳しい札を出すため)
     public static boolean plinth(GuiGraphics g, ItemStack stack, int mx, int my) {
-        if (UiLook.plate()) {
-            // 品を立てる窓 (品を見せる画面だけが呼ぶ)
-            Plate.plinth(g, RIGHT_X - 2, 26, RIGHT_W + 4, 84, Plate.GOLD);
-        } else {
-            Paper.cut(g, "shop_plinth", new float[] {276, 92, 376, 88, 366, 106, 288, 108}, Paper.PINK, Paper.BLACK_LO, 2, 3);
-        }
+        // 品を立てる窓 (品を見せる画面だけが呼ぶ)
+        Plate.plinth(g, RIGHT_X - 2, 26, RIGHT_W + 4, 84, Plate.GOLD);
         if (stack.isEmpty()) {
             return false;
         }
@@ -296,14 +258,10 @@ public final class ShopStage {
         int w = 26 + font.width(s);
         int x = 392 - w;
         int top = 202;
-        if (UiLook.plate()) {
-            // 下の段の右、品の窓の右の端にそろえた沈んだ欄
-            x = RIGHT_X + RIGHT_W + 2 - (w + 2);
-            top = FOOT_Y;
-            Plate.well(g, x, FOOT_Y, w + 2, FOOT_H);
-        } else {
-            Paper.cut(g, "shop_purse", new float[] {x, 204, x + w + 2, 202, x + w, 222, x + 2, 224}, Paper.BLACK, Paper.PINK, 2, 2);
-        }
+        // 下の段の右、品の窓の右の端にそろえた沈んだ欄
+        x = RIGHT_X + RIGHT_W + 2 - (w + 2);
+        top = FOOT_Y;
+        Plate.well(g, x, FOOT_Y, w + 2, FOOT_H);
         g.renderItem(coin, x + 4, top + 3);
         g.drawString(font, s, x + 21, top + 8, Paper.ON_BLACK_HI, false);
         // 手持ちが変わった: 札の上に「-n」「+n」が浮いて消える (600ms)
@@ -318,7 +276,7 @@ public final class ShopStage {
         if (t < 1f) {
             String d = (coinDelta > 0 ? "+" : "") + coinDelta;
             int al = Math.max(6, Math.round(255 * (1f - t * t)));
-            g.drawString(font, d, x + w - font.width(d), 194 - Math.round(jp.revati.skyabyss.rpg.client.skill.SkillStage.out(t) * 6f), (al << 24) | (coinDelta > 0 ? 0xFFF6EA : 0xF89CD2), false);
+            g.drawString(font, d, x + w - font.width(d), 194 - Math.round(jp.revati.skyabyss.rpg.client.skill.SkillStage.out(t) * 6f), (al << 24) | (coinDelta > 0 ? 0xFFF6EA : 0xF2C47C), false);
         }
     }
 

@@ -81,33 +81,6 @@ public abstract class GuiGraphicsMixin {
         ci.cancel();
     }
 
-    // 板の絵柄のとき、切り絵の画面が塗る色 (g.fill) を板の色へ写す (Plate.paint。選びが決まるまでの渡し)
-    @org.spongepowered.asm.mixin.injection.ModifyVariable(method = "fill(Lnet/minecraft/client/renderer/RenderType;IIIIII)V", at = @At("HEAD"), argsOnly = true, ordinal = 5)
-    private int skyabyss$plateFill(int color) {
-        return jp.revati.skyabyss.client.ui.UiLook.plate() ? jp.revati.skyabyss.client.ui.Plate.paint(color) : color;
-    }
-
-    // 生成りの紙の上 (Paper.inkBegin〜inkEnd) では、字の地の色を墨の色へ写し、影は付けない
-    @org.spongepowered.asm.mixin.injection.ModifyVariable(method = "drawString(Lnet/minecraft/client/gui/Font;Ljava/lang/String;IIIZ)I", at = @At("HEAD"), argsOnly = true, ordinal = 2)
-    private int skyabyss$ink1(int color) {
-        return jp.revati.skyabyss.client.ui.Paper.inkColor(color);
-    }
-
-    @org.spongepowered.asm.mixin.injection.ModifyVariable(method = "drawString(Lnet/minecraft/client/gui/Font;Lnet/minecraft/util/FormattedCharSequence;IIIZ)I", at = @At("HEAD"), argsOnly = true, ordinal = 2)
-    private int skyabyss$ink2(int color) {
-        return jp.revati.skyabyss.client.ui.Paper.inkColor(color);
-    }
-
-    @org.spongepowered.asm.mixin.injection.ModifyVariable(method = "drawString(Lnet/minecraft/client/gui/Font;Ljava/lang/String;IIIZ)I", at = @At("HEAD"), argsOnly = true, ordinal = 0)
-    private boolean skyabyss$inkShadow1(boolean shadow) {
-        return shadow && !jp.revati.skyabyss.client.ui.Paper.inking();
-    }
-
-    @org.spongepowered.asm.mixin.injection.ModifyVariable(method = "drawString(Lnet/minecraft/client/gui/Font;Lnet/minecraft/util/FormattedCharSequence;IIIZ)I", at = @At("HEAD"), argsOnly = true, ordinal = 0)
-    private boolean skyabyss$inkShadow2(boolean shadow) {
-        return shadow && !jp.revati.skyabyss.client.ui.Paper.inking();
-    }
-
     @Inject(method = "drawString(Lnet/minecraft/client/gui/Font;Ljava/lang/String;IIIZ)I", at = @At("HEAD"))
     private void skyabyss$in1(Font font, String text, int x, int y, int color, boolean shadow, CallbackInfoReturnable<Integer> cir) {
         skyabyss$begin(font, text == null ? 0 : font.width(text), x, y);

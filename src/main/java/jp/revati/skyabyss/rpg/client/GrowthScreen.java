@@ -159,7 +159,6 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
         }
 
         // 右の帯: レベルと経験値・職・基礎の上がり方 (字は墨へ写る)
-        Paper.inkBegin();
         int sx = SIDE_X;
         int sw = SIDE_W;
         boolean max = d.level >= GrowthRules.MAX_LEVEL;
@@ -193,7 +192,6 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
             g.drawString(font, line, sx, ty, SOFT, false);
             ty += 11;
         }
-        Paper.inkEnd();
 
         renderHover(g, d, mouseX, mouseY);
     }

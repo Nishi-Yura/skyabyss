@@ -5,15 +5,15 @@ import net.minecraft.client.gui.GuiGraphics;
 // 都の施設の画面 (店・ギルド・取引・厩舎・記録・町の案内) の絵柄: 板と欄は黄金比の板 (client/ui/Golden) と同じ。frame は旅の地図の枠 (半分の画素) として残す
 public final class FacilityUi {
     public static final int TEXT = 0xFFECE8DC;
-    public static final int DIM = 0xFF7C7480;
+    public static final int DIM = 0xFF6C7084;
     public static final int TEAL = 0xFFFFF6EA;
-    public static final int GOLD = 0xFFF89CD2;
+    public static final int GOLD = 0xFFF2C47C;
     public static final int LACK = 0xFFD9779A;
     public static final int SLATE = 0xF216151E;
     public static final int SLATE_IN = 0xFF0E0D14;
     public static final int ROW = 0xFF1E1C28;
     public static final int ROW_HOVER = 0xFF2C2434;
-    public static final int LINE = 0xFF3A3644;
+    public static final int LINE = 0xFF2A3044;
 
     private FacilityUi() {
     }
@@ -83,7 +83,7 @@ public final class FacilityUi {
             int half = r - Math.abs(dy);
             g.fill(cx - half, cy + dy, cx + half + 1, cy + dy + 1, 0xFF05070F);
             if (half >= 1) {
-                g.fill(cx - half + 1, cy + dy, cx + half, cy + dy + 1, 0xFF3A3644);
+                g.fill(cx - half + 1, cy + dy, cx + half, cy + dy + 1, 0xFF2A3044);
             }
             if (dy < 0 && half >= 2) {
                 g.fill(cx, cy + dy, cx + half - 1, cy + dy + 1, 0xFFFFF6EA);

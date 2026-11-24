@@ -115,11 +115,11 @@ public class BoxPouchScreen extends Screen implements jp.revati.skyabyss.client.
             int sx = x + s.x(), sy = y + s.y();
             Golden.slot(g, sx - 1, sy - 1, 18);
             if (n > 0) {
-                Paper.edge(g, sx - 1, sy - 1, sx + 17, sy + 17, 0xFF5A5460);
+                Paper.edge(g, sx - 1, sy - 1, sx + 17, sy + 17, 0xFF3A4054);
             }
             g.renderItem(stack(s.kind()), sx, sy);
             if (n <= 0) {
-                g.fill(sx, sy, sx + 16, sy + 16, 0xC80E0D14);
+                g.fill(sx, sy, sx + 16, sy + 16, 0xC80F121A);
             } else {
                 String t = n > 999 ? "999+" : String.valueOf(n);
                 g.pose().pushPose();

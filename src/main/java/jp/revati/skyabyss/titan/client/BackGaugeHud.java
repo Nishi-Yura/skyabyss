@@ -46,9 +46,9 @@ public final class BackGaugeHud {
         int x = g.guiWidth() - w - 6;
         int y = top(mc);
         // 切り絵 (docs/design/56 の 5): 黒い紙に右下の濃い桃色の影、左の端に巨神の色の筋 (地の透かしはそのまま)
-        g.fill(x + 1, y + 1, x + w + 1, y + h + 1, 0xFF8C2C60);
-        g.fill(x, y, x + w, y + h, (bg & 0xFF000000) | 0x181722);
-        g.fill(x, y, x + w, y + 1, 0xFF3A3644);
+        g.fill(x + 1, y + 1, x + w + 1, y + h + 1, 0xFF83502A);
+        g.fill(x, y, x + w, y + h, (bg & 0xFF000000) | 0x181C28);
+        g.fill(x, y, x + w, y + 1, 0xFF2A3044);
         g.fill(x, y, x + 2, y + h, border);
         decor.draw(g, x + 4, y + 5);
         int room = w - DECOR - 10;

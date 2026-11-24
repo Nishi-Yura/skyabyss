@@ -207,7 +207,7 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
                     CAND_W - 16 - 44 - ScrollPanel.GUTTER - 4, Paper.INK, false);
         }
         candPanel.end(g);
-        candPanel.drawBar(g, 0x30181722, jp.revati.skyabyss.client.ui.UiLook.plate() ? 0xFFC48A44 : 0xFFE45A9C);
+        candPanel.drawBar(g, 0x30181C28, 0xFFC48A44);
         for (int i = 0; i < inviteButtons.size(); i++) {
             Button b = inviteButtons.get(i);
             int oy = candPanel.top() + i * PROW;

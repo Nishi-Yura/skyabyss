@@ -178,7 +178,7 @@ public class MountShopScreen extends Screen {
             ShopStage.leader(g, x + Math.min(font.width(name), w) + 4, right - 2, y + 8, hot);
             g.renderItem(new ItemStack(FacilitySetup.BELL_COIN.get()), right, y + 3);
             boolean enough = view.coins() >= look.price;
-            g.drawString(font, price, right + 17, y + 8, hot ? (enough ? ShopStage.ON_PINK : 0x5A0820) : enough ? Paper.INK : ShopStage.LACK, false);
+            g.drawString(font, price, right + 17, y + 8, hot ? (enough ? ShopStage.ON_PINK : 0xF0607A) : enough ? Paper.INK : ShopStage.LACK, false);
         }
     }
 

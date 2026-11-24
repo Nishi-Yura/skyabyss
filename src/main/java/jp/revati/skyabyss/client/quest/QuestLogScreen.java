@@ -468,7 +468,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
             }
         }
         listPanel.end(g);
-        listPanel.drawBar(g, 0x30181722, 0xFFE45A9C);
+        listPanel.drawBar(g, 0x30181C28, 0xFFC48A44);
         // 右の頁
         QuestDef def = selected == null ? null : QuestClient.quest(selected);
         int bx = bodyLeft();
@@ -486,7 +486,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
                 g.drawString(font, l.text(), bx + l.indent(), Golden.textY(y, LINE_H), l.color(), false);
             }
             bodyPanel.end(g);
-            bodyPanel.drawBar(g, EDGE_IN, 0x88E45A9C);
+            bodyPanel.drawBar(g, EDGE_IN, 0x88C48A44);
         }
     }
 

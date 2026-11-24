@@ -118,7 +118,7 @@ public class CircuitCampScreen extends Screen implements jp.revati.skyabyss.clie
         hovered = ItemStack.EMPTY;
         List<List<ItemStack>> rows = rows();
         for (int t = 0; t < rows.size(); t++) {
-            int y = (jp.revati.skyabyss.client.ui.UiLook.plate() ? ROW_Y + 4 : ROW_Y) + t * ROW_STEP;
+            int y = (ROW_Y + 4) + t * ROW_STEP;
             boolean supply = t == CircuitCamps.TIERS.length;
             int weight = supply ? CircuitCamps.SUPPLY_WEIGHT : CircuitCamps.WEIGHTS[t];
             double pct = weight * 100.0 / total;
@@ -158,7 +158,7 @@ public class CircuitCampScreen extends Screen implements jp.revati.skyabyss.clie
         ry = para(g, Component.translatable("gui.skyabyss.camp.pool", time(view.secondsToRotate())), rx, ry, rw, PickStage.ON_PINK) + Golden.S5;
         ry = para(g, Component.translatable("gui.skyabyss.camp.how"), rx, ry, rw, Paper.ON_BLACK_SOFT) + Golden.S5;
         para(g, Component.translatable("gui.skyabyss.camp.rules"), rx, ry, rw, Paper.ON_BLACK_DIM);
-        FitText.draw(g, font, Component.translatable("gui.skyabyss.camp.left", view.runsLeft()), rx, jp.revati.skyabyss.client.ui.UiLook.plate() ? 180 : BTN_Y - 13, rw,
+        FitText.draw(g, font, Component.translatable("gui.skyabyss.camp.left", view.runsLeft()), rx, 180, rw,
                 view.runsLeft() > 0 ? Paper.ON_BLACK_HI : Paper.ON_BLACK_DIM, false);
         PickStage.hint(g, font, Component.translatable("gui.skyabyss.camp.chance"));
         for (net.minecraft.client.gui.components.Renderable r : renderables) {

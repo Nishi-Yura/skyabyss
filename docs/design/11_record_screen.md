@@ -4,7 +4,7 @@
 - 範囲: プレイヤーが自分の大事な品・巨神の記録・成長・クエストと好感度を一か所で確かめる画面（控え帳）、管理者が他人の分を確かめるコマンド、大事な品を落とさない・消さない守り、倒れたときの持ち物の扱いと墓（6 章）
 - 関連: [01 全体設計](01_overview.md)、[02 岩鯨](02_stone_whale.md)（預かり）、[03 装備](03_gear_and_endgame.md)、[04 成長](04_growth_and_skills.md)、[05 伝承の書](05_lore_npc_quest.md)、[07 NPC とクエスト](07_npc_quest.md)、[09 巨神での移動](09_titan_travel.md)
 
-実装: `jp.revati.skyabyss.record`（サーバー）、`jp.revati.skyabyss.client.record`（画面）。文は `assets/skyabyss_record/lang`。絵は `tools/gen/story/gen_record_screen.py` → `textures/gui/record/ledger.png`・`widgets.png`。
+実装: `jp.revati.skyabyss.record`（サーバー）、`jp.revati.skyabyss.client.record`（画面）。文は `assets/skyabyss_record/lang`。絵は使わず、鐘の銅の部品（`client/ui/BookPlate`）でコードが描く（56 の 2.1「本」）。
 
 ---
 
@@ -28,7 +28,7 @@
 
 巨神の頁に「順路」の行を足す（32 の 6 章）: 今の段（まだ／第 n / 3 の試練／中ボス／心臓へ）、引いてある三つ、周回、越えた回数と最速。引いてある三つと周回は、地上の巨神の祠の画面（碑を右クリック）でも見られる（32 の 3.1）。
 
-鯨骨の枠に一枚の羊皮紙。上につまみ 4 つ、左に行の一覧、右に選んだ行の詳しい頁。32px 密度、碑文の青緑、伝承の書と同じ墨の色。
+石と銅の表紙に一枚の生成りの頁。上につまみ 5 つ、左に行の一覧、右に選んだ行の詳しい頁。伝承の書と同じ部品と墨の色。
 
 | つまみ | 行 |
 | --- | --- |

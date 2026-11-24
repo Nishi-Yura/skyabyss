@@ -221,7 +221,7 @@ public class BoardScreen extends Screen implements jp.revati.skyabyss.client.ui.
         int hoverRow = ShopStage.rowAt(mouseX, mouseY);
         if (hoverRow >= 0 && hoverRow + scroll < n() && hoverRow + scroll != focus) {
             int hy = ShopStage.rowY(hoverRow);
-            g.fill(ShopStage.LIST_X - 1, hy, ShopStage.LIST_X + ShopStage.LIST_W + 1, hy + ShopStage.ROW_H - 1, 0x30E45A9C);
+            g.fill(ShopStage.LIST_X - 1, hy, ShopStage.LIST_X + ShopStage.LIST_W + 1, hy + ShopStage.ROW_H - 1, 0x30C48A44);
         }
         if (n() == 0) {
             ShopStage.empty(g, font, Component.translatable("gui.skyabyss.board.empty"));

@@ -38,8 +38,6 @@ public final class PartyStage {
 
     private static final float[][] PEAKS = {{-20, 0}, {18, -12}, {60, -4}, {104, -20}, {150, -8}, {200, -16}, {246, -2}, {290, -22}, {336, -8}, {376, -18}, {428, -6}};
     private static final int[][] DIAMONDS = {{238, 22, 3, 1}, {12, 120, 2, 0}, {258, 146, 2, 1}};
-    private static final float[] TILT = {-7, -2, 3, 7};
-
     public static void backdrop(GuiGraphics g, UiFit fit, int width, int height) {
         backdrop(g, fit, width, height, HEAD_TITLE, true);
     }
@@ -57,13 +55,11 @@ public final class PartyStage {
     // head = 左の見出しの段、footLeft = 左の下の段に欄を敷くか (右の下の段はいつも)
     public static void backdrop(GuiGraphics g, UiFit fit, int width, int height, int head, boolean footLeft) {
         Paper.stage(g, fit, width, height, "party", PEAKS, DIAMONDS);
-        if (UiLook.plate()) {
-            Plate.headBand(g, 5, COL_X - 8, head);
-            if (footLeft) {
-                Plate.well(g, 8, PLATE_FOOT_Y, COL_X - 12, PLATE_FOOT_H);
-            }
-            Plate.well(g, COL_X, PLATE_FOOT_Y, COL_W, PLATE_FOOT_H);
+        Plate.headBand(g, 5, COL_X - 8, head);
+        if (footLeft) {
+            Plate.well(g, 8, PLATE_FOOT_Y, COL_X - 12, PLATE_FOOT_H);
         }
+        Plate.well(g, COL_X, PLATE_FOOT_Y, COL_W, PLATE_FOOT_H);
     }
 
     // 右の列の沈んだ欄 (板の側。top から下の段の上まで)
@@ -73,7 +69,7 @@ public final class PartyStage {
 
     // 下の段の釦の y (板の側は沈んだ欄の真ん中)
     public static int footBtn(int paperY) {
-        return UiLook.plate() ? PLATE_FOOT_Y + (PLATE_FOOT_H - Golden.BTN) / 2 : paperY;
+        return PLATE_FOOT_Y + (PLATE_FOOT_H - Golden.BTN) / 2;
     }
 
     // 題 (桃色の菱と、黒の上の桃色の字)
@@ -105,11 +101,7 @@ public final class PartyStage {
 
     // 右の帯 (見出しつき)
     public static void strip(GuiGraphics g, Font font, Component head) {
-        if (UiLook.plate()) {
-            column(g, 55);
-        } else {
-            Paper.cut(g, "party_strip", STRIP, Paper.CREAM, Paper.PINK_LO, 3, 4);
-        }
+        column(g, 55);
         if (head != null) {
             FitText.draw(g, font, Component.literal(head.getString()), STRIP_X, STRIP_Y, STRIP_W, Paper.INK_HEAD, false);
         }
@@ -117,11 +109,7 @@ public final class PartyStage {
 
     // 右上から差し込む桃色の紙 (招待・知らせ)。字の左上 {x, y} を返す
     public static int[] note(GuiGraphics g) {
-        if (UiLook.plate()) {
-            Plate.tile(g, 250, 7, 151, 38, Plate.ON, Plate.GOLD);
-            return new int[] {258, 12};
-        }
-        Paper.cut(g, "party_note", new float[] {250, 6, 408, 2, 410, 42, 246, 46}, Paper.PINK, Paper.BLACK_LO, -2, 3);
+        Plate.tile(g, 250, 7, 151, 38, Plate.ON, Plate.GOLD);
         return new int[] {258, 12};
     }
 
@@ -130,7 +118,7 @@ public final class PartyStage {
         // 四枚でも右の帯 (x 270 から) にかからないように詰める。五枚・六枚 (パーティーは 6 人まで) は細い札にして同じ幅に収める
         int cx = n >= 5 ? 34 + i * 41 : n >= 4 ? 44 + i * 61 : 52 + i * 68;
         // 板の絵柄では一列にそろえる (切り絵のときは扇の弧)
-        int cy = UiLook.plate() ? 140 : 140 + Math.round(Math.abs(i - (n - 1) / 2f) * 6);
+        int cy = 140;
         return new int[] {cx, cy};
     }
 
@@ -146,13 +134,8 @@ public final class PartyStage {
     public static void card(GuiGraphics g, int i, int n, boolean pink) {
         int[] c = cardAt(i, n);
         lastW = cardW(n);
-        if (UiLook.plate()) {
-            // 板の絵柄: 札はまっすぐな升 (長・自分は灯る)
-            Plate.tile(g, c[0] - lastW / 2, c[1] - CARD_H / 2, lastW, CARD_H, pink ? Plate.ON : Plate.REST, Plate.GOLD);
-            return;
-        }
-        float ang = TILT[Math.min(i, TILT.length - 1)] * (n == 1 ? 0 : 1);
-        Paper.cut(g, "party_card" + i, Paper.rotRect(c[0], c[1], lastW, CARD_H, ang), pink ? Paper.PINK : Paper.CREAM, Paper.BLACK_LO, 2, 3);
+        // 板の絵柄: 札はまっすぐな升 (長・自分は灯る)
+        Plate.tile(g, c[0] - lastW / 2, c[1] - CARD_H / 2, lastW, CARD_H, pink ? Plate.ON : Plate.REST, Plate.GOLD);
     }
 
     // 札の上の顔 (32 角)

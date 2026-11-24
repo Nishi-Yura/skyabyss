@@ -13,10 +13,10 @@ public final class WheelScreen extends Screen {
     static final int RADIUS = 92;
     static final int CELL = 22;
     static final int DEAD = 26;
-    private static final int GOLD = 0xFFF89CD2;
-    private static final int EDGE = 0xFF3A3644;
-    private static final int FILL = 0xE0181722;
-    private static final int FILL_ON = 0xF08C2C60;
+    private static final int GOLD = 0xFFF2C47C;
+    private static final int EDGE = 0xFF2A3044;
+    private static final int FILL = 0xE0181C28;
+    private static final int FILL_ON = 0xF083502A;
 
     private int selected = -1;
     private int age;
@@ -100,7 +100,7 @@ public final class WheelScreen extends Screen {
             double a = Math.PI * 2 * selected / n;
             int ex = cx + (int) Math.round(Math.sin(a) * (RADIUS - CELL - 4));
             int ey = cy - (int) Math.round(Math.cos(a) * (RADIUS - CELL - 4));
-            line(g, cx, cy, ex, ey, 0x99E45A9C);
+            line(g, cx, cy, ex, ey, 0x99C48A44);
         }
         for (int i = 0; i < n; i++) {
             double a = Math.PI * 2 * i / n;
@@ -130,9 +130,9 @@ public final class WheelScreen extends Screen {
             WheelClient.Entry e = list.get(selected);
             Component name = Component.translatable("gui.skyabyss.wheel." + e.id());
             g.drawCenteredString(font, name, cx, cy - 9, GOLD);
-            g.drawCenteredString(font, Component.translatable("gui.skyabyss.wheel.key", e.key().getTranslatedKeyMessage()), cx, cy + 3, 0xFF9A929C);
+            g.drawCenteredString(font, Component.translatable("gui.skyabyss.wheel.key", e.key().getTranslatedKeyMessage()), cx, cy + 3, 0xFFA9ABB8);
         } else {
-            g.drawCenteredString(font, Component.translatable("gui.skyabyss.wheel.hint"), cx, cy - 4, 0xFF9A929C);
+            g.drawCenteredString(font, Component.translatable("gui.skyabyss.wheel.hint"), cx, cy - 4, 0xFFA9ABB8);
         }
     }
 

@@ -21,27 +21,27 @@ public final class Paper {
     }
 
     // 色 (ARGB)
-    public static final int BLACK = 0xFF181722;
-    public static final int BLACK_LO = 0xFF0E0D14;
-    public static final int PINK = 0xFFE45A9C;
-    public static final int PINK_HI = 0xFFF89CD2;
-    public static final int PINK_LO = 0xFF8C2C60;
+    public static final int BLACK = 0xFF181C28;
+    public static final int BLACK_LO = 0xFF0F121A;
+    public static final int PINK = 0xFFC48A44;
+    public static final int PINK_HI = 0xFFF2C47C;
+    public static final int PINK_LO = 0xFF83502A;
     public static final int GREY = 0xFFA8A29A;
-    public static final int GREY_LO = 0xFF5A5460;
+    public static final int GREY_LO = 0xFF3A4054;
     public static final int CREAM = 0xFFECE4D6;
-    public static final int CREAM_LO = 0xFFC9BFAE;
+    public static final int CREAM_LO = 0xFF2A3044;
     // 字の色 (生成りの紙の上 / 黒い紙の上)
-    public static final int INK = 0x181722;
-    public static final int INK_HEAD = 0xB0326E;
-    public static final int INK_SOFT = 0x6E6468;
+    public static final int INK = 0xECE6D6;
+    public static final int INK_HEAD = 0xF2C47C;
+    public static final int INK_SOFT = 0xA9ABB8;
     public static final int ON_BLACK = 0xECE4D6;
-    public static final int ON_BLACK_SOFT = 0x9A929C;
-    public static final int ON_BLACK_PINK = 0xF89CD2;
+    public static final int ON_BLACK_SOFT = 0xA9ABB8;
+    public static final int ON_BLACK_PINK = 0xF2C47C;
     // 黒い紙の上の目立つ字 (夜空の空色の代わり) と、まだ使えないものの字
     public static final int ON_BLACK_HI = 0xFFF6EA;
-    public static final int ON_BLACK_DIM = 0x7C7480;
+    public static final int ON_BLACK_DIM = 0x6C7084;
     // 黒い紙の上の細い縁 (升・枠)
-    public static final int EDGE = 0xFF3A3644;
+    public static final int EDGE = 0xFF2A3044;
 
     // ---------- 紙の絵 (作った絵を名前で使い回す) ----------
     public interface Painter {
@@ -52,18 +52,10 @@ public final class Paper {
     }
 
     private static final Map<String, Tex> CACHE = new HashMap<>();
-    // いま塗っている絵の色を写すか (draw が決める)
-    private static boolean mapping;
     private static int serial;
 
     // name ごとに一枚。key (大きさや状態) が変わったときだけ塗り直す。(x, y) は絵の左上 (論理の座標)
     public static void draw(GuiGraphics g, String name, String key, int x, int y, int w, int h, Painter p) {
-        boolean plate = UiLook.plate();
-        if (plate) {
-            // 絵の使い回しは絵柄ごとに分ける
-            name = name + "@" + UiLook.get().ordinal();
-        }
-        mapping = plate && !name.startsWith("plate_");
         Tex t = CACHE.get(name);
         if (t == null || !t.key.equals(key) || t.w != w || t.h != h) {
             if (t != null) {
@@ -88,9 +80,6 @@ public final class Paper {
         public final int w;
         public final int h;
 
-        // 板の絵柄のとき、切り絵の画面が塗る色を板の色へ写す (Plate.paint)
-        final boolean map = mapping;
-
         Sheet(int w, int h) {
             this.w = w;
             this.h = h;
@@ -101,9 +90,6 @@ public final class Paper {
         public void px(int x, int y, int argb) {
             if (x < 0 || y < 0 || x >= w || y >= h) {
                 return;
-            }
-            if (map) {
-                argb = Plate.paintSheet(argb);
             }
             int a = argb >>> 24;
             if (a == 0) {
@@ -202,7 +188,7 @@ public final class Paper {
     // 乗せると紙が浮いて影が伸び、押している間は影が消えて紙が沈む。押せないときは灰の紙を平らに (筋なし)
     public static final int REST = 0, HOVER = 1, PRESS = 2, FLAT = 3, LOW = 4;
     public static final int CREAM_HI = 0xFFFFF6EA;
-    public static final int TEXT_OFF = 0xC4BCC4;
+    public static final int TEXT_OFF = 0xA9ABB8;
 
     // 状態。hot = 乗せている か 手元 (キー) で選んでいる、over = マウスが上にある (押している = over で左の釦を押さえている)
     public static int state(boolean enabled, boolean hot, boolean over) {
@@ -231,59 +217,19 @@ public final class Paper {
 
     // 紙を描いて、字をずらす量 {dx, dy} を返す。stripe = 0 なら筋なし
     public static int[] slip(GuiGraphics g, int x, int y, int w, int h, int body, int stripe, int state) {
-        if (UiLook.plate()) {
-            boolean pink = (body & 0xFFFFFF) == 0xE45A9C || (body & 0xFFFFFF) == 0xF89CD2 || (body & 0xFFFFFF) == 0xCC4A8A;
-            Plate.tile(g, x, y, w, h, state == FLAT ? Plate.FLAT : pink ? Plate.ON : state == HOVER ? Plate.HOVER : Plate.REST, Plate.GOLD);
-            return new int[] {0, 0};
-        }
-        int sl = slant(h);
-        int dx = state == PRESS ? 1 : 0;
-        int dy = state == HOVER ? -1 : state == PRESS ? 1 : 0;
-        int o = 4;
-        String key = Integer.toHexString(body) + "_" + Integer.toHexString(stripe) + "_" + state + "_" + w + "x" + h;
-        draw(g, "slip_" + key, "", x - o, y - o, w + 2 * o + 2, h + 2 * o + 2, s -> {
-            float l = o + dx;
-            float t = o + dy;
-            float[] p = {l + sl, t, l + w, t, l + w - sl, t + h, l, t + h};
-            if (state == REST) {
-                s.poly(p, BLACK_LO, 1, 2);
-            } else if (state == HOVER) {
-                s.poly(p, BLACK_LO, 2, 3);
-            } else if (state == LOW) {
-                s.poly(p, BLACK_LO, 1, 1);
-            }
-            s.poly(p, body);
-            if (stripe != 0 && state != FLAT) {
-                s.poly(new float[] {l + sl + 3, t, l + sl + 5, t, l + 5, t + h, l + 3, t + h}, stripe);
-            }
-        });
-        return new int[] {dx, dy};
+        boolean pink = (body & 0xFFFFFF) == 0xE45A9C || (body & 0xFFFFFF) == 0xF89CD2 || (body & 0xFFFFFF) == 0xF2C47C || (body & 0xFFFFFF) == 0xC48A44 || (body & 0xFFFFFF) == 0xA8743A || (body & 0xFFFFFF) == 0xCC4A8A;
+        Plate.tile(g, x, y, w, h, state == FLAT ? Plate.FLAT : pink ? Plate.ON : state == HOVER ? Plate.HOVER : Plate.REST, Plate.GOLD);
+        return new int[] {0, 0};
     }
 
     // 釦 (主は桃色に生成りの筋、ほかは生成りに桃色の筋)
     public static void button(GuiGraphics g, Font font, int x, int y, int w, int h, Component label, boolean primary, int state) {
-        if (UiLook.plate()) {
-            Plate.button(g, font, x, y, w, h, label, primary, state == LOW ? Plate.REST : state, Plate.GOLD);
-            return;
-        }
-        int body = state == FLAT ? GREY_LO : primary ? (state == HOVER ? PINK_HI : state == PRESS ? 0xFFCC4A8A : PINK)
-                : (state == HOVER ? CREAM_HI : state == PRESS ? CREAM_LO : CREAM);
-        boolean roomy = roomy(font, label, w, h);
-        int[] d = slip(g, x, y, w, h, body, roomy ? (primary ? CREAM : PINK) : 0, state);
-        label(g, font, label, x + d[0], y + d[1], w, h, roomy, state == FLAT ? TEXT_OFF : INK);
+        Plate.button(g, font, x, y, w, h, label, primary, state == LOW ? Plate.REST : state, Plate.GOLD);
     }
 
     // つまみ (選んでいれば桃色に生成りの筋、ほかは一段沈んだ生成りに桃色の筋。乗せると浮く)
     public static void tab(GuiGraphics g, Font font, int x, int y, int w, int h, Component label, boolean on, boolean hover) {
-        if (UiLook.plate()) {
-            Plate.tab(g, font, x, y, w, h, label, on, hover);
-            return;
-        }
-        int state = on ? REST : hover ? HOVER : LOW;
-        int body = on ? PINK : hover ? CREAM : CREAM_LO;
-        boolean roomy = roomy(font, label, w, h);
-        int[] d = slip(g, x, y, w, h, body, roomy ? (on ? CREAM : PINK) : 0, state);
-        label(g, font, label, x + d[0], y + d[1], w, h, roomy, INK);
+        Plate.tab(g, font, x, y, w, h, label, on, hover);
     }
 
     // 札の字: 筋があれば筋の右から、なければ斜めの切り口の内側で真ん中に。入らなければ横へ流す (FitText)
@@ -313,45 +259,9 @@ public final class Paper {
     // 黒い紙と下の桃色の山を窓の端まで敷く (fit.begin のあと、論理の座標で)。peaks = 山の峰 {論理の x, base 226 からの高さ}、
     // x が 0 より小さい / STAGE_W より大きい峰は窓の端まで伸ばす。dm = 紙の上の菱 {x, y, 大きさ, 桃色なら 1}
     public static void stage(GuiGraphics g, UiFit fit, int width, int height, String name, float[][] peaks, int[][] dm) {
-        inkDepth = 0;
-        if (UiLook.plate()) {
-            // 板の絵柄: 舞台の大きさの板を一枚 (窓の端までは敷かない。後ろの景色はぼかして見せる)
-            Plate.openFade(g);
-            Plate.panel(g, 0, 0, STAGE_W, STAGE_H, 0, Plate.GOLD);
-            return;
-        }
-        int x0 = (int) Math.floor(fit.x(0));
-        int y0 = (int) Math.floor(fit.y(0));
-        int sw = (int) Math.ceil(fit.x(width)) - x0;
-        int sh = (int) Math.ceil(fit.y(height)) - y0;
-        int ox = -x0;
-        int oy = -y0;
-        draw(g, "stage_" + name, ox + "," + oy + "," + sw + "x" + sh, x0, y0, sw, sh, s -> {
-            float[] black = {7, 10, sw * 0.22f, 6, sw * 0.47f, 9, sw * 0.71f, 4, sw - 9, 8, sw - 5, sh * 0.30f, sw - 8, sh * 0.62f, sw - 4, sh - 12,
-                    sw * 0.64f, sh - 6, sw * 0.31f, sh - 9, 10, sh - 5, 5, sh * 0.58f, 8, sh * 0.27f};
-            s.poly(black, BLACK);
-            float base = oy + 226;
-            float[] p = new float[peaks.length * 2 + 4];
-            for (int i = 0; i < peaks.length; i++) {
-                p[i * 2] = peaks[i][0] < 0 ? -20 : peaks[i][0] > STAGE_W ? sw + 20 : ox + peaks[i][0];
-                p[i * 2 + 1] = base + peaks[i][1];
-            }
-            p[peaks.length * 2] = sw + 20;
-            p[peaks.length * 2 + 1] = sh + 4;
-            p[peaks.length * 2 + 2] = -20;
-            p[peaks.length * 2 + 3] = sh + 4;
-            s.poly(p, PINK_LO);
-            for (int i = 0; i + 1 < peaks.length; i++) {
-                float ax = p[i * 2], ay = p[i * 2 + 1], bx = p[i * 2 + 2], by = p[i * 2 + 3];
-                int n = (int) Math.max(1, Math.abs(bx - ax));
-                for (int k = 0; k <= n; k++) {
-                    s.px(Math.round(ax + (bx - ax) * k / n), Math.round(ay + (by - ay) * k / n), PINK);
-                }
-            }
-            for (int[] d : dm) {
-                s.diamond(ox + d[0], oy + d[1], d[2], d[3] == 1 ? PINK : GREY, d[3] == 1 ? PINK_HI : 0xFFD8D2CA);
-            }
-        });
+        // 舞台の大きさの板を一枚 (窓の端までは敷かない。後ろの景色はぼかして見せる)。peaks・dm は切り絵のときの引数で、使わない
+        Plate.openFade(g);
+        Plate.panel(g, 0, 0, STAGE_W, STAGE_H, 0, Plate.GOLD);
     }
 
     // 紙一枚 (点の並びは論理の座標)。under が 0 でなければ、その色の影を (ux, uy) ずらして下に。
@@ -364,32 +274,10 @@ public final class Paper {
             minY = Math.min(minY, pts[i + 1]);
             maxY = Math.max(maxY, pts[i + 1]);
         }
-        if (UiLook.plate()) {
-            // 板の絵柄: 紙の外接の四角を、紙の色に合う部品で (傾きは持たない)
-            int bx = Math.round(minX);
-            int by = Math.round(minY);
-            Plate.piece(g, bx, by, Math.round(maxX) - bx, Math.round(maxY) - by, body);
-            return;
-        }
-        int x = (int) Math.floor(minX) - 1;
-        int y = (int) Math.floor(minY) - 1;
-        int w = (int) Math.ceil(maxX) - x + 2 + (int) Math.ceil(Math.abs(ux));
-        int h = (int) Math.ceil(maxY) - y + 2 + (int) Math.ceil(Math.abs(uy));
-        float[] q = pts.clone();
-        for (int i = 0; i < q.length; i += 2) {
-            q[i] -= x;
-            q[i + 1] -= y;
-        }
-        StringBuilder key = new StringBuilder(Integer.toHexString(body)).append(':').append(Integer.toHexString(under));
-        for (float f : pts) {
-            key.append(',').append(Math.round(f * 4));
-        }
-        draw(g, "cut_" + name, key.toString(), x, y, w, h, s -> {
-            if (under != 0) {
-                s.poly(q, under, ux, uy);
-            }
-            s.poly(q, body);
-        });
+        // 板の絵柄: 紙の外接の四角を、紙の色に合う部品で (傾きは持たない)
+        int bx = Math.round(minX);
+        int by = Math.round(minY);
+        Plate.piece(g, bx, by, Math.round(maxX) - bx, Math.round(maxY) - by, body);
     }
 
     // 四隅を手でずらした四角の紙 (x, y, w, h と四隅のずれ {左上 y, 右上 y, 右下 x, 左下 x})
@@ -399,70 +287,14 @@ public final class Paper {
 
     // 菱の留め (r = 中心から角まで)
     public static void pin(GuiGraphics g, int cx, int cy, int r, boolean pink) {
-        if (UiLook.plate()) {
-            Plate.gem(g, cx, cy, Math.max(1, r - 1), pink ? 0xFFF2C47C : 0xFF8A90A4);
-            return;
-        }
-        draw(g, "pin_" + r + "_" + pink, "", cx - r, cy - r, 2 * r + 1, 2 * r + 1, s -> s.diamond(r, r, r, pink ? PINK : GREY, pink ? PINK_HI : 0xFFD8D2CA));
+        Plate.gem(g, cx, cy, Math.max(1, r - 1), pink ? 0xFFF2C47C : 0xFF8A90A4);
     }
 
     // ---------- 生成りの紙の上の字 ----------
-    // inkBegin と inkEnd のあいだに描く字 (drawString の地の色) は、黒い紙の上の色から生成りの上の墨の色へ写す (mixin/GuiGraphicsMixin)。
-    // 黒い紙の上の色で書いてある画面の中身を、そのまま生成りの紙に載せるため。字の色が文の中で決めてあるもの (品の稀さの色など) は写らない
-    private static int inkDepth;
-
-    public static void inkBegin() {
-        inkDepth++;
-    }
-
-    public static void inkEnd() {
-        inkDepth = Math.max(0, inkDepth - 1);
-    }
-
-    public static boolean inking() {
-        return inkDepth > 0 && !UiLook.plate();
-    }
-
-    public static int inkColor(int argb) {
-        if (UiLook.plate()) {
-            return Plate.textColor(argb);
-        }
-        return inkDepth <= 0 ? argb : inkOf(argb);
-    }
-
-    // 黒い紙の上の字の色 -> 生成りの上の墨の色 (いつでも写す)
-    public static int inkOf(int argb) {
-        int a = argb & 0xFF000000;
-        if (a == 0) {
-            a = 0xFF000000;
-        }
-        int rgb = argb & 0xFFFFFF;
-        int out;
-        switch (rgb) {
-            case 0xF89CD2, 0xE9C46A, 0xE45A9C, 0xF2D78A -> out = INK_HEAD;
-            case 0x9A929C, 0xB4BBD6, 0xC4BCC4, 0xA8A29A -> out = INK_SOFT;
-            case 0x7C7480, 0x8892B6, 0x707070, 0x808080, 0x5A5460 -> out = 0x8A8086;
-            case 0xD9779A, 0xF0607A, 0xE87C9A, 0xFF5555 -> out = 0xB0102C;
-            case 0x7BD66B, 0x55FF55, 0x7FFFA0 -> out = 0x2E7A3A;
-            default -> {
-                int r = (rgb >> 16) & 0xFF;
-                int g = (rgb >> 8) & 0xFF;
-                int b = rgb & 0xFF;
-                // 明るい字 (黒の上の地の文・目立つ字) は墨、ほかの色はそのまま
-                out = r * 3 + g * 6 + b > 1800 ? INK : rgb;
-            }
-        }
-        return a | out;
-    }
-
     // 窓の外 (舞台の外) を薄く暗くする地
     public static void dim(GuiGraphics g, int width, int height) {
-        if (UiLook.plate()) {
-            Plate.blur();
-            Plate.backdrop(g, width, height, 1f);
-            return;
-        }
-        g.fill(0, 0, width, height, 0xA00E0D14);
+        Plate.blur();
+        Plate.backdrop(g, width, height, 1f);
     }
 
     // Button.builder の代わり (同じ書き方で Tag を作る)。主の釦は .primary()

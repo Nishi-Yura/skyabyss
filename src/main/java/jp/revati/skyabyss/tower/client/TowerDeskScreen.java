@@ -198,11 +198,7 @@ public final class TowerDeskScreen extends Screen {
         }
         // 右の帯: 隊長は今週の賭け、ほかは手引き
         // 帯は上へ伸ばす (賭けの見出しが三行になるため)
-        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
-            PartyStage.column(g, 30);
-        } else {
-            Paper.cut(g, "tower_strip", STRIP, Paper.CREAM, Paper.PINK_LO, 3, 4);
-        }
+        PartyStage.column(g, 30);
         Component strip = state.isLeader() ? Component.translatable("gui.skyabyss.tower_desk.wagers", state.pickMax(), state.bonusPct(), state.chosen().size())
                 : Component.translatable("gui.skyabyss.tower_desk.hint");
         int sy = 38;

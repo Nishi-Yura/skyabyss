@@ -337,7 +337,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
         }
         go.visible = true;
         // 経験値の帯 (Lv 50 は満ちている)
-        g.fill(x, y + 1, x + C1W, y + 3, 0xFFE45A9C);
+        g.fill(x, y + 1, x + C1W, y + 3, 0xFFC48A44);
         y += Golden.S5;
         // 転生後
         int after = n + 1;
@@ -401,7 +401,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
         }
         terms.end(g);
         terms.setContentHeight(y - terms.top());
-        terms.drawBar(g, 0xFF0E0D14, 0xAAE45A9C);
+        terms.drawBar(g, 0xFF0F121A, 0xAAC48A44);
     }
 
     private boolean fx(GuiGraphics g, int x, int y, String key, double value, int decimals) {
@@ -448,7 +448,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
             int color = 0xFF000000 | a.color;
             // 腕に沿った点線
             for (int r = 9; r <= 36; r += 3) {
-                g.fill(cx + (int) Math.round(dx * r), cy + (int) Math.round(dy * r), cx + (int) Math.round(dx * r) + 1, cy + (int) Math.round(dy * r) + 1, 0xFF3A3644);
+                g.fill(cx + (int) Math.round(dx * r), cy + (int) Math.round(dy * r), cx + (int) Math.round(dx * r) + 1, cy + (int) Math.round(dy * r) + 1, 0xFF2A3044);
             }
             // 節 (転生した順に外へ。要の節は大きく)
             int k = 0;
@@ -540,8 +540,8 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
         protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
             boolean sel = selArm == arm.ordinal();
             int color = 0xFF000000 | arm.color;
-            g.fill(getX(), getY(), getX() + 18, getY() + 18, sel ? 0xFF2E2A38 : isHoveredOrFocused() ? 0xFF24202E : 0xFF16151E);
-            g.renderOutline(getX(), getY(), 18, 18, sel ? 0xFFF89CD2 : isHoveredOrFocused() ? 0xFFECE8DC : color & 0xFF8A8A8A | 0xFF303030);
+            g.fill(getX(), getY(), getX() + 18, getY() + 18, sel ? 0xFF2E2A38 : isHoveredOrFocused() ? 0xFF283046 : 0xFF16151E);
+            g.renderOutline(getX(), getY(), 18, 18, sel ? 0xFFF2C47C : isHoveredOrFocused() ? 0xFFECE8DC : color & 0xFF8A8A8A | 0xFF303030);
             Component name = getMessage();
             g.drawString(font, name, getX() + (18 - font.width(name)) / 2, getY() + 5, color, false);
         }

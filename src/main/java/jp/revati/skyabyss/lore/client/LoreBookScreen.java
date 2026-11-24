@@ -6,7 +6,7 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.client.ui.BookPlate;
 import jp.revati.skyabyss.lore.LoreCatalog;
 import jp.revati.skyabyss.lore.LoreChapter;
 import jp.revati.skyabyss.lore.LoreEntry;
@@ -15,64 +15,47 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 
 // 伝承の書の画面。見開きの古い帳面で、上に章のしおり、左の頁に項目の一覧、右の頁に本文。
 // まだ記されていない項目は題を「？？？」、本文をにじんだ墨の帯で伏せ、手がかりを一行だけ添える。
-// テクスチャは 32px 密度 (GUI の 1 単位 = 2 画素) で描いてある (tools/gen/story/gen_lore_book.py)
-public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded, jp.revati.skyabyss.client.ui.Plate.Parchment {
-    static final ResourceLocation BOOK = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/lore/book.png");
-    static final ResourceLocation WIDGETS = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/lore/widgets.png");
-    private static final int BOOK_TEX_W = 608;
-    private static final int BOOK_TEX_H = 384;
-    private static final int WIDGETS_TEX_W = 512;
-    private static final int WIDGETS_TEX_H = 256;
-
-    // widgets.png の中の絵 (画素で u, v, 幅, 高さ。画面には半分の大きさで描く)
-    record Sprite(int u, int v, int w, int h) {
-    }
-
-    static final Sprite W_TAB_OFF = new Sprite(0, 0, 104, 36);
-    static final Sprite W_TAB_ON = new Sprite(104, 0, 104, 48);
-    static final Sprite W_MARK_KNOWN = new Sprite(208, 0, 16, 16);
-    static final Sprite W_MARK_LOCKED = new Sprite(224, 0, 16, 16);
-    static final Sprite W_MARK_NEW = new Sprite(240, 0, 16, 16);
-    static final Sprite W_ARROW_UP = new Sprite(256, 0, 16, 16);
-    static final Sprite W_ARROW_DOWN = new Sprite(272, 0, 16, 16);
-    static final Sprite W_ROW_SELECTED = new Sprite(0, 56, 256, 24);
-    static final Sprite W_INK_BAR = new Sprite(0, 88, 256, 12);
-    static final Sprite W_TOAST = new Sprite(0, 104, 320, 64);
-
+// 絵は鐘の銅の板 (client/ui/BookPlate。docs/design/56 の 2.1): 石と銅の表紙に生成りの頁、しおりは升
+public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     // 墨の色
-    static final int INK = 0xFF181722;
-    static final int FADED = 0xFF6E6468;
-    static final int TEAL = 0xFF8C2C60;
-    static final int TITLE = 0xFFB0326E;
-    static final int PAPER = 0xFFECE4D6;
-    // まだ何も記されていない章のしおりの字
-    static final int TAB_LOCKED = 0xFF6E6468;
+    static final int INK = BookPlate.INK;
+    static final int FADED = BookPlate.FADED;
+    static final int TEAL = BookPlate.RUST;
+    static final int TITLE = BookPlate.TITLE;
 
     // 見開きの大きさと、頁の内側 (書の左上からの位置)
     private static final int BW = 304;
     private static final int BH = 192;
-    // 章は 8 枚 (序章・一〜六章・終章)。書の幅 304 に収めるため、しおりは重ねて並べる (見える幅 TAB_STEP、右のしおりが左のしおりの端に載る)
-    private static final int TAB_W = 52;
+    // 頁 (左右とも幅 143、上下は表紙の縁の内側)。のどは 150〜154
+    private static final int PAGE_Y = 7;
+    private static final int PAGE_H = 178;
+    private static final int LPAGE_X = 7;
+    private static final int RPAGE_X = 154;
+    private static final int PAGE_W = 143;
+    // 章は 8 枚 (序章・一〜六章・終章)。しおりは書の上に、頁の左の端から重ねずに並べる (幅 32、あいだ 2)
+    private static final int TAB_W = 32;
+    private static final int TAB_H = 13;
     private static final int TAB_STEP = 34;
-    private static final int TAB_X0 = 6;
+    private static final int TAB_X0 = LPAGE_X;
     private static final int LEFT_X = 18;
     private static final int LEFT_W = 126;
     private static final int RIGHT_X = 160;
     private static final int RIGHT_W = 126;
     private static final int HEADER_Y = 16;
+    // 見出しの下の線
+    private static final int RULE_Y = 27;
     private static final int LIST_Y = 33;
     // 行は 13 (docs/design/56。紙の本の形はそのまま)
     private static final int ROW_H = 13;
     private static final int LIST_ROWS = 10;
     private static final int BODY_Y = 33;
     private static final int BODY_BOTTOM = 180;
-    private static final int COUNT_Y = 176;
+    private static final int COUNT_Y = 174;
     private static final int LINE_H = 13;
     private static final int GAP_H = 5;
 
@@ -291,30 +274,13 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
             r.render(g, mouseX, mouseY, partialTick);
         }
         List<LoreChapter> chapters = LoreClient.catalog().chapters();
-        // しおり (選んでいないもの) は書の後ろに
+        drawBook(g);
+        // しおりは重ならないので、どれも同じ順で描く
         for (int i = 0; i < chapters.size(); i++) {
-            if (i != chapterIndex) {
-                drawTab(g, i, chapters.get(i), false, mouseX, mouseY);
-            }
+            drawTab(g, i, chapters.get(i), i == chapterIndex, mouseX, mouseY);
         }
-        g.blit(BOOK, left, top, BW, BH, 0, 0, BOOK_TEX_W, BOOK_TEX_H, BOOK_TEX_W, BOOK_TEX_H);
-        // しおりの章の名は書の後に、書の上端より上だけに描く (書に下半分が隠れて読めなかった。2026-10-21 の試遊)
-        jp.revati.skyabyss.client.ui.TextClip.clipPosed(g, 0, 0, 4000, top + 1);
-        for (int i = 0; i < chapters.size(); i++) {
-            if (i != chapterIndex) {
-                drawTabLabel(g, i, chapters.get(i), false, mouseX, mouseY);
-            }
-        }
-        g.disableScissor();
         LoreChapter chapter = chapter();
         if (chapter != null) {
-            // 選んだしおりは、自分の幅 (しおりの間隔 + 両側 3) だけで切って一番前に描く。しおりの絵は間隔より広く、
-            // そのまま描くと右どなりの章の名を隠し、となりを上に描き直すと今度はとなりが前に出た (2026-10-23 の試遊)
-            int tx = left + TAB_X0 + chapterIndex * TAB_STEP;
-            jp.revati.skyabyss.client.ui.TextClip.clipPosed(g, tx - 3, 0, TAB_STEP + 6, top + 1);
-            drawTab(g, chapterIndex, chapter, true, mouseX, mouseY);
-            g.disableScissor();
-            drawTabLabel(g, chapterIndex, chapter, true, mouseX, mouseY);
             drawLeftPage(g, chapter, mouseX, mouseY);
         } else {
             g.drawString(font, Component.translatable("gui.skyabyss.lore.empty"), left + LEFT_X, top + HEADER_Y, FADED, false);
@@ -329,31 +295,32 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
         renderTransparentBackground(g);
     }
 
-    private void drawTab(GuiGraphics g, int index, LoreChapter chapter, boolean on, int mouseX, int mouseY) {
-        int x = left + TAB_X0 + index * TAB_STEP;
-        int y = top - (on ? 18 : 15);
-        blitWidget(g, x, y, on ? W_TAB_ON : W_TAB_OFF);
+    // 表紙・見開きの頁・のど・見出しの線・しおり紐
+    private void drawBook(GuiGraphics g) {
+        BookPlate.cover(g, left, top, BW, BH);
+        BookPlate.spine(g, left + LPAGE_X + PAGE_W, top + PAGE_Y, RPAGE_X - LPAGE_X - PAGE_W, PAGE_H);
+        BookPlate.page(g, left + LPAGE_X, top + PAGE_Y, PAGE_W, PAGE_H, 1);
+        BookPlate.page(g, left + RPAGE_X, top + PAGE_Y, PAGE_W, PAGE_H, -1);
+        BookPlate.rule(g, left + LEFT_X, top + RULE_Y, LEFT_W);
+        BookPlate.rule(g, left + RIGHT_X, top + RULE_Y, RIGHT_W);
+        BookPlate.ribbon(g, left + RPAGE_X + 82, top + PAGE_Y + PAGE_H, top + BH + 5);
     }
 
-    // しおりの章の名と NEW の印 (しおりの上の段に。書の上端にかからない高さ)
-    private void drawTabLabel(GuiGraphics g, int index, LoreChapter chapter, boolean on, int mouseX, int mouseY) {
+    // しおり (章の名の升) と NEW の印。書の上の端に載る
+    private void drawTab(GuiGraphics g, int index, LoreChapter chapter, boolean on, int mouseX, int mouseY) {
         int x = left + TAB_X0 + index * TAB_STEP;
-        int y = top - (on ? 18 : 15);
-        boolean known = chapterKnown(chapter);
+        int y = top - TAB_H;
         Component label = Component.translatable(chapter.tabKey());
-        int color = on ? INK : known ? INK : TAB_LOCKED;
-        if (!on && hoverTab(index, mouseX, mouseY)) {
-            color = TEAL;
-        }
-        g.drawString(font, label, x + (TAB_STEP - font.width(label)) / 2, y + 3, color, false);
+        boolean hover = !on && hoverTab(index, mouseX, mouseY);
+        BookPlate.tab(g, font, x, y, TAB_W, TAB_H, label, on, hover, !chapterKnown(chapter));
         if (chapterHasNew(chapter)) {
-            blitWidget(g, x + TAB_STEP - 9, y + 2, W_MARK_NEW);
+            BookPlate.mark(g, x + TAB_W - 8, y - 4, BookPlate.MARK_NEW);
         }
     }
 
     private boolean hoverTab(int index, double mouseX, double mouseY) {
         int x = left + TAB_X0 + index * TAB_STEP;
-        return mouseX >= x && mouseX < x + TAB_STEP && mouseY >= top - 18 && mouseY < top + 1;
+        return mouseX >= x && mouseX < x + TAB_W && mouseY >= top - TAB_H - 1 && mouseY < top;
     }
 
     private void drawLeftPage(GuiGraphics g, LoreChapter chapter, int mouseX, int mouseY) {
@@ -383,25 +350,24 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
             boolean unlocked = LoreClient.unlocked(entry.id());
             boolean hover = mouseX >= x && mouseX < x + LEFT_W && mouseY >= y && mouseY < y + ROW_H;
             if (entry.id().equals(selected)) {
-                blitWidget(g, x - 2, y, W_ROW_SELECTED);
+                BookPlate.row(g, x - 2, y, LEFT_W + 2, ROW_H - 1, true);
             }
-            blitWidget(g, x, y + 2, unlocked ? W_MARK_KNOWN : W_MARK_LOCKED);
+            BookPlate.mark(g, x, y + 1, unlocked ? BookPlate.MARK_KNOWN : BookPlate.MARK_LOCKED);
             Component title = unlocked ? Component.translatable(entry.titleKey()) : Component.literal("？？？");
             FormattedText clipped = font.substrByWidth(title, LEFT_W - 22);
-            // 選んだ行は濃い青緑の帯の上なので、羊皮紙の色で書く (墨の色では帯に沈んで読めない)
             boolean isSelected = entry.id().equals(selected);
-            int color = !unlocked ? FADED : isSelected ? PAPER : hover ? TEAL : INK;
+            int color = !unlocked ? FADED : isSelected ? TITLE : hover ? TEAL : INK;
             g.drawString(font, net.minecraft.locale.Language.getInstance().getVisualOrder(clipped), x + 11, y + 3, color, false);
             if (LoreClient.isNew(entry.id())) {
-                blitWidget(g, x + LEFT_W - 9, y + 2, W_MARK_NEW);
+                BookPlate.mark(g, x + LEFT_W - 9, y + 1, BookPlate.MARK_NEW);
             }
         }
         if (listScroll > 0) {
             // 上の矢印も一覧の下に並べる (一覧の上は見出しの二重線で、重なってしまう)
-            blitWidget(g, x + LEFT_W - 18, top + LIST_Y + LIST_ROWS * ROW_H, W_ARROW_UP);
+            BookPlate.arrow(g, x + LEFT_W - 18, top + LIST_Y + LIST_ROWS * ROW_H, true, INK);
         }
         if (listScroll + LIST_ROWS < entries.size()) {
-            blitWidget(g, x + LEFT_W - 8, top + LIST_Y + LIST_ROWS * ROW_H, W_ARROW_DOWN);
+            BookPlate.arrow(g, x + LEFT_W - 8, top + LIST_Y + LIST_ROWS * ROW_H, false, INK);
         }
         if (total > 0) {
             Component count = Component.translatable("gui.skyabyss.lore.count", known, total);
@@ -431,7 +397,7 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
                 drawInkBar(g, x, y + 4, line.color());
             } else {
                 if (line.bar()) {
-                    g.fill(x + 1, y - 1, x + 2, y + line.height() - 1, 0x808C2C60);
+                    g.fill(x + 1, y - 1, x + 2, y + line.height() - 1, 0x8083502A);
                 }
                 int color = line.color();
                 if (line.link() != null && mouseX >= x && mouseX < x + RIGHT_W && mouseY >= y && mouseY < y + line.height()) {
@@ -443,10 +409,10 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
         }
         // 続きがあれば、文の右の余白に矢印
         if (bodyScroll > 0) {
-            blitWidget(g, x + RIGHT_W + 1, top + BODY_Y, W_ARROW_UP);
+            BookPlate.arrow(g, x + RIGHT_W + 1, top + BODY_Y, true, INK);
         }
         if (bodyScroll < maxBodyScroll()) {
-            blitWidget(g, x + RIGHT_W + 1, top + BODY_BOTTOM - 8, W_ARROW_DOWN);
+            BookPlate.arrow(g, x + RIGHT_W + 1, top + BODY_BOTTOM - 8, false, INK);
         }
         // 送りの目盛り (細い帯。矢印の間に、いまの見える所を示す)
         int max = maxBodyScroll();
@@ -456,17 +422,12 @@ public class LoreBookScreen extends Screen implements jp.revati.skyabyss.client.
             int thumb = Math.max(8, track * shown / Math.max(1, lines.size()));
             int ty = top + BODY_Y + (track - thumb) * bodyScroll / max;
             g.fill(x + RIGHT_W + 4, top + BODY_Y, x + RIGHT_W + 6, top + BODY_BOTTOM, 0x40000000);
-            g.fill(x + RIGHT_W + 4, ty, x + RIGHT_W + 6, ty + thumb, 0x90 << 24 | 0x8C2C60);
+            g.fill(x + RIGHT_W + 4, ty, x + RIGHT_W + 6, ty + thumb, 0x90 << 24 | 0x83502A);
         }
     }
 
     private void drawInkBar(GuiGraphics g, int x, int y, int width) {
-        int w = Math.min(width, W_INK_BAR.w() / 2);
-        g.blit(WIDGETS, x, y, w, W_INK_BAR.h() / 2, W_INK_BAR.u(), W_INK_BAR.v(), w * 2, W_INK_BAR.h(), WIDGETS_TEX_W, WIDGETS_TEX_H);
-    }
-
-    static void blitWidget(GuiGraphics g, int x, int y, Sprite s) {
-        g.blit(WIDGETS, x, y, s.w() / 2, s.h() / 2, s.u(), s.v(), s.w(), s.h(), WIDGETS_TEX_W, WIDGETS_TEX_H);
+        BookPlate.inkBar(g, x, y, Math.min(width, RIGHT_W));
     }
 
     // 右の頁を、一番下の行が下端に来るまで送れる

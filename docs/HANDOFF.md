@@ -4,6 +4,19 @@
 
 ## 今
 
+- 2026-11-25（コミットなし）: (4) 本と地図の枠を銅にした（ユーザーの「よし」3 回）。伝承の書・控え帳は絵をやめて `client/ui/BookPlate`（`Plate.panel` の表紙・まっすぐな生成りの頁・重ならない升のしおり・格子の菱と矢印）で描き、`LoreToast` は HUD の札に。旅の地図は枠・凡例・縮尺の升・行き先の一覧と釦を `Plate` の部品に（地図の絵は前のまま）。決まりは doc 56 の 2.1「本」と 4.1。
+  - 絵: `docs/review/plate_ui/book_lore_clean.png`・`book_record_clean.png`・`map_frame_clean.png`。台本 `tools/shots/paper_books.txt`（状態を足した）・`map_frame.txt`（新）で重なり 0。
+  - 消したもの: `textures/gui/lore/`・`gui/record/` の絵、`tools/gen/story/paper_cut.py`・`gen_record_screen.py`、`gen_lore_book.py` の案 p（アイテムの絵だけ写す）。地図の死んだ石板の丸い海図のコード。`textures/gui/map/disc_a.png` はコードから使われていない（生成は `gen_travel_map_assets.py`）が残した。
+  - 地図の板は窓の大きさなので `Plate.panelFor`・`wellFor`（大きさごとに絵を溜めない）を足した。CLAUDE.md の環境の癖に Python 3.9 の coding 宣言を 1 行足した。
+  - 撮れていない状態: 控え帳の釦の出る行・管理者が見る帯、地図の押せない釦、`LoreToast`（カードの知らせが出ないときだけの控え）。控え帳の一覧は下の端を 6 上げた（矢印を頁に収めるため）。次は (5) HUD の残り。
+
+- 2026-11-25（コミットなし。前半だけ `git add` 済み）: (3) 切り絵の経路を消した。
+  - 前半: `UiLook.plate()` の分岐 103 か所を板の側だけに畳み、`UiLook`・`UiLookCommand`（`/skyabyss_ui look`）・台本の `uilook`・案 B/C（`Plate` の STONE・DEEP）・墨の写し（`Paper.inkBegin/inkEnd`）と、使われなくなった切り絵の部品（職えらびの紙のカード・山・菱など）を消した。
+  - 後半: 色の写し（`Plate.paint`・`paintSheet`・`textColor`・`card`、`Paper.inkColor`・`inkOf`、mixin の `fill` と字の写し、`Plate.Parchment`）を消し、画面の側の色を、写した後の色で書いた。`Paper` の色の名前（`PINK`・`INK` など）は名前のまま、値が板の色。`CREAM`・`CREAM_HI` だけ生成りのまま（紙の絵の中で使っていた所は板の色の数字へ）。`Plate.piece` と `Paper.slip` の色の見分けには新しい色も足した。
+  - 確かめ方: 一時の記録（写しが色を変えた所を、呼んだ行といっしょに書く）を取りながら 12 本の台本を撮り、記録が 0 件になるまで書き換えてから写しを消した。前後の絵は 8 本（約 400 枚）を画素と色ごとの数で比べ、差の出た絵は並べて目で見た。差はどれも、マウスの位置で出る札・乗せた升、動き（回る模型・時計・雨）、闇市の品ぞろえと所持金だけだった。台本に出ない画面は、色の使い道（字・塗り・紙の絵）を読んで決めた。
+  - 見た目が変わるもの（2026-11-25 ユーザーの「よし」）: 文の中の色（`withColor`）は写しを通らないので、切り絵の色のまま出ていた。名前の値を板の色にしたので、次の字が桃色・灰色から板の色（鐘の金・添えの灰・まだの灰）に変わる。釣り大会の題（`RecordsHubScreen`）、スキルの木の札の型の名と遊び方（`SkillScreen`）、転生の札（`SoulScreen`）、旅の記録の札（`JourneyScreen`）、プロフィールの札（`ProfileScreen`）、成長の札（`GrowthScreen`）。旅の地図の光る印（`TravelMapScreen` の `S_GLOW` の色）は地図の絵の側なので桃色のまま。
+  - 残り: `Paper` の名前は切り絵のまま（`Paper.draw`・`Sheet`・`Tag` は板でも使う）。`tools/dev/paper_audit.py` は切り絵用の数え方のまま。次は (4) 本のつまみと頁・旅の地図の枠を銅に。
+
 - 2026-11-25（コミットなし）: 画面ごとの清書 (2) の 1 つ目、**スキルの木**（`SkillScreen` の板の側・`ExtPage`）を清書した。見出しの段を溝で区切り、盤・下の段の左右を沈んだ欄に（下の段が窓の縁にかかっていたのを直した）、技と秘伝の枠を升と欄に、右の釦の幅をそろえ、節の札を説明の欄にまっすぐ、節の絵を枠の芯に（ユーザーの声「アイコンが右上に寄ってる」。絵 `skill_tree_nodes_center.png`）。決まりは doc 56 の 2.1 の「スキルの木」。前後の絵 `docs/review/plate_ui/skill_tree_clean.png`、台本 `tools/shots/paper_skill.txt` の 33 枚で重なり 0。
   - スキルの木はユーザーの「よし」。続けて店の型（`ShopStage`）の下の段を清書した（手引きの欄と手持ちの欄を縁の内側に、手引きは 2 行まで。絵 `shop_clean.png`、`paper_round3.txt` の 150 枚で重なり 0）。
   - 店はユーザーの「よし」。続けて作業台（共鳴の炉・袋）を組み直した（doc 56 の 2.1「作業台」。絵 `forge_bag_clean.png`、炉の 4 つのつまみは装備を入れた状態でも撮った）。

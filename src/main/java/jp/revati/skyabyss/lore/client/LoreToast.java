@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 
-// 伝承が記されたときの控えめな知らせ。右上に羊皮紙の札が 4 秒出る (チャットには出さない)
+// 伝承が記されたときの控えめな知らせ。右上に HUD の札が 4 秒出る (チャットには出さない)
 public class LoreToast implements Toast {
     private static final long DURATION = 4000L;
     private final Component title;
@@ -25,12 +25,14 @@ public class LoreToast implements Toast {
     public Visibility render(GuiGraphics g, ToastComponent toasts, long timeSinceLastVisible) {
         jp.revati.skyabyss.client.hud.HudManager.noteToast(g, height());
         Font font = toasts.getMinecraft().font;
-        LoreBookScreen.blitWidget(g, 0, 0, LoreBookScreen.W_TOAST);
+        // 札の地は HUD の札と同じ (鐘の銅。筋は鐘の金)
+        jp.revati.skyabyss.client.ui.Plate.hudCard(g, 0, 0, width(), height(), jp.revati.skyabyss.client.ui.Plate.hudHead(1f), 1f);
         g.renderFakeItem(new ItemStack(LoreSetup.LORE_BOOK.get()), 8, 8);
-        g.drawString(font, Component.translatable("gui.skyabyss.lore.toast"), 30, 7, LoreBookScreen.TEAL, false);
-        // 札の絵は一行分の高さ。長い題は「…」で切る (折り返して途中で切れるより、省略だと分かる)
+        g.drawString(font, Component.translatable("gui.skyabyss.lore.toast"), 30, 7, jp.revati.skyabyss.client.ui.Plate.hudHead(1f), false);
+        // 札は一行分の高さ。長い題は「…」で切る (折り返して途中で切れるより、省略だと分かる)
         int room = width() - 36;
-        jp.revati.skyabyss.client.ui.Marquee.draw(g, font, Language.getInstance().getVisualOrder(title), 30, 18, room, LoreBookScreen.INK, false);
+        jp.revati.skyabyss.client.ui.Marquee.draw(g, font, Language.getInstance().getVisualOrder(title), 30, 18, room,
+                jp.revati.skyabyss.client.ui.Plate.hudText(1f), false);
         return timeSinceLastVisible >= DURATION * toasts.getNotificationDisplayTimeMultiplier() ? Visibility.HIDE : Visibility.SHOW;
     }
 }

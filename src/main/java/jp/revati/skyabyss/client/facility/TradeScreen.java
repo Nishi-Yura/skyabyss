@@ -242,7 +242,7 @@ public class TradeScreen extends Screen {
     // ---------------------------------------------------------------- 描く
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        g.fill(0, 0, width, height, 0xA00E0D14);
+        g.fill(0, 0, width, height, 0xA00F121A);
     }
 
     // 板は窓に合わせて一様に大きく描く (描くのと当たりは同じ変換: fit)
@@ -284,8 +284,6 @@ public class TradeScreen extends Screen {
             hit(b.x(), b.y(), b.w(), b.h(), () -> setTab(id), null);
             tx += tw + Golden.S3;
         }
-        // 帳面の上の字は墨へ写す (右の黒い紙へ移る所で各頁が inkEnd する)
-        Paper.inkBegin();
         switch (tab) {
             case 1 -> renderSell(g, mx, my);
             case 2 -> renderMine(g, mx, my);
@@ -293,7 +291,6 @@ public class TradeScreen extends Screen {
             case 4 -> renderMail(g, mx, my);
             default -> renderMarket(g, mx, my);
         }
-        Paper.inkEnd();
         // 帳面の下の端: 手引き (一行。入りきらなければ「…」で、重ねると全文)
         boolean away = !view.atKeeper() && (tab == 0 || tab == 1);
         Component foot = away ? Component.translatable("gui.skyabyss.trade.not_at_keeper")
@@ -301,14 +298,10 @@ public class TradeScreen extends Screen {
         int fw = ShopStage.LIST_W - 8;
         int fx = ShopStage.LIST_X + 4;
         int fy = ShopStage.HINT_Y;
-        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
-            // 板の絵柄: 店と同じ下の段の欄 (2 行まで)
-            ShopStage.hint(g, font, foot, away ? ShopStage.LACK_ON_BLACK : -1);
-            fy = ShopStage.FOOT_Y;
-        } else {
-            FitText.draw(g, font, foot, fx, fy, fw, away ? ShopStage.LACK : Paper.INK_SOFT, false);
-        }
-        if (font.width(foot) > (jp.revati.skyabyss.client.ui.UiLook.plate() ? 2 * fw : fw) && mx >= fx && mx < fx + fw && my >= fy - 2 && my < fy + 10) {
+        // 板の絵柄: 店と同じ下の段の欄 (2 行まで)
+        ShopStage.hint(g, font, foot, away ? ShopStage.LACK_ON_BLACK : -1);
+        fy = ShopStage.FOOT_Y;
+        if (font.width(foot) > (2 * fw) && mx >= fx && mx < fx + fw && my >= fy - 2 && my < fy + 10) {
             hoverText = foot;
         }
         if (cancelButton != null && mineSelected() != null) {
@@ -436,7 +429,7 @@ public class TradeScreen extends Screen {
             int pick = i + scroll[0];
             hit(CONTENT.x(), ry, CONTENT.w(), ROW_H, () -> marketFocus = pick, null);
             if (pick != marketFocus && mx >= CONTENT.x() && mx < CONTENT.right() && my >= ry && my < ry + ROW_H) {
-                g.fill(CONTENT.x(), ry, CONTENT.right(), ry + ROW_H, 0x30E45A9C);
+                g.fill(CONTENT.x(), ry, CONTENT.right(), ry + ROW_H, 0x30C48A44);
             }
         }
         for (int i = 0; i < ROWS && i + scroll[0] < rows.size(); i++) {
@@ -453,9 +446,7 @@ public class TradeScreen extends Screen {
             // 買う側から読む: 左 = 渡すもの (出品者のほしいもの)、右 = もらえる品 (出品の品)。2026-10-22 の試遊: 逆に読めた
             int iy = itemY(ry);
             FacilityUi.tag(g, lx - 2, iy - 2, stacksWidth(r.want(), 18, 4) + 4, 20);
-            Paper.inkEnd();
             int ex = stacks(g, r.want(), lx, iy, 18, 4, mx, my);
-            Paper.inkBegin();
             int ax = Math.max(ex, lx + Golden.S89 - 13);
             g.drawString(font, "→", ax, iy + 4, hot ? ShopStage.ON_PINK : Paper.ON_BLACK_HI, false);
             int tagW = r.applied() ? font.width(Component.translatable("gui.skyabyss.trade.applied")) + 6 : 0;
@@ -466,7 +457,6 @@ public class TradeScreen extends Screen {
             }
         }
         scrollBar(g, CONTENT, rows.size(), scroll[0]);
-        Paper.inkEnd();
         // 右の黒い紙: 乗せた出品の出す人・残り・払えるか、申請と値を出す
         if (rows.isEmpty()) {
             return;
@@ -577,7 +567,7 @@ public class TradeScreen extends Screen {
                         stack(g, s.copyWithCount(rest), sx, sy, mx, my);
                     } else {
                         stack(g, s, sx, sy, mx, my);
-                        g.fill(sx, sy, sx + 17, sy + 17, 0xA00E0D14);
+                        g.fill(sx, sy, sx + 17, sy + 17, 0xA00F121A);
                     }
                     if (!ok) {
                         g.fill(sx, sy, sx + 17, sy + 17, 0x90401020);
@@ -587,7 +577,6 @@ public class TradeScreen extends Screen {
                 }
             }
         }
-        Paper.inkEnd();
         // 右の黒い紙: 値 (鐘銭)。欄は init の coinsBox
         int nx = MINOR_R.x() + Golden.S5;
         int nw = MINOR_R.w() - 2 * Golden.S5;
@@ -677,7 +666,6 @@ public class TradeScreen extends Screen {
             }, null);
         }
         scrollBar(g, MINOR_L, rows.size(), scroll[2]);
-        Paper.inkEnd();
         // 主の列 (右): 選んだ出品の申請
         if (sel == null) {
             return;
@@ -694,7 +682,7 @@ public class TradeScreen extends Screen {
         for (int i = 0; i < sel.apps().size() && i < appRows; i++) {
             TradeNetwork.AppRow a = sel.apps().get(i);
             int ry = ay + i * ROW_H;
-            g.fill(ax, ry + 5, ax + 3, ry + 8, a.online() ? FacilityUi.TEAL : 0xFF3A3644);
+            g.fill(ax, ry + 5, ax + 3, ry + 8, a.online() ? FacilityUi.TEAL : 0xFF2A3044);
             int col = !a.online() ? Paper.ON_BLACK_DIM : a.ok() ? Golden.TEXT : FacilityUi.LACK;
             String state = Component.translatable(!a.online() ? "gui.skyabyss.trade.away" : a.ok() ? "gui.skyabyss.trade.ready" : "gui.skyabyss.trade.short")
                     .getString();
@@ -730,7 +718,7 @@ public class TradeScreen extends Screen {
             int pick = i + scroll[3];
             hit(CONTENT.x(), ry, CONTENT.w(), ROW_H, () -> appliedFocus = pick, null);
             if (pick != appliedFocus && mx >= CONTENT.x() && mx < CONTENT.right() && my >= ry && my < ry + ROW_H) {
-                g.fill(CONTENT.x(), ry, CONTENT.right(), ry + ROW_H, 0x30E45A9C);
+                g.fill(CONTENT.x(), ry, CONTENT.right(), ry + ROW_H, 0x30C48A44);
             }
         }
         for (int i = 0; i < ROWS && i + scroll[3] < rows.size(); i++) {
@@ -755,7 +743,6 @@ public class TradeScreen extends Screen {
             g.drawString(font, st, right - sw, iy + 4, hot ? ShopStage.ON_PINK : r.canPay() ? Paper.ON_BLACK_HI : FacilityUi.LACK, false);
         }
         scrollBar(g, CONTENT, rows.size(), scroll[3]);
-        Paper.inkEnd();
         // 右の黒い紙: 乗せた申請の出す人・残り・取り下げる
         if (rows.isEmpty()) {
             return;

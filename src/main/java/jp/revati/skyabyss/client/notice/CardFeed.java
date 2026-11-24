@@ -249,7 +249,7 @@ public final class CardFeed {
                 int rows = (e.items.size() + perRow(ew) - 1) / perRow(ew);
                 int hh = rows * ICON_PITCH + 2;
                 g.fill(x - slide, y + 1, x + 2 - slide, y + hh - 1, alpha << 24 | e.accent);
-                g.fill(x - slide, y + hh - 2, x + 2 - slide, y + hh - 1, jp.revati.skyabyss.client.ui.Plate.alpha(jp.revati.skyabyss.client.ui.Plate.mix(jp.revati.skyabyss.client.ui.Plate.paint(0xFF000000 | e.accent), 0xFF000000, 0.40f), 0xFF, a));
+                g.fill(x - slide, y + hh - 2, x + 2 - slide, y + hh - 1, jp.revati.skyabyss.client.ui.Plate.alpha(jp.revati.skyabyss.client.ui.Plate.mix(0xFF000000 | e.accent, 0xFF000000, 0.40f), 0xFF, a));
                 for (int i = 0; i < e.items.size(); i++) {
                     int bx = x + 4 - slide + (i % perRow(ew)) * ICON_PITCH;
                     int by = y + 1 + (i / perRow(ew)) * ICON_PITCH;

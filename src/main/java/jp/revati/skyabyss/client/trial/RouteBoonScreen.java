@@ -25,14 +25,6 @@ import jp.revati.skyabyss.client.ui.Paper;
 // 左上に題と残りの秒、右の黒い紙に手引き
 @net.neoforged.fml.common.EventBusSubscriber(modid = jp.revati.skyabyss.SkyAbyss.MODID, value = net.neoforged.api.distmarker.Dist.CLIENT)
 public class RouteBoonScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
-    private static final int BG = 0x05070F;
-    private static final int PANEL = 0x181722;
-    private static final int CARD = 0x16151E;
-    private static final int GOLD = 0xF89CD2;
-    private static final int TEAL = 0xFFF6EA;
-    private static final int TEXT = 0xECE4D6;
-    private static final int DIM = 0x9A929C;
-
     private static final int W = PickStage.W;
     private static final int H = PickStage.H;
 
@@ -150,15 +142,6 @@ public class RouteBoonScreen extends Screen implements jp.revati.skyabyss.client
     // ---------------------------------------------------------------- 絵
     private static int argb(float alpha, int rgb) {
         return (Mth.clamp((int) (alpha * 255f), 0, 255) << 24) | (rgb & 0xFFFFFF);
-    }
-
-    private void frame(GuiGraphics g, int x, int y, int w, int h, int line, int fill) {
-        g.fill(x, y, x + w, y + h, 0xFF03050A);
-        g.fill(x + 1, y + 1, x + w - 1, y + h - 1, argb(1f, line));
-        g.fill(x + 2, y + 2, x + w - 2, y + h - 2, argb(1f, fill));
-        g.fill(x + 2, y + 2, x + w - 2, y + 3, argb(0.10f, 0xFFFFFF));
-        g.fill(x + 2, y + 2, x + 3, y + h - 2, argb(0.06f, 0xFFFFFF));
-        g.fill(x + 2, y + h - 3, x + w - 2, y + h - 2, argb(0.35f, 0x000000));
     }
 
     @Override

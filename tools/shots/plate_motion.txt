@@ -12,7 +12,6 @@ cmd skyabyss cinematic stop
 wait 40
 chat clear
 
-uilook a
 uislow 10
 open job_choice_warrior
 hover 230 100
@@ -169,4 +168,3 @@ shot decide_62
 shot decide_63
 close
 uislow 1
-uilook paper

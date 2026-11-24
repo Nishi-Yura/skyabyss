@@ -25,11 +25,6 @@ import jp.revati.skyabyss.client.ui.Paper;
 // 右の黒い紙に「袋」の題と、袋 27・手もと 9 の枠。枠の場所は画面の側で動かす (Slot.x/y。accesstransformer)
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public class GlassChestScreen extends AbstractContainerScreen<ChestMenu> implements jp.revati.skyabyss.client.ui.TextBounded {
-    // 箱の枠 (帳面の中) と袋の枠 (右の黒い紙)
-    private static final int BOX_X = 40;
-    private static final int BOX_Y = 42;
-    private static final int BAG_X = 239;
-    private static final int BAG_Y = 34;
     private final UiFit fit = new UiFit();
 
     // 板の絵柄 (docs/design/56 の 2.1「作業台」): 板は中身の高さに詰めて舞台の真ん中。左に箱の欄、右に袋と手もとの欄 (同じ幅で左右対称)
@@ -92,34 +87,18 @@ public class GlassChestScreen extends AbstractContainerScreen<ChestMenu> impleme
         leftPos = r[0];
         topPos = r[1];
         int box = menu.getRowCount() * 9;
-        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
-            int gy = pWellY() + 6;
-            for (int i = 0; i < menu.slots.size(); i++) {
-                Slot s = menu.slots.get(i);
-                if (i < box) {
-                    s.x = P_LX + 6 + 1 + i % 9 * 18;
-                    s.y = gy + 1 + i / 9 * 18;
-                } else if (i < box + 27) {
-                    s.x = P_RX + 6 + 1 + (i - box) % 9 * 18;
-                    s.y = gy + 1 + (i - box) / 9 * 18;
-                } else {
-                    s.x = P_RX + 6 + 1 + (i - box - 27) * 18;
-                    s.y = gy + 1 + 58;
-                }
-            }
-            return;
-        }
+        int gy = pWellY() + 6;
         for (int i = 0; i < menu.slots.size(); i++) {
             Slot s = menu.slots.get(i);
             if (i < box) {
-                s.x = BOX_X + 1 + i % 9 * 18;
-                s.y = BOX_Y + 1 + i / 9 * 18;
+                s.x = P_LX + 6 + 1 + i % 9 * 18;
+                s.y = gy + 1 + i / 9 * 18;
             } else if (i < box + 27) {
-                s.x = BAG_X + 1 + (i - box) % 9 * 18;
-                s.y = BAG_Y + 1 + (i - box) / 9 * 18;
+                s.x = P_RX + 6 + 1 + (i - box) % 9 * 18;
+                s.y = gy + 1 + (i - box) / 9 * 18;
             } else {
-                s.x = BAG_X + 1 + (i - box - 27) * 18;
-                s.y = BAG_Y + 1 + 58;
+                s.x = P_RX + 6 + 1 + (i - box - 27) * 18;
+                s.y = gy + 1 + 58;
             }
         }
     }
@@ -141,54 +120,7 @@ public class GlassChestScreen extends AbstractContainerScreen<ChestMenu> impleme
     protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
         fit.fit(width, height, imageWidth, imageHeight, 1f, 1f);
         fit.begin(g);
-        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
-            renderPlate(g, mouseX, mouseY);
-            return;
-        }
-        // 窓が舞台よりずっと大きい (GUI 2 など) ときは、窓の端まで敷かずに舞台の大きさの一枚の紙にする (箱の画面は大きくできないため)
-        jp.revati.skyabyss.client.ui.UiFit back = fit;
-        int bw = width;
-        int bh = height;
-        if (width > imageWidth * 3 / 2 || height > imageHeight * 3 / 2) {
-            bw = imageWidth + 24;
-            bh = imageHeight + 24;
-            back = new jp.revati.skyabyss.client.ui.UiFit();
-            back.fit(bw, bh, imageWidth, imageHeight, 1f, 1f);
-        }
-        ShopStage.backdrop(g, back, bw, bh);
-        int box = menu.getRowCount() * 9;
-        // 預かり所の頁 (帳面の上の辺のつまみ)
-        int pages = StashTabs.pages(this);
-        for (int i = 0; i < pages; i++) {
-            ShopStage.tab(g, font, i, Component.literal(String.valueOf(i + 1)), i + 1 == StashTabs.page(), mouseX - leftPos, mouseY - topPos);
-        }
-        // 箱の題と入っている数 (帳面の上。墨)
-        Paper.pin(g, BOX_X - 18, 32, 3, true);
-        g.drawString(font, title, BOX_X - 10, 28, Paper.INK_HEAD, false);
-        int used = 0;
-        for (int i = 0; i < box; i++) {
-            if (menu.slots.get(i).hasItem()) {
-                used++;
-            }
-        }
-        String count = used + " / " + box;
-        g.drawString(font, count, BOX_X + 162 - font.width(count), 28, Paper.INK_SOFT, false);
-        // 袋 (右の黒い紙の題)
-        ShopStage.title(g, font, Component.translatable("gui.skyabyss.gear.bag"));
-        fit.end(g);
-        g.pose().pushPose();
-        g.pose().translate(leftPos, topPos, 0);
-        for (int i = 0; i < menu.slots.size(); i++) {
-            Slot s = menu.slots.get(i);
-            if (i < box) {
-                // 帳面の上の枠 (少し濃い生成りの窪み)
-                g.fill(s.x - 1, s.y - 1, s.x + 17, s.y + 17, Paper.CREAM_LO);
-                g.fill(s.x, s.y, s.x + 17, s.y + 17, 0xFFDCD2C2);
-            } else {
-                Golden.slot(g, s.x - 1, s.y - 1, 18);
-            }
-        }
-        g.pose().popPose();
+        renderPlate(g, mouseX, mouseY);
     }
 
     // 板の絵柄: 見出しの段に (預かり所なら頁のつまみと) 箱の名前・入っている数、袋の名前。下に二つの沈んだ欄と枠
@@ -240,17 +172,8 @@ public class GlassChestScreen extends AbstractContainerScreen<ChestMenu> impleme
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         int pages = StashTabs.pages(this);
-        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
-            for (int i = 0; i < pages; i++) {
-                if (button == 0 && ShopStage.in(mouseX - leftPos, mouseY - topPos, pTabX(i), pTabY(), P_TAB_W, 13)) {
-                    StashTabs.go(this, i + 1);
-                    return true;
-                }
-            }
-            return super.mouseClicked(mouseX, mouseY, button);
-        }
         for (int i = 0; i < pages; i++) {
-            if (button == 0 && ShopStage.in(mouseX - leftPos, mouseY - topPos, ShopStage.tabX(i), ShopStage.TAB_Y, ShopStage.TAB_W, 13)) {
+            if (button == 0 && ShopStage.in(mouseX - leftPos, mouseY - topPos, pTabX(i), pTabY(), P_TAB_W, 13)) {
                 StashTabs.go(this, i + 1);
                 return true;
             }

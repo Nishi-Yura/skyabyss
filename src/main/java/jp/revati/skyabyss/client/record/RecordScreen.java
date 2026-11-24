@@ -9,9 +9,7 @@ import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
-import jp.revati.skyabyss.SkyAbyss;
+import jp.revati.skyabyss.client.ui.BookPlate;
 import jp.revati.skyabyss.record.RecordNetwork;
 import jp.revati.skyabyss.record.RecordSnapshot;
 import jp.revati.skyabyss.record.RecordSnapshot.Kind;
@@ -22,74 +20,44 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 // 控え帳の画面 (B キー、/skyrecord、管理者は /skyabyss inspect)。
-// 鯨骨の枠に一枚の羊皮紙。上につまみ 4 つ、左に行の一覧、右に選んだ行の詳しい頁 (在りか・守り・取り戻し方)。
+// 石と銅の表紙に一枚の生成りの頁 (client/ui/BookPlate。docs/design/56 の 2.1)。上につまみ 5 つ、左に行の一覧、右に選んだ行の詳しい頁 (在りか・守り・取り戻し方)。
 // 中身はサーバーが組んだもの (RecordSnapshot) をそのまま描く。開いているあいだ 1 秒ごとに最新を頼み、
-// 値が変わった行には金のきらめきを 10 秒付ける。テクスチャは tools/gen/story/gen_record_screen.py (32px 密度) の b 案
-public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded, jp.revati.skyabyss.client.ui.Plate.Parchment {
-    static final ResourceLocation LEDGER = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/record/ledger.png");
-    static final ResourceLocation WIDGETS = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/record/widgets.png");
-    static final int LEDGER_W = 608;
-    static final int LEDGER_H = 384;
-    static final int WIDGETS_W = 512;
-    static final int WIDGETS_H = 256;
-
-    // widgets.png の中の絵 (画素。画面には半分で描く)
-    record Sprite(int u, int v, int w, int h) {
-        void draw(GuiGraphics g, int x, int y) {
-            draw(g, x, y, w / 2, h / 2);
-        }
-
-        void draw(GuiGraphics g, int x, int y, int gw, int gh) {
-            // 半透明の絵 (選んだ行の帯など) があるので、重ねて描く
-            RenderSystem.enableBlend();
-            g.blit(WIDGETS, x, y, gw, gh, u, v, w, h, WIDGETS_W, WIDGETS_H);
-            RenderSystem.disableBlend();
-        }
-    }
-
-    static final Sprite TAB_OFF = new Sprite(0, 0, 128, 36);
-    static final Sprite TAB_ON = new Sprite(128, 0, 128, 48);
-    static final Sprite MARK_SAFE = new Sprite(256, 0, 16, 16);
-    static final Sprite MARK_ATTENTION = new Sprite(272, 0, 16, 16);
-    static final Sprite MARK_LOST = new Sprite(288, 0, 16, 16);
-    static final Sprite MARK_LOCKED = new Sprite(304, 0, 16, 16);
-    static final Sprite MARK_CHANGED = new Sprite(320, 0, 16, 16);
-    static final Sprite ARROW_UP = new Sprite(336, 0, 16, 16);
-    static final Sprite ARROW_DOWN = new Sprite(352, 0, 16, 16);
-    static final Sprite ROW_SELECTED = new Sprite(0, 56, 256, 24);
-    static final Sprite BAR_FRAME = new Sprite(256, 56, 200, 10);
-    static final Sprite BAR_FILL = new Sprite(256, 70, 196, 4);
-    static final Sprite[] BUTTON = {new Sprite(0, 88, 160, 28), new Sprite(0, 120, 160, 28), new Sprite(0, 152, 160, 28)};
-    static final Sprite RIBBON = new Sprite(0, 184, 256, 22);
-
+// 値が変わった行には銅の印を 10 秒付ける
+public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
     // 墨の色 (伝承の書と同じ)
-    static final int INK = 0xFF181722;
-    static final int FADED = 0xFF6E6468;
-    static final int TEAL = 0xFF8C2C60;
-    static final int TITLE = 0xFFB0326E;
+    static final int INK = BookPlate.INK;
+    static final int FADED = BookPlate.FADED;
+    static final int TEAL = BookPlate.RUST;
+    static final int TITLE = BookPlate.TITLE;
     static final int AMBER = 0xFFA06A0E;
     static final int LOST = 0xFF8A2A3C;
     static final int PAPER = 0xFFECE4D6;
 
     static final int BW = 304;
     static final int BH = 192;
-    static final int TAB_W = 64;
-    // つまみ 5 つ (大事な品・巨神・成長・縁と頁・記し) が書の幅に収まる間隔 (絵は 64 幅、少し重ねる)
+    // 頁 (表紙の縁の内側に一枚。真ん中を縦の線で分ける)
+    static final int PAGE_X = 7;
+    static final int PAGE_Y = 7;
+    static final int PAGE_W = 290;
+    static final int PAGE_H = 178;
+    static final int DIVIDER_X = 152;
+    // つまみ 5 つ (大事な品・巨神・成長・縁と頁・記し)。書の上に、頁の左の端から重ねずに並べる (幅 52、あいだ 2)
+    static final int TAB_W = 52;
+    static final int TAB_H = 13;
     static final int TAB_STEP = 54;
-    static final int TAB_X0 = 14;
+    static final int TAB_X0 = PAGE_X;
     static final int LX = 18;
     static final int LW = 128;
     static final int RX = 162;
     static final int RW = 124;
     static final int LIST_TOP = 31;
-    static final int LIST_BOTTOM = 182;
+    static final int LIST_BOTTOM = 176;
     // 行は 13 の段 (docs/design/56。紙の本の形はそのまま): 見出し 13、品 26 (名前と値の 2 行)、値 13
     static final int H_HEADER = 13;
     static final int H_ITEM = 26;
@@ -287,14 +255,14 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
         };
     }
 
-    @Nullable
-    static Sprite markSprite(int mark) {
+    // 行の印 (BookPlate.mark の種類。-1 = 印なし)
+    static int markKind(int mark) {
         return switch (mark) {
-            case RecordSnapshot.MARK_SAFE -> MARK_SAFE;
-            case RecordSnapshot.MARK_ATTENTION -> MARK_ATTENTION;
-            case RecordSnapshot.MARK_LOST -> MARK_LOST;
-            case RecordSnapshot.MARK_LOCKED -> MARK_LOCKED;
-            default -> null;
+            case RecordSnapshot.MARK_SAFE -> BookPlate.MARK_KNOWN;
+            case RecordSnapshot.MARK_ATTENTION -> BookPlate.MARK_NEW;
+            case RecordSnapshot.MARK_LOST -> BookPlate.MARK_LOST;
+            case RecordSnapshot.MARK_LOCKED -> BookPlate.MARK_LOCKED;
+            default -> -1;
         };
     }
 
@@ -377,14 +345,12 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
         fit.end(g);
     }
 
+    // 表紙・頁・真ん中の線・右の頁の見出しの線
     private void renderBook(GuiGraphics g) {
-        // 選んでいないつまみは書の後ろに
-        for (int i = 0; i < RecordSnapshot.TAB_IDS.size(); i++) {
-            if (!RecordSnapshot.TAB_IDS.get(i).equals(tab)) {
-                TAB_OFF.draw(g, left + TAB_X0 + i * TAB_STEP, top - 15);
-            }
-        }
-        g.blit(LEDGER, left, top, BW, BH, 0, 0, LEDGER_W, LEDGER_H, LEDGER_W, LEDGER_H);
+        BookPlate.cover(g, left, top, BW, BH);
+        BookPlate.page(g, left + PAGE_X, top + PAGE_Y, PAGE_W, PAGE_H, 0);
+        BookPlate.divider(g, left + DIVIDER_X, top + 15, top + 177);
+        BookPlate.rule(g, left + RX - 2, top + 27, RW + 2);
     }
 
     private void renderBody(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
@@ -406,23 +372,14 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
             String id = RecordSnapshot.TAB_IDS.get(i);
             int x = left + TAB_X0 + i * TAB_STEP;
             boolean on = id.equals(tab);
-            if (on) {
-                g.pose().pushPose();
-                g.pose().translate(0, 0, 50);
-                TAB_ON.draw(g, x, top - 21);
-                g.pose().popPose();
-            }
-            boolean hover = !on && mouseX >= x && mouseX < x + TAB_W && mouseY >= top - 15 && mouseY < top;
+            int y = top - TAB_H;
+            boolean hover = !on && mouseX >= x && mouseX < x + TAB_W && mouseY >= y - 1 && mouseY < top;
             Component name = Component.translatable("skyabyss_record.tab." + id);
-            int y = on ? top - 14 : top - 10;
-            g.pose().pushPose();
-            g.pose().translate(0, 0, on ? 60 : 0);
-            g.drawString(font, name, x + (TAB_W - font.width(name)) / 2, y, on ? INK : hover ? INK : 0xFF6E6468, false);
-            // 変わった値があるつまみには、きらめきを
+            BookPlate.tab(g, font, x, y, TAB_W, TAB_H, name, on, hover, false);
+            // 変わった値があるつまみには、右上の角に銅の印を
             if (!on && hasChangedIn(id)) {
-                MARK_CHANGED.draw(g, x + TAB_W - 11, y - 1);
+                BookPlate.mark(g, x + TAB_W - 8, y - 4, BookPlate.MARK_CHANGED);
             }
-            g.pose().popPose();
         }
     }
 
@@ -453,8 +410,8 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
             jp.revati.skyabyss.client.rebirth.RebirthClient.drawFrame(g, cx - ow / 2 - 4, top + 17, ow + 8, 11, rebirths);
         }
         if (!snapshot.self()) {
-            // 管理者がほかの人を見ているときは、えんじの帯で
-            RIBBON.draw(g, cx - ow / 2 - 6, top + 18, ow + 16, 10);
+            // 管理者がほかの人を見ているときは、暗い銅の帯で
+            BookPlate.band(g, cx - ow / 2 - 6, top + 18, ow + 12, 10);
             jp.revati.skyabyss.client.ui.Marquee.draw(g, font, o, cx - ow / 2, top + 19, ow, PAPER, false);
         } else {
             g.drawString(font, o, cx - ow / 2, top + 19, FADED, false);
@@ -495,7 +452,7 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
             int x1 = chipX(i + 1, n) - 1;
             boolean on = c.id().equals(current);
             boolean hover = !on && mouseX >= x0 && mouseX < x1 && mouseY >= y && mouseY < y + CHIP_H;
-            g.fill(x0, y, x1, y + CHIP_H, on ? 0x50E45A9C : hover ? 0x30000000 : 0x18000000);
+            g.fill(x0, y, x1, y + CHIP_H, on ? 0x50C48A44 : hover ? 0x30000000 : 0x18000000);
             if (on) {
                 g.fill(x0, y + CHIP_H - 1, x1, y + CHIP_H, TEAL);
             }
@@ -507,7 +464,7 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
                 g.drawString(font, label, x0 + (x1 - x0 - font.width(label)) / 2 + 1, y + 2, color, false);
             }
             if (!on && hasChangedIn(c.id())) {
-                MARK_CHANGED.draw(g, x1 - 7, y - 3);
+                BookPlate.mark(g, x1 - 7, y - 3, BookPlate.MARK_CHANGED);
             }
         }
     }
@@ -530,10 +487,10 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
         }
         g.disableScissor();
         if (scroll() > 0) {
-            ARROW_UP.draw(g, left + 140, top + listTop - 9);
+            BookPlate.arrow(g, left + 140, top + listTop - 9, true, INK);
         }
         if (scroll() < maxListScroll()) {
-            ARROW_DOWN.draw(g, left + 140, top + LIST_BOTTOM - 2);
+            BookPlate.arrow(g, left + 140, top + LIST_BOTTOM - 1, false, INK);
         }
         return hover;
     }
@@ -544,22 +501,16 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
         boolean inside = mouseY >= Math.max(y, top + listTop()) && mouseY < Math.min(y + rowHeight(r), top + LIST_BOTTOM);
         if (r.kind() == Kind.HEADER) {
             g.drawString(font, r.label(), x, y + 3, TEAL, false);
-            g.fill(x + font.width(r.label()) + 4, y + 7, left + LX + LW - 2, y + 8, 0x40E45A9C);
+            g.fill(x + font.width(r.label()) + 4, y + 7, left + LX + LW - 2, y + 8, 0x40C48A44);
             return hover;
         }
         boolean rowHover = inside && mouseX >= x - 2 && mouseX < x + LW;
         if (selected || rowHover) {
-            g.pose().pushPose();
-            if (!selected) {
-                g.setColor(1f, 1f, 1f, 0.45f);
-            }
-            ROW_SELECTED.draw(g, x - 4, y, LW + 4, rowHeight(r));
-            g.setColor(1f, 1f, 1f, 1f);
-            g.pose().popPose();
+            BookPlate.row(g, x - 4, y, LW + 4, rowHeight(r), selected);
         }
         boolean isChanged = changed.containsKey(page() + "/" + r.key());
         if (isChanged) {
-            MARK_CHANGED.draw(g, left + 7, y + (rowHeight(r) - 8) / 2);
+            BookPlate.mark(g, left + 7, y + (rowHeight(r) - 8) / 2, BookPlate.MARK_CHANGED);
         }
         int valueColor = isChanged ? AMBER : markColor(r.mark());
         if (r.kind() == Kind.ITEM) {
@@ -576,9 +527,9 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
             int room = LW - 19 - 12;
             jp.revati.skyabyss.client.ui.Marquee.draw(g, font, r.label(), tx, y + 3, room, INK, false);
             jp.revati.skyabyss.client.ui.Marquee.draw(g, font, r.value(), tx, y + 16, room, valueColor, false);
-            Sprite m = markSprite(r.mark());
-            if (m != null) {
-                m.draw(g, x + LW - 11, y + 9);
+            int m = markKind(r.mark());
+            if (m >= 0) {
+                BookPlate.mark(g, x + LW - 11, y + 9, m);
             }
         } else {
             int bar = r.bar() >= 0 ? 1 : 0;
@@ -609,14 +560,10 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
         boolean isChanged = changed.containsKey(page() + "/" + row.key());
         jp.revati.skyabyss.client.ui.Marquee.draw(g, font, row.value(), x, top + BODY_TOP, RW - 10, isChanged ? AMBER : markColor(row.mark()), false);
         if (isChanged) {
-            MARK_CHANGED.draw(g, x + RW - 8, top + BODY_TOP);
+            BookPlate.mark(g, x + RW - 8, top + BODY_TOP, BookPlate.MARK_CHANGED);
         }
         if (row.bar() >= 0) {
-            BAR_FRAME.draw(g, x, top + BODY_TOP + 11, RW - 4, 5);
-            int fill = Math.round((RW - 8) * Mth.clamp(row.bar(), 0f, 1f));
-            if (fill > 0) {
-                BAR_FILL.draw(g, x + 2, top + BODY_TOP + 13, fill, 2);
-            }
+            BookPlate.bar(g, x, top + BODY_TOP + 11, RW - 4, Mth.clamp(row.bar(), 0f, 1f));
         }
         int bt = top + bodyTop(row);
         int bb = top + bodyBottom(row);
@@ -631,16 +578,15 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
         }
         g.disableScissor();
         if (bodyScroll > 0) {
-            ARROW_UP.draw(g, x + RW - 6, bt - 8);
+            BookPlate.arrow(g, x + RW - 6, bt - 8, true, INK);
         }
         if (bodyScroll < maxBodyScroll(row)) {
-            ARROW_DOWN.draw(g, x + RW - 6, bb - 4);
+            BookPlate.arrow(g, x + RW - 6, bb - 1, false, INK);
         }
         if (hasButton(row)) {
             int bx = x + (RW - 80) / 2;
             int by = top + BUTTON_Y;
             boolean hover = mouseX >= bx && mouseX < bx + 80 && mouseY >= by && mouseY < by + 14;
-            BUTTON[hover ? 1 : 0].draw(g, bx, by);
             Component label = Component.translatable(switch (row.action()) {
                 case RecordSnapshot.ACTION_CLAIM -> "skyabyss_record.gui.claim";
                 case RecordSnapshot.ACTION_RECALL_FRAGMENT, RecordSnapshot.ACTION_RECALL_KEY -> "skyabyss_record.gui.recall";
@@ -648,7 +594,8 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
                 case RecordSnapshot.ACTION_RECORDS -> "skyabyss_record.gui.open";
                 default -> "skyabyss_record.gui.choose";
             });
-            g.drawString(font, label, bx + (80 - font.width(label)) / 2, by + 3, TITLE, false);
+            jp.revati.skyabyss.client.ui.Plate.button(g, font, bx, by, 80, 14, label, true,
+                    hover ? jp.revati.skyabyss.client.ui.Plate.HOVER : jp.revati.skyabyss.client.ui.Plate.REST, jp.revati.skyabyss.client.ui.Plate.GOLD);
         }
     }
 
@@ -667,7 +614,7 @@ public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui
             // つまみ
             for (int i = 0; i < RecordSnapshot.TAB_IDS.size(); i++) {
                 int x = left + TAB_X0 + i * TAB_STEP;
-                if (mouseX >= x && mouseX < x + TAB_W && mouseY >= top - 21 && mouseY < top + 1) {
+                if (mouseX >= x && mouseX < x + TAB_W && mouseY >= top - TAB_H - 1 && mouseY < top) {
                     if (!RecordSnapshot.TAB_IDS.get(i).equals(tab)) {
                         click();
                         switchTab(RecordSnapshot.TAB_IDS.get(i));

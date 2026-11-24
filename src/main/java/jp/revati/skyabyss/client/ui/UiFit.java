@@ -51,10 +51,8 @@ public final class UiFit {
     }
 
     public void end(GuiGraphics g) {
-        if (UiLook.plate()) {
-            // 板の絵柄は、開くときに舞台ごと透かして入れる (Plate.fade)。舞台の終わりで必ず戻す
-            Plate.fadeEnd(g);
-        }
+        // 板の絵柄は、開くときに舞台ごと透かして入れる (Plate.fade)。舞台の終わりで必ず戻す
+        Plate.fadeEnd(g);
         g.pose().popPose();
     }
 

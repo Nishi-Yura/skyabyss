@@ -1,4 +1,4 @@
-# 伝承の書と記録の帳 (切り絵。docs/design/56 の 2.1)
+# 伝承の書と記録の帳 (鐘の銅の本。docs/design/56 の 2.1「本」)
 # bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/paper_books.txt -PshotsName=paper_books
 world paper_books flat
 size 1920 1080
@@ -14,6 +14,8 @@ cmd skyabyss playtest skip opening
 cmd skyabyss cinematic stop
 cmd skyabyss level set @p 12
 cmd skyabyss job choose mage
+cmd skyabyss lore reset @p
+cmd skyabyss lore book @p
 hud on
 camera 0 -60 8 180 0
 waitchunks
@@ -36,6 +38,43 @@ cmd skyrecord deeds
 wait 30
 overlap record_1920_g4
 shot record_1920_g4
+close
+wait 4
+cmd skyrecord titans
+wait 30
+overlap record_titans_1920_g4
+shot record_titans_1920_g4
+close
+wait 4
+cmd skyrecord keepsakes
+wait 30
+overlap record_keep_1920_g4
+shot record_keep_1920_g4
+close
+wait 4
+# 全部を記した書 (しおりの NEW の印・記した行・長い本文)
+cmd skyabyss lore unlock @p all
+wait 10
+chat clear
+open lore
+wait 8
+overlap lore_all_1920_g4
+shot lore_all_1920_g4
+close
+wait 4
+window 1920 1080
+guiscale 3
+wait 10
+open lore
+wait 8
+overlap lore_1920_g3
+shot lore_1920_g3
+close
+wait 4
+cmd skyrecord titans
+wait 30
+overlap record_1920_g3
+shot record_1920_g3
 close
 wait 4
 window 1280 720

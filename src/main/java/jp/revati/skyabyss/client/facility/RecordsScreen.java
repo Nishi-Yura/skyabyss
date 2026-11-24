@@ -89,12 +89,10 @@ public class RecordsScreen extends Screen {
         }
         // 合計 (目録の下)
         int fy = tabY(Math.max(4, view.pages().size())) + 8;
-        Paper.inkBegin();
         for (net.minecraft.util.FormattedCharSequence l : font.split(Component.translatable("gui.skyabyss.records.foot", view.totalCleared(), view.titles()), LedgerStage.INDEX_W - 4)) {
             g.drawString(font, l, LedgerStage.INDEX_X + 2, fy, Paper.INK_SOFT, false);
             fy += ROW_H;
         }
-        Paper.inkEnd();
         if (view.pages().isEmpty()) {
             fit.end(g);
             return;
@@ -129,8 +127,8 @@ public class RecordsScreen extends Screen {
                 if (r.modsTotal() > 0) {
                     int bx = x + 166;
                     int bw = Golden.S34;
-                    g.fill(bx, ry + 5, bx + bw, ry + 8, 0xFF3A3644);
-                    g.fill(bx, ry + 5, bx + Math.min(bw, bw * r.modsSeen() / r.modsTotal()), ry + 8, 0xFFE45A9C);
+                    g.fill(bx, ry + 5, bx + bw, ry + 8, 0xFF2A3044);
+                    g.fill(bx, ry + 5, bx + Math.min(bw, bw * r.modsSeen() / r.modsTotal()), ry + 8, 0xFFC48A44);
                     g.drawString(font, r.modsSeen() + "/" + r.modsTotal(), bx + bw + 4, Golden.textY(ry, ROW_H), FacilityUi.DIM, false);
                 }
                 if (r.goals() > 0) {
@@ -138,7 +136,7 @@ public class RecordsScreen extends Screen {
                 }
             }
             rows.end(g);
-            rows.drawBar(g, 0xFF0E0D14, 0xFFE45A9C);
+            rows.drawBar(g, 0xFF0F121A, 0xFFC48A44);
         }
         fit.end(g);
     }

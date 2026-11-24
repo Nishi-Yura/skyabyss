@@ -141,7 +141,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
                 if (seen(e)) {
                     // いちど手に入れた品: 暗い影 (今は手もとにない)
                     g.renderItem(new ItemStack(e.item()), sx, sy);
-                    g.fill(sx, sy, sx + 16, sy + 16, 0xC80E0D14);
+                    g.fill(sx, sy, sx + 16, sy + 16, 0xC80F121A);
                 } else {
                     g.drawString(font, "?", sx + 8 - font.width("?") / 2, sy + 4, 0xFF000000 | Paper.ON_BLACK_DIM, false);
                 }
@@ -153,7 +153,7 @@ public class PouchScreen extends AbstractContainerScreen<PouchMenu> implements j
     private static void frame(GuiGraphics g, int x, int y, int state) {
         Golden.slot(g, x - 1, y - 1, 18);
         if (state > 0) {
-            Paper.edge(g, x - 1, y - 1, x + 17, y + 17, state == 2 ? GOLD : 0xFF5A5460);
+            Paper.edge(g, x - 1, y - 1, x + 17, y + 17, state == 2 ? GOLD : 0xFF3A4054);
         }
     }
 
