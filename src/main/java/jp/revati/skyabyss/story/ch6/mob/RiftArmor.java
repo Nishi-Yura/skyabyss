@@ -66,14 +66,6 @@ public class RiftArmor extends RiftMob {
         return super.hurt(source, amount);
     }
 
-    @Override
-    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
-        super.dropCustomDeathLoot(level, source, recentlyHit);
-        if (!echo()) {
-            jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.MOON_DUST.get(), 0.5, 1, 2);
-        }
-    }
-
     // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)
     private static net.minecraft.core.particles.SimpleParticleType fx(jp.revati.skyabyss.fx.FxParticles.Kind kind) {
         return jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.MOON, kind);

@@ -451,19 +451,17 @@ public final class Ch1MobsSelfTest {
             drop(ps);
             h.discard();
 
-            // 落とし物: 棘針 40% (1〜2)・骨片 10%
+            // 落とし物: 骨片 10%
             clearItems(level);
             FakePlayer killer = fake(level, "h_killer", SX + 10, SZ);
             ps.add(killer);
             for (int i = 0; i < 200; i++) {
                 spawn(level, ModEntities.SPINE_HARE.get(), SX, SZ, 0f).hurt(level.damageSources().playerAttack(killer), 1000f);
             }
-            int quills = count(level, GuideSetup.HARE_QUILL.get(), false);
             int chips = count(level, GuideSetup.BONE_CHIP.get(), true);
-            check(quills >= 80 && quills <= 160, "hare quill drops " + quills + " from 200 (expected about 120)", f);
             check(chips >= 5 && chips <= 40, "hare bone chip drops " + chips + " from 200 (expected about 20)", f);
             level.getEntitiesOfClass(Mob.class, area(), m -> m instanceof GuardMob).forEach(Mob::discard);
-            notes.add("hare quills " + quills + "/200");
+            notes.add("hare bone chips " + chips + "/200");
         } finally {
             drop(ps);
             h.discard();

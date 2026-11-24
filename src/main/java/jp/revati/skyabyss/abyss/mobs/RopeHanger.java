@@ -7,14 +7,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.story.ch4.Ch4Mobs;
 import jp.revati.skyabyss.util.PlayerMaps;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -171,12 +168,6 @@ public class RopeHanger extends AbyssMobB {
         if (at != null && p.serverLevel().getGameTime() - at <= FALL_WINDOW) {
             event.setAmount(Math.min(event.getAmount(), FALL_CAP));
         }
-    }
-
-    @Override
-    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
-        super.dropCustomDeathLoot(level, source, recentlyHit);
-        Ch4Mobs.drop(level, this, source, AbyssMobsBSetup.ROPE_KNOT.get(), 0.7, 1, 2);
     }
 
     // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)

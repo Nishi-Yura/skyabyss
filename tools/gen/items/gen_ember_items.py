@@ -58,7 +58,6 @@ RECOMMEND = {
     "ember_horn": "a",
     "ember_core": "a",
     "ember_shard": "a",
-    "spark_dust": "a",
     "cinder_husk": "a",
 }
 

@@ -27,7 +27,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 //
 // | 敵     | 余燼の燠石 | 共鳴の欠片 | 熾火の角杯 | そのほか |
 // | 灰被り | 35%、1〜2  | 6%、1      | 4%、1      | 余燼の鎧のどれか一部位 1%。火守り (EmberBackLayout.SOUTH) では熾 1 (必ず。だれでも拾える) |
-// | 火の粉蛾 | 5%、1    | 1%、1      | —          | 火の粉の粉 15% |
+// | 火の粉蛾 | 5%、1    | 1%、1      | —          | — |
 // | 燠虫   | 25%、1〜2  | 5%、1      | 3%、1      | 燠の殻 20% |
 //
 // 品 (余燼の燠石・角杯・粉・殻・鎧) は担当 G、熾は担当 C3 が登録する。表は ID で持ち、登録されていない品は落とさない
@@ -40,7 +40,6 @@ public final class EmberMobLoot {
     public static final ResourceLocation SHARD = EmberIds.id(EmberIds.EMBER_SHARD);
     public static final ResourceLocation RESONANCE = EmberIds.id("resonance_shard_ember");
     public static final ResourceLocation HORN = EmberIds.id(EmberIds.EMBER_HORN);
-    public static final ResourceLocation SPARK_DUST = EmberIds.id(EmberIds.SPARK_DUST);
     public static final ResourceLocation CINDER_HUSK = EmberIds.id(EmberIds.CINDER_HUSK);
     public static final List<ResourceLocation> ARMOR = List.of(EmberIds.id(EmberIds.EMBER_HELMET), EmberIds.id(EmberIds.EMBER_CHESTPLATE),
             EmberIds.id(EmberIds.EMBER_LEGGINGS), EmberIds.id(EmberIds.EMBER_BOOTS));
@@ -50,7 +49,7 @@ public final class EmberMobLoot {
     }
 
     public static final Row THRALL = new Row(0.35f, 1, 2, 0.06f, 0.04f, 0.01f, null, 0f);
-    public static final Row MOTH = new Row(0.05f, 1, 1, 0.01f, 0f, 0f, SPARK_DUST, 0.15f);
+    public static final Row MOTH = new Row(0.05f, 1, 1, 0.01f, 0f, 0f, null, 0f);
     public static final Row ROLLER = new Row(0.25f, 1, 2, 0.05f, 0.03f, 0f, CINDER_HUSK, 0.20f);
 
     public record Drop(ResourceLocation id, int count) {

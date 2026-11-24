@@ -46,7 +46,7 @@ public final class EmberLoreSelfTest {
             EmberLore.LORE_STILLED, EmberLore.inscriptionLore("lore_ember_west"), EmberLore.inscriptionLore("lore_ember_east"),
             EmberLore.inscriptionLore("lore_ember_south"));
     static final List<String> ITEMS = List.of("ember_helmet", "ember_chestplate", "ember_leggings", "ember_boots", "ember_war_axe", "ember_mantle",
-            "kindling_charm", "smith_hammer", "thrall_poker", "ember_lantern", "ember_horn", "ember_shard", "ember_core", "spark_dust", "cinder_husk");
+            "kindling_charm", "smith_hammer", "thrall_poker", "ember_lantern", "ember_horn", "ember_shard", "ember_core", "cinder_husk");
 
     private EmberLoreSelfTest() {
     }

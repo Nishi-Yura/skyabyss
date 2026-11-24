@@ -390,9 +390,9 @@
 |---|---|---|---|---|
 | 珊瑚憑き | 30%、1〜2 | 5%、1 | 3%、1 | 潮殻の鎧のどれか一部位 1%（`TideGearLoot`） |
 | 磯走り | 8%、1 | 1%、1 | — | なし |
-| 泡吹き | 25%、1〜2 | 5%、1 | 3%、1 | 泡袋 20% |
+| 泡吹き | 25%、1〜2 | 5%、1 | 3%、1 | — |
 
-素材: 潮殻の殻片（`tide_shell_shard`）、潮干しの貝（`tide_dried_shell`。食べると体力が少しずつ戻り、水中呼吸 30 秒）、泡袋（`bubble_sac`）。登録は `TideMobSetup`（心臓の報酬もこれを使う）。絵の生成は `tools/gen/mobs/gen_tide_mob_assets.py`。
+素材: 潮殻の殻片（`tide_shell_shard`）、潮干しの貝（`tide_dried_shell`。食べると体力が少しずつ戻り、水中呼吸 30 秒）。登録は `TideMobSetup`（心臓の報酬もこれを使う）。絵の生成は `tools/gen/mobs/gen_tide_mob_assets.py`。
 
 ### 6.2 潮招き（中ボス）
 

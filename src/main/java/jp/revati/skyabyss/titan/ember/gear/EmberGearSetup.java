@@ -38,8 +38,6 @@ public final class EmberGearSetup {
     public static final DeferredItem<Item> CORE = ITEMS.register(EmberIds.EMBER_CORE,
             () -> new MaterialItem(new Item.Properties().stacksTo(16).rarity(Rarity.EPIC).fireResistant(), 0xFF9A3C,
                     "item.skyabyss.ember_core.desc", true));
-    public static final DeferredItem<Item> SPARK_DUST = ITEMS.register(EmberIds.SPARK_DUST,
-            () -> new MaterialItem(new Item.Properties().fireResistant(), 0xF2B53A, "item.skyabyss.spark_dust.desc", false));
     public static final DeferredItem<Item> CINDER_HUSK = ITEMS.register(EmberIds.CINDER_HUSK,
             () -> new MaterialItem(new Item.Properties().fireResistant(), 0xB06A48, "item.skyabyss.cinder_husk.desc", false));
     public static final DeferredItem<Item> HORN = ITEMS.register(EmberIds.EMBER_HORN,
@@ -102,7 +100,7 @@ public final class EmberGearSetup {
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredHolder<Item, Item> item : List.of(HELMET, CHESTPLATE, LEGGINGS, BOOTS, WAR_AXE, MANTLE, CHARM, HAMMER, POKER, LANTERN,
-                    HORN, SHARD, CORE, SPARK_DUST, CINDER_HUSK)) {
+                    HORN, SHARD, CORE, CINDER_HUSK)) {
                 event.accept(item.get());
             }
         }

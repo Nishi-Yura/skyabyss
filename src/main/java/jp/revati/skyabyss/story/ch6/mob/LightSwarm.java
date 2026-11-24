@@ -6,7 +6,6 @@ import java.util.Set;
 
 import jp.revati.skyabyss.story.ch6.field.FieldTide;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -19,7 +18,6 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 // 光の群れ (満月の野。docs/design/46 の 4.5・一品一案「欠けた輪の芯の群れ」)。欠けた光の結晶が群れて一つの体。宙に浮く (地面の 1.3 上)。
@@ -218,12 +216,6 @@ public class LightSwarm extends MoonMob {
         if (dashing > 0) {
             dashing--;
         }
-    }
-
-    @Override
-    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
-        super.dropCustomDeathLoot(level, source, recentlyHit);
-        jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.MOON_DUST.get(), 0.45, 1, 2);
     }
 
     // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)

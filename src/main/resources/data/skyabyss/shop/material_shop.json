@@ -173,11 +173,6 @@
       "coins": 1
     },
     {
-      "item": "skyabyss:hare_quill",
-      "per": 4,
-      "coins": 1
-    },
-    {
       "item": "skyabyss:rock_shell_scrap",
       "per": 4,
       "coins": 1
@@ -258,11 +253,6 @@
       "coins": 1
     },
     {
-      "item": "skyabyss:clay_lump",
-      "per": 16,
-      "coins": 1
-    },
-    {
       "item": "minecraft:dirt",
       "per": 64,
       "coins": 1
@@ -280,11 +270,6 @@
     {
       "item": "skyabyss:iron_lump",
       "per": 2,
-      "coins": 1
-    },
-    {
-      "item": "skyabyss:gold_grain",
-      "per": 1,
       "coins": 1
     },
     {

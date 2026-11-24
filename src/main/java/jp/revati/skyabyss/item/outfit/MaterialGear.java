@@ -31,7 +31,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 // 置き換えの第 3 段 (2026-10-27): バニラの素材と道具類の代わり。絵は選定の案 (tools/rough/icons_phase3.py)。
-//   素材   鉄の塊・銅の塊・炭・空石・金の粒・光る石の欠片・火打ち石・粘土の塊・麦の束・糸巻き・獣の革・熾火の棒・熾の雫
+//   素材   鉄の塊・銅の塊・炭・空石・光る石の欠片・火打ち石・麦の束・糸巻き・獣の革・熾火の棒・熾の雫
 //          (採集で出るバニラの品も、ここへ替える。rpg/rules/Gathering.MOD_DROPS)
 //   道具類 方位盤・白紙の海図・藍の栞 (頼みと記念の品)、水袋 (水場で右クリックすると水入り)、小舟 (乗れる舟。SkiffEntity)
 public final class MaterialGear {
@@ -46,10 +46,8 @@ public final class MaterialGear {
     public static final DeferredItem<Item> COPPER_LUMP = plain("copper_lump");
     public static final DeferredItem<Item> CHARCOAL_LUMP = plain("charcoal_lump");
     public static final DeferredItem<Item> SKY_STONE = plain("sky_stone");
-    public static final DeferredItem<Item> GOLD_GRAIN = plain("gold_grain");
     public static final DeferredItem<Item> GLINT_SHARD = plain("glint_shard");
     public static final DeferredItem<Item> FLINT_STONE = plain("flint_stone");
-    public static final DeferredItem<Item> CLAY_LUMP = plain("clay_lump");
     public static final DeferredItem<Item> WHEAT_SHEAF = plain("wheat_sheaf");
     public static final DeferredItem<Item> THREAD_SPOOL = plain("thread_spool");
     public static final DeferredItem<Item> HIDE = plain("hide");

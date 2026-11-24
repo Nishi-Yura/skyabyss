@@ -1,7 +1,6 @@
 package jp.revati.skyabyss.abyss.mobs;
 
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -9,7 +8,6 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import jp.revati.skyabyss.story.ch4.Ch4Mobs;
 
 // 鼓動もどき (深淵だけ・docs/design/36 の 4・4.1 B 膜の袋)。溜まりの間の鼓動の音をまねて、人を呼ぶ。動かない。
 //   近く (16 ブロック内) の人に、鼓動の音を 2 秒ごとに出す (遠いほど小さい)。近づいて 2.4 ブロック以内に入ると、噛む (予告 0.4 秒)。
@@ -61,11 +59,5 @@ public class HeartbeatMimic extends AbyssMobB {
                 playSound(AbyssMobsBSetup.HEARTBEAT_LURE.get(), 0.9f, 1.0f);
             }
         }
-    }
-
-    @Override
-    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
-        super.dropCustomDeathLoot(level, source, recentlyHit);
-        Ch4Mobs.drop(level, this, source, AbyssMobsBSetup.PULSE_MEMBRANE.get(), 0.6, 1, 1);
     }
 }

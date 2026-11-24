@@ -146,7 +146,6 @@ public final class TideMobSelfTest {
             int shard = 0;
             int res = 0;
             int dried = 0;
-            int sac = 0;
             for (int i = 0; i < n; i++) {
                 for (ItemStack s : TideMobLoot.roll(r, random)) {
                     if (s.is(TideMobSetup.TIDE_SHELL_SHARD.get())) {
@@ -156,8 +155,6 @@ public final class TideMobSelfTest {
                         res++;
                     } else if (s.is(TideMobSetup.TIDE_DRIED_SHELL.get())) {
                         dried++;
-                    } else if (s.is(TideMobSetup.BUBBLE_SAC.get())) {
-                        sac++;
                     } else {
                         failures.add(row[0] + " unexpected drop " + s);
                     }
@@ -166,9 +163,8 @@ public final class TideMobSelfTest {
             near(failures, row[0] + " shard", shard, n, r.shard());
             near(failures, row[0] + " resonance", res, n, r.resonance());
             near(failures, row[0] + " dried shell", dried, n, r.driedShell());
-            near(failures, row[0] + " bubble sac", sac, n, r.bubbleSac());
         }
-        check(failures, Math.abs(TideMobLoot.THRALL.shard() - 0.30f) < 1e-6 && Math.abs(TideMobLoot.PUFFER.bubbleSac() - 0.20f) < 1e-6
+        check(failures, Math.abs(TideMobLoot.THRALL.shard() - 0.30f) < 1e-6 && Math.abs(TideMobLoot.PUFFER.shard() - 0.25f) < 1e-6
                 && Math.abs(TideMobLoot.SCUTTLER.shard() - 0.08f) < 1e-6, "table values (08 6.1)");
     }
 

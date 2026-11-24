@@ -73,12 +73,6 @@ public final class AbyssMobsBSetup {
     public static final DeferredItem<Item> HEARTBEAT_MIMIC_EGG = egg("heartbeat_mimic_spawn_egg", HEARTBEAT_MIMIC, 0x3A2630, 0xE06070);
     public static final DeferredItem<Item> ROPE_HANGER_EGG = egg("rope_hanger_spawn_egg", ROPE_HANGER, 0x3B3024, 0xB89A60);
 
-    // ---------------------------------------------------------------- 品 (深淵の材料。説明の一行は item.skyabyss.<id>.desc)
-    public static final DeferredItem<Item> LAMP_ASH = ITEMS.register("lamp_ash", () -> new Ch4Setup.Described(new Item.Properties()));
-    public static final DeferredItem<Item> SOOT_CLUMP = ITEMS.register("soot_clump", () -> new Ch4Setup.Described(new Item.Properties()));
-    public static final DeferredItem<Item> ROPE_KNOT = ITEMS.register("rope_knot", () -> new Ch4Setup.Described(new Item.Properties()));
-    public static final DeferredItem<Item> ECHO_SHARD = ITEMS.register("echo_shard", () -> new Ch4Setup.Described(new Item.Properties()));
-    public static final DeferredItem<Item> PULSE_MEMBRANE = ITEMS.register("pulse_membrane", () -> new Ch4Setup.Described(new Item.Properties()));
 
     // ---------------------------------------------------------------- 音 (既存の音の別名。assets/skyabyss_abyss_b/sounds.json)
     public static final DeferredHolder<SoundEvent, SoundEvent> ASH_TRAIL_STEP = sound("ash_trail_step");
@@ -149,8 +143,7 @@ public final class AbyssMobsBSetup {
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> i : List.of(ASH_TRAIL_EGG, EMBER_KEEPER_EGG, SOOT_CHILD_EGG, PAST_SHADOW_EGG, NAMELESS_SHAPE_EGG,
-                    LAMP_EATER_EGG, CEILING_WALKER_EGG, HEARTBEAT_MIMIC_EGG, ROPE_HANGER_EGG, LAMP_ASH, SOOT_CLUMP, ROPE_KNOT, ECHO_SHARD,
-                    PULSE_MEMBRANE)) {
+                    LAMP_EATER_EGG, CEILING_WALKER_EGG, HEARTBEAT_MIMIC_EGG, ROPE_HANGER_EGG)) {
                 event.accept(i.get());
             }
         }

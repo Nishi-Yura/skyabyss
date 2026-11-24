@@ -84,22 +84,12 @@
       "coins": 1
     },
     {
-      "item": "skyabyss:bubble_sac",
-      "per": 4,
-      "coins": 1
-    },
-    {
       "item": "skyabyss:tide_dried_shell",
       "per": 4,
       "coins": 1
     },
     {
       "item": "skyabyss:moth_dust",
-      "per": 4,
-      "coins": 1
-    },
-    {
-      "item": "skyabyss:spark_dust",
       "per": 4,
       "coins": 1
     },

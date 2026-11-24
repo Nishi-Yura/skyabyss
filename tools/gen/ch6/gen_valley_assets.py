@@ -102,8 +102,7 @@ w("models/block/star_mark.json", {"parent": "minecraft:block/cross", "render_typ
                                   "textures": {"cross": tex("moon_star_mark", "minecraft:block/amethyst_cluster")}})
 
 # ---------------------------------------------------------------- 品
-for name, fb in (("star_lamp", "minecraft:item/amethyst_shard"), ("star_shard", "minecraft:item/echo_shard"), ("moon_dust", "minecraft:item/gunpowder"),
-                 ("crescent_shell", "minecraft:item/nautilus_shell"), ("shadow_thread", "minecraft:item/string")):
+for name, fb in (("star_lamp", "minecraft:item/amethyst_shard"),):
     w("models/item/%s.json" % name, {"parent": "minecraft:item/generated", "textures": {"layer0": itex(name, fb)}})
 for egg in ("dust_crawler", "shell_hare", "shadow_stitcher", "shadow_embracer"):
     w("models/item/%s_spawn_egg.json" % egg, {"parent": "minecraft:item/template_spawn_egg"})

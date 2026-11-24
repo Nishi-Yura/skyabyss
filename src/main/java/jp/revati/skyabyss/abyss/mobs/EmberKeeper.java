@@ -2,11 +2,8 @@ package jp.revati.skyabyss.abyss.mobs;
 
 import java.util.EnumSet;
 
-import jp.revati.skyabyss.story.ch4.Ch4Mobs;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -60,12 +57,6 @@ public class EmberKeeper extends AbyssMobB {
             // 胸の燠の粒 (近くの人に見える)
             ((ServerLevel) level()).sendParticles(jp.revati.skyabyss.fx.FxParticles.type(jp.revati.skyabyss.fx.FxParticles.Element.ABYSS, jp.revati.skyabyss.fx.FxParticles.Kind.GLOW), getX(), getY() + 1.3, getZ(), 2, 0.15, 0.2, 0.15, 0.01);
         }
-    }
-
-    @Override
-    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
-        super.dropCustomDeathLoot(level, source, recentlyHit);
-        Ch4Mobs.drop(level, this, source, AbyssMobsBSetup.LAMP_ASH.get(), 0.5, 1, 2);
     }
 
     // 熱の輪: 予告 (赤い輪の粒) → 熱 (輪の中の人に傷と火)。距離を保つ

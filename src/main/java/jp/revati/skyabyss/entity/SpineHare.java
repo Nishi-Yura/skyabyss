@@ -145,15 +145,12 @@ public class SpineHare extends GroundFoe {
         }
     }
 
-    // 棘針 40% (1〜2)、骨片 10%
+    // 骨片 10%
     @Override
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         if (!recentlyHit) {
             return;
-        }
-        if (random.nextFloat() < 0.4f) {
-            spawnAtLocation(new ItemStack(GuideSetup.HARE_QUILL.get(), 1 + random.nextInt(2)));
         }
         if (random.nextFloat() < 0.1f) {
             spawnAtLocation(new ItemStack(GuideSetup.BONE_CHIP.get()));

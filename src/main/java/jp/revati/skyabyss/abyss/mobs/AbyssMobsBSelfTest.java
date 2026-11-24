@@ -64,7 +64,6 @@ public final class AbyssMobsBSelfTest {
             check(AbyssMobSpawner.typeOf(id) != null, "typeOf(" + id + ") is null");
         }
         check(AbyssMobsBSetup.ASH_TRAIL_EGG.get() != null && AbyssMobsBSetup.ROPE_HANGER_EGG.get() != null, "spawn eggs are missing");
-        check(AbyssMobsBSetup.LAMP_ASH.get() != null && AbyssMobsBSetup.PULSE_MEMBRANE.get() != null, "abyss materials are missing");
         check(AbyssMobsBSetup.ASH_TRAIL_STEP.get() != null && AbyssMobsBSetup.ROPE_PULL.get() != null, "abyss sounds are missing");
     }
 
@@ -80,9 +79,6 @@ public final class AbyssMobsBSelfTest {
             check(res("assets/skyabyss/models/item/" + id + "_spawn_egg.json"), id + ": spawn egg model is missing");
         }
         check(res("assets/skyabyss_abyss_b/sounds.json"), "sounds.json is missing");
-        for (String m : new String[] {"lamp_ash", "soot_clump", "rope_knot", "echo_shard", "pulse_membrane"}) {
-            check(res("assets/skyabyss/textures/item/" + m + ".png"), m + ": item texture is missing");
-        }
         // 発光: 目と膜のある四体は光る画素があり、全部の段で発光マスクがある
         for (String id : new String[] {AshTrail.ID, EmberKeeper.ID, PastShadow.ID, CeilingWalker.ID, HeartbeatMimic.ID, RopeHanger.ID}) {
             check(res("assets/skyabyss/textures/lowpoly/" + id + "_glowmask.png"), id + ": glow mask is missing");

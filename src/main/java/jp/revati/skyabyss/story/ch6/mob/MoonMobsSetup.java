@@ -113,11 +113,6 @@ public final class MoonMobsSetup {
     public static final DeferredItem<Item> WANING_BLADE_EGG = egg("waning_blade_spawn_egg", WANING_BLADE, 0x161A2C, 0xD8E8FF);
     public static final DeferredItem<Item> MOON_CORE_EGG = egg("moon_core_spawn_egg", MOON_CORE, 0xDCE8FF, 0x8C96B0);
 
-    // 落とし物 (月の材料。説明の一行は item.skyabyss.<id>.desc)
-    public static final DeferredItem<Item> MOON_DUST = ITEMS.register("moon_dust", () -> new Ch4Setup.Described(new Item.Properties()));
-    public static final DeferredItem<Item> CRESCENT_SHELL = ITEMS.register("crescent_shell", () -> new Ch4Setup.Described(new Item.Properties()));
-    public static final DeferredItem<Item> SHADOW_THREAD = ITEMS.register("shadow_thread", () -> new Ch4Setup.Described(new Item.Properties()));
-
     public static final DeferredHolder<SoundEvent, SoundEvent> CRAWLER_DIG = sound("crawler_dig");
     public static final DeferredHolder<SoundEvent, SoundEvent> CRAWLER_BURST = sound("crawler_burst");
     public static final DeferredHolder<SoundEvent, SoundEvent> CRAWLER_BITE = sound("crawler_bite");
@@ -243,8 +238,7 @@ public final class MoonMobsSetup {
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             for (DeferredItem<Item> i : List.of(DUST_CRAWLER_EGG, SHELL_HARE_EGG, SHADOW_STITCHER_EGG, SHADOW_EMBRACER_EGG, MOON_LEAPER_EGG, PUSH_STONE_EGG,
-                    CLIFF_CREEPER_EGG, MOON_SCALE_EGG, LIGHT_SWARM_EGG, SHADE_STRIDER_EGG, MIRROR_BEARER_EGG, FULL_KEEPER_EGG, RIFT_WING_EGG, RIFT_ARMOR_EGG, RIFT_SERPENT_EGG, WANING_BLADE_EGG, MOON_CORE_EGG, MOON_DUST, CRESCENT_SHELL,
-                    SHADOW_THREAD)) {
+                    CLIFF_CREEPER_EGG, MOON_SCALE_EGG, LIGHT_SWARM_EGG, SHADE_STRIDER_EGG, MIRROR_BEARER_EGG, FULL_KEEPER_EGG, RIFT_WING_EGG, RIFT_ARMOR_EGG, RIFT_SERPENT_EGG, WANING_BLADE_EGG, MOON_CORE_EGG)) {
                 event.accept(i.get());
             }
         }

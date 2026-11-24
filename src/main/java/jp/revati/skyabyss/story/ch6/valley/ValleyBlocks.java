@@ -54,9 +54,6 @@ public final class ValleyBlocks {
 
     // 星の灯 (星術「星灯り」。手に持って右クリックで足もとに星の印。同時に 2 つ・30 秒)
     public static final DeferredItem<StarLampItem> STAR_LAMP = ITEMS.register("star_lamp", () -> new StarLampItem(new Item.Properties().stacksTo(1)));
-    // 星の欠片 (谷の三つの探す場所でもらう。門を開く印。手持ちには入れず、頼みの進みで数える。見せる絵と名前のための品)
-    public static final DeferredItem<Item> STAR_SHARD = ITEMS.register("star_shard",
-            () -> new jp.revati.skyabyss.story.ch4.Ch4Setup.Described(new Item.Properties()));
 
     public static final DeferredHolder<SoundEvent, SoundEvent> STAR_LAMP_PLACE = sound("star_lamp_place");
     public static final DeferredHolder<SoundEvent, SoundEvent> STAR_LAMP_FADE = sound("star_lamp_fade");
@@ -85,7 +82,7 @@ public final class ValleyBlocks {
 
     private static void onCreativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
-            for (DeferredItem<? extends Item> i : List.of(STAR_LAMP, STAR_SHARD)) {
+            for (DeferredItem<? extends Item> i : List.of(STAR_LAMP)) {
                 event.accept(i.get());
             }
         }

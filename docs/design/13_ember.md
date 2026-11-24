@@ -377,7 +377,7 @@
 | 敵 | 余燼の燠石 | 共鳴の欠片（余燼） | 熾火の角杯 | そのほか |
 |---|---|---|---|---|
 | 灰被り | 35%、1〜2 | 6%、1 | 4%、1 | 余燼の鎧のどれか一部位 1% |
-| 火の粉蛾 | 5%、1 | 1%、1 | — | 火の粉の粉 15%（薬師の誂えの材料） |
+| 火の粉蛾 | 5%、1 | 1%、1 | — | — |
 | 燠虫 | 25%、1〜2 | 5%、1 | 3%、1 | 燠の殻 20%（鍛冶場の誂えで「燠の灯」。6.4 の末尾） |
 
 - **燠の灯**（`cinder_lamp`。`EmberBackSetup`、`CinderLampBlock`）: 燠の殻から鍛冶場で誂えてもらう吊り灯。光 12。鎖で吊るし（`hanging`）、床にも置ける（バニラの角灯と同じ挙動）。形は鉄と黒石の籠の中に赤く熾る炭、上に鎖の輪。ときどき火の粉と灰がこぼれる（明るさは変えない）。レシピは `data/skyabyss/recipe/cinder_lamp.json`: 上段 鎖、中段 鉄の粒・燠の殻・鉄の粒、下段 石炭。壊すとつるはしで自分が落ちる。創造メニューにある。モデルと 32x32 のデータを直接直す（生成スクリプトはない）、確認の台本は `tools/shots/back_blocks.txt`。燠の背の中には置かない（拾った人が好きな所に置く）。
@@ -727,7 +727,7 @@
 
 - 戦斧と大鎚の 1 秒あたりは、17.5 を目安に固有効果の上乗せ込みで 0.9〜1.1 倍に収める（`GearCurve` の自己テストで確かめる）。
 - 登録は `titan/ember/gear/EmberGearSetup`（鎧・戦斧・外套・護符・専用の逸品 3・角杯・欠片・心核）、`EmberGear`（表・熱のたまり方）、`EmberGearLoot`（中ボス・道中の抽選）、`EmberGearEvents`。品の絵は 32px（`tools/gen/items/gen_ember_items.py`）。
-- 余燼の燠石・熾火の角杯・火の粉の粉・燠の殻・鎧が登録されると、敵が落とし始める（6.4）。
+- 余燼の燠石・熾火の角杯・燠の殻・鎧が登録されると、敵が落とし始める（6.4）。
 
 ### 9.7 成長の経験値（04 の 3.2節）
 
@@ -988,7 +988,7 @@
 | エンティティ | `ember_titan`・`ember_mouth`、`ash_thrall`・`ember_moth`・`cinder_roller` とスポーンエッグ `*_spawn_egg`、`ash_smith`、`ember_heart`・`ash_pellet`（灰の礫） |
 | ブロック | `ash_forge`・`forge_bellows`・`ash_anvil`・`quench_trough`、`cinder_lamp` |
 | 地上の品 | `warm_stone`（温石） |
-| 素材 | `ember_shard`・`ember_core`・`spark_dust`・`cinder_husk`・`ember_horn`（熾火の角杯） |
+| 素材 | `ember_shard`・`ember_core`・`cinder_husk`・`ember_horn`（熾火の角杯） |
 | 図鑑の 10 品 | `ember_helmet`・`ember_chestplate`・`ember_leggings`・`ember_boots`・`ember_war_axe`・`ember_mantle`（外套）・`kindling_charm`（護符）・`smith_hammer`・`thrall_poker`・`ember_lantern`（灯） |
 | 休み場 | 部屋ごとの入口の休み場（`RaidKit`）、中ボスの間の休み場、`heart` |
 | 碑文 | `lore_ember_west`・`_east`・`_south`、`lore_raid_ember_chain`・`_valve`・`_pupil` |
@@ -1087,7 +1087,7 @@
 - ゲームの画面での試遊は未実施。見た目は台本のスクショだけで確かめた。
 - 巨神での移動は [09](09_titan_travel.md)・[28](28_titan_young_carriers.md) が正。天の鍵は五章の入口（都の下）を開く（[36](36_abyss.md)）。
 - 四章の小要素の置かれ方（17.3）は、合成の地形での自己テスト（17 の 3.8）と部品の読み込みまでで、実際のワールドで歩いて確かめていない。灰降り観測点に灰の濃さの地図は出ない（17.3）。
-- 余裕があれば: 洞窟の中の「壁の向こう」の音（2.2）、パーティの表示の熱の印、火の粉の粉の花火。
+- 余裕があれば: 洞窟の中の「壁の向こう」の音（2.2）、パーティの表示の熱の印。
 
 ---
 

@@ -4,7 +4,6 @@ import java.util.EnumSet;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -154,12 +153,6 @@ public class MoonLeaper extends MoonMob {
             spot = null;
             cooldown = 100;
         }
-    }
-
-    @Override
-    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
-        super.dropCustomDeathLoot(level, source, recentlyHit);
-        jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.MOON_DUST.get(), 0.35, 1, 1);
     }
 
     // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)

@@ -23,18 +23,18 @@ import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 // | 敵       | 潮殻の殻片 | 共鳴の欠片 | 潮干しの貝 | そのほか |
 // | 珊瑚憑き | 30%、1〜2  | 5%、1      | 3%、1      | 潮殻の鎧のどれか一部位 1% (TideGearLoot.rollThrall) |
 // | 磯走り   | 8%、1      | 1%、1      | —          | — |
-// | 泡吹き   | 25%、1〜2  | 5%、1      | 3%、1      | 泡袋 20% |
+// | 泡吹き   | 25%、1〜2  | 5%、1      | 3%、1      | — |
 @EventBusSubscriber(modid = SkyAbyss.MODID)
 public final class TideMobLoot {
     private TideMobLoot() {
     }
 
-    public record Row(float shard, int shardMin, int shardMax, float resonance, float driedShell, float bubbleSac) {
+    public record Row(float shard, int shardMin, int shardMax, float resonance, float driedShell) {
     }
 
-    public static final Row THRALL = new Row(0.30f, 1, 2, 0.05f, 0.03f, 0f);
-    public static final Row SCUTTLER = new Row(0.08f, 1, 1, 0.01f, 0f, 0f);
-    public static final Row PUFFER = new Row(0.25f, 1, 2, 0.05f, 0.03f, 0.20f);
+    public static final Row THRALL = new Row(0.30f, 1, 2, 0.05f, 0.03f);
+    public static final Row SCUTTLER = new Row(0.08f, 1, 1, 0.01f, 0f);
+    public static final Row PUFFER = new Row(0.25f, 1, 2, 0.05f, 0.03f);
 
     public static Row row(LivingEntity mob) {
         if (mob instanceof CoralThrall) {
@@ -63,9 +63,6 @@ public final class TideMobLoot {
         }
         if (random.nextFloat() < r.driedShell()) {
             items.add(new ItemStack(TideMobSetup.TIDE_DRIED_SHELL.get()));
-        }
-        if (random.nextFloat() < r.bubbleSac()) {
-            items.add(new ItemStack(TideMobSetup.BUBBLE_SAC.get()));
         }
         return items;
     }

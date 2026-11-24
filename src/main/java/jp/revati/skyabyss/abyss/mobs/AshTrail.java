@@ -1,8 +1,6 @@
 package jp.revati.skyabyss.abyss.mobs;
 
 import jp.revati.skyabyss.abyss.arts.AbyssLight;
-import jp.revati.skyabyss.story.ch4.Ch4Mobs;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -99,12 +97,6 @@ public class AshTrail extends AbyssMobB {
             shownUntil = tickCount + HIT_SHOW_TICKS;
         }
         return super.hurt(source, amount);
-    }
-
-    @Override
-    protected void dropCustomDeathLoot(net.minecraft.server.level.ServerLevel level, DamageSource source, boolean recentlyHit) {
-        super.dropCustomDeathLoot(level, source, recentlyHit);
-        Ch4Mobs.drop(level, this, source, AbyssMobsBSetup.LAMP_ASH.get(), 0.4, 1, 1);
     }
 
     // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)

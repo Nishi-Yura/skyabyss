@@ -4,7 +4,7 @@
 出力:
   src/main/resources/assets/skyabyss/sounds/tide_mobs/*.ogg
   src/main/resources/assets/skyabyss/textures/entity/bubble_shot.png       (泡吹きの泡。カメラを向く一枚の絵)
-  src/main/resources/assets/skyabyss/textures/item/{tide_shell_shard,tide_dried_shell,bubble_sac}.png  (32x32。仮の絵)
+  src/main/resources/assets/skyabyss/textures/item/{tide_shell_shard,tide_dried_shell}.png  (32x32。仮の絵)
 
 音 (静かな恐さ: 大きな鳴き声でなく、乾いた・湿った小さな音):
 - coral_thrall_ambient : 珊瑚のこすれる乾いたきしみと、骨の奥の低いうなり
@@ -273,19 +273,6 @@ def dried_shell_icon():
     return np.array(im)
 
 
-def bubble_sac_icon():
-    """泡袋: うすい膜の袋に泡が透ける"""
-    from PIL import ImageDraw
-    im = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    d.ellipse([5, 7, 27, 29], fill=hexc("#7FD0D8", 190), outline=hexc("#2A7F8A"))
-    d.rectangle([13, 3, 19, 8], fill=hexc("#3F8189"), outline=hexc("#24565F"))
-    for cx, cy, r in ((12, 16, 3), (20, 20, 2), (15, 23, 2), (21, 13, 1)):
-        d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=hexc("#E8FDFF"))
-    d.point([(10, 12), (11, 11)], fill=hexc("#FFFFFF"))
-    return np.array(im)
-
-
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     for name, fn in SOUNDS.items():
@@ -295,7 +282,6 @@ def main():
     Image.fromarray(bubble_texture(), "RGBA").save(TEX / "entity/bubble_shot.png")
     Image.fromarray(shard_icon(), "RGBA").save(TEX / "item/tide_shell_shard.png")
     Image.fromarray(dried_shell_icon(), "RGBA").save(TEX / "item/tide_dried_shell.png")
-    Image.fromarray(bubble_sac_icon(), "RGBA").save(TEX / "item/bubble_sac.png")
 
 
 if __name__ == "__main__":

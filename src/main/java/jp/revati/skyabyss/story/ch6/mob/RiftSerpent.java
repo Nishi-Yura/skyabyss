@@ -5,8 +5,6 @@ import java.util.EnumSet;
 import jp.revati.skyabyss.story.ch6.field.FallingLight;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -19,7 +17,6 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 // 逆さ砂の蛇 (下弦の淵。docs/design/46 の 4.6・一品一案「砂時計の蛇」)。割れた砂時計からこぼれた月の砂が蛇の形になったもの。動かない (砂時計ごと据わる)。
@@ -175,14 +172,6 @@ public class RiftSerpent extends RiftMob {
         public void stop() {
             t = -1;
             cooldown = 80;
-        }
-    }
-
-    @Override
-    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
-        super.dropCustomDeathLoot(level, source, recentlyHit);
-        if (!echo()) {
-            jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.MOON_DUST.get(), 0.5, 1, 2);
         }
     }
 

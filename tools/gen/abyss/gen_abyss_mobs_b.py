@@ -467,67 +467,10 @@ def sounds():
     wjson(os.path.join(AB, "sounds.json"), {k: {"subtitle": "subtitles.skyabyss_abyss_b." + k, "sounds": v} for k, v in SOUNDS.items()})
 
 
-# ---------------------------------------------------------------- 品の絵 (32x32。手描きではなく、形を決めて描く。深淵の材料 5 つ)
-def icons():
-    from PIL import Image, ImageDraw
-
-    def canvas():
-        return Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-
-    out = {}
-    # 灯の灰: 灰の山 (粒の濃淡) と、消えた灯りの赤い残り火
-    im = canvas()
-    d = ImageDraw.Draw(im)
-    d.ellipse((4, 14, 27, 28), fill=(96, 92, 90, 255))
-    d.ellipse((7, 12, 24, 24), fill=(132, 126, 122, 255))
-    for x, y in ((10, 18), (14, 21), (19, 16), (22, 22), (12, 14), (17, 24)):
-        d.point((x, y), fill=(190, 184, 178, 255))
-    d.ellipse((13, 7, 18, 12), fill=(255, 140, 48, 255))
-    out["lamp_ash"] = im
-    # 煤の団子: 黒い丸 (ふくらみの陰影)
-    im = canvas()
-    d = ImageDraw.Draw(im)
-    d.ellipse((5, 6, 26, 27), fill=(30, 27, 26, 255))
-    d.ellipse((8, 8, 20, 18), fill=(62, 56, 52, 255))
-    d.point((11, 11), fill=(120, 112, 106, 255))
-    out["soot_clump"] = im
-    # 縄の結び目: 茶色の輪を二つ重ねる
-    im = canvas()
-    d = ImageDraw.Draw(im)
-    d.ellipse((4, 8, 20, 24), outline=(112, 84, 52, 255), width=3)
-    d.ellipse((12, 6, 28, 22), outline=(150, 116, 74, 255), width=3)
-    d.ellipse((12, 13, 18, 19), fill=(84, 62, 38, 255))
-    out["rope_knot"] = im
-    # 影の欠片: 青灰の薄い破片 (縁は明るく)
-    im = canvas()
-    d = ImageDraw.Draw(im)
-    d.polygon([(16, 3), (27, 16), (19, 29), (7, 22), (6, 9)], fill=(72, 94, 108, 200), outline=(170, 200, 216, 255))
-    d.polygon([(16, 8), (22, 16), (17, 23), (11, 18)], fill=(110, 138, 152, 220))
-    out["echo_shard"] = im
-    # 鼓動の膜: 淡い赤の袋と、細い血管のような筋
-    im = canvas()
-    d = ImageDraw.Draw(im)
-    d.ellipse((5, 5, 27, 27), fill=(178, 96, 104, 255), outline=(96, 50, 56, 255))
-    d.line((9, 16, 16, 12, 23, 16), fill=(120, 60, 66, 255), width=1)
-    d.line((16, 12, 16, 22), fill=(120, 60, 66, 255), width=1)
-    d.ellipse((11, 10, 15, 14), fill=(230, 170, 176, 255))
-    out["pulse_membrane"] = im
-    return out
-
-
-def item_textures():
-    for name, im in icons().items():
-        p = os.path.join(A, "textures", "item", name + ".png")
-        os.makedirs(os.path.dirname(p), exist_ok=True)
-        im.save(p)
-        wjson(os.path.join(A, "models", "item", name + ".json"), {"parent": "minecraft:item/generated", "textures": {"layer0": "skyabyss:item/" + name}})
-
-
 def main():
-    only = set(sys.argv[1:])   # 名前を並べると、その敵の素材だけ入れ直す (音・品の絵は毎回書く)
+    only = set(sys.argv[1:])   # 名前を並べると、その敵の素材だけ入れ直す (音は毎回書く)
     install(only)
     sounds()
-    item_textures()
     print("done")
 
 

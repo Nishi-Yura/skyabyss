@@ -62,11 +62,9 @@ public final class Gathering {
                 : i == net.minecraft.world.item.Items.RAW_COPPER ? jp.revati.skyabyss.item.outfit.MaterialGear.COPPER_LUMP.get()
                 : i == net.minecraft.world.item.Items.COAL || i == net.minecraft.world.item.Items.CHARCOAL ? jp.revati.skyabyss.item.outfit.MaterialGear.CHARCOAL_LUMP.get()
                 : i == net.minecraft.world.item.Items.DIAMOND ? jp.revati.skyabyss.item.outfit.MaterialGear.SKY_STONE.get()
-                : i == net.minecraft.world.item.Items.RAW_GOLD || i == net.minecraft.world.item.Items.GOLD_NUGGET ? jp.revati.skyabyss.item.outfit.MaterialGear.GOLD_GRAIN.get()
                 : i == net.minecraft.world.item.Items.LAPIS_LAZULI || i == net.minecraft.world.item.Items.REDSTONE || i == net.minecraft.world.item.Items.AMETHYST_SHARD
                         || i == net.minecraft.world.item.Items.EMERALD ? jp.revati.skyabyss.item.outfit.MaterialGear.GLINT_SHARD.get()
                 : i == net.minecraft.world.item.Items.FLINT ? jp.revati.skyabyss.item.outfit.MaterialGear.FLINT_STONE.get()
-                : i == net.minecraft.world.item.Items.CLAY_BALL ? jp.revati.skyabyss.item.outfit.MaterialGear.CLAY_LUMP.get()
                 : i == net.minecraft.world.item.Items.WHEAT ? jp.revati.skyabyss.item.outfit.MaterialGear.WHEAT_SHEAF.get() : null;
         return to == null ? ItemStack.EMPTY : new ItemStack(to, d.getCount());
     }

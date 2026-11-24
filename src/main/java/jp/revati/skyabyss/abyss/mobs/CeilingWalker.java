@@ -2,13 +2,11 @@ package jp.revati.skyabyss.abyss.mobs;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -19,7 +17,6 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import jp.revati.skyabyss.story.ch4.Ch4Mobs;
 
 // 逆さ歩き (深淵だけ・docs/design/36 の 4・4.1 A 逆さの人)。天井を逆さに歩く。
 //   見られている間は止まる (人の視線の中の、目に入る向き。見る者の決まりと同じ: 見ていない間だけ動く)。
@@ -181,12 +178,6 @@ public class CeilingWalker extends AbyssMobB {
         Vec3 to = target.subtract(eye);
         double len = to.length();
         return len > 1e-6 && look.normalize().dot(to.scale(1 / len)) > LOOK_DOT;
-    }
-
-    @Override
-    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
-        super.dropCustomDeathLoot(level, source, recentlyHit);
-        Ch4Mobs.drop(level, this, source, AbyssMobsBSetup.SOOT_CLUMP.get(), 0.4, 1, 1);
     }
 
     // 攻撃の粒は mod の abyss の粒だけ (docs/design/59 の 2 章)

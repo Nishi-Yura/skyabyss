@@ -3,7 +3,6 @@ package jp.revati.skyabyss.story.ch6.mob;
 import java.util.EnumSet;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -168,12 +167,6 @@ public class PushStone extends MoonMob {
             t = -1;
             cooldown = 80;
         }
-    }
-
-    @Override
-    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
-        super.dropCustomDeathLoot(level, source, recentlyHit);
-        jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.MOON_DUST.get(), 0.45, 1, 2);
     }
 
     // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)

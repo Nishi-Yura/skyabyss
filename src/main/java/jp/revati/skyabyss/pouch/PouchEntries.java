@@ -145,13 +145,10 @@ public final class PouchEntries {
         add(list, jp.revati.skyabyss.guide.GuideSetup.ROCK_SHELL_THREAD.get(), Category.MATERIAL, 999, false, false);
         // 小さな素材
         add(list, jp.revati.skyabyss.item.storm.StormGearSetup.DUST.get(), Category.SMALL, 999, false, false);
-        add(list, jp.revati.skyabyss.titan.tide.mob.TideMobSetup.BUBBLE_SAC.get(), Category.SMALL, 999, false, false);
         add(list, jp.revati.skyabyss.titan.tide.mob.TideMobSetup.TIDE_DRIED_SHELL.get(), Category.SMALL, 999, false, false);
-        add(list, jp.revati.skyabyss.titan.ember.gear.EmberGearSetup.SPARK_DUST.get(), Category.SMALL, 999, false, false);
         add(list, jp.revati.skyabyss.titan.ember.gear.EmberGearSetup.CINDER_HUSK.get(), Category.SMALL, 999, false, false);
-        // 序盤の小さな素材 (骨片・棘針)
+        // 序盤の小さな素材 (骨片)
         add(list, jp.revati.skyabyss.guide.GuideSetup.BONE_CHIP.get(), Category.SMALL, 999, false, false);
-        add(list, jp.revati.skyabyss.guide.GuideSetup.HARE_QUILL.get(), Category.SMALL, 999, false, false);
         // 鐘銭も袋へ (2026-10-25 の試遊。支払いは袋と持ち物の両方から: Coins)。共鳴の列に足すと袋の枠が一行あふれるので、小さな素材の列の端に
         // 上限は Coins.MAX (999,999,999。2026-11-01)。旅袋の枠の上には数を出さない (PouchScreen.renderSlot)
         add(list, jp.revati.skyabyss.facility.FacilitySetup.BELL_COIN.get(), Category.SMALL, jp.revati.skyabyss.facility.Coins.MAX, false, false);
@@ -181,9 +178,8 @@ public final class PouchEntries {
         return list;
     }
 
-    // 土地の敵の素材 (売るだけの品。店の買い取りは旅袋の中も見る)
-    private static final String[] LAND_ITEMS = {"soot_iron", "ash_hemp", "ash_ward_thread", "lamp_ash", "soot_clump", "rope_knot", "echo_shard",
-            "pulse_membrane", "star_shard", "moon_dust", "crescent_shell", "shadow_thread"};
+    // 土地の敵の素材 (鍛冶屋・細工師の材料)
+    private static final String[] LAND_ITEMS = {"soot_iron", "ash_hemp", "ash_ward_thread"};
 
     // 心核か (図鑑の頁がない巨神も装備の表の心核で数える。Keepsakes.coreItems)
     private static boolean isCore(Item item) {

@@ -513,9 +513,7 @@ public final class PouchSelfTest {
         out.add(jp.revati.skyabyss.item.storm.StormGearSetup.CORE.get());
         out.add(jp.revati.skyabyss.titan.ember.gear.EmberGearSetup.SHARD.get());
         out.add(jp.revati.skyabyss.item.storm.StormGearSetup.DUST.get());
-        out.add(jp.revati.skyabyss.titan.tide.mob.TideMobSetup.BUBBLE_SAC.get());
         out.add(jp.revati.skyabyss.titan.tide.mob.TideMobSetup.TIDE_DRIED_SHELL.get());
-        out.add(jp.revati.skyabyss.titan.ember.gear.EmberGearSetup.SPARK_DUST.get());
         out.add(jp.revati.skyabyss.titan.ember.gear.EmberGearSetup.CINDER_HUSK.get());
         return out;
     }

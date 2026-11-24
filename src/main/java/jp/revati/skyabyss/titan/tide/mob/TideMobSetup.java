@@ -46,7 +46,6 @@ public final class TideMobSetup {
     public static final DeferredItem<Item> TIDE_DRIED_SHELL = ITEMS.register("tide_dried_shell",
             () -> new Item(new Item.Properties().food(new FoodProperties.Builder().nutrition(5).saturationModifier(0.6f)
                     .effect(() -> new MobEffectInstance(MobEffects.WATER_BREATHING, 600, 0), 1f).build())));
-    public static final DeferredItem<Item> BUBBLE_SAC = ITEMS.registerSimpleItem("bubble_sac");
 
     // テスト用のスポーンエッグ
     public static final DeferredItem<Item> CORAL_THRALL_EGG = ITEMS.register("coral_thrall_spawn_egg",
@@ -103,7 +102,6 @@ public final class TideMobSetup {
         if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             event.accept(TIDE_SHELL_SHARD.get());
             event.accept(TIDE_DRIED_SHELL.get());
-            event.accept(BUBBLE_SAC.get());
             event.accept(CORAL_THRALL_EGG.get());
             event.accept(REEF_SCUTTLER_EGG.get());
             event.accept(BUBBLE_PUFFER_EGG.get());

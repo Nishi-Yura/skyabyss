@@ -27,7 +27,7 @@ public final class PouchConfig {
         BOOK("book"),
         // 巨神の素材 (鱗片・殻片・羽軸・燠石)
         MATERIAL("material"),
-        // 小さな素材 (鱗粉・泡袋・火の粉の粉・燠の殻・潮干しの貝)
+        // 小さな素材 (鱗粉・燠の殻・潮干しの貝)
         SMALL("small"),
         // 土地の素材 (四章の灰の地・深淵の灯・月の敵が落とす、売るための素材。2026-11-10 に足した)
         LAND("land"),

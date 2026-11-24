@@ -2,10 +2,7 @@ package jp.revati.skyabyss.abyss.mobs;
 
 import java.util.EnumSet;
 
-import jp.revati.skyabyss.story.ch4.Ch4Mobs;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -47,12 +44,6 @@ public class NamelessShape extends AbyssMobB {
         goalSelector.addGoal(1, new Hover(this));
         goalSelector.addGoal(2, new Shard(this));
         targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
-    }
-
-    @Override
-    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
-        super.dropCustomDeathLoot(level, source, recentlyHit);
-        Ch4Mobs.drop(level, this, source, AbyssMobsBSetup.ECHO_SHARD.get(), 0.6, 1, 2);
     }
 
     // 距離を保つ: 人が近ければ下がり、遠ければ寄る。高さは人の少し上

@@ -77,7 +77,6 @@ public final class EmberIds {
     // 素材
     public static final String EMBER_SHARD = "ember_shard";         // → G 余燼の燠石
     public static final String EMBER_CORE = "ember_core";           // → G 余燼の心核
-    public static final String SPARK_DUST = "spark_dust";           // → G 火の粉の粉 (蛾から)
     public static final String CINDER_HUSK = "cinder_husk";         // → G 燠の殻 (燠虫から)
     public static final String EMBER_HORN = "ember_horn";           // → G 熾火の角杯 (食べ物)
     // 図鑑の 10 品 (6.3節)

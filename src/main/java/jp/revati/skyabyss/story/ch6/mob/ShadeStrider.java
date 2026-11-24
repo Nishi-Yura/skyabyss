@@ -3,7 +3,6 @@ package jp.revati.skyabyss.story.ch6.mob;
 import java.util.EnumSet;
 
 import jp.revati.skyabyss.story.ch6.field.FieldTide;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -172,12 +171,6 @@ public class ShadeStrider extends MoonMob {
             t = -1;
             getNavigation().stop();
         }
-    }
-
-    @Override
-    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
-        super.dropCustomDeathLoot(level, source, recentlyHit);
-        jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.SHADOW_THREAD.get(), 0.35, 1, 1);
     }
 
     // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)

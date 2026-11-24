@@ -69,7 +69,6 @@ public class MirrorBearer extends MoonMob {
         return hidden;
     }
 
-
     // 叩いた者が前 (鏡と頭の側) にいるか
     boolean fromFront(DamageSource source) {
         Entity a = source.getEntity();
@@ -210,12 +209,6 @@ public class MirrorBearer extends MoonMob {
             aim = -1;
             cooldown = 80;
         }
-    }
-
-    @Override
-    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
-        super.dropCustomDeathLoot(level, source, recentlyHit);
-        jp.revati.skyabyss.story.ch4.Ch4Mobs.drop(level, this, source, MoonMobsSetup.CRESCENT_SHELL.get(), 0.35, 1, 1);
     }
 
     // 攻撃の粒は mod の moon の粒だけ (docs/design/59 の 2 章)

@@ -195,7 +195,7 @@ public final class EmberMobSelfTest {
         }
         // 表の値 (13 の 6.1節)
         expect(EmberMobLoot.THRALL.equals(new EmberMobLoot.Row(0.35f, 1, 2, 0.06f, 0.04f, 0.01f, null, 0f)), "thrall table (6.1)", f);
-        expect(EmberMobLoot.MOTH.equals(new EmberMobLoot.Row(0.05f, 1, 1, 0.01f, 0f, 0f, EmberMobLoot.SPARK_DUST, 0.15f)), "moth table (6.1)", f);
+        expect(EmberMobLoot.MOTH.equals(new EmberMobLoot.Row(0.05f, 1, 1, 0.01f, 0f, 0f, null, 0f)), "moth table (6.1)", f);
         expect(EmberMobLoot.ROLLER.equals(new EmberMobLoot.Row(0.25f, 1, 2, 0.05f, 0.03f, 0f, EmberMobLoot.CINDER_HUSK, 0.20f)), "roller table (6.1)", f);
         // 共鳴の欠片は今ある品。ほかは担当 G が登録するまで落ちない (登録されていない品は物にしない)
         expect(EmberMobLoot.stacks(List.of(new EmberMobLoot.Drop(EmberMobLoot.RESONANCE, 1))).size() == 1, "resonance shard is not found", f);

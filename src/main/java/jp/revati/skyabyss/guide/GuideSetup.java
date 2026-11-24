@@ -24,7 +24,6 @@ public final class GuideSetup {
     // ID は 21 の表のとおり。P5・P7 は、同じ ID を二重に登録せず、この 4 つを使うこと)
     public static final DeferredItem<Item> ROCK_SHELL_SCRAP = ITEMS.register("rock_shell_scrap", () -> new Item(new Item.Properties()));
     public static final DeferredItem<Item> BONE_CHIP = ITEMS.register("bone_chip", () -> new Item(new Item.Properties()));
-    public static final DeferredItem<Item> HARE_QUILL = ITEMS.register("hare_quill", () -> new Item(new Item.Properties()));
     // 岩殻の護り糸 (鼓動守 岩鯨の材料)
     public static final DeferredItem<Item> ROCK_SHELL_THREAD = ITEMS.register("rock_shell_thread", () -> new Item(new Item.Properties()));
 
@@ -52,7 +51,6 @@ public final class GuideSetup {
         if (event.getTabKey().equals(ModItems.LEGACY_TAB)) {
             event.accept(ROCK_SHELL_SCRAP.get());
             event.accept(BONE_CHIP.get());
-            event.accept(HARE_QUILL.get());
             event.accept(ROCK_SHELL_THREAD.get());
             event.accept(SENTRY_TALLY.get());
             event.accept(WHALE_CHASER_MARK.get());

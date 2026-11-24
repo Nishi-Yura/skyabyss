@@ -2,7 +2,7 @@
   "parent": "skyabyss:rebirth_1",
   "display": {
     "icon": {
-      "id": "skyabyss:gold_grain"
+      "id": "skyabyss:resonance_crystal"
     },
     "title": {
       "translate": "advancement.skyabyss.rebirth_5.title"
