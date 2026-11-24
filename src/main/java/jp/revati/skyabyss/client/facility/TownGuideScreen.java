@@ -99,7 +99,7 @@ public class TownGuideScreen extends Screen {
         int mx = (int) Math.floor(fit.x(sx));
         int my = (int) Math.floor(fit.y(sy));
         fit.begin(g);
-        LedgerStage.backdrop(g, fit, width, height);
+        LedgerStage.backdrop(g, fit, width, height, LedgerStage.HEAD_NONE, false);
         Font font = this.font;
         LedgerStage.indexHead(g, font, title);
         int hy = 32;
@@ -115,6 +115,7 @@ public class TownGuideScreen extends Screen {
         rows.begin(g);
         int y = rows.top();
         int right = rows.x() + rows.width() - (rows.scrollable() ? ScrollPanel.GUTTER : 0);
+        TownGuideNetwork.Entry shown = null;
         for (Line l : lines) {
             int lh = l.head ? HEAD_H : ROW_H;
             if (y + lh >= rows.y() && y <= rows.y() + rows.height()) {
@@ -129,6 +130,9 @@ public class TownGuideScreen extends Screen {
                     TownGuideNetwork.Entry e = l.entry;
                     boolean hover = mx >= rows.x() && mx < right && my >= Math.max(y, rows.y()) && my < Math.min(y + lh, rows.y() + rows.height());
                     boolean on = e.id().equals(current);
+                    if (hover || (on && shown == null)) {
+                        shown = e;
+                    }
                     if (hover || on) {
                         g.fill(rows.x() + 1, y, right - 1, y + lh - 1, on ? 0xFF2C2434 : FacilityUi.ROW_HOVER);
                     }
@@ -155,7 +159,13 @@ public class TownGuideScreen extends Screen {
                     int dx = nx + Math.max(78, font.width(name) + 8);
                     int room = right - 10 - fw - dx;
                     // ひとことは入るときだけ (縮めた字は使わない。入らない分は流す)
-                    if (room > 30) {
+                    Component desc = Component.translatable("gui.skyabyss.town_guide.place." + e.id() + ".desc");
+                    if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+                        // 板の側: 行に入るときだけ等倍で。入らないものは右の欄に (乗せた行・案内中の行)
+                        if (font.width(desc) <= room) {
+                            g.drawString(font, desc, dx, Golden.textY(y, lh), FacilityUi.DIM, false);
+                        }
+                    } else if (room > 30) {
                         jp.revati.skyabyss.client.ui.Marquee.draw(g, font, Component.translatable("gui.skyabyss.town_guide.place." + e.id() + ".desc").getVisualOrderText(), dx,
                                 Golden.textY(y, lh), room, FacilityUi.DIM, false);
                     }
@@ -165,6 +175,20 @@ public class TownGuideScreen extends Screen {
         }
         rows.end(g);
         rows.drawBar(g, 0xFF0E0D14, FacilityUi.TEAL);
+        if (jp.revati.skyabyss.client.ui.UiLook.plate() && shown != null) {
+            // 乗せた行 (なければ案内中の行) のひとことを、右の欄の手引きの下に
+            int dy = hy + 6;
+            jp.revati.skyabyss.client.ui.Plate.rule(g, LedgerStage.INDEX_X - 4, dy - 4, LedgerStage.INDEX_W + 8);
+            g.drawString(font, Component.translatable("gui.skyabyss.town_guide.place." + shown.id()), LedgerStage.INDEX_X + 2, dy + 2, FacilityUi.GOLD, false);
+            dy += 15;
+            for (net.minecraft.util.FormattedCharSequence l : font.split(Component.translatable("gui.skyabyss.town_guide.place." + shown.id() + ".desc"), LedgerStage.INDEX_W - 4)) {
+                if (dy + 9 > STOP_Y - 4) {
+                    break;
+                }
+                g.drawString(font, l, LedgerStage.INDEX_X + 2, dy, Paper.INK_SOFT, false);
+                dy += 11;
+            }
+        }
         // 釦 (帯の下)
         if (current != null) {
             button(g, BTN_X, STOP_Y, Component.translatable("gui.skyabyss.town_guide.stop"), mx, my);

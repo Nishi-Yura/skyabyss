@@ -98,7 +98,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
     protected void init() {
         layout();
         trackButton = addRenderableWidget(Paper.tag(Component.empty(), b -> toggleTrack())
-                .bounds(PAGE.right() - Golden.S89, LedgerStage.FOOT_Y, Golden.S89, Golden.BTN).primary().build());
+                .bounds(PAGE.right() - Golden.S89, LedgerStage.footBtn(LedgerStage.FOOT_Y), Golden.S89, Golden.BTN).primary().build());
         rebuild();
         if (selected == null) {
             QuestLog log = log();
@@ -427,7 +427,7 @@ public class QuestLogScreen extends Screen implements jp.revati.skyabyss.client.
 
     private void drawPanel(GuiGraphics g, int mouseX, int mouseY) {
         Font font = Minecraft.getInstance().font;
-        LedgerStage.backdrop(g, fit, width, height);
+        LedgerStage.backdrop(g, fit, width, height, LedgerStage.HEAD_PAGE, true);
         LedgerStage.indexHead(g, font, title);
         LedgerStage.footHint(g, font, Component.translatable("gui.skyabyss.quest.lore_hint"), PAGE.x(), PAGE.w() - Golden.S89 - Golden.S8);
         if (rows.isEmpty()) {

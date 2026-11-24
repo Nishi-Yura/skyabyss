@@ -145,7 +145,7 @@ public class DialogueScreen extends Screen {
         for (int k = 0; k < i; k++) {
             y += optionH(k) + 4;
         }
-        return new int[] {panelX + panelW - OPT_W - i * 3, y};
+        return new int[] {panelX + panelW - OPT_W - (jp.revati.skyabyss.client.ui.UiLook.plate() ? 0 : i * 3), y};
     }
 
     // 本文の欄 (真ん中。目盛りつきで送る)
@@ -157,7 +157,8 @@ public class DialogueScreen extends Screen {
     }
 
     private int faceColH() {
-        return face + 40;
+        // 板の側は名前の升を札の内側に収める分だけ高く
+        return face + (jp.revati.skyabyss.client.ui.UiLook.plate() ? 46 : 40);
     }
 
     // 選択肢は右の列にいつも見えている
@@ -274,6 +275,18 @@ public class DialogueScreen extends Screen {
         // 名前の短冊は、開いて少しあとに大きく浮いてから押される
         float press = jp.revati.skyabyss.rpg.client.skill.SkillStage.back((nowD - openedAtD - 120) / 240f);
         float ps = 1f + (1f - press) * 0.4f;
+        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+            // 板の側: 名前は札の内側の灯った升 (札の幅にそろえ、はみ出さない)
+            int nx = Math.round(ccx - cw / 2f) + 3;
+            int ny = Math.round(ccy - ch / 2f) + ch - 17;
+            g.pose().pushPose();
+            g.pose().translate(nx + (cw - 6) / 2f, ny + 7, 0);
+            g.pose().scale(ps, ps, 1f);
+            g.pose().translate(-(nx + (cw - 6) / 2f), -(ny + 7), 0);
+            jp.revati.skyabyss.client.ui.Plate.tile(g, nx, ny, cw - 6, 14, jp.revati.skyabyss.client.ui.Plate.ON, jp.revati.skyabyss.client.ui.Plate.GOLD);
+            jp.revati.skyabyss.client.ui.FitText.drawCentered(g, font, name, nx + (cw - 6) / 2, ny + 3, cw - 12, NAME, false);
+            g.pose().popPose();
+        } else {
         g.pose().pushPose();
         g.pose().translate(x - 4 + sw / 2f, sy + 7, 0);
         g.pose().scale(ps, ps, 1f);
@@ -281,6 +294,7 @@ public class DialogueScreen extends Screen {
         jp.revati.skyabyss.client.ui.Paper.slip(g, x - 4, sy, sw, 14, jp.revati.skyabyss.client.ui.Paper.PINK, jp.revati.skyabyss.client.ui.Paper.CREAM, jp.revati.skyabyss.client.ui.Paper.REST);
         jp.revati.skyabyss.client.ui.FitText.draw(g, font, name, x + 6, sy + 3, sw - 14, NAME, false);
         g.pose().popPose();
+        }
         // 本文 (一字ずつ。帯にじかに生成りの字で)
         int tx = x + textX;
         body.begin(g);
@@ -296,8 +310,12 @@ public class DialogueScreen extends Screen {
             ty += LINE_H;
         }
         body.end(g);
-        body.drawBar(g, EDGE_IN, 0x88E45A9C);
+        body.drawBar(g, EDGE_IN, jp.revati.skyabyss.client.ui.UiLook.plate() ? 0x88C48A44 : 0x88E45A9C);
         boolean more = show.hasNext() && show.options().isEmpty();
+        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+            // 板の側: 選択肢の列は沈んだ欄 (本文の欄と同じ高さ。字を送っているあいだも同じ所に)
+            jp.revati.skyabyss.client.ui.Plate.well(g, panelX + panelW - OPT_W - 4, panelY + PAD - 4, OPT_W + 8, panelH - 2 * PAD + 8);
+        }
         if (fullyShown() && !more) {
             // 選択肢 (右の列に短冊を縦に。選んでいるものは桃色で浮く)
             List<NpcNetwork.OptionView> opts = options();

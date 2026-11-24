@@ -301,8 +301,14 @@ public class TradeScreen extends Screen {
         int fw = ShopStage.LIST_W - 8;
         int fx = ShopStage.LIST_X + 4;
         int fy = ShopStage.HINT_Y;
-        FitText.draw(g, font, foot, fx, fy, fw, away ? ShopStage.LACK : Paper.INK_SOFT, false);
-        if (font.width(foot) > fw && mx >= fx && mx < fx + fw && my >= fy - 2 && my < fy + 10) {
+        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+            // 板の絵柄: 店と同じ下の段の欄 (2 行まで)
+            ShopStage.hint(g, font, foot, away ? ShopStage.LACK_ON_BLACK : -1);
+            fy = ShopStage.FOOT_Y;
+        } else {
+            FitText.draw(g, font, foot, fx, fy, fw, away ? ShopStage.LACK : Paper.INK_SOFT, false);
+        }
+        if (font.width(foot) > (jp.revati.skyabyss.client.ui.UiLook.plate() ? 2 * fw : fw) && mx >= fx && mx < fx + fw && my >= fy - 2 && my < fy + 10) {
             hoverText = foot;
         }
         if (cancelButton != null && mineSelected() != null) {

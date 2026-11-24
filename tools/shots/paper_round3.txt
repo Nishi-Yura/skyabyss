@@ -66,6 +66,12 @@ overlap records_demo_1920_g4
 shot records_demo_1920_g4
 close
 wait 2
+open records_hub_demo
+wait 8
+overlap records_hub_demo_1920_g4
+shot records_hub_demo_1920_g4
+close
+wait 2
 open town_guide_demo
 wait 8
 overlap town_guide_demo_1920_g4
@@ -380,6 +386,12 @@ overlap records_demo_1920_g2
 shot records_demo_1920_g2
 close
 wait 2
+open records_hub_demo
+wait 8
+overlap records_hub_demo_1920_g2
+shot records_hub_demo_1920_g2
+close
+wait 2
 open town_guide_demo
 wait 8
 overlap town_guide_demo_1920_g2
@@ -692,6 +704,12 @@ open records_demo
 wait 8
 overlap records_demo_1280_g3
 shot records_demo_1280_g3
+close
+wait 2
+open records_hub_demo
+wait 8
+overlap records_hub_demo_1280_g3
+shot records_hub_demo_1280_g3
 close
 wait 2
 open town_guide_demo

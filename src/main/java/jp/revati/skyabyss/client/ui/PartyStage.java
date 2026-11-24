@@ -41,7 +41,39 @@ public final class PartyStage {
     private static final float[] TILT = {-7, -2, 3, 7};
 
     public static void backdrop(GuiGraphics g, UiFit fit, int width, int height) {
+        backdrop(g, fit, width, height, HEAD_TITLE, true);
+    }
+
+    // 板の側 (docs/design/56 の 2.1「集まりの型」): 左の見出しの段の下の線 (題だけ・題と物語の三行・題と一行)、下の段の沈んだ欄 (左と右)
+    public static final int HEAD_TITLE = 30;
+    public static final int HEAD_STORY = 62;
+    public static final int HEAD_FINDER = 44;
+    public static final int PLATE_FOOT_Y = 199;
+    public static final int PLATE_FOOT_H = 22;
+    private static final int COL_X = 272;
+    private static final int COL_W = 129;
+    private static final int COL_BOTTOM = 195;
+
+    // head = 左の見出しの段、footLeft = 左の下の段に欄を敷くか (右の下の段はいつも)
+    public static void backdrop(GuiGraphics g, UiFit fit, int width, int height, int head, boolean footLeft) {
         Paper.stage(g, fit, width, height, "party", PEAKS, DIAMONDS);
+        if (UiLook.plate()) {
+            Plate.headBand(g, 5, COL_X - 8, head);
+            if (footLeft) {
+                Plate.well(g, 8, PLATE_FOOT_Y, COL_X - 12, PLATE_FOOT_H);
+            }
+            Plate.well(g, COL_X, PLATE_FOOT_Y, COL_W, PLATE_FOOT_H);
+        }
+    }
+
+    // 右の列の沈んだ欄 (板の側。top から下の段の上まで)
+    public static void column(GuiGraphics g, int top) {
+        Plate.well(g, COL_X, top, COL_W, COL_BOTTOM - top);
+    }
+
+    // 下の段の釦の y (板の側は沈んだ欄の真ん中)
+    public static int footBtn(int paperY) {
+        return UiLook.plate() ? PLATE_FOOT_Y + (PLATE_FOOT_H - Golden.BTN) / 2 : paperY;
     }
 
     // 題 (桃色の菱と、黒の上の桃色の字)
@@ -74,7 +106,7 @@ public final class PartyStage {
     // 右の帯 (見出しつき)
     public static void strip(GuiGraphics g, Font font, Component head) {
         if (UiLook.plate()) {
-            Plate.well(g, 272, 55, 129, 134);
+            column(g, 55);
         } else {
             Paper.cut(g, "party_strip", STRIP, Paper.CREAM, Paper.PINK_LO, 3, 4);
         }

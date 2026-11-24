@@ -590,6 +590,22 @@ public final class Plate {
         notchOutline(s, 0, 0, w, h, 1, p.outline);
     }
 
+    // 板の一部だけの見出しの段 (帳の左の頁など。panel の head と同じ描き方で、x〜x+w だけ)。head = 板の上の端から下の線まで
+    public static void headBand(GuiGraphics g, int x, int w, int head) {
+        Pal p = pal();
+        if (UiLook.get() == UiLook.BRONZE) {
+            int hc = mix(p.slab, 0xFF000000, 0.38f);
+            g.fill(x, 5, x + w, head - 2, hc);
+            g.fill(x, 5, x + w, 6, mix(hc, 0xFFFFFFFF, 0.10f));
+            g.fill(x, head - 2, x + w, head - 1, p.f);
+            g.fill(x, head - 1, x + w, head, p.fLo);
+            g.fill(x, head, x + w, head + 1, p.outline);
+            g.fill(x, head + 1, x + w, head + 2, p.slabHi);
+        } else {
+            rule(g, x, head, w);
+        }
+    }
+
     // ---------- 欄 (沈んだ面) ----------
     public static void well(GuiGraphics g, int x, int y, int w, int h) {
         UiLook look = UiLook.get();

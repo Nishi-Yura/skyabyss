@@ -28,6 +28,9 @@ public final class ShopStage {
     public static final int ROWS = 7;
     // 手引きの行 (帳面の下の端)
     public static final int HINT_Y = 198;
+    // 板の絵柄の下の段 (手引きの欄と手持ちの欄。窓の縁の内側に収める)
+    public static final int FOOT_Y = 199;
+    public static final int FOOT_H = 22;
     // つまみ (帳面の上の辺)
     public static final int TAB_X = 16;
     public static final int TAB_Y = 6;
@@ -58,6 +61,13 @@ public final class ShopStage {
         }
         Paper.stage(g, fit, width, height, "shop", PEAKS, DIAMONDS);
         Paper.cut(g, "shop_ledger", LEDGER, Paper.CREAM, Paper.PINK_LO, 4, 4);
+    }
+
+    // 板の絵柄で、欄を画面の側で敷くとき (作業台): 入りの透かしと板と見出しの段だけ
+    public static void panelOnly(GuiGraphics g, int head) {
+        track();
+        Plate.fade(g, jp.revati.skyabyss.rpg.client.skill.SkillStage.out((net.minecraft.Util.getMillis() - openedAt) / 160f));
+        Plate.panel(g, 0, 0, W, H, head, Plate.GOLD);
     }
 
     public static int tabX(int i) {
@@ -183,9 +193,25 @@ public final class ShopStage {
     }
 
     public static void hint(GuiGraphics g, Font font, Component text) {
+        hint(g, font, text, -1);
+    }
+
+    // color = -1 なら添えの色
+    public static void hint(GuiGraphics g, Font font, Component text, int color) {
+        if (UiLook.plate()) {
+            // 板の絵柄: 品の欄の下に沈んだ欄。手引きは 2 行まで折り返す (それでも入らない分は 2 行目に詰める)
+            Plate.well(g, LIST_X - 2, FOOT_Y, LIST_W + 7, FOOT_H);
+            int c = color == -1 ? 0xFF000000 | Plate.pal().inkSoft : 0xFF000000 | color;
+            List<FormattedCharSequence> lines = Marquee.joinRest(font.split(text, LIST_W - 8), 2);
+            int y = lines.size() == 1 ? FOOT_Y + (FOOT_H - 8) / 2 : FOOT_Y + 2;
+            for (FormattedCharSequence l : lines) {
+                Marquee.draw(g, font, l, LIST_X + 4, y, LIST_W - 8, c, false);
+                y += 10;
+            }
+            return;
+        }
         // 長い手引きは縮めずに横へ流す
-        Marquee.draw(g, font, text.getVisualOrderText(), LIST_X + 4, UiLook.plate() ? HINT_Y + 4 : HINT_Y, LIST_W - 8,
-                UiLook.plate() ? 0xFF000000 | Plate.pal().inkSoft : Paper.INK_SOFT, false);
+        Marquee.draw(g, font, text.getVisualOrderText(), LIST_X + 4, HINT_Y, LIST_W - 8, color == -1 ? Paper.INK_SOFT : color, false);
     }
 
     // 店の名前 (右上)
@@ -269,13 +295,17 @@ public final class ShopStage {
         String s = Integer.toString(coins);
         int w = 26 + font.width(s);
         int x = 392 - w;
+        int top = 202;
         if (UiLook.plate()) {
-            Plate.well(g, x, 202, w + 2, 21);
+            // 下の段の右、品の窓の右の端にそろえた沈んだ欄
+            x = RIGHT_X + RIGHT_W + 2 - (w + 2);
+            top = FOOT_Y;
+            Plate.well(g, x, FOOT_Y, w + 2, FOOT_H);
         } else {
             Paper.cut(g, "shop_purse", new float[] {x, 204, x + w + 2, 202, x + w, 222, x + 2, 224}, Paper.BLACK, Paper.PINK, 2, 2);
         }
-        g.renderItem(coin, x + 4, 205);
-        g.drawString(font, s, x + 21, 210, Paper.ON_BLACK_HI, false);
+        g.renderItem(coin, x + 4, top + 3);
+        g.drawString(font, s, x + 21, top + 8, Paper.ON_BLACK_HI, false);
         // 手持ちが変わった: 札の上に「-n」「+n」が浮いて消える (600ms)
         track();
         long now = net.minecraft.Util.getMillis();

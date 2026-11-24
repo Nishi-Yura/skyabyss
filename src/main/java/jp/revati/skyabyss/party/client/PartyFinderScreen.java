@@ -142,12 +142,12 @@ public final class PartyFinderScreen extends Screen implements jp.revati.skyabys
                 page = (page + pages() - 1) % pages();
                 dealAt = net.minecraft.Util.getMillis();
                 rebuildWidgets();
-            }).bounds(300, PartyStage.FOOT_Y, 22, Golden.BTN).build());
+            }).bounds(300, PartyStage.footBtn(PartyStage.FOOT_Y), 22, Golden.BTN).build());
             addRenderableWidget(Paper.tag(Component.literal("›"), b -> {
                 page = (page + 1) % pages();
                 dealAt = net.minecraft.Util.getMillis();
                 rebuildWidgets();
-            }).bounds(350, PartyStage.FOOT_Y, 22, Golden.BTN).build());
+            }).bounds(350, PartyStage.footBtn(PartyStage.FOOT_Y), 22, Golden.BTN).build());
         }
     }
 
@@ -176,7 +176,7 @@ public final class PartyFinderScreen extends Screen implements jp.revati.skyabys
         int mouseX = (int) Math.floor(fit.x(screenX));
         int mouseY = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
-        PartyStage.backdrop(g, fit, width, height);
+        PartyStage.backdrop(g, fit, width, height, PartyStage.HEAD_FINDER, false);
         PartyNetwork.Finder f = last;
         // 題: 2 倍の「パーティー募集」と、募集の数の判子
         float h0 = jp.revati.skyabyss.rpg.client.skill.SkillStage.out(since(openedAt, 0, 240));
@@ -221,7 +221,7 @@ public final class PartyFinderScreen extends Screen implements jp.revati.skyabys
             g.pose().popPose();
         }
         if (pages() > 1) {
-            FitText.drawCentered(g, font, Component.literal((page + 1) + "/" + pages()), 336, PartyStage.FOOT_Y + 3, 24, PartyStage.ON_PINK, false);
+            FitText.drawCentered(g, font, Component.literal((page + 1) + "/" + pages()), 336, PartyStage.footBtn(PartyStage.FOOT_Y) + 3, 24, PartyStage.ON_PINK, false);
         }
         // 右の帯: 自分の募集
         PartyStage.strip(g, font, null);

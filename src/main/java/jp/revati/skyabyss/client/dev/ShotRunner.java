@@ -1426,6 +1426,7 @@ public final class ShotRunner {
                 }
                 return new jp.revati.skyabyss.client.facility.RecordsScreen(new jp.revati.skyabyss.facility.KeepRecords.View(pages, 2, 9));
             };
+            case "records_hub_demo" -> () -> new jp.revati.skyabyss.client.record.RecordsHubScreen(0, false, java.util.List.of(net.minecraft.network.chat.Component.literal("1. Dev  12:34"), net.minecraft.network.chat.Component.literal("2. Alex  15:02"), net.minecraft.network.chat.Component.literal("3. Steve  18:40")));
             case "town_guide_demo" -> () -> {
                 java.util.List<jp.revati.skyabyss.facility.TownGuideNetwork.Entry> es = new java.util.ArrayList<>();
                 int i = 0;

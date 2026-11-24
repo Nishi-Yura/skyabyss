@@ -807,7 +807,7 @@
   "gui.skyabyss.buyback.title": "封切り師の買い取り",
   "gui.skyabyss.buyback.tab": "買い取り",
   "gui.skyabyss.buyback.empty": "買い取れる装備がない (武器・防具・装飾)",
-  "gui.skyabyss.buyback.hint": "押すと 1 個売る (シフトでそのスロットを全部)。身につけている品と大事な品は出ない ・ 間違えたら「買い戻す」から戻せる",
+  "gui.skyabyss.buyback.hint": "押すと 1 個売る ・ シフトで全部。身につけた品と大事な品は出ない ・ 間違えたら「買い戻す」で戻せる",
   "dialogue.skyabyss.attendant_perch_keeper.mount_rules": "笛を吹けば目の前に来る。もう一度吹けば帰る。巨神の背と淵の底、心臓の間には連れていけない。主が遠くへ行ったり、眠りについたりしても帰っちまう。見た目は章を越えるごとに増える。性能は鐘銭で磨くんだ。",
   "dialogue.skyabyss.attendant_perch_keeper.menu.mount": "乗り物を見る・買う (見た目と性能)",
   "dialogue.skyabyss.attendant_perch_keeper.menu.mount_rules": "乗り笛の決まり",

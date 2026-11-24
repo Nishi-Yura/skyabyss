@@ -370,7 +370,7 @@ final class ExtPage {
     // 祭壇の地 (切り絵): 五つの枠を角に置いた生成りの五角の台紙 (角は手で少しずつずらす) と濃い桃色の影、
     // 真ん中から枠へ伸びる桃色の点線、真ん中の桃色の菱に職の木の絵
     // 台紙の五角の半径 (枠の角まで包む)
-    private static final int ALTAR_RAD = 58;
+    private static final int ALTAR_RAD = 55;
     private static final float[] ALTAR_R = {1.00f, 0.95f, 1.04f, 0.97f, 1.02f};
     private static final float[] ALTAR_TURN = {-2f, 3f, -1f, 2f, -3f};
 

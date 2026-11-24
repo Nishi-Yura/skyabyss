@@ -67,12 +67,22 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     private static final int MAT_SY = 38;
     private static final int GEAR_SX = 324;
     private static final int GEAR_SY = 32;
-    private static final int INV_SX = 239;
+    private static final int INV_SX = 237;
     private static final int INV_SY = 138;
     // 細工の列 (帳面の下の端)
     private static final int PART_SX = 44;
     private static final int PART_SY = 187;
     private static final int PART_MAX = 10;
+    // 板の絵柄の欄 (左のつまみの中身・下の段の細工)。持ち物の欄の左に 3 あける
+    private static final int P_LEFT_X = 6;
+    private static final int P_HEAD = 20;
+    private static final int P_LEFT_W = INV_SX - 3 - 3 - P_LEFT_X;
+    private static final int P_FOOT_Y = 199;
+    private static final int P_FOOT_H = 22;
+
+    private static int partY() {
+        return jp.revati.skyabyss.client.ui.UiLook.plate() ? P_FOOT_Y + 2 : PART_SY;
+    }
     private final jp.revati.skyabyss.client.ui.UiFit fit = new jp.revati.skyabyss.client.ui.UiFit();
 
     private enum Tab {
@@ -132,7 +142,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
         imageWidth = Paper.STAGE_W;
         imageHeight = Paper.STAGE_H;
         inventoryLabelX = INV_SX;
-        inventoryLabelY = INV_SY - 12;
+        inventoryLabelY = jp.revati.skyabyss.client.ui.UiLook.plate() ? INV_SY - 14 : INV_SY - 12;
     }
 
     @Override
@@ -500,11 +510,26 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
             back = new jp.revati.skyabyss.client.ui.UiFit();
             back.fit(bw, bh, imageWidth, imageHeight, 1f, 1f);
         }
-        jp.revati.skyabyss.client.ui.ShopStage.backdrop(g, back, bw, bh);
-        jp.revati.skyabyss.client.ui.ShopStage.title(g, font, title);
-        // 装備の枠を立てる桃色の台
-        Paper.cut(g, "forge_plinth", new float[] {GEAR_SX - 16, GEAR_SY + 20, GEAR_SX + 34, GEAR_SY + 19, GEAR_SX + 30, GEAR_SY + 28, GEAR_SX - 12, GEAR_SY + 29},
-                Paper.PINK, Paper.BLACK_LO, 2, 2);
+        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+            // 板の絵柄 (docs/design/56 の 2.1「作業台」): 見出しの段はつまみの高さ (中身は y 22 から)。左のつまみの中身は板にじか、
+            // 右下に持ち物の欄、下の段に細工の欄 (持っているときだけ)。装備の枠は灯った升の台、材料の枠は升に載せる
+            jp.revati.skyabyss.client.ui.ShopStage.panelOnly(g, P_HEAD);
+            jp.revati.skyabyss.client.ui.Plate.well(g, INV_SX - 3, INV_SY - 3, 9 * 18 + 6, 3 * 18 + 4 + 18 + 6);
+            if (!shownParts().isEmpty()) {
+                jp.revati.skyabyss.client.ui.Plate.well(g, P_LEFT_X, P_FOOT_Y, P_LEFT_W, P_FOOT_H);
+            }
+            jp.revati.skyabyss.client.ui.Plate.tile(g, GEAR_SX - 4, GEAR_SY - 4, 26, 26, jp.revati.skyabyss.client.ui.Plate.ON, jp.revati.skyabyss.client.ui.Plate.GOLD);
+            jp.revati.skyabyss.client.ui.Plate.tile(g, MAT_SX - 2, MAT_SY - 2, 22, 22, jp.revati.skyabyss.client.ui.Plate.REST, jp.revati.skyabyss.client.ui.Plate.GOLD);
+            // 題は見出しの段の右に (段が低いので上に寄せる)
+            jp.revati.skyabyss.rpg.client.skill.SkillStage.big(g, font, title, jp.revati.skyabyss.client.ui.ShopStage.RIGHT_X, 2,
+                    jp.revati.skyabyss.client.ui.ShopStage.RIGHT_W, 0xFF000000 | jp.revati.skyabyss.client.ui.Plate.pal().inkHead);
+        } else {
+            jp.revati.skyabyss.client.ui.ShopStage.backdrop(g, back, bw, bh);
+            jp.revati.skyabyss.client.ui.ShopStage.title(g, font, title);
+            // 装備の枠を立てる桃色の台
+            Paper.cut(g, "forge_plinth", new float[] {GEAR_SX - 16, GEAR_SY + 20, GEAR_SX + 34, GEAR_SY + 19, GEAR_SX + 30, GEAR_SY + 28, GEAR_SX - 12, GEAR_SY + 29},
+                    Paper.PINK, Paper.BLACK_LO, 2, 2);
+        }
         fit.end(g);
         for (net.minecraft.world.inventory.Slot slot : menu.slots) {
             if (slot.isActive()) {
@@ -773,7 +798,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     private int partAt(int mx, int my) {
         java.util.List<Integer> parts = shownParts();
         int x0 = leftPos + PART_SX;
-        int y0 = topPos + PART_SY;
+        int y0 = topPos + partY();
         for (int k = 0; k < parts.size() && k < PART_MAX; k++) {
             int px = x0 + k * 18;
             int py = y0;
@@ -790,15 +815,24 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
             return;
         }
         // 帳面の下の端に一列 (生成りの窪みの枠)。押すと材料の枠へ
-        g.drawString(font, Component.translatable("skyabyss_pouch.category.parts"), leftPos + 14, topPos + PART_SY + 5, Paper.INK_SOFT, false);
+        g.drawString(font, Component.translatable("skyabyss_pouch.category.parts"), leftPos + 14, topPos + partY() + 5, Paper.INK_SOFT, false);
         jp.revati.skyabyss.pouch.PouchData d = jp.revati.skyabyss.pouch.Pouch.data(minecraft.player);
         int hover = partAt(mouseX, mouseY);
         for (int k = 0; k < parts.size() && k < PART_MAX; k++) {
             int px = leftPos + PART_SX + k * 18;
-            int py = topPos + PART_SY;
+            int py = topPos + partY();
             ItemStack s = d.part(parts.get(k));
-            g.fill(px - 1, py - 1, px + 17, py + 17, Paper.CREAM_LO);
-            g.fill(px, py, px + 17, py + 17, parts.get(k) == hover ? jp.revati.skyabyss.client.ui.Plate.card(Paper.PINK_HI) : 0xFFDCD2C2);
+            if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+                // 板の絵柄: 枠は沈んだ升、乗せた枠は明るい升
+                if (parts.get(k) == hover) {
+                    jp.revati.skyabyss.client.ui.Plate.tile(g, px - 1, py - 1, 18, 18, jp.revati.skyabyss.client.ui.Plate.HOVER, jp.revati.skyabyss.client.ui.Plate.GOLD);
+                } else {
+                    jp.revati.skyabyss.client.ui.Golden.slot(g, px - 1, py - 1, 18);
+                }
+            } else {
+                g.fill(px - 1, py - 1, px + 17, py + 17, Paper.CREAM_LO);
+                g.fill(px, py, px + 17, py + 17, parts.get(k) == hover ? Paper.PINK_HI : 0xFFDCD2C2);
+            }
             g.renderItem(s, px, py);
             g.renderItemDecorations(font, s, px, py);
         }

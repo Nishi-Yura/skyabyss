@@ -32,6 +32,43 @@ public class GlassChestScreen extends AbstractContainerScreen<ChestMenu> impleme
     private static final int BAG_Y = 34;
     private final UiFit fit = new UiFit();
 
+    // 板の絵柄 (docs/design/56 の 2.1「作業台」): 板は中身の高さに詰めて舞台の真ん中。左に箱の欄、右に袋と手もとの欄 (同じ幅で左右対称)
+    private static final int P_HEAD = 24;
+    private static final int P_WELL_W = 9 * 18 + 12;
+    private static final int P_GAP = 10;
+    private static final int P_LX = (Paper.STAGE_W - 2 * P_WELL_W - P_GAP) / 2;
+    private static final int P_RX = P_LX + P_WELL_W + P_GAP;
+    private static final int P_TAB_W = 21;
+    private static final int P_TAB_STEP = 24;
+
+    private int pLeftH() {
+        return menu.getRowCount() * 18 + 12;
+    }
+
+    private static int pRightH() {
+        return 3 * 18 + 4 + 18 + 12;
+    }
+
+    private int pPanelH() {
+        return P_HEAD + 8 + Math.max(pLeftH(), pRightH()) + 10;
+    }
+
+    private int pPanelY() {
+        return (Paper.STAGE_H - pPanelH()) / 2;
+    }
+
+    private int pWellY() {
+        return pPanelY() + P_HEAD + 8;
+    }
+
+    private int pTabX(int i) {
+        return P_LX + i * P_TAB_STEP;
+    }
+
+    private int pTabY() {
+        return pPanelY() + 6;
+    }
+
     public GlassChestScreen(ChestMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
         imageWidth = Paper.STAGE_W;
@@ -55,6 +92,23 @@ public class GlassChestScreen extends AbstractContainerScreen<ChestMenu> impleme
         leftPos = r[0];
         topPos = r[1];
         int box = menu.getRowCount() * 9;
+        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+            int gy = pWellY() + 6;
+            for (int i = 0; i < menu.slots.size(); i++) {
+                Slot s = menu.slots.get(i);
+                if (i < box) {
+                    s.x = P_LX + 6 + 1 + i % 9 * 18;
+                    s.y = gy + 1 + i / 9 * 18;
+                } else if (i < box + 27) {
+                    s.x = P_RX + 6 + 1 + (i - box) % 9 * 18;
+                    s.y = gy + 1 + (i - box) / 9 * 18;
+                } else {
+                    s.x = P_RX + 6 + 1 + (i - box - 27) * 18;
+                    s.y = gy + 1 + 58;
+                }
+            }
+            return;
+        }
         for (int i = 0; i < menu.slots.size(); i++) {
             Slot s = menu.slots.get(i);
             if (i < box) {
@@ -87,6 +141,10 @@ public class GlassChestScreen extends AbstractContainerScreen<ChestMenu> impleme
     protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
         fit.fit(width, height, imageWidth, imageHeight, 1f, 1f);
         fit.begin(g);
+        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+            renderPlate(g, mouseX, mouseY);
+            return;
+        }
         // 窓が舞台よりずっと大きい (GUI 2 など) ときは、窓の端まで敷かずに舞台の大きさの一枚の紙にする (箱の画面は大きくできないため)
         jp.revati.skyabyss.client.ui.UiFit back = fit;
         int bw = width;
@@ -133,6 +191,48 @@ public class GlassChestScreen extends AbstractContainerScreen<ChestMenu> impleme
         g.pose().popPose();
     }
 
+    // 板の絵柄: 見出しの段に (預かり所なら頁のつまみと) 箱の名前・入っている数、袋の名前。下に二つの沈んだ欄と枠
+    private void renderPlate(GuiGraphics g, int mouseX, int mouseY) {
+        jp.revati.skyabyss.client.ui.Plate.Pal p = jp.revati.skyabyss.client.ui.Plate.pal();
+        jp.revati.skyabyss.client.ui.Plate.openFade(g);
+        int py = pPanelY();
+        jp.revati.skyabyss.client.ui.Plate.panel(g, 0, py, Paper.STAGE_W, pPanelH(), P_HEAD, jp.revati.skyabyss.client.ui.Plate.GOLD);
+        int wy = pWellY();
+        jp.revati.skyabyss.client.ui.Plate.well(g, P_LX, wy, P_WELL_W, pLeftH());
+        jp.revati.skyabyss.client.ui.Plate.well(g, P_RX, wy, P_WELL_W, pRightH());
+        int box = menu.getRowCount() * 9;
+        int pages = StashTabs.pages(this);
+        int tx = P_LX;
+        for (int i = 0; i < pages; i++) {
+            int x = pTabX(i);
+            boolean hover = ShopStage.in(mouseX - leftPos, mouseY - topPos, x, pTabY(), P_TAB_W, 13);
+            Paper.tab(g, font, x, pTabY(), P_TAB_W, 13, Component.literal(String.valueOf(i + 1)), i + 1 == StashTabs.page(), hover);
+            tx = x + P_TAB_W + 6;
+        }
+        int ty = py + 9;
+        int used = 0;
+        for (int i = 0; i < box; i++) {
+            if (menu.slots.get(i).hasItem()) {
+                used++;
+            }
+        }
+        // 箱の名前のすぐ右に入っている数 (袋の名前と離す)
+        String count = used + " / " + box;
+        int room = P_LX + P_WELL_W - tx - font.width(count) - 8;
+        int tw = Math.min(font.width(title), Math.max(10, room));
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, title, tx, ty, tw, 0xFF000000 | p.inkHead, false);
+        g.drawString(font, count, tx + tw + 8, ty, 0xFF000000 | p.inkSoft, false);
+        g.drawString(font, Component.translatable("gui.skyabyss.gear.bag"), P_RX, ty, 0xFF000000 | p.inkHead, false);
+        fit.end(g);
+        g.pose().pushPose();
+        g.pose().translate(leftPos, topPos, 0);
+        for (int i = 0; i < menu.slots.size(); i++) {
+            Slot s = menu.slots.get(i);
+            Golden.slot(g, s.x - 1, s.y - 1, 18);
+        }
+        g.pose().popPose();
+    }
+
     @Override
     protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
     }
@@ -140,6 +240,15 @@ public class GlassChestScreen extends AbstractContainerScreen<ChestMenu> impleme
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         int pages = StashTabs.pages(this);
+        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+            for (int i = 0; i < pages; i++) {
+                if (button == 0 && ShopStage.in(mouseX - leftPos, mouseY - topPos, pTabX(i), pTabY(), P_TAB_W, 13)) {
+                    StashTabs.go(this, i + 1);
+                    return true;
+                }
+            }
+            return super.mouseClicked(mouseX, mouseY, button);
+        }
         for (int i = 0; i < pages; i++) {
             if (button == 0 && ShopStage.in(mouseX - leftPos, mouseY - topPos, ShopStage.tabX(i), ShopStage.TAB_Y, ShopStage.TAB_W, 13)) {
                 StashTabs.go(this, i + 1);

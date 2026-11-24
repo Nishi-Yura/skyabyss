@@ -107,7 +107,7 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
     // ---------------------------------------------------------------- ボタン
     private void rebuild() {
         clearWidgets();
-        int fy = PickStage.H - 20;
+        int fy = PickStage.footBtn(PickStage.H - 20);
         switch (mode) {
             case LIST -> {
                 String k = selectedKind();

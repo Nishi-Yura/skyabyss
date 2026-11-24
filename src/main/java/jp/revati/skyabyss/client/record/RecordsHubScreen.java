@@ -115,7 +115,7 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
             hidden = !hidden;
             PacketDistributor.sendToServer(new jp.revati.skyabyss.rebirth.RebirthNet.HiddenPayload(hidden));
             x.setMessage(hideLabel());
-        }).bounds(LedgerStage.PAGE_X + LedgerStage.PAGE_W - Golden.S89 - Golden.S55, LedgerStage.FOOT_Y, Golden.S89 + Golden.S55, Golden.BTN).build());
+        }).bounds(LedgerStage.PAGE_X + LedgerStage.PAGE_W - Golden.S89 - Golden.S55, LedgerStage.footBtn(LedgerStage.FOOT_Y), Golden.S89 + Golden.S55, Golden.BTN).build());
         hideButton.visible = tab == RecordsHub.REBIRTH;
         rewrap();
     }
@@ -137,7 +137,7 @@ public class RecordsHubScreen extends Screen implements jp.revati.skyabyss.clien
         int mx = (int) Math.floor(fit.x(screenX));
         int my = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
-        LedgerStage.backdrop(g, fit, width, height);
+        LedgerStage.backdrop(g, fit, width, height, LedgerStage.HEAD_PAGE, tab == RecordsHub.REBIRTH);
         LedgerStage.indexHead(g, font, title);
         LedgerStage.pageTitle(g, font, Component.translatable("gui.skyabyss.records_hub.tab." + RecordsHub.TABS[tab]), null);
         panel.begin(g);

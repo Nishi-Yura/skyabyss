@@ -191,14 +191,15 @@ public class RouteBoonScreen extends Screen implements jp.revati.skyabyss.client
                     argb(1f, on ? 0xFFF6EA : Paper.INK_HEAD), false);
             int ly = ny + Golden.S13 + Golden.S5;
             List<FormattedCharSequence> lines = jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.literal(Component.translatable(b.key() + ".desc").getString()), w);
-            int bottom = PickStage.center(i, 2, on)[1] + PickStage.CARD_H / 2 - 4;
+            int bottom = PickStage.center(i, 2, on)[1] + PickStage.cardH() / 2 - 4;
             for (int l = 0; l < lines.size() && ly + Golden.ROW <= bottom; l++) {
                 g.drawString(font, lines.get(l), x, Golden.textY(ly, Golden.ROW), argb(1f, on ? 0xFFF6EA : Paper.INK), false);
                 ly += Golden.ROW;
             }
             PickStage.undeal(g);
         }
-        int ry = 44;
+        PickStage.column(g);
+        int ry = PickStage.colY(44);
         for (FormattedCharSequence line : jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.boon.help"), PickStage.RIGHT_W)) {
             g.drawString(font, line, PickStage.RIGHT_X, ry, argb(1f, Paper.ON_BLACK_SOFT), false);
             ry += Golden.ROW;

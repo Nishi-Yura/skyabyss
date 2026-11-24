@@ -188,7 +188,7 @@ public class HunterNotesScreen extends Screen implements jp.revati.skyabyss.clie
         int mx = (int) Math.floor(fit.x(screenX));
         int my = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
-        LedgerStage.backdrop(g, fit, width, height);
+        LedgerStage.backdrop(g, fit, width, height, LedgerStage.HEAD_PAGE, true);
         ListTag l = foes();
         int known = 0;
         for (int i = 0; i < l.size(); i++) {
@@ -352,7 +352,7 @@ public class HunterNotesScreen extends Screen implements jp.revati.skyabyss.clie
     private static final int MODEL = 80;
 
     private static MutableComponent head(String key) {
-        return Component.translatable(key).withColor(GOLD);
+        return Component.translatable(key).withColor(jp.revati.skyabyss.client.ui.UiLook.plate() ? jp.revati.skyabyss.client.ui.Plate.textColor(GOLD) & 0xFFFFFF : GOLD);
     }
 
     private static String shown(float v) {

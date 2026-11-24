@@ -84,7 +84,7 @@ public class JourneyScreen extends Screen {
         // 記録の画面 (踏破・塔・深み・釣り・早駆け・転生・空見。record/RecordsHub) を開く釦。左下の山の上
         addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.records_hub.open"),
                 b -> jp.revati.skyabyss.client.record.RecordsHubScreen.request(jp.revati.skyabyss.record.RecordsHub.CLEAR))
-                .bounds(ROW_X, LedgerStage.FOOT_Y + 4, 70, Golden.BTN).build());
+                .bounds(ROW_X, LedgerStage.footBtn(LedgerStage.FOOT_Y + 4), 70, Golden.BTN).build());
         PacketDistributor.sendToServer(new Journey.Request());
     }
 
@@ -114,7 +114,7 @@ public class JourneyScreen extends Screen {
         int mx = (int) Math.floor(fit.x(screenX));
         int my = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
-        LedgerStage.backdrop(g, fit, width, height);
+        LedgerStage.backdrop(g, fit, width, height, LedgerStage.HEAD_K, true);
         LedgerStage.kTitle(g, font, title, LedgerStage.K_HEAD.x() + RpgTabs.headWidth(RpgTabs.JOURNEY));
         if (data == null) {
             FitText.draw(g, font, Component.translatable("gui.skyabyss.journey.loading"), ROW_X, 100, ROW_W, SOFT, false);
@@ -201,7 +201,7 @@ public class JourneyScreen extends Screen {
             }
             if (in(mx, my, x, y, ROW_W, ROW_H)) {
                 List<Component> lines = new ArrayList<>();
-                lines.add(RegionFame.landName(region).copy().withColor(GOLD));
+                lines.add(RegionFame.landName(region).copy().withColor(jp.revati.skyabyss.client.ui.UiLook.plate() ? jp.revati.skyabyss.client.ui.Plate.textColor(GOLD) & 0xFFFFFF : GOLD));
                 if (town) {
                     int t = RegionFame.tier(fame);
                     lines.add(Component.translatable("gui.skyabyss.journey.tip.fame", fame,
@@ -264,6 +264,11 @@ public class JourneyScreen extends Screen {
         int w = SIDE_W - 4;
         int y = CODEX_Y;
         boolean hot = codexHit(mx, my);
+        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+            // 板の側: 押せる所 (狩人の手帳へ) は升
+            jp.revati.skyabyss.client.ui.Plate.tile(g, SIDE_X - 4, CODEX_Y - 4, SIDE_W + 4, CODEX_BOTTOM - CODEX_Y + 4,
+                    hot ? jp.revati.skyabyss.client.ui.Plate.HOVER : jp.revati.skyabyss.client.ui.Plate.REST, jp.revati.skyabyss.client.ui.Plate.GOLD);
+        }
         LedgerStage.section(g, font, Component.translatable("gui.skyabyss.journey.codex"), x, y, 11, Paper.INK_HEAD);
         ListTag sets = data.getList("sets", Tag.TAG_COMPOUND);
         int done = 0;
@@ -291,7 +296,7 @@ public class JourneyScreen extends Screen {
         }
         if (hot) {
             List<Component> lines = new ArrayList<>();
-            lines.add(Component.translatable("gui.skyabyss.journey.codex").withColor(GOLD));
+            lines.add(Component.translatable("gui.skyabyss.journey.codex").withColor(jp.revati.skyabyss.client.ui.UiLook.plate() ? jp.revati.skyabyss.client.ui.Plate.textColor(GOLD) & 0xFFFFFF : GOLD));
             for (int i = 0; i < sets.size(); i++) {
                 CompoundTag s = sets.getCompound(i);
                 boolean full = s.getInt("owned") >= s.getInt("total");
@@ -335,7 +340,7 @@ public class JourneyScreen extends Screen {
             y += 11;
         }
         if (in(mx, my, SIDE_X - 4, MASTERY_Y, SIDE_W + 4, MASTERY_BOTTOM - MASTERY_Y)) {
-            tip(List.of(Component.translatable("gui.skyabyss.journey.mastery").withColor(GOLD),
+            tip(List.of(Component.translatable("gui.skyabyss.journey.mastery").withColor(jp.revati.skyabyss.client.ui.UiLook.plate() ? jp.revati.skyabyss.client.ui.Plate.textColor(GOLD) & 0xFFFFFF : GOLD),
                     Component.translatable("gui.skyabyss.journey.tip.mastery").withColor(TEXT)));
         }
     }

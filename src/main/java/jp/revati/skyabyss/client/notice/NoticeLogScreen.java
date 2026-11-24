@@ -89,7 +89,7 @@ public class NoticeLogScreen extends Screen implements jp.revati.skyabyss.client
         layout();
         Paper.dim(g, width, height);
         fit.begin(g);
-        LedgerStage.backdrop(g, fit, width, height);
+        LedgerStage.backdrop(g, fit, width, height, LedgerStage.HEAD_NONE, false);
         LedgerStage.indexHead(g, font, title);
         List<Row> rows = rows(font, list.width() - TIME_W - ScrollPanel.GUTTER);
         Paper.inkBegin();

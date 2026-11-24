@@ -91,7 +91,7 @@ public class GrowthScreen extends Screen implements jp.revati.skyabyss.client.ui
         int mouseX = (int) Math.floor(fit.x(screenX));
         int mouseY = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
-        LedgerStage.backdrop(g, fit, width, height);
+        LedgerStage.backdrop(g, fit, width, height, LedgerStage.HEAD_K, false);
         LedgerStage.kTitle(g, font, title, LedgerStage.K_HEAD.x() + RpgTabs.headWidth(RpgTabs.STATUS));
         renderBody(g, mouseX, mouseY);
         for (net.minecraft.client.gui.components.Renderable r : renderables) {

@@ -69,7 +69,7 @@ public class DeepChoiceScreen extends Screen {
             PickStage.card(g, i, 2, lift, lift);
             int[] c = PickStage.center(i, 2, lift);
             if (deep) {
-                Paper.pin(g, c[0] + PickStage.CARD_W / 2 - 10, c[1] - PickStage.CARD_H / 2 + 6, 5, !lift);
+                Paper.pin(g, c[0] + PickStage.CARD_W / 2 - 10, c[1] - PickStage.cardH() / 2 + 6, 5, !lift);
             }
             int[] in = PickStage.inner(i, 2, lift);
             int x = in[0];
@@ -93,7 +93,8 @@ public class DeepChoiceScreen extends Screen {
         }
         // 右の列: 層の気配と、仲間への手引き
         int rx = PickStage.RIGHT_X;
-        int ry = 44;
+        PickStage.column(g);
+        int ry = PickStage.colY(44);
         for (FormattedCharSequence line : TextWrap.split(font, Component.translatable("gui.skyabyss.dungeon.deep.mood", Component.translatable(data.moodName())), PickStage.RIGHT_W)) {
             g.drawString(font, line, rx, ry, PickStage.ON_PINK, false);
             ry += Golden.ROW;

@@ -54,7 +54,16 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     // 深淵のつまみ・歌片を作る (下の山の上)
     private static final int ABYSS_W = 92;
     private static final int CRAFT_W = 76;
-    private static final int FOOT_BTN_Y = 207;
+    private static final int FOOT_BTN_Y_PAPER = 207;
+
+    // 板の側 (docs/design/56 の 2.1「選ぶ型」): 見出しの段 (y 38) の下へ頁の中身を 4 だけ下げ、下の段は沈んだ欄の真ん中
+    private static int footY() {
+        return jp.revati.skyabyss.client.ui.UiLook.plate() ? 204 : FOOT_BTN_Y_PAPER;
+    }
+
+    private static int contentDy() {
+        return jp.revati.skyabyss.client.ui.UiLook.plate() ? 4 : 0;
+    }
     private static final int CRAFT_X = W - 12 - ABYSS_W - 6 - CRAFT_W;
     private static final int ABYSS_X = W - 12 - ABYSS_W;
     // つまみ (右の端に縦)
@@ -80,7 +89,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
 
     // いまの三つの i 枚目の札の真ん中
     private static int[] cardCenter(int i, boolean lift) {
-        return new int[] {CONTENT.x() + 56 + i * 114, CONTENT.y() + 82 + (i == 1 ? -4 : 2) - (lift ? 8 : 0)};
+        return new int[] {CONTENT.x() + 56 + i * 114, CONTENT.y() + 82 + (i == 1 ? -4 : 2) - (lift ? (jp.revati.skyabyss.client.ui.UiLook.plate() ? 4 : 8) : 0)};
     }
 
     private int hoverCard(double mx, double my) {
@@ -207,7 +216,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
                 return true;
             }
         }
-        if (button == 0 && my >= FOOT_BTN_Y && my < FOOT_BTN_Y + ROW) {
+        if (button == 0 && my >= footY() && my < footY() + ROW) {
             // 歌片を作る (祠の炉。足りるかはサーバーが確かめる)
             if (mx >= CRAFT_X && mx < CRAFT_X + CRAFT_W) {
                 net.neoforged.neoforge.network.PacketDistributor.sendToServer(new TrialBoardNet.CraftShard(data.titan()));
@@ -223,7 +232,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         }
         // 誓いの行 (選べるときだけ)
         if (button == 0 && tab == 2 && data.vowClosed().isEmpty()) {
-            int i = vowRowAt(mx, my);
+            int i = vowRowAt(mx, my - contentDy());
             if (i >= 0) {
                 TrialBoardNet.VowLine v = data.vows().get(i);
                 net.neoforged.neoforge.network.PacketDistributor.sendToServer(new TrialBoardNet.VowChange(data.titan(), v.id(), !v.on()));
@@ -306,6 +315,10 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         int mouseY = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
         jp.revati.skyabyss.client.ui.Paper.stage(g, fit, width, height, "trial", PEAKS, DIAMONDS);
+        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+            jp.revati.skyabyss.client.ui.Plate.headBand(g, 5, TAB_X - 12, 38);
+            jp.revati.skyabyss.client.ui.Plate.well(g, 8, 199, W - 16, 22);
+        }
         // 題・巨神と周回・称号 (左上)
         // 題: 小さな題 (巨神の祠・周目) と、2 倍の巨神の名。称号は名の右に判で (無ければ出さない)
         float h0 = jp.revati.skyabyss.rpg.client.skill.SkillStage.out(since(0, 240));
@@ -334,19 +347,20 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
         // 頁の中身は替えると右から 8 だけ滑りこむ (180ms)
         int slide = Math.round((1f - jp.revati.skyabyss.rpg.client.skill.SkillStage.out((net.minecraft.Util.getMillis() - tabAt) / 180f)) * 8f);
         g.pose().pushPose();
-        g.pose().translate(tab == 0 ? 0 : slide, 0, 0);
+        g.pose().translate(tab == 0 ? 0 : slide, contentDy(), 0);
+        int cmy = mouseY - contentDy();
         switch (tab) {
-            case 0 -> renderNow(g, font, mouseX, mouseY);
+            case 0 -> renderNow(g, font, mouseX, cmy);
             case 1 -> renderCodex(g, font);
-            case 2 -> renderVows(g, font, mouseX, mouseY);
-            case 3 -> renderRewards(g, font, mouseX, mouseY);
+            case 2 -> renderVows(g, font, mouseX, cmy);
+            case 3 -> renderRewards(g, font, mouseX, cmy);
             default -> renderHow(g, font);
         }
         g.pose().popPose();
         // 足: 順路の記録・歌片と、歌片を作る・深淵のつまみ
         renderFoot(g, font);
-        renderAbyssToggle(g, font, ABYSS_X, FOOT_BTN_Y, mouseX, mouseY);
-        renderCraft(g, font, CRAFT_X, FOOT_BTN_Y, mouseX, mouseY);
+        renderAbyssToggle(g, font, ABYSS_X, footY(), mouseX, mouseY);
+        renderCraft(g, font, CRAFT_X, footY(), mouseX, mouseY);
         fit.end(g);
     }
 
@@ -722,7 +736,7 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     // 下の段 (山の上): 順路の記録と歌片
     private void renderFoot(GuiGraphics g, Font font) {
         int x = 14;
-        int y = FOOT_BTN_Y + 3;
+        int y = footY() + 3;
         // 順路の記録と歌片 (docs/design/32 の 6 章)
         long best = data.routeBest() / 20;
         Component record = data.routeClears() <= 0 ? Component.translatable("gui.skyabyss.shrine.record_none")

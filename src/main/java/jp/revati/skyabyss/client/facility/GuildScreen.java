@@ -290,11 +290,15 @@ public class GuildScreen extends Screen {
     }
 
     private void renderBoard(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        PartyStage.backdrop(g, fit, width, height);
+        PartyStage.backdrop(g, fit, width, height, PartyStage.HEAD_TITLE, true);
         hits.clear();
         hitActions.clear();
         if (view.mine().isEmpty() || tab != 3) {
-            Paper.cut(g, "guild_strip", STRIP, Paper.CREAM, Paper.PINK_LO, 3, 4);
+            if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+                PartyStage.column(g, 30);
+            } else {
+                Paper.cut(g, "guild_strip", STRIP, Paper.CREAM, Paper.PINK_LO, 3, 4);
+            }
         }
         if (view.mine().isEmpty()) {
             PartyStage.title(g, font, title);
@@ -338,7 +342,7 @@ public class GuildScreen extends Screen {
             FitText.draw(g, font, Component.literal(r.name()), bx + 3, ty, cx - Golden.S5 - bx - 3, Golden.TEXT, false);
             g.drawString(font, count, cx, ty, Paper.ON_BLACK_DIM, false);
             boolean hover = mx >= ax && mx < ax + aw && my >= ry && my < ry + ROW;
-            g.fill(ax, ry, ax + aw, ry + ROW, r.applied() ? 0xFF161B22 : hover ? 0xFF3A3644 : 0xFF2A2232);
+            bg(g, ax, ry, aw, ROW, r.applied() ? jp.revati.skyabyss.client.ui.Plate.FLAT : hover ? jp.revati.skyabyss.client.ui.Plate.HOVER : jp.revati.skyabyss.client.ui.Plate.REST, r.applied() ? 0xFF161B22 : hover ? 0xFF3A3644 : 0xFF2A2232);
             g.drawString(font, act, ax + (aw - font.width(act)) / 2, ty, r.applied() ? Paper.ON_BLACK_DIM : Golden.TEXT, false);
             if (!r.applied()) {
                 hit(ax, ry, aw, ROW, () -> send("apply", r.id(), "", "", false));
@@ -413,7 +417,7 @@ public class GuildScreen extends Screen {
         }
         // 下の段の左: 人数と自分の位
         Component who = Component.translatable("gui.skyabyss.guild.members", view.members().size(), view.max()).append("  ・  ")
-                .append(Component.translatable("gui.skyabyss.guild.rank." + view.rank()).withColor(Paper.ON_BLACK_PINK));
+                .append(Component.translatable("gui.skyabyss.guild.rank." + view.rank()).withColor(jp.revati.skyabyss.client.ui.UiLook.plate() ? jp.revati.skyabyss.client.ui.Plate.textColor(Paper.ON_BLACK_PINK) & 0xFFFFFF : Paper.ON_BLACK_PINK));
         FitText.draw(g, font, who, FOOT_L.x() + Golden.S5, Golden.textY(FOOT_L.y(), FOOT_L.h()), FOOT_L.w() - Golden.S5, PartyStage.ON_PINK, false);
         switch (tab) {
             case 1 -> renderRequest(g, font);
@@ -465,19 +469,22 @@ public class GuildScreen extends Screen {
                 Component k = Component.translatable("gui.skyabyss.guild.kick");
                 int kw = font.width(k) + 6;
                 int kx = right - kw;
-                g.fill(kx, ry + 1, kx + kw, ry + ROW - 1, mx >= kx && mx < kx + kw && my >= ry && my < ry + ROW ? 0xFF5A2A38 : 0xFF2A1C22);
+                boolean kh = mx >= kx && mx < kx + kw && my >= ry && my < ry + ROW;
+                bg(g, kx, ry + 1, kw, ROW - 2, kh ? jp.revati.skyabyss.client.ui.Plate.HOVER : jp.revati.skyabyss.client.ui.Plate.REST, kh ? 0xFF5A2A38 : 0xFF2A1C22);
                 g.drawString(font, k, kx + 3, ty, FacilityUi.LACK, false);
                 hit(kx, ry + 1, kw, ROW - 2, () -> send("kick", m.id().toString(), "", "", false));
                 Component o = Component.translatable(m.rank() == 1 ? "gui.skyabyss.guild.demote" : "gui.skyabyss.guild.promote");
                 int ow = font.width(o) + 6;
                 int ox = kx - ow - 2;
-                g.fill(ox, ry + 1, ox + ow, ry + ROW - 1, mx >= ox && mx < ox + ow && my >= ry && my < ry + ROW ? 0xFF3A3644 : 0xFF2A2232);
+                boolean oh = mx >= ox && mx < ox + ow && my >= ry && my < ry + ROW;
+                bg(g, ox, ry + 1, ow, ROW - 2, oh ? jp.revati.skyabyss.client.ui.Plate.HOVER : jp.revati.skyabyss.client.ui.Plate.REST, oh ? 0xFF3A3644 : 0xFF2A2232);
                 g.drawString(font, o, ox + 3, ty, FacilityUi.TEXT, false);
                 hit(ox, ry + 1, ow, ROW - 2, () -> send("officer", m.id().toString(), "", "", m.rank() != 1));
                 // 長を譲る (★。二度押し)
                 boolean sure = confirming("transfer", m.id().toString());
                 int sx = ox - 15 - 2;
-                g.fill(sx, ry + 1, sx + 15, ry + ROW - 1, sure ? 0xFF5A4A20 : mx >= sx && mx < sx + 15 && my >= ry && my < ry + ROW ? 0xFF4A4426 : 0xFF2A2618);
+                boolean sh = mx >= sx && mx < sx + 15 && my >= ry && my < ry + ROW;
+                bg(g, sx, ry + 1, 15, ROW - 2, sure ? jp.revati.skyabyss.client.ui.Plate.ON : sh ? jp.revati.skyabyss.client.ui.Plate.HOVER : jp.revati.skyabyss.client.ui.Plate.REST, sure ? 0xFF5A4A20 : sh ? 0xFF4A4426 : 0xFF2A2618);
                 g.drawString(font, sure ? "?" : "★", sx + 4, ty, FacilityUi.GOLD, false);
                 hit(sx, ry + 1, 15, ROW - 2, () -> {
                     if (confirmed("transfer", m.id().toString())) {
@@ -520,11 +527,11 @@ public class GuildScreen extends Screen {
             int ty = Golden.textY(ry, ROW);
             FitText.draw(g, font, Component.literal(m.name()), NX, ty, NW - 36, Golden.TEXT, false);
             int okx = MINOR.right() - Golden.S5 - 32;
-            g.fill(okx, ry + 1, okx + 15, ry + ROW - 1, 0xFF2A2232);
+            bg(g, okx, ry + 1, 15, ROW - 2, jp.revati.skyabyss.client.ui.Plate.REST, 0xFF2A2232);
             g.drawString(font, "✔", okx + 4, ty, FacilityUi.TEAL, false);
             hit(okx, ry + 1, 15, ROW - 2, () -> send("accept", m.id().toString(), "", "", false));
             int nox = okx + 17;
-            g.fill(nox, ry + 1, nox + 15, ry + ROW - 1, 0xFF2A1C22);
+            bg(g, nox, ry + 1, 15, ROW - 2, jp.revati.skyabyss.client.ui.Plate.REST, 0xFF2A1C22);
             g.drawString(font, "✘", nox + 4, ty, FacilityUi.LACK, false);
             hit(nox, ry + 1, 15, ROW - 2, () -> send("deny", m.id().toString(), "", "", false));
         }
@@ -595,8 +602,12 @@ public class GuildScreen extends Screen {
         String pl = view.leader() ? plate : view.plate();
         int top = MAJOR.y() + Golden.S5;
         Golden.Box well = new Golden.Box(MX, top, Golden.S55, Golden.S55);
-        g.fill(well.x(), well.y(), well.right(), well.bottom(), 0xFF0E0D14);
-        Paper.edge(g, well.x(), well.y(), well.right(), well.bottom(), 0xFF3A3644);
+        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+            jp.revati.skyabyss.client.ui.Plate.well(g, well.x(), well.y(), well.w(), well.h());
+        } else {
+            g.fill(well.x(), well.y(), well.right(), well.bottom(), 0xFF0E0D14);
+            Paper.edge(g, well.x(), well.y(), well.right(), well.bottom(), 0xFF3A3644);
+        }
         bannerItem(g, well.x() + 3, well.y() + 3, 3.0f, pat, c, a);
         GuildEmblems.Emblem em = GuildEmblems.emblem(pat);
         int px = well.right() + Golden.S8;
@@ -656,9 +667,18 @@ public class GuildScreen extends Screen {
         pattern = all.get(Math.floorMod(i + d, all.size())).id();
     }
 
+    // 小さな釦の地 (板の側は升、切り絵の側は今の塗り)
+    private static void bg(GuiGraphics g, int x, int y, int w, int h, int state, int paper) {
+        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+            jp.revati.skyabyss.client.ui.Plate.tile(g, x, y, w, h, state, jp.revati.skyabyss.client.ui.Plate.GOLD);
+        } else {
+            g.fill(x, y, x + w, y + h, paper);
+        }
+    }
+
     private void arrow(GuiGraphics g, int x, int y, String s, int mx, int my, Runnable run) {
         boolean hover = mx >= x && mx < x + BTN && my >= y && my < y + BTN;
-        g.fill(x, y, x + BTN, y + BTN, hover ? 0xFF3A3644 : 0xFF2A2232);
+        bg(g, x, y, BTN, BTN, hover ? jp.revati.skyabyss.client.ui.Plate.HOVER : jp.revati.skyabyss.client.ui.Plate.REST, hover ? 0xFF3A3644 : 0xFF2A2232);
         g.drawString(font, s, x + (BTN - font.width(s)) / 2, Golden.textY(y, BTN), Golden.TEXT, false);
         hit(x, y, BTN, BTN, run);
     }

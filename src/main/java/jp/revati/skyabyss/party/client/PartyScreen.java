@@ -82,13 +82,13 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
         }
         if (!s.members().isEmpty()) {
             addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.party.leave"), b -> send(PartyNetwork.Action.LEAVE, ""))
-                    .bounds(20, PartyStage.FOOT_Y, 60, Golden.BTN).build());
+                    .bounds(20, PartyStage.footBtn(PartyStage.FOOT_Y), 60, Golden.BTN).build());
         }
         // パーティー募集の画面
         addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.party.finder.open"), b -> {
             minecraft.setScreen(new PartyFinderScreen(this));
             send(PartyNetwork.Action.FINDER_LIST, "");
-        }).bounds(320, PartyStage.FOOT_Y - 2, 70, Golden.BTN).primary().tooltip(net.minecraft.client.gui.components.Tooltip.create(
+        }).bounds(320, PartyStage.footBtn(PartyStage.FOOT_Y - 2), 70, Golden.BTN).primary().tooltip(net.minecraft.client.gui.components.Tooltip.create(
                 Component.translatable("gui.skyabyss.party.finder.open_tip"))).build());
         // 招待できる人 (右の帯)
         inviteButtons.clear();
@@ -134,7 +134,7 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
         int mouseX = (int) Math.floor(fit.x(screenX));
         int mouseY = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
-        PartyStage.backdrop(g, fit, width, height);
+        PartyStage.backdrop(g, fit, width, height, PartyStage.HEAD_STORY, true);
         PartyNetwork.Sync s = PartyClient.state();
         PartyStage.title(g, font, title);
         // 物語
@@ -207,7 +207,7 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
                     CAND_W - 16 - 44 - ScrollPanel.GUTTER - 4, Paper.INK, false);
         }
         candPanel.end(g);
-        candPanel.drawBar(g, 0x30181722, 0xFFE45A9C);
+        candPanel.drawBar(g, 0x30181722, jp.revati.skyabyss.client.ui.UiLook.plate() ? 0xFFC48A44 : 0xFFE45A9C);
         for (int i = 0; i < inviteButtons.size(); i++) {
             Button b = inviteButtons.get(i);
             int oy = candPanel.top() + i * PROW;

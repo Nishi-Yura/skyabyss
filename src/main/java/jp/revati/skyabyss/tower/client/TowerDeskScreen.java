@@ -118,7 +118,7 @@ public final class TowerDeskScreen extends Screen {
                 }
             }
         }
-        int fy = PartyStage.FOOT_Y;
+        int fy = PartyStage.footBtn(PartyStage.FOOT_Y);
         addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.tower_desk.shop"), b -> cmd("shop")).bounds(20, fy, 80, Golden.BTN).build());
         addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.tower_desk.records"), b -> {
             cmd("records");
@@ -161,7 +161,7 @@ public final class TowerDeskScreen extends Screen {
         int mouseX = (int) Math.floor(fit.x(screenX));
         int mouseY = (int) Math.floor(fit.y(screenY));
         fit.begin(g);
-        PartyStage.backdrop(g, fit, width, height);
+        PartyStage.backdrop(g, fit, width, height, PartyStage.HEAD_STORY, true);
         PartyStage.title(g, font, title);
         int x = PartyStage.HEAD_X;
         int tw = PartyStage.HEAD_W;
@@ -198,7 +198,11 @@ public final class TowerDeskScreen extends Screen {
         }
         // 右の帯: 隊長は今週の賭け、ほかは手引き
         // 帯は上へ伸ばす (賭けの見出しが三行になるため)
-        Paper.cut(g, "tower_strip", STRIP, Paper.CREAM, Paper.PINK_LO, 3, 4);
+        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+            PartyStage.column(g, 30);
+        } else {
+            Paper.cut(g, "tower_strip", STRIP, Paper.CREAM, Paper.PINK_LO, 3, 4);
+        }
         Component strip = state.isLeader() ? Component.translatable("gui.skyabyss.tower_desk.wagers", state.pickMax(), state.bonusPct(), state.chosen().size())
                 : Component.translatable("gui.skyabyss.tower_desk.hint");
         int sy = 38;

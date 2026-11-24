@@ -108,7 +108,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
         }
         go = addRenderableWidget(Paper.tag(Component.empty(), b -> press()).bounds(BOON_X, GO_Y, BOON_W, Golden.BTN).primary().build());
         shardButton = addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.rebirth.shard_btn"), b -> claimShard())
-                .bounds(RIGHT.x() + 4, LedgerStage.FOOT_Y + 4, Golden.S55, Golden.BTN).build());
+                .bounds(RIGHT.x() + 4, LedgerStage.footBtn(LedgerStage.FOOT_Y + 4), Golden.S55, Golden.BTN).build());
         RpgTabs.addHead(this::addRenderableWidget, LedgerStage.K_HEAD, RpgTabs.REBIRTH, true);
         refresh();
     }
@@ -240,13 +240,15 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
         return LedgerStage.PAGE_X + i * (PAGE_W + Golden.S3);
     }
 
-    private static final int PAGE_TAB_Y = LedgerStage.FOOT_Y + 4;
+    private static int pageTabY() {
+        return LedgerStage.footBtn(LedgerStage.FOOT_Y + 4);
+    }
 
     @Override
     public boolean mouseClicked(double screenX, double screenY, int button) {
         double mx = fit.x(screenX);
         double my = fit.y(screenY);
-        int ty = PAGE_TAB_Y;
+        int ty = pageTabY();
         if (button == 0 && my >= ty && my < ty + Golden.BTN) {
             for (int i = 0; i < 2; i++) {
                 if (mx >= pageX(i) && mx < pageX(i) + PAGE_W) {
@@ -285,7 +287,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
     }
 
     private void renderPanel(GuiGraphics g) {
-        LedgerStage.backdrop(g, fit, width, height);
+        LedgerStage.backdrop(g, fit, width, height, LedgerStage.HEAD_K, true);
         LedgerStage.kTitle(g, font, title, LedgerStage.K_HEAD.x() + RpgTabs.headWidth(RpgTabs.REBIRTH));
         // 準備の列と魂盤のあいだの点線
         for (int y = RIGHT.y() + 4; y < RIGHT.bottom() - 4; y += 3) {
@@ -295,7 +297,7 @@ public class SoulScreen extends Screen implements jp.revati.skyabyss.client.ui.T
 
     private void renderBody(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         // 頁のつまみ
-        int ty = PAGE_TAB_Y;
+        int ty = pageTabY();
         String[] keys = {"gui.skyabyss.rebirth.page.board", "gui.skyabyss.rebirth.page.terms"};
         for (int i = 0; i < 2; i++) {
             boolean hover = mouseX >= pageX(i) && mouseX < pageX(i) + PAGE_W && mouseY >= ty && mouseY < ty + Golden.BTN;
