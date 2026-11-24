@@ -105,8 +105,13 @@ public final class BackGaugeHud {
         g.drawManaged(() -> jp.revati.skyabyss.client.ui.Plate.hudCard(g, x, y, x + w, y + h, border, 1f));
     }
 
-    // 文を幅 room に収めて描く (狭い画面で幅が足りなければ、はみ出す分を切る。枠の外へは出さない)
+    // 文を幅 room に収めて描く。札の幅は文に合わせてあるので普通は等倍のまま。狭い画面で入らないときだけ、
+    // 切らずに Marquee で縮めて収める (docs/design/56 の 1「字」の最後の手)
     public static void text(GuiGraphics g, Font font, Component text, int x, int y, int room, int color) {
-        g.drawString(font, Language.getInstance().getVisualOrder(font.substrByWidth(text, room)), x, y, color, true);
+        if (font.width(text) <= room) {
+            g.drawString(font, text, x, y, color, true);
+            return;
+        }
+        jp.revati.skyabyss.client.ui.Marquee.draw(g, font, Language.getInstance().getVisualOrder(text), x, y, room, color, true);
     }
 }

@@ -109,8 +109,9 @@ public final class VowHud {
             g.drawManaged(() -> jp.revati.skyabyss.client.ui.Plate.hudCard(g, r.right() - cardW - 5, r.y() - 3, r.right() + 3, r.y() + cardH - 1, 0, 1f));
         }
         for (Component line : shownLines) {
-            net.minecraft.util.FormattedCharSequence shown = net.minecraft.locale.Language.getInstance().getVisualOrder(font.substrByWidth(line, r.w()));
-            g.drawString(font, shown, r.right() - Math.min(font.width(line), r.w()), y, first ? jp.revati.skyabyss.client.ui.Plate.hudHead(1f) : jp.revati.skyabyss.client.ui.Plate.hudText(1f), true);
+            // 入らない行は切らずに縮める (Marquee。docs/design/56 の 1「字」の最後の手)
+            jp.revati.skyabyss.client.titan.BackGaugeHud.text(g, font, line, r.right() - Math.min(font.width(line), r.w()), y, r.w(),
+                    first ? jp.revati.skyabyss.client.ui.Plate.hudHead(1f) : jp.revati.skyabyss.client.ui.Plate.hudText(1f));
             first = false;
             y += 11;
         }

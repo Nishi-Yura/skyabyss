@@ -290,24 +290,58 @@ public final class PartyMarkers {
         drawBox(g, font, label, box[0], box[1], s, lw, rgb, symbol, hp, TextStyle.alpha(0.88f) | TextStyle.CAPTION.color() | 0x202020);
     }
 
-    // すでに置いたものと重ならない場所へ、step ずつずらして置く
+    // すでに置いたものと重ならない場所へ、step ずつずらして置く。HUD の札 (HudManager が置いた部品・ずらしたバニラの部品・右上の知らせ) には
+    // かぶせない: かかったら、その札の外 (画面の上半分の札なら下、下半分なら上) へ出す (2026-11-24 の撮影で「カイ 16m」が知らせの行にかぶっていた)
     private static int[] place(int x, int y, int bw, int bh, List<int[]> taken, int step) {
         int[] box = { x, y, bw, bh };
-        for (int i = 0; i < 6; i++) {
-            boolean hit = false;
-            for (int[] o : taken) {
-                if (box[0] < o[0] + o[2] && o[0] < box[0] + box[2] && box[1] < o[1] + o[3] && o[1] < box[1] + box[3]) {
-                    hit = true;
-                    break;
-                }
+        List<int[]> hud = hudRects();
+        int half = Minecraft.getInstance().getWindow().getGuiScaledHeight() / 2;
+        for (int i = 0; i < 12; i++) {
+            int[] card = hit(box, hud);
+            if (card != null) {
+                box[1] = card[1] + card[3] / 2 < half ? card[1] + card[3] + 1 : card[1] - box[3] - 1;
+                continue;
             }
-            if (!hit) {
+            if (hit(box, taken) == null) {
                 break;
             }
             box[1] += step;
         }
         taken.add(box);
         return box;
+    }
+
+    private static int[] hit(int[] box, List<int[]> others) {
+        for (int[] o : others) {
+            if (box[0] < o[0] + o[2] && o[0] < box[0] + box[2] && box[1] < o[1] + o[3] && o[1] < box[1] + box[3]) {
+                return o;
+            }
+        }
+        return null;
+    }
+
+    private static List<int[]> hudRects() {
+        List<int[]> out = new ArrayList<>();
+        jp.revati.skyabyss.hud.HudLayout.Result r = jp.revati.skyabyss.client.hud.HudManager.result();
+        if (r != null) {
+            for (java.util.Map<jp.revati.skyabyss.hud.HudLayout.Id, jp.revati.skyabyss.hud.HudLayout.Rect> m : List.of(r.placed, r.vanilla)) {
+                for (java.util.Map.Entry<jp.revati.skyabyss.hud.HudLayout.Id, jp.revati.skyabyss.hud.HudLayout.Rect> en : m.entrySet()) {
+                    // 真ん中の照準と狙いの輪は避けない (仲間の頭の上の札は真ん中にも出る)
+                    if (en.getKey() == jp.revati.skyabyss.hud.HudLayout.Id.V_CROSSHAIR || en.getKey() == jp.revati.skyabyss.hud.HudLayout.Id.AIM_RING) {
+                        continue;
+                    }
+                    jp.revati.skyabyss.hud.HudLayout.Rect c = en.getValue();
+                    // 札の地の縁 (3) の分だけ広げる
+                    out.add(new int[] { c.x() - 3, c.y() - 3, c.w() + 6, c.h() + 6 });
+                }
+            }
+        }
+        int toast = jp.revati.skyabyss.client.hud.HudManager.toastHeight();
+        if (toast > 0) {
+            int w = Minecraft.getInstance().getWindow().getGuiScaledWidth();
+            out.add(new int[] { w - 160, 0, 160, toast });
+        }
+        return out;
     }
 
     public static int hpColor(int hp) {

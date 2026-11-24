@@ -70,11 +70,10 @@ public final class PhasedBossBar {
     public static void drawHp(GuiGraphics g, Minecraft mc, BossEvent boss, int x, int midY) {
         BOTTOM.put(boss.getId(), midY + 10);
         String text = hpText(mc, boss);
-        float scale = 0.75f;
+        // 字は等倍 (docs/design/56 の 1)。帯の真ん中に、画素にそろえて置く
         g.pose().pushPose();
-        g.pose().translate(x + WIDTH / 2f - mc.font.width(text) * scale / 2f, midY - 4 * scale, 200);
-        g.pose().scale(scale, scale, 1f);
-        g.drawString(mc.font, text, 0, 0, 0xFFFFFF, true);
+        g.pose().translate(0, 0, 200);
+        g.drawString(mc.font, text, x + (WIDTH - mc.font.width(text)) / 2, midY - 4, 0xFFFFFF, true);
         g.pose().popPose();
     }
 

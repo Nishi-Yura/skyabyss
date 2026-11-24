@@ -101,7 +101,7 @@ public final class QuestHud {
         Shown s = shown(mc);
         if (s != null) {
             out.add(jp.revati.skyabyss.hud.HudLayout.Request.of(jp.revati.skyabyss.hud.HudLayout.Id.QUEST, jp.revati.skyabyss.hud.HudLayout.Region.TOP_LEFT,
-                    w() + 6, s.lines.size() * 10 + 16 + (s.def != null && guideShown(mc, s) ? 10 : 0)));
+                    w() + 6, titleExtra(mc.font, s.title) + s.lines.size() * 10 + 16 + (s.def != null && guideShown(mc, s) ? 10 : 0)));
         }
     }
 
@@ -115,30 +115,44 @@ public final class QuestHud {
         int top = r.y() + 3;
         drawBox(g, mc, top, s.title, s.main, s.lines, s.def != null && guideShown(mc, s), () -> {
             if (s.def != null) {
-                drawGuide(g, mc, s.def, s.entry, top + 12 + s.lines.size() * 10);
+                drawGuide(g, mc, s.def, s.entry, top + 12 + titleExtra(mc.font, s.title) + s.lines.size() * 10);
             }
         });
+    }
+
+    // 題の行 (等倍で折り返す。docs/design/56 の 1「字」)。2 行目からの高さの分
+    private static List<net.minecraft.util.FormattedCharSequence> titleRows(Font font, Component title) {
+        List<net.minecraft.util.FormattedCharSequence> rows = font.split(title, w() - 2);
+        return rows.isEmpty() ? List.of(title.getVisualOrderText()) : rows;
+    }
+
+    private static int titleExtra(Font font, Component title) {
+        return (titleRows(font, title).size() - 1) * 10;
     }
 
     // 札の箱 (題と、済んでいない目的の行)
     private static void drawBox(GuiGraphics g, Minecraft mc, int top, Component title, boolean main, List<Line> lines, boolean withGuide, Runnable guide) {
         Font font = mc.font;
         int WIDTH = w();
-        int h = 12 + lines.size() * 10 + 3 + (withGuide ? 10 : 0);
+        List<net.minecraft.util.FormattedCharSequence> rows = titleRows(font, title);
+        int extra = (rows.size() - 1) * 10;
+        int h = 12 + extra + lines.size() * 10 + 3 + (withGuide ? 10 : 0);
         int bg = flash > 0 ? Mth.clamp(flash * 6, 0, 0x60) : 0;
         // 札の地 (Plate.hudCard)。左の筋は主の筋 = 鐘の金・ほか = 骨色。題の下に区切り。進んだ直後は上の銅の線が白く光る
         final int glow = bg;
         g.drawManaged(() -> {
             jp.revati.skyabyss.client.ui.Plate.hudCard(g, X - 3, top - 3, X + WIDTH + 3, top + h - 2, main ? MAIN_TITLE : TITLE, 1f);
-            jp.revati.skyabyss.client.ui.Plate.hudRule(g, X, top + 9, WIDTH, 1f);
+            jp.revati.skyabyss.client.ui.Plate.hudRule(g, X, top + 9 + extra, WIDTH, 1f);
             if (glow > 0) {
                 g.fill(X - 2, top - 3, X + WIDTH + 2, top - 2, Math.min(0xFF, glow * 3) << 24 | 0xFFFFFF);
             }
         });
-        // 長い題は省かずに横へ流す (Marquee)
-        jp.revati.skyabyss.client.ui.Marquee.draw(g, font, title.getString(), X + 1, top, WIDTH - 2, main ? MAIN_TITLE : TITLE, true);
+        // 長い題は省かず、縮めず、等倍で折り返す
+        for (int i = 0; i < rows.size(); i++) {
+            g.drawString(font, rows.get(i), X + 1, top + i * 10, main ? MAIN_TITLE : TITLE, true);
+        }
         guide.run();
-        int y = top + 12;
+        int y = top + 12 + extra;
         for (Line l : lines) {
             g.drawString(font, l.text, X + l.indent, y, l.color, true);
             y += 10;

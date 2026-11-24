@@ -204,7 +204,7 @@ public final class PartyClient {
             if (away != null) {
                 int tw = Math.min(font.width(away), W);
                 int ay = y + (tight ? 11 : 16);
-                g.drawString(font, net.minecraft.locale.Language.getInstance().getVisualOrder(font.substrByWidth(away, tw)), x + W - tw, ay, jp.revati.skyabyss.client.ui.Plate.hudSoft(1f), true);
+                jp.revati.skyabyss.client.titan.BackGaugeHud.text(g, font, away, x + W - tw, ay, tw, jp.revati.skyabyss.client.ui.Plate.hudSoft(1f));
             }
             y += rowHeight(m, mode);
         }

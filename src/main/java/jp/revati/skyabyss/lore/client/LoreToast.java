@@ -29,10 +29,21 @@ public class LoreToast implements Toast {
         jp.revati.skyabyss.client.ui.Plate.hudCard(g, 0, 0, width(), height(), jp.revati.skyabyss.client.ui.Plate.hudHead(1f), 1f);
         g.renderFakeItem(new ItemStack(LoreSetup.LORE_BOOK.get()), 8, 8);
         g.drawString(font, Component.translatable("gui.skyabyss.lore.toast"), 30, 7, jp.revati.skyabyss.client.ui.Plate.hudHead(1f), false);
-        // 札は一行分の高さ。長い題は「…」で切る (折り返して途中で切れるより、省略だと分かる)
-        int room = width() - 36;
-        jp.revati.skyabyss.client.ui.Marquee.draw(g, font, Language.getInstance().getVisualOrder(title), 30, 18, room,
-                jp.revati.skyabyss.client.ui.Plate.hudText(1f), false);
+        // 長い題は省かず、縮めず、等倍で折り返す (札の高さが行に合わせて伸びる。docs/design/56 の 1「字」)
+        List<FormattedCharSequence> rows = rows(font);
+        for (int i = 0; i < rows.size(); i++) {
+            g.drawString(font, rows.get(i), 30, 18 + i * 10, jp.revati.skyabyss.client.ui.Plate.hudText(1f), false);
+        }
         return timeSinceLastVisible >= DURATION * toasts.getNotificationDisplayTimeMultiplier() ? Visibility.HIDE : Visibility.SHOW;
+    }
+
+    private List<FormattedCharSequence> rows(Font font) {
+        List<FormattedCharSequence> rows = font.split(title, width() - 36);
+        return rows.isEmpty() ? List.of(Language.getInstance().getVisualOrder(title)) : rows;
+    }
+
+    @Override
+    public int height() {
+        return Math.max(32, 18 + rows(net.minecraft.client.Minecraft.getInstance().font).size() * 10 + 4);
     }
 }

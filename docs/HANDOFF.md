@@ -4,6 +4,7 @@
 
 ## 今
 
+- 2026-11-25: (5) HUD の残りを直した。ボスの帯の体力の数は等倍（`PhasedBossBar.drawHp`）。追跡中のクエストの題と `LoreToast` の題は等倍で折り返し、札が伸びる。巨神の背の札・誓いの帯・仲間の帯の場所の一行は「切る」をやめ、入らないときだけ `Marquee` で縮める（`client/titan/BackGaugeHud.text`）。仲間・倒れた仲間・合図の印は HUD の札を避ける（`PartyMarkers.place`）。使われていない古い `titan/client/BackGaugeHud` を消した。決まりは doc 56 の 5 章。`hud_v2.txt` の 12 場面で重なり 0。長い題の折り返しは撮れていない（見本の題が短い）。UI の (1)〜(5) はこれで終わり。
 - 2026-11-25（コミットなし）: (4) 本と地図の枠を銅にした（ユーザーの「よし」3 回）。伝承の書・控え帳は絵をやめて `client/ui/BookPlate`（`Plate.panel` の表紙・まっすぐな生成りの頁・重ならない升のしおり・格子の菱と矢印）で描き、`LoreToast` は HUD の札に。旅の地図は枠・凡例・縮尺の升・行き先の一覧と釦を `Plate` の部品に（地図の絵は前のまま）。決まりは doc 56 の 2.1「本」と 4.1。
   - 絵: `docs/review/plate_ui/book_lore_clean.png`・`book_record_clean.png`・`map_frame_clean.png`。台本 `tools/shots/paper_books.txt`（状態を足した）・`map_frame.txt`（新）で重なり 0。
   - 消したもの: `textures/gui/lore/`・`gui/record/` の絵、`tools/gen/story/paper_cut.py`・`gen_record_screen.py`、`gen_lore_book.py` の案 p（アイテムの絵だけ写す）。地図の死んだ石板の丸い海図のコード。`textures/gui/map/disc_a.png` はコードから使われていない（生成は `gen_travel_map_assets.py`）が残した。
