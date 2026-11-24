@@ -52,6 +52,15 @@ final class ExtPage {
     private final List<Object[]> cards = new ArrayList<>();
     private final ScrollPanel shelf = new ScrollPanel(GROUP_HEAD + TILE + PIPS + GROUP_GAP);
     private int ticks;
+    // 動き: ページを開くと祭壇が跳ねて立ち、五つの枠が順に、棚の段が順に入る。品を付けると枠に判が押される
+    private long shownAt = net.minecraft.Util.getMillis();
+    private String[] lastSlots;
+    private final long[] slotAt = new long[Aspects.MAX_SLOTS];
+
+    void opened() {
+        shownAt = net.minecraft.Util.getMillis();
+        lastSlots = null;
+    }
 
     void tick() {
         ticks++;
@@ -150,10 +159,31 @@ final class ExtPage {
         Golden.Box lb = left(body);
         int lx = lb.x() + Golden.S5;
         int lw = lb.w() - 2 * Golden.S5;
-        FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.aspect.altar"), lb.cx(), Golden.textY(lb.y() + 2, Golden.ROW), lw, Paper.ON_BLACK_PINK, false);
+        // 題: 2 倍の「名残の祭壇」(入らなければ 1 倍)。開くと左から入る
+        long now0 = net.minecraft.Util.getMillis();
+        float ta = SkillStage.out((now0 - shownAt) / 240f);
+        SkillStage.big(g, font, Component.translatable("gui.skyabyss.aspect.altar"), lx + Math.round((1f - ta) * -12f), lb.y() + 2, lw, SkillStage.fade(Paper.ON_BLACK_HI, ta));
         int cx = lb.cx();
-        int cy = lb.y() + 2 + Golden.ROW + 4 + ALTAR_RAD + 2;
-        altar(g, cx, cy, job);
+        int cy = lb.y() + 2 + 18 + 4 + ALTAR_RAD + 2;
+        long now = net.minecraft.Util.getMillis();
+        if (lastSlots != null) {
+            for (int i = 0; i < Math.min(lastSlots.length, d.aspectSlots.length); i++) {
+                if (d.aspectSlots[i] != null && !d.aspectSlots[i].equals(lastSlots[i]) && Aspects.get(d.aspectSlots[i]) != null) {
+                    slotAt[i] = now;
+                }
+            }
+        }
+        lastSlots = d.aspectSlots.clone();
+        float ap = SkillStage.back((now - shownAt) / 240f);
+        if (ap > 0.12f) {
+            g.pose().pushPose();
+            g.pose().translate(cx, cy, 0);
+            float as = 0.6f + 0.4f * ap;
+            g.pose().scale(as, as, 1f);
+            g.pose().translate(-cx, -cy, 0);
+            altar(g, cx, cy, job);
+            g.pose().popPose();
+        }
         for (int i = 0; i < Aspects.MAX_SLOTS; i++) {
             double ang = Math.toRadians(-90 + 72 * i);
             int sx = cx + (int) Math.round(Math.cos(ang) * RING) - SLOT / 2;
@@ -161,6 +191,19 @@ final class ExtPage {
             boolean isOpen = i < open;
             Aspect a = isOpen ? Aspects.get(d.aspectSlots[i]) : null;
             boolean hover = in(mx, my, sx, sy, SLOT, SLOT);
+            float sp = SkillStage.back((now - shownAt - 80 - i * 35L) / 200f);
+            if (sp < 0.12f) {
+                continue;
+            }
+            float ss = 0.5f + 0.5f * sp;
+            if (now - slotAt[i] < 400) {
+                ss *= 1f + 0.5f * (1f - SkillStage.back((now - slotAt[i]) / 200f));
+            }
+            g.pose().pushPose();
+            g.pose().translate(sx + SLOT / 2f, sy + SLOT / 2f, 0);
+            g.pose().scale(ss, ss, 1f);
+            g.pose().translate(-(sx + SLOT / 2f), -(sy + SLOT / 2f), 0);
+            try {
             if (!isOpen) {
                 // 閉じた枠: 生成りの台紙を少し沈めた升に、開く Lv を墨で
                 g.fill(sx, sy, sx + SLOT, sy + SLOT, 0xFFB8AEA4);
@@ -190,6 +233,9 @@ final class ExtPage {
                 }
             }
             hits.add(new int[] {sx, sy, SLOT, SLOT, HIT_SLOT, i});
+            } finally {
+                g.pose().popPose();
+            }
         }
         int used = 0;
         for (String s : d.aspectSlots) {
@@ -206,10 +252,21 @@ final class ExtPage {
                 }
             }
         }
-        int sy0 = cy + (int) (ALTAR_RAD * 0.81f) + 7;
-        FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.aspect.slots", used, open), cx, sy0, lw, Paper.ON_BLACK, false);
-        if (sy0 + Golden.ROW + 8 <= lb.bottom()) {
-            FitText.drawCentered(g, font, Component.translatable("gui.skyabyss.aspect.pity", Math.max(0, Aspects.PITY - d.aspectPity)), cx, sy0 + Golden.ROW, lw, Paper.ON_BLACK_SOFT, false);
+        int sy0 = cy + (int) (ALTAR_RAD * 0.81f) + 6;
+        // 付けている数: 字と菱 (開いた枠の数だけ。付けた分が桃色)
+        Component wl = Component.translatable("gui.skyabyss.aspect.worn_head");
+        int wRowW = font.width(wl) + 6 + open * 9;
+        int wx = cx - wRowW / 2;
+        if (open > 0) {
+            g.drawString(font, wl, wx, sy0, 0xFF000000 | Paper.ON_BLACK_SOFT, false);
+            SkillStage.pips(g, wx + font.width(wl) + 6, sy0 + 1, open, used, 3, true);
+        }
+        // レジェンドまで: 字と、8 つ目で必ず出る目盛り (進んだ分が桃色)
+        if (sy0 + 12 + 10 <= lb.bottom() + 2) {
+            int left = Math.max(0, Aspects.PITY - d.aspectPity);
+            Component pl = Component.translatable("gui.skyabyss.aspect.pity", left);
+            int pw = font.width(pl);
+            g.drawString(font, pl, cx - pw / 2, sy0 + 12, 0xFF000000 | Paper.ON_BLACK_DIM, false);
         }
 
         // ---- 右: 棚
@@ -222,7 +279,12 @@ final class ExtPage {
         FitText.draw(g, font, Component.translatable("gui.skyabyss.aspect.title").append(job == null ? Component.empty()
                 : Component.literal("・").append(Component.translatable(job.nameKey()))), rx, Golden.textY(rb.y() + 2, Golden.ROW), rw - cw - Golden.S8, Paper.ON_BLACK_PINK, false);
         int vy = rb.y() + 2 + Golden.ROW + 3;
-        g.fill(rx, vy - 2, rx + rw, vy - 1, Paper.PINK_LO);
+        // 集めた割合の帯 (見出しの下の線をそのまま目盛りに)
+        g.fill(rx, vy - 3, rx + rw, vy - 1, Paper.EDGE);
+        if (total > 0) {
+            float ga = SkillStage.out((now0 - shownAt - 100) / 400f);
+            g.fill(rx, vy - 3, rx + Math.round(rw * ga * owned / (float) total), vy - 1, Paper.PINK);
+        }
         shelf.setViewport(rx, vy, rw, rb.bottom() - 3 - vy);
         int groupH = GROUP_HEAD + 2 * (TILE + PIPS + 1) + GROUP_GAP;
         shelf.setContentHeight(job == null ? 0 : GROUPS.length * groupH - GROUP_GAP);
@@ -234,8 +296,17 @@ final class ExtPage {
         shelf.begin(g);
         if (job != null) {
             int y = shelf.top();
+            int gi = 0;
             for (String grp : GROUPS) {
                 List<Aspect> list = group(job, grp);
+                // 段は上から 45ms ずつ遅れて、下から 8 だけ上がって入る
+                float ge = SkillStage.out((now - shownAt - 120 - gi++ * 45L) / 240f);
+                if (ge < 0.3f) {
+                    y += groupH;
+                    continue;
+                }
+                g.pose().pushPose();
+                g.pose().translate(0, Math.round((1f - ge) * 8f), 0);
                 int have = 0;
                 for (Aspect a : list) {
                     if (Aspects.level(d, a) > 0) {
@@ -249,7 +320,7 @@ final class ExtPage {
                 String c = have + " / " + list.size();
                 g.drawString(font, n, tx0 + 8, y + 1, have > 0 ? Paper.ON_BLACK : Paper.ON_BLACK_SOFT, false);
                 int nw = font.width(n);
-                g.drawString(font, c, tx0 + rowW - font.width(c), y + 1, Paper.ON_BLACK_SOFT, false);
+                g.drawString(font, c, tx0 + rowW - font.width(c), y + 1, have > 0 ? Paper.ON_BLACK_PINK : Paper.ON_BLACK_DIM, false);
                 for (int lx2 = tx0 + 8 + nw + 4; lx2 < tx0 + rowW - font.width(c) - 4; lx2 += 4) {
                     g.fill(lx2, y + 5, lx2 + 2, y + 6, Paper.GREY_LO);
                 }
@@ -262,7 +333,13 @@ final class ExtPage {
                     int tyy = ty + row * (TILE + PIPS + 1);
                     int lv = Aspects.level(d, a);
                     boolean hover = inView && in(mx, my, tx, tyy, TILE, TILE);
-                    paperTile(g, font, tx, tyy, TILE, a, lv, hover, worn.contains(a.id()), false, i + col[row]);
+                    if (lv <= 0) {
+                        // まだ見つけていない品: 黒い紙を少し沈めた升と、真ん中の小さな菱 (「？」は並ぶとうるさい)
+                        g.fill(tx + 1, tyy + 1, tx + TILE - 1, tyy + TILE - 1, hover ? Paper.EDGE : Paper.BLACK_LO);
+                        diamond(g, tx + TILE / 2, tyy + TILE / 2, hover ? 2 : 1, hover ? Paper.GREY : Paper.GREY_LO);
+                    } else {
+                        paperTile(g, font, tx, tyy, TILE, a, lv, hover, worn.contains(a.id()), false, i + col[row]);
+                    }
                     if (lv > 0) {
                         paperPips(g, tx, tyy + TILE + 1, TILE, lv);
                     }
@@ -276,6 +353,7 @@ final class ExtPage {
                     }
                     cards.add(new Object[] {tx, tyy, a});
                 }
+                g.pose().popPose();
                 y += groupH;
             }
         }

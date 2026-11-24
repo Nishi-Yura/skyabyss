@@ -1211,6 +1211,11 @@ public final class ShotRunner {
             return new jp.revati.skyabyss.endgame.client.HunterNotesScreen().select(name.substring("hunt:".length()));
         }
         // skills_node:<節の id> : 技の木 v2 で、その節を選んだ状態で開く
+        // skills_hover:<節の id> : その節にマウスを乗せた見た目で開く (浮きと影。ツールチップは出ない)
+        if (name.startsWith("skills_hover:")) {
+            String id = name.substring("skills_hover:".length());
+            return new jp.revati.skyabyss.rpg.client.skill.SkillScreen().demoHover(id);
+        }
         if (name.startsWith("skills_node:")) {
             String id = name.substring("skills_node:".length());
             return new jp.revati.skyabyss.rpg.client.skill.SkillScreen().selectNode(id);
@@ -1337,7 +1342,11 @@ public final class ShotRunner {
             case "job_choice" -> jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen::new;
             case "job_choice_shaman" -> () -> new jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen().pick(jp.revati.skyabyss.rpg.skill.Job.SHAMAN);
             case "job_choice_archer" -> () -> new jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen().pick(jp.revati.skyabyss.rpg.skill.Job.ARCHER);
+            case "job_choice_warrior" -> () -> new jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen().pick(jp.revati.skyabyss.rpg.skill.Job.WARRIOR);
+            case "job_choice_hover" -> () -> new jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen().pick(jp.revati.skyabyss.rpg.skill.Job.ARCHER).demoHover(1);
             case "job_room_archer" -> () -> new jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen(true).pick(jp.revati.skyabyss.rpg.skill.Job.ARCHER);
+            case "job_room_mage" -> () -> new jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen(true).pick(jp.revati.skyabyss.rpg.skill.Job.MAGE);
+            case "job_choice_decide" -> () -> new jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen().pick(jp.revati.skyabyss.rpg.skill.Job.ARCHER).demoDecide();
             case "skills_tryon" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.WHALE_SWEEP)
                     .tryOn(jp.revati.skyabyss.rpg.skill.Skill.ROCK_CALL, jp.revati.skyabyss.rpg.skill.Skill.WHALE_SWEEP);
             case "skills_cleave" -> () -> new jp.revati.skyabyss.rpg.client.skill.SkillScreen().select(jp.revati.skyabyss.rpg.skill.Skill.TITAN_CLEAVE);

@@ -1,0 +1,51 @@
+# 切り絵のジョブ選び (docs/design/56 の「切り絵」) の開く動きをコマで撮る
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/paper_job_motion.txt -PshotsName=paper_job_motion
+world paper_job flat
+size 1920 1080
+timeout 600
+render 4
+clouds off
+guiscale 4
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss playtest skip opening
+cmd skyabyss cinematic stop
+cmd skyabyss level set @p 12
+cmd skyabyss job choose mage
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+
+window 1920 1080
+guiscale 4
+wait 10
+open job_choice_archer
+shot m0_1920_g4
+wait 2
+shot m1_1920_g4
+wait 3
+shot m2_1920_g4
+wait 4
+shot m3_1920_g4
+wait 20
+shot m4_1920_g4
+close
+open job_choice_decide
+wait 18
+shot d0_1920_g4
+wait 4
+shot d1_1920_g4
+wait 4
+shot d2_1920_g4
+wait 8
+shot d3_1920_g4
+close
+open job_room_mage
+wait 30
+shot same_1920_g4
+close
+quit

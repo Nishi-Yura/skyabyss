@@ -24,17 +24,17 @@ window 1920 1080
 guiscale 4
 wait 10
 open job_choice
-wait 8
+wait 30
 overlap none_1920_g4
 shot none_1920_g4
 close
 open job_choice_archer
-wait 8
+wait 30
 overlap archer_1920_g4
 shot archer_1920_g4
 close
 open job_room_archer
-wait 8
+wait 30
 overlap room_1920_g4
 shot room_1920_g4
 close
@@ -42,7 +42,7 @@ close
 guiscale 2
 wait 10
 open job_choice_archer
-wait 8
+wait 30
 overlap archer_1920_g2
 shot archer_1920_g2
 close
@@ -51,13 +51,22 @@ window 1280 720
 wait 10
 guiscale 3
 wait 10
+open job_choice_warrior
+wait 30
+overlap warrior_1280_g3
+shot warrior_1280_g3
+close
+open job_choice_hover
+wait 30
+shot hover_1280_g3
+close
 open job_choice_archer
-wait 8
+wait 30
 overlap archer_1280_g3
 shot archer_1280_g3
 close
 open job_room_archer
-wait 8
+wait 30
 overlap room_1280_g3
 shot room_1280_g3
 close

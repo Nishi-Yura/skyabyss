@@ -319,6 +319,7 @@
   "aspect.skyabyss.unowned": "まだ持っていない",
   "gui.skyabyss.aspect.title": "名残",
   "gui.skyabyss.aspect.slots": "付けている（%s / %s）",
+  "gui.skyabyss.aspect.worn_head": "付けている",
   "gui.skyabyss.aspect.slot_locked": "Lv %s で開く",
   "gui.skyabyss.aspect.slot_locked_rebirth": "転生 3 回で開く",
   "gui.skyabyss.aspect.empty": "空き",

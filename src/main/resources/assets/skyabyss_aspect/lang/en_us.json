@@ -319,6 +319,7 @@
   "aspect.skyabyss.unowned": "Not owned yet",
   "gui.skyabyss.aspect.title": "Remnants",
   "gui.skyabyss.aspect.slots": "Equipped (%s / %s)",
+  "gui.skyabyss.aspect.worn_head": "Equipped",
   "gui.skyabyss.aspect.slot_locked": "Opens at Lv %s",
   "gui.skyabyss.aspect.slot_locked_rebirth": "Opens at 3 rebirths",
   "gui.skyabyss.aspect.empty": "Empty",
