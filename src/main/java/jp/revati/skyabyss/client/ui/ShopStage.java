@@ -79,10 +79,56 @@ public final class ShopStage {
         return (int) ((my - LIST_Y) / ROW_H);
     }
 
+    // 動き (docs/design/56 の 2.1「動き」): 画面が替わったら開いた時を覚える。題は左から入り、乗せた行の紙は前の行から滑って移る (音)。
+    // 台の品は替わると跳ねて立ち、ゆっくり浮き沈みする。手持ちが減る・増えると数の横に「-n」「+n」が浮いて消える
+    private static Object owner;
+    private static long openedAt;
+    private static float hotY = Float.NaN;
+    private static int hotTarget;
+    private static float hotFrom;
+    private static long hotAt;
+    private static long hotFrame;
+    private static net.minecraft.world.item.Item plinthItem;
+    private static long plinthAt;
+    private static int lastCoins = -1;
+    private static int coinDelta;
+    private static long coinAt = -100000;
+
+    private static void track() {
+        Object s = Minecraft.getInstance().screen;
+        if (s != owner) {
+            owner = s;
+            openedAt = net.minecraft.Util.getMillis();
+            hotY = Float.NaN;
+            plinthItem = null;
+            lastCoins = -1;
+        }
+    }
+
     // 乗せた行の桃色の紙
     public static void hot(GuiGraphics g, int i) {
+        track();
         int y = rowY(i);
+        long now = net.minecraft.Util.getMillis();
+        // 前の絵で描いていなければ (乗せていなかった) 滑らずにその行へ
+        if (Float.isNaN(hotY) || now - hotFrame > 200) {
+            hotY = y;
+            hotFrom = y;
+            hotTarget = y;
+            hotAt = now - 1000;
+        } else if (y != hotTarget) {
+            hotFrom = hotY;
+            hotTarget = y;
+            hotAt = now;
+            Minecraft.getInstance().getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
+                    net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), 2.0f, 0.1f));
+        }
+        hotFrame = now;
+        hotY = hotFrom + (hotTarget - hotFrom) * jp.revati.skyabyss.rpg.client.skill.SkillStage.out((now - hotAt) / 140f);
+        g.pose().pushPose();
+        g.pose().translate(0, Math.round(hotY) - y, 0);
         Paper.cut(g, "shop_hot", new float[] {LIST_X - 2, y - 1, LIST_X + LIST_W + 2, y - 2, LIST_X + LIST_W + 3, y + ROW_H - 2, LIST_X - 1, y + ROW_H - 1}, Paper.PINK, 0, 0, 0);
+        g.pose().popPose();
     }
 
     // 名前から値段までの点線
@@ -116,7 +162,15 @@ public final class ShopStage {
 
     // 店の名前 (右上)
     public static void title(GuiGraphics g, Font font, Component title) {
-        FitText.draw(g, font, title, RIGHT_X, 10, RIGHT_W, Paper.ON_BLACK_PINK, false);
+        track();
+        float a = jp.revati.skyabyss.rpg.client.skill.SkillStage.out((net.minecraft.Util.getMillis() - openedAt) / 240f);
+        int dx = Math.round((1f - a) * -10f);
+        // 入れば 2 倍 (題の線 y 21 の上に収まる)
+        if (font.width(title) * 2 <= RIGHT_W) {
+            jp.revati.skyabyss.rpg.client.skill.SkillStage.big(g, font, title, RIGHT_X + dx, 4, RIGHT_W, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_HI, a));
+        } else {
+            FitText.draw(g, font, title, RIGHT_X + dx, 10, RIGHT_W, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_PINK, a), false);
+        }
         g.fill(RIGHT_X, 21, RIGHT_X + RIGHT_W, 22, Paper.PINK_LO);
     }
 
@@ -126,9 +180,20 @@ public final class ShopStage {
         if (stack.isEmpty()) {
             return false;
         }
+        track();
+        long now = net.minecraft.Util.getMillis();
+        if (stack.getItem() != plinthItem) {
+            plinthItem = stack.getItem();
+            plinthAt = now;
+        }
+        // 替わると 0.6 倍から跳ねて立つ。立ったあとはゆっくり浮き沈み (1 画素)
+        float pop = jp.revati.skyabyss.rpg.client.skill.SkillStage.back((now - plinthAt) / 220f);
+        float sc = 4f * (0.6f + 0.4f * pop);
+        float bob = (float) Math.sin(now / 700.0) * 1f;
         g.pose().pushPose();
-        g.pose().translate(294, 26, 0);
-        g.pose().scale(4f, 4f, 1f);
+        g.pose().translate(294 + 32, 26 + 32 + bob, 0);
+        g.pose().scale(sc, sc, 1f);
+        g.pose().translate(-8, -8, 0);
         g.renderItem(stack, 0, 0);
         g.pose().popPose();
         return in(mx, my, 290, 22, 72, 70);
@@ -164,6 +229,20 @@ public final class ShopStage {
         Paper.cut(g, "shop_purse", new float[] {x, 204, x + w + 2, 202, x + w, 222, x + 2, 224}, Paper.BLACK, Paper.PINK, 2, 2);
         g.renderItem(coin, x + 4, 205);
         g.drawString(font, s, x + 21, 210, Paper.ON_BLACK_HI, false);
+        // 手持ちが変わった: 札の上に「-n」「+n」が浮いて消える (600ms)
+        track();
+        long now = net.minecraft.Util.getMillis();
+        if (lastCoins >= 0 && coins != lastCoins) {
+            coinDelta = coins - lastCoins;
+            coinAt = now;
+        }
+        lastCoins = coins;
+        float t = (now - coinAt) / 600f;
+        if (t < 1f) {
+            String d = (coinDelta > 0 ? "+" : "") + coinDelta;
+            int al = Math.max(6, Math.round(255 * (1f - t * t)));
+            g.drawString(font, d, x + w - font.width(d), 194 - Math.round(jp.revati.skyabyss.rpg.client.skill.SkillStage.out(t) * 6f), (al << 24) | (coinDelta > 0 ? 0xFFF6EA : 0xF89CD2), false);
+        }
     }
 
     public static boolean in(double mx, double my, int x, int y, int w, int h) {

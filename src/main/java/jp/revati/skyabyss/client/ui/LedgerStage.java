@@ -40,10 +40,41 @@ public final class LedgerStage {
     public static final Golden.Box K_HEAD = new Golden.Box(10, 5, 252, 21);
     public static final int K_BODY_Y = 32;
 
-    // K の頁の題 (つまみの右。x = つまみの右の端)
+    // 動き (docs/design/56 の 2.1「動き」): 画面が替わったら開いた時を覚える。題は左から入り、選んだ行の付箋は前の行から滑って移る
+    private static Object owner;
+    private static long openedAt;
+    private static float flagY = Float.NaN;
+    private static int flagTarget;
+    private static float flagFrom;
+    private static long flagAt;
+    private static int lastHoverY = Integer.MIN_VALUE;
+    private static long lastHoverFrame;
+
+    private static void track() {
+        Object s = net.minecraft.client.Minecraft.getInstance().screen;
+        if (s != owner) {
+            owner = s;
+            openedAt = net.minecraft.Util.getMillis();
+            flagY = Float.NaN;
+            lastHoverY = Integer.MIN_VALUE;
+        }
+    }
+
+    private static float open(long delay) {
+        return jp.revati.skyabyss.rpg.client.skill.SkillStage.out((net.minecraft.Util.getMillis() - openedAt - delay) / 240f);
+    }
+
+    // K の頁の題 (つまみの右。x = つまみの右の端)。入れば 2 倍
     public static void kTitle(GuiGraphics g, Font font, Component title, int x) {
+        track();
+        float a = open(0);
         Paper.pin(g, x + 4, 15, 3, true);
-        FitText.draw(g, font, title, x + 12, 11, 262 - x - 12, Paper.ON_BLACK_PINK, false);
+        int dx = Math.round((1f - a) * -10f);
+        if (font.width(title) * 2 <= 262 - x - 12) {
+            jp.revati.skyabyss.rpg.client.skill.SkillStage.big(g, font, title, x + 12 + dx, 8, 262 - x - 12, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_HI, a));
+        } else {
+            FitText.draw(g, font, title, x + 12 + dx, 11, 262 - x - 12, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_PINK, a), false);
+        }
         g.fill(PAGE_X, 26, PAGE_X + PAGE_W, 27, Paper.PINK_LO);
     }
 
@@ -59,15 +90,41 @@ public final class LedgerStage {
         g.fill(INDEX_X + 2, 25, INDEX_X + INDEX_W, 26, Paper.CREAM_LO);
     }
 
-    // 選んだ行の付箋 (帯から左へはみ出す)。y は行の上、h は行の高さ
+    // 選んだ行の付箋 (帯から左へはみ出す)。y は行の上、h は行の高さ。行を替えると前の行から 160ms で滑って移る
     public static void flag(GuiGraphics g, int y, int h) {
+        track();
+        long now = net.minecraft.Util.getMillis();
+        if (Float.isNaN(flagY)) {
+            flagY = y;
+            flagFrom = y;
+            flagTarget = y;
+            flagAt = now - 1000;
+        } else if (y != flagTarget) {
+            flagFrom = flagY;
+            flagTarget = y;
+            flagAt = now;
+        }
+        flagY = flagFrom + (flagTarget - flagFrom) * jp.revati.skyabyss.rpg.client.skill.SkillStage.out((now - flagAt) / 160f);
+        int dy = Math.round(flagY) - y;
+        g.pose().pushPose();
+        g.pose().translate(0, dy, 0);
         Paper.cut(g, "ledger_flag", new float[] {252, y - 1, INDEX_X + INDEX_W + 2, y - 1, INDEX_X + INDEX_W + 4, y + h, 256, y + h + 1}, Paper.PINK, Paper.BLACK_LO, 1, 2);
         Paper.pin(g, 260, y + h / 2, 2, false);
+        g.pose().popPose();
     }
 
-    // 乗せた行の地 (帯の上)
+    // 乗せた行の地 (帯の上)。乗せる行が替わったら小さな音
     public static void hover(GuiGraphics g, int y, int h) {
+        track();
+        long now = net.minecraft.Util.getMillis();
+        if (y != lastHoverY && now - lastHoverFrame < 200) {
+            net.minecraft.client.Minecraft.getInstance().getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
+                    net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), 2.0f, 0.1f));
+        }
+        lastHoverY = y;
+        lastHoverFrame = now;
         g.fill(INDEX_X - 2, y, INDEX_X + INDEX_W, y + h, 0x30E45A9C);
+        g.fill(INDEX_X - 2, y, INDEX_X, y + h, 0xFFE45A9C);
     }
 
     // 見出しの行 (目録の中の区切り: 字と、右へ伸びる線)
@@ -82,10 +139,18 @@ public final class LedgerStage {
 
     // 読む頁の題 (桃色の菱・題・添え)
     public static void pageTitle(GuiGraphics g, Font font, Component title, Component sub) {
+        track();
+        float a = open(0);
+        int dx = Math.round((1f - a) * -10f);
         Paper.pin(g, PAGE_X + 2, PAGE_Y + 5, 3, true);
-        FitText.draw(g, font, title, PAGE_X + 10, PAGE_Y + 1, PAGE_W - 10, Paper.ON_BLACK_PINK, false);
+        // 添えが無ければ題は 2 倍 (入れば)。添えがあるときは 1 倍の題と添え (題の線までに収まらない)
+        if (sub == null && font.width(title) * 2 <= PAGE_W - 10) {
+            jp.revati.skyabyss.rpg.client.skill.SkillStage.big(g, font, title, PAGE_X + 10 + dx, PAGE_Y - 1, PAGE_W - 10, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_HI, a));
+        } else {
+            FitText.draw(g, font, title, PAGE_X + 10 + dx, PAGE_Y + 1, PAGE_W - 10, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_PINK, a), false);
+        }
         if (sub != null) {
-            FitText.draw(g, font, sub, PAGE_X + 10, PAGE_Y + 13, PAGE_W - 10, Paper.ON_BLACK_SOFT, false);
+            FitText.draw(g, font, sub, PAGE_X + 10 + dx, PAGE_Y + 13, PAGE_W - 10, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_SOFT, a), false);
         }
         g.fill(PAGE_X, PAGE_Y + 26, PAGE_X + PAGE_W, PAGE_Y + 27, Paper.PINK_LO);
     }

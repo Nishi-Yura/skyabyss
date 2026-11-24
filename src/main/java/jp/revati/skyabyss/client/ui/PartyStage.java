@@ -45,9 +45,30 @@ public final class PartyStage {
     }
 
     // 題 (桃色の菱と、黒の上の桃色の字)
+    // 画面が替わったら開いた時を覚える (題は左から入る。docs/design/56 の 2.1「動き」)
+    private static Object owner;
+    private static long openedAt;
+
+    // 題の幅 (2 倍で描いたときはその幅)
+    public static int titleWidth(Font font, Component title) {
+        return font.width(title) * 2 <= HEAD_W ? font.width(title) * 2 : font.width(title);
+    }
+
     public static void title(GuiGraphics g, Font font, Component title) {
+        Object s = Minecraft.getInstance().screen;
+        if (s != owner) {
+            owner = s;
+            openedAt = net.minecraft.Util.getMillis();
+        }
+        float a = jp.revati.skyabyss.rpg.client.skill.SkillStage.out((net.minecraft.Util.getMillis() - openedAt) / 240f);
+        int dx = Math.round((1f - a) * -10f);
         Paper.pin(g, HEAD_X - 8, 16, 3, true);
-        FitText.draw(g, font, title, HEAD_X, 12, HEAD_W, Paper.ON_BLACK_PINK, false);
+        // 入れば 2 倍
+        if (font.width(title) * 2 <= HEAD_W) {
+            jp.revati.skyabyss.rpg.client.skill.SkillStage.big(g, font, title, HEAD_X + dx, 9, HEAD_W, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_HI, a));
+        } else {
+            FitText.draw(g, font, title, HEAD_X + dx, 12, HEAD_W, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_PINK, a), false);
+        }
     }
 
     // 右の帯 (見出しつき)

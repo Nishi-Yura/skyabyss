@@ -395,7 +395,7 @@ public class GuildScreen extends Screen {
         int tabsX = MINOR.x() - 2;
         int ty = 12;
         PartyStage.title(g, font, title);
-        int x = PartyStage.HEAD_X + font.width(title) + Golden.S8;
+        int x = PartyStage.HEAD_X + PartyStage.titleWidth(font, title) + Golden.S8;
         bannerItem(g, x, HEAD.y() + 2, 1f, view.pattern(), me.color(), me.accent());
         x += 16 + Golden.S3;
         int bx = drawBadge(g, font, x, ty, me.tag(), me.color(), me.accent(), me.plate());

@@ -52,6 +52,8 @@ public class DialogueScreen extends Screen {
     private final List<List<String>> optionLines = new ArrayList<>();
     private int totalChars;
     private float revealed;
+    // 開いた時 (帯と顔の札がせり上がり、名前の短冊が押される。docs/design/56 の 2.1「動き」)
+    private long openedAtD;
     private int selected;
     private boolean closedByServer;
     private boolean closeSent;
@@ -220,6 +222,13 @@ public class DialogueScreen extends Screen {
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.render(g, mouseX, mouseY, partialTick);
         Font font = Minecraft.getInstance().font;
+        long nowD = net.minecraft.Util.getMillis();
+        if (openedAtD == 0) {
+            openedAtD = nowD;
+        }
+        float rise = (1f - jp.revati.skyabyss.rpg.client.skill.SkillStage.out((nowD - openedAtD) / 220f)) * 30f;
+        g.pose().pushPose();
+        g.pose().translate(0, rise, 0);
         int x = panelX;
         int y = panelY;
         // 黒い帯 (窓の幅いっぱい。上の辺は手で決めた点で、少しずつ斜めに切る)
@@ -253,8 +262,16 @@ public class DialogueScreen extends Screen {
         Component name = Component.literal(Component.translatable("entity." + show.role().replace(':', '.')).getString());
         int sw = Math.max(cw + 4, Math.min(cw + 40, font.width(name) + 18));
         int sy = fy + face + 23;
+        // 名前の短冊は、開いて少しあとに大きく浮いてから押される
+        float press = jp.revati.skyabyss.rpg.client.skill.SkillStage.back((nowD - openedAtD - 120) / 240f);
+        float ps = 1f + (1f - press) * 0.4f;
+        g.pose().pushPose();
+        g.pose().translate(x - 4 + sw / 2f, sy + 7, 0);
+        g.pose().scale(ps, ps, 1f);
+        g.pose().translate(-(x - 4 + sw / 2f), -(sy + 7), 0);
         jp.revati.skyabyss.client.ui.Paper.slip(g, x - 4, sy, sw, 14, jp.revati.skyabyss.client.ui.Paper.PINK, jp.revati.skyabyss.client.ui.Paper.CREAM, jp.revati.skyabyss.client.ui.Paper.REST);
         jp.revati.skyabyss.client.ui.FitText.draw(g, font, name, x + 6, sy + 3, sw - 14, NAME, false);
+        g.pose().popPose();
         // 本文 (一字ずつ。帯にじかに生成りの字で)
         int tx = x + textX;
         body.begin(g);
@@ -318,6 +335,7 @@ public class DialogueScreen extends Screen {
                 g.drawString(font, "▼", x + textX + textW - 12, y + panelH - PAD - 8, NAME, false);
             }
         }
+        g.pose().popPose();
     }
 
     private ResourceLocation faceTexture() {
