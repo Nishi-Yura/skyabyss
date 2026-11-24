@@ -720,7 +720,7 @@ public final class ShotRunner {
                 return true;
             }
             case "huddemo" -> {
-                // huddemo <all|opening|back|boss|off> : 画面の部品をいっぺんに出す (client/hud/HudDemo)
+                // huddemo <all|opening|back|boss|midboss|cooldown|lesson|off> : 画面の部品をいっぺんに出す (client/hud/HudDemo)
                 jp.revati.skyabyss.client.hud.HudDemo.set(line.arg(0));
                 return true;
             }

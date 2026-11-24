@@ -141,9 +141,9 @@ public final class SkillHud {
     }
 
     static void diamond(GuiGraphics g, int x, int y, int c) {
-        g.fill(x + 2, y, x + 3, y + 5, 0xFF0A0E1E);
-        g.fill(x, y + 2, x + 5, y + 3, 0xFF0A0E1E);
-        g.fill(x + 1, y + 1, x + 4, y + 4, 0xFF0A0E1E);
+        g.fill(x + 2, y, x + 3, y + 5, jp.revati.skyabyss.client.ui.Paper.BLACK);
+        g.fill(x, y + 2, x + 5, y + 3, jp.revati.skyabyss.client.ui.Paper.BLACK);
+        g.fill(x + 1, y + 1, x + 4, y + 4, jp.revati.skyabyss.client.ui.Paper.BLACK);
         g.fill(x + 2, y + 1, x + 3, y + 4, c);
         g.fill(x + 1, y + 2, x + 4, y + 3, c);
     }

@@ -9,12 +9,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
 // 作り直しのあとの読み込み画面 (upgrade/RegenLoading)。サーバーが「終わり」と言い、手元にもまわりのチャンクが届いて描けるまで閉じない。
-// Esc では閉じない。夜空の色に、題・まわりの読み込みの帯・建てている物の数
+// Esc では閉じない。黒い紙に、題・まわりの読み込みの帯・建てている物の数
 public class RegenLoadingScreen extends Screen {
-    private static final int BG = 0xFF05070F;
-    private static final int GOLD = 0xFFE9C46A;
-    private static final int TEAL = 0xFF8FD0FF;
-    private static final int DIM = 0xFF9AA4C4;
+    private static final int BG = jp.revati.skyabyss.client.ui.Paper.BLACK;
+    private static final int PINK_HI = jp.revati.skyabyss.client.ui.Paper.PINK_HI;
+    private static final int CREAM = jp.revati.skyabyss.client.ui.Paper.CREAM;
+    private static final int DIM = 0xFF000000 | jp.revati.skyabyss.client.ui.Paper.ON_BLACK_SOFT;
     private static final int RADIUS = 4;
 
     private static RegenLoading.State last = new RegenLoading.State(true, false, 0, 0);
@@ -78,19 +78,19 @@ public class RegenLoadingScreen extends Screen {
         renderBackground(g, mouseX, mouseY, partialTick);
         int cx = width / 2;
         int y = height / 2 - 36;
-        TextStyle.HEADING.drawCentered(g, font, title, cx, y, 1f, GOLD & 0xFFFFFF);
+        TextStyle.HEADING.drawCentered(g, font, title, cx, y, 1f, PINK_HI & 0xFFFFFF);
         g.drawCenteredString(font, Component.translatable("gui.skyabyss.regen.sub"), cx, y + 26, DIM);
         // まわりの読み込みの帯
         int w = Math.min(240, width - 40);
         int bx = cx - w / 2;
         int by = y + 48;
-        g.fill(bx - 1, by - 1, bx + w + 1, by + 7, 0xFF2A3342);
-        g.fill(bx, by, bx + w, by + 6, 0xFF0C1022);
+        g.fill(bx + 1, by + 1, bx + w + 2, by + 8, jp.revati.skyabyss.client.ui.Paper.PINK_LO);
+        g.fill(bx, by, bx + w, by + 6, jp.revati.skyabyss.client.ui.Paper.BLACK_LO);
         int fill = Math.round(w * Mth.clamp(last.percent() / 100f, 0f, 1f));
-        g.fill(bx, by, bx + fill, by + 6, TEAL);
+        g.fill(bx, by, bx + fill, by + 6, jp.revati.skyabyss.client.ui.Paper.PINK);
         String dots = ".".repeat(1 + (age / 10) % 3);
         Component line = last.builds() > 0 ? Component.translatable("gui.skyabyss.regen.builds", last.builds())
                 : Component.translatable("gui.skyabyss.regen.land", last.percent());
-        g.drawCenteredString(font, line.copy().append(dots), cx, by + 14, TEAL);
+        g.drawCenteredString(font, line.copy().append(dots), cx, by + 14, CREAM);
     }
 }

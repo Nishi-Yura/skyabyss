@@ -53,7 +53,7 @@ public final class QuickCard {
     // 入れ替わりの強調 (ms) と、名前を出している間
     private static final long HIGHLIGHT_MS = 1600;
     private static final long NAME_MS = 2600;
-    private static final int GOLD = 0xE9C46A;
+    private static final int PINK_HI = 0xF89CD2;
     // 見回りの間隔 (tick) と、巨神・乗り場・嵐を探す範囲
     private static final int SCAN_INTERVAL = 10;
     private static final double TITAN_RANGE = 128;
@@ -284,10 +284,10 @@ public final class QuickCard {
         jp.revati.skyabyss.client.ui.Golden.hudFrame(g, itemX - 3, h - 23, itemX + 19, h - 1);
         if (glow > 0f) {
             int a = (int) (glow * 150) << 24;
-            // 縁にそった金の線 (ホットバーの絵に合わせた細い角ばった枠)
+            // 縁にそった明るい桃色の線 (ホットバーの絵に合わせた細い角ばった枠)
             int x0 = leftSide ? spriteX : spriteX + 7;
             int x1 = leftSide ? spriteX + 22 : spriteX + SPRITE_W;
-            g.renderOutline(x0, spriteY, x1 - x0, SPRITE_H - 1, a | GOLD);
+            g.renderOutline(x0, spriteY, x1 - x0, SPRITE_H - 1, a | PINK_HI);
         }
         ItemStack stack = new ItemStack(e.item(), count);
         g.renderItem(stack, itemX, h - 19);
@@ -296,11 +296,11 @@ public final class QuickCard {
         if (PouchNew.any()) {
             PouchNew.badge(g, mc.font, itemX, h - 19);
         }
-        // 置いた札の印 (角の小さな金の点)
+        // 置いた札の印 (角の小さな桃色の点)
         if (isPinned(shown)) {
             int px = itemX - 1;
-            g.fill(px, h - 20, px + 3, h - 19, 0xFF000000 | GOLD);
-            g.fill(px, h - 20, px + 1, h - 17, 0xFF000000 | GOLD);
+            g.fill(px, h - 20, px + 3, h - 19, 0xFF000000 | PINK_HI);
+            g.fill(px, h - 20, px + 1, h - 17, 0xFF000000 | PINK_HI);
         }
         // キー名 (上に小さく)。入れ替わった直後は道具の名前も
         Component key = PouchClient.USE_KEY.getTranslatedKeyMessage();

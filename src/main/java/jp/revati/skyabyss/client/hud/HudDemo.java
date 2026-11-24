@@ -52,7 +52,9 @@ import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 public final class HudDemo {
     // 見本の部品 (場面ごとに組み合わせる。all = 全部)
     public enum Part {
-        TUTORIAL, HINTS, NARRATE, BANNER, LEVELUP, TOASTS, OBJECTIVE, QUEST, GROWTH, SKILLS, QUICKCARD, VOW, GAUGE, PARTY, MARKERS, CUE
+        TUTORIAL, HINTS, NARRATE, BANNER, LEVELUP, TOASTS, OBJECTIVE, QUEST, GROWTH, SKILLS, QUICKCARD, VOW, GAUGE, PARTY, MARKERS, CUE,
+        // 撮影だけの場面 (all には入れない): 中ボスの帯・技の待ちの覆い・技の手引きの「覚える」段
+        MIDBOSS, COOLDOWN, LESSON
     }
 
     private static final java.util.EnumSet<Part> PARTS = java.util.EnumSet.noneOf(Part.class);
@@ -74,6 +76,7 @@ public final class HudDemo {
     }
 
     // 場面の名前から部品を選ぶ: all (既定)・opening (序盤: 手引きとキーの手がかり)・back (背中: 目盛りと目的の板・誓い・仲間)・boss (ボス戦)
+    //   midboss (出ているボスバーを中ボスの帯で描く。台本で `cmd bossbar add …` してから)・cooldown (技の枠に待ちの覆い)・lesson (技の画面で取れる技を光らせる)
     public static void set(String mode) {
         if (mode.equalsIgnoreCase("off")) {
             set(false);
@@ -87,7 +90,13 @@ public final class HudDemo {
                     Part.SKILLS, Part.QUICKCARD));
             case "boss" -> PARTS.addAll(java.util.EnumSet.of(Part.PARTY, Part.MARKERS, Part.TUTORIAL, Part.HINTS, Part.NARRATE, Part.OBJECTIVE, Part.VOW, Part.GAUGE,
                     Part.SKILLS, Part.QUICKCARD, Part.CUE, Part.GROWTH, Part.TOASTS, Part.BANNER));
-            default -> PARTS.addAll(java.util.EnumSet.allOf(Part.class));
+            case "midboss" -> PARTS.add(Part.MIDBOSS);
+            case "cooldown" -> PARTS.addAll(java.util.EnumSet.of(Part.SKILLS, Part.COOLDOWN));
+            case "lesson" -> PARTS.add(Part.LESSON);
+            default -> {
+                PARTS.addAll(java.util.EnumSet.allOf(Part.class));
+                PARTS.removeAll(java.util.EnumSet.of(Part.MIDBOSS, Part.COOLDOWN, Part.LESSON));
+            }
         }
         set(true);
     }
@@ -125,6 +134,7 @@ public final class HudDemo {
                 d.ranks.putAll(savedSkills.ranks);
                 System.arraycopy(savedSkills.slots, 0, d.slots, 0, d.slots.length);
                 d.mana = savedSkills.mana;
+                d.cooldowns.clear();
                 savedSkills = null;
             }
         }
@@ -246,6 +256,17 @@ public final class HudDemo {
                 d.slots[i] = skills[i].id;
             }
             d.mana = (float) (SkillManager.maxMana(mc.player) * 0.6);
+        }
+        // 技の待ち: 一つ目は残り 2/3、二つ目は残り 1/4 で止めておく (毎 tick 置き直す)
+        if (has(Part.COOLDOWN) && savedSkills != null) {
+            SkillData d = SkillManager.get(mc.player);
+            float[] left = {0.66f, 0.25f};
+            for (int i = 0; i < left.length && i < d.slots.length; i++) {
+                Skill s = d.slot(i);
+                if (s != null) {
+                    d.cooldowns.put(s.id, Math.max(1, Math.round(SkillManager.cooldownFor(mc.player, s) * left[i])));
+                }
+            }
         }
         // ---- ボスの技の名前
         if (slow && has(Part.CUE) && tick % 40 == 1) {

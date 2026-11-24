@@ -102,6 +102,7 @@ python tools/install/install_lowpoly.py bone_sentinel --gear docs/review/lowpoly
 | `waitchunks [最大 tick]` | まわりの描画が出そろうまで待つ (既定 600 tick まで) |
 | `wait <tick>` | 待つ |
 | `hud on\|off` | HUD と手を出す/隠す |
+| `huddemo <all\|opening\|back\|boss\|midboss\|cooldown\|lesson\|off>` | HUD の見本を出す (`client/hud/HudDemo`)。midboss は出ているボスバー (`cmd bossbar add …`) を中ボスの帯で、cooldown は技の枠に待ちの覆い、lesson は技の画面で取れる技を光らせる。見本の技は鍵 (`key key.skyabyss.skill_slot_1`) ではサーバーが撃たないので、待ちは cooldown で出す |
 | `clouds on\|off`、`render <チャンク>`、`fov <度>`、`guiscale <n>` | 描き方の設定 |
 | `open <名前>` | mod の画面を開く: `lore` `quests` `growth` `skills` `party` `inventory` `grave`（語り部の墓の一覧の見本）、`travel_map_demo` / `travel_map_voyage_demo`（旅の地図の見本の印。子の海図を重ねた姿）、または引数なしで作れる画面のクラスの完全な名前 |
 | `key <キーの名前>` | そのキーを押したことにする (KeyMapping。OS の入力ではない)。サーバーから中身を受け取る画面に使う。例 `key key.skyabyss_record.open` (控え帳) |

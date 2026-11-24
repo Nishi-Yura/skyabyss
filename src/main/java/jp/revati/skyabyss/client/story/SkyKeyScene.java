@@ -156,12 +156,12 @@ public final class SkyKeyScene extends Screen {
         float t = time();
         int w = width;
         int h = height;
-        // 暗がり: 上ほど濃く (空が暗くなる)
+        // 暗がり: 黒い紙を一枚 (切り絵)
         float dark = Mth.clamp(t / 1.2f, 0f, 1f);
         if (t > CARD - 1f) {
             dark = Math.max(dark, 1f);
         }
-        g.fillGradient(0, 0, w, h, argb(0.94f * dark, 0x05070C), argb(0.84f * dark, 0x0A0D14));
+        g.fill(0, 0, w, h, argb(0.92f * dark, 0x181722));
 
         float cx = w / 2f;
         float cy = h * 0.40f;
@@ -200,7 +200,7 @@ public final class SkyKeyScene extends Screen {
     private void key(GuiGraphics g, float t, float cx, float cy) {
         float k = Mth.clamp((t - MERGE) / 0.6f, 0f, 1f);
         float bob = Mth.sin((t - MERGE) * 1.6f) * 2f;
-        glow(g, cx, cy + bob, 34, 0xE8F6FF, 0.35f * k);
+        glow(g, cx, cy + bob, 34, 0xF89CD2, 0.35f * k);
         item(g, new ItemStack(StorySetup.SKY_KEY.get()), cx, cy + bob, 4f, 1f);
     }
 
@@ -215,11 +215,12 @@ public final class SkyKeyScene extends Screen {
             float y = -20 + phase * (h + 40);
             float len = 14 + 18 * s[2];
             float fade = strength * (phase < 0.85f ? 1f : (1 - phase) / 0.15f);
-            g.fillGradient((int) x, (int) (y - len), (int) x + 1, (int) y, argb(0f, 0xDFF4FF), argb(0.55f * fade, 0xDFF4FF));
+            g.fill((int) x, (int) (y - len), (int) x + 1, (int) y, argb(0.55f * fade, 0xECE4D6));
         }
         // 鍵から真下へ、細い光 (鍵が足もとを指す)
         float beam = Mth.clamp((since - 1f) / 2f, 0f, 1f) * strength;
-        g.fillGradient((int) cx, (int) cy + 20, (int) cx + 1, h, argb(0.5f * beam, 0xE8F6FF), argb(0.05f * beam, 0xE8F6FF));
+        g.fill((int) cx + 1, (int) cy + 21, (int) cx + 2, h, argb(0.5f * beam, 0x8C2C60));
+        g.fill((int) cx, (int) cy + 20, (int) cx + 1, h, argb(0.5f * beam, 0xF89CD2));
     }
 
     private void flash(GuiGraphics g, float t, int w, int h) {
@@ -235,7 +236,7 @@ public final class SkyKeyScene extends Screen {
         for (int i = 0; i < LINE_AT.length; i++) {
             float a = Mth.clamp((t - LINE_AT[i]) / 0.9f, 0f, 1f) * out;
             if (a > 0.02f) {
-                g.drawCenteredString(font, Component.translatable("scene.skyabyss.sky_key.line" + (i + 1)), (int) cx, y, argb(a, 0xDDE8F0));
+                g.drawCenteredString(font, Component.translatable("scene.skyabyss.sky_key.line" + (i + 1)), (int) cx, y, argb(a, 0xECE4D6));
             }
             y += 16;
         }
@@ -252,18 +253,18 @@ public final class SkyKeyScene extends Screen {
             g.pose().pushPose();
             g.pose().translate(cx, y, 0);
             g.pose().scale(TextStyle.TITLE.scale(), TextStyle.TITLE.scale(), 1f);
-            g.drawCenteredString(font, Component.translatable("scene.skyabyss.sky_key.end_title"), 0, 0, argb(a1, 0xF2E6C8));
+            g.drawCenteredString(font, Component.translatable("scene.skyabyss.sky_key.end_title"), 0, 0, argb(a1, 0xF89CD2));
             g.pose().popPose();
         }
         if (a2 > 0.02f) {
-            g.drawCenteredString(font, Component.translatable("scene.skyabyss.sky_key.end_sub"), (int) cx, y + 30, argb(a2, 0xB8C4D0));
+            g.drawCenteredString(font, Component.translatable("scene.skyabyss.sky_key.end_sub"), (int) cx, y + 30, argb(a2, 0xC9BFAE));
         }
         if (a3 > 0.02f) {
-            g.drawCenteredString(font, Component.translatable("scene.skyabyss.sky_key.end_thanks"), (int) cx, y + 52, argb(a3, 0xDDE8F0));
-            g.drawCenteredString(font, Component.translatable("scene.skyabyss.sky_key.end_days", days), (int) cx, y + 66, argb(a3 * 0.8f, 0x8C98A4));
+            g.drawCenteredString(font, Component.translatable("scene.skyabyss.sky_key.end_thanks"), (int) cx, y + 52, argb(a3, 0xECE4D6));
+            g.drawCenteredString(font, Component.translatable("scene.skyabyss.sky_key.end_days", days), (int) cx, y + 66, argb(a3 * 0.8f, 0x9A929C));
         }
         if (a4 > 0.02f) {
-            g.drawCenteredString(font, Component.translatable("scene.skyabyss.sky_key.end_hint"), (int) cx, h - 24, argb(a4 * 0.7f, 0x8C98A4));
+            g.drawCenteredString(font, Component.translatable("scene.skyabyss.sky_key.end_hint"), (int) cx, h - 24, argb(a4 * 0.7f, 0x9A929C));
         }
     }
 
@@ -282,11 +283,15 @@ public final class SkyKeyScene extends Screen {
         if (alpha <= 0.01f) {
             return;
         }
-        // 重ねた四角でぼんやりした光 (外ほど薄く、角が目立たないように段を細かく)
-        for (int i = 10; i >= 1; i--) {
-            float rr = r * i / 10f;
-            g.fill((int) (x - rr), (int) (y - rr * 0.8f), (int) (x + rr), (int) (y + rr * 0.8f), argb(alpha * 0.07f, rgb));
-            g.fill((int) (x - rr * 0.8f), (int) (y - rr), (int) (x + rr * 0.8f), (int) (y + rr), argb(alpha * 0.05f, rgb));
+        // ぼかしの代わりに紙の菱を一枚 (濃い桃色の影を右下にずらす)
+        int half = Math.max(3, Math.round(r * 0.5f));
+        for (int dy = -half; dy <= half; dy++) {
+            int span = half - Math.abs(dy);
+            g.fill((int) x - span + 2, (int) y + dy + 2, (int) x + span + 3, (int) y + dy + 3, argb(Math.min(1f, alpha * 2.2f), 0x8C2C60));
+        }
+        for (int dy = -half; dy <= half; dy++) {
+            int span = half - Math.abs(dy);
+            g.fill((int) x - span, (int) y + dy, (int) x + span + 1, (int) y + dy + 1, argb(Math.min(1f, alpha * 2.2f), rgb));
         }
     }
 

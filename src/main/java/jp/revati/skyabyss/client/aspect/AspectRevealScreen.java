@@ -29,9 +29,9 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public class AspectRevealScreen extends Screen {
     private static final int[] RARITY = {0x6FA8E0, 0xB48AE6, 0xEF8A5C};
-    private static final int GOLD = 0xE9C46A;
-    private static final int TEXT = 0xE6E8EE;
-    private static final int DIM = 0x9AA4C4;
+    private static final int GOLD = 0xF89CD2;
+    private static final int TEXT = 0xECE4D6;
+    private static final int DIM = 0x9A929C;
     private static final int CARD_W = 132;
     private static final int CARD_H = 172;
     private static final int GAP = 21;
@@ -149,8 +149,7 @@ public class AspectRevealScreen extends Screen {
     public void render(GuiGraphics g, int mx, int my, float pt) {
         float t = age + pt;
         float dim = Mth.clamp(t / 8f, 0, 1);
-        g.fill(0, 0, width, height, argb(0.82f * dim, 0x05070F));
-        g.fillGradient(0, 0, width, height / 2, argb(0.20f * dim, accent), argb(0f, accent));
+        g.fill(0, 0, width, height, argb(0.90f * dim, 0x181722));
         // 題字
         float ta = Mth.clamp((t - T_TITLE) / 10f, 0, 1);
         if (ta > 0) {
@@ -226,7 +225,8 @@ public class AspectRevealScreen extends Screen {
     }
 
     private void frame(GuiGraphics g, int line, float alpha) {
-        g.fill(0, 0, CARD_W, CARD_H, argb(alpha, 0x141821));
+        g.fill(2, 2, CARD_W + 2, CARD_H + 2, argb(alpha, 0x8C2C60));
+        g.fill(0, 0, CARD_W, CARD_H, argb(alpha, 0x181722));
         g.fill(0, 0, CARD_W, 1, argb(alpha, line));
         g.fill(0, CARD_H - 1, CARD_W, CARD_H, argb(alpha, line));
         g.fill(0, 0, 1, CARD_H, argb(alpha, line));
@@ -260,9 +260,9 @@ public class AspectRevealScreen extends Screen {
         // めくった直後の光
         if (fresh) {
             float glow = Mth.clamp(1 - (since - FLIP_LEN / 2f) / 24f, 0, 1);
-            g.fillGradient(1, 1, CARD_W - 1, CARD_H / 2, argb(glow * 0.55f, line), argb(0f, line));
+            g.fill(1, 1, CARD_W - 1, CARD_H - 1, argb(glow * 0.45f, 0xECE4D6));
         }
-        g.fillGradient(1, 1, CARD_W - 1, 40, argb(alpha * 0.22f, line), argb(0f, line));
+        g.fill(1, 1, CARD_W - 1, 5, argb(alpha, line));
         int y = 10;
         g.drawCenteredString(font, Component.translatable("aspect.skyabyss.rarity." + a.rarity()), CARD_W / 2, y, argb(alpha, line));
         y += 14;

@@ -51,6 +51,9 @@ public final class MidBossBar {
         BossEvent boss = event.getBossEvent();
         String name = boss.getName().getString();
         Look look = near(mc, WhaleboneCaptain.class, boss) ? CAPTAIN : near(mc, ElderSentry.class, boss) ? ELDER : near(mc, TideBeckoner.class, boss) ? BECKONER : null;
+        if (look == null && jp.revati.skyabyss.client.hud.HudDemo.has(jp.revati.skyabyss.client.hud.HudDemo.Part.MIDBOSS)) {
+            look = CAPTAIN;
+        }
         if (look == null) {
             return;
         }

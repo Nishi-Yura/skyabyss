@@ -254,9 +254,9 @@ public final class CardFeed {
                     int by = y + 1 + (i / perRow(ew)) * ICON_PITCH;
                     net.minecraft.world.item.ItemStack st = e.items.get(i);
                     jp.revati.skyabyss.item.GearTier tier = jp.revati.skyabyss.client.ui.GearTierFrames.tierOf(st);
-                    int edge = tier != null ? tier.rgb() : 0x6A78A8;
+                    int edge = tier != null ? tier.rgb() : 0x5A5460;
                     g.fill(bx, by, bx + 18, by + 18, ((int) (alpha * 0.85f)) << 24 | 0x181722);
-                    jp.revati.skyabyss.client.ui.Golden.outline(g, bx, by, bx + 18, by + 18, alpha << 24 | edge);
+                    jp.revati.skyabyss.client.ui.Paper.edge(g, bx, by, bx + 18, by + 18, alpha << 24 | edge);
                     if (alpha > 120) {
                         g.renderItem(st, bx + 1, by + 1);
                         if (st.getCount() > 1) {

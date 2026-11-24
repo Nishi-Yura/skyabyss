@@ -74,10 +74,10 @@ public final class SkillLessonClient {
 
     // 覚える段か (技の画面が光らせる)
     public static boolean learning(Minecraft mc) {
-        return "learn".equals(stage(mc));
+        return "learn".equals(stage(mc)) || jp.revati.skyabyss.client.hud.HudDemo.has(jp.revati.skyabyss.client.hud.HudDemo.Part.LESSON);
     }
 
-    // 呼吸する金の縁 (x, y から w × h の外側に 1 px)
+    // 呼吸する明るい桃色の縁 (x, y から w × h の外側に 1 px)
     public static void frame(GuiGraphics g, int x, int y, int w, int h) {
         float pulse = 0.55f + 0.45f * Mth.sin(Util.getMillis() / 260f);
         int c = ((int) (pulse * 255) << 24) | 0xF89CD2;

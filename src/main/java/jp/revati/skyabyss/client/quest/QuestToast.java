@@ -40,8 +40,8 @@ public class QuestToast implements Toast {
         int h = height();
         jp.revati.skyabyss.client.ui.Golden.hudFrame(g, 0, 0, w, h);
 
-        g.fill(2, 2, 4, h - 2, main ? 0xFFE9C46A : 0xFF8FD0FF);
-        g.drawString(font, head, 10, 7, main ? 0xFFE9C46A : 0xFF8FD0FF, false);
+        g.fill(2, 2, 4, h - 2, main ? 0xFFF89CD2 : 0xFFECE4D6);
+        g.drawString(font, head, 10, 7, main ? 0xFFF89CD2 : 0xFFECE4D6, false);
         int y = 18;
         for (FormattedCharSequence line : lines) {
             g.drawString(font, line, 10, y, 0xFFE9E3D4, false);

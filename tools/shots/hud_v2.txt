@@ -58,8 +58,24 @@ shot back_1280_g3
 huddemo off
 guiscale 4
 window 1920 1080
-wait 20
-key key.skyabyss.skill_slot_1
-wait 4
+huddemo cooldown
+wait 30
 shot cd_1920_g4
+huddemo off
+cmd bossbar add skyabyss:demo_mid {"translate":"entity.skyabyss.whalebone_captain"}
+cmd bossbar set skyabyss:demo_mid players @a
+cmd bossbar set skyabyss:demo_mid value 62
+huddemo midboss
+wait 30
+shot midboss_1920_g4
+huddemo off
+cmd bossbar remove skyabyss:demo_mid
+guiscale 3
+window 1280 720
+cmd skyabyss skill node @p spi_1
+huddemo lesson
+open skills
+wait 30
+shot lesson_skills
+close
 huddemo off

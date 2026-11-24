@@ -170,8 +170,9 @@ final class CinematicScreen extends Screen {
         int bottom = h - barFull - 16;
         int top = bottom - blockH;
         int cx = w / 2;
-        // 暗がり: 上へ向かって消える。下は今の黒帯の縁までつなげる (2026-11-03 の声「上下の薄い黒が間空いてる」。前は帯の手前で切れて隙間が見えた)
-        g.fillGradient(0, top - 26, w, h - barH, 0x00000000, ((int) (a * 0x99) << 24) | 0x05080C);
+        // 暗がり: 黒い紙を一枚 (上の辺に濃い桃色の線)。下は今の黒帯の縁までつなげる (2026-11-03 の声「上下の薄い黒が間空いてる」。前は帯の手前で切れて隙間が見えた)
+        g.fill(0, top - 25, w, top - 24, ((int) (a * 0xC0) << 24) | 0x8C2C60);
+        g.fill(0, top - 24, w, h - barH, ((int) (a * 0xC0) << 24) | 0x181722);
         g.fill(cx - 36, top - 6, cx + 36, top - 5, ((int) (a * 0xB0) << 24) | accent);
         g.drawCenteredString(font, label, cx, top, alpha | labelColor);
         int y = top + 13;

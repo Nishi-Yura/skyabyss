@@ -1009,7 +1009,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
                 jp.revati.skyabyss.client.tutorial.SkillLessonClient.frame(g, learn.getX(), learn.getY(), learn.getWidth(), learn.getHeight());
             }
             // 盤の下の端の帯に (等倍)
-            boardStrip(g, Component.translatable("lesson.skyabyss.screen.learn"), GOLD);
+            boardStrip(g, Component.translatable("lesson.skyabyss.screen.learn"), Paper.ON_BLACK_PINK);
         }
         if (tryon != null && page == 0) {
             boardCaption(g, Component.translatable("gui.skyabyss.skill.tryon_banner", tryonOrder.size()), Paper.ON_BLACK_PINK);
