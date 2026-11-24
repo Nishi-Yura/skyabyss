@@ -58,13 +58,13 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
     private static final int CRAFT_X = W - 12 - ABYSS_W - 6 - CRAFT_W;
     private static final int ABYSS_X = W - 12 - ABYSS_W;
     // つまみ (右の端に縦)
-    private static final int TAB_X = 356;
+    private static final int TAB_X = 350;
     private static final int TAB_W = 48;
     private static final int TAB_STEP = 18;
     private static final int TABS = 5;
     private static final int TAB_Y = 12;
     // 仲間と渡る (つまみの下)
-    private static final int GO_X = 354;
+    private static final int GO_X = 350;
     private static final int GO_Y = TAB_Y + TABS * TAB_STEP + 8;
     private static final int GO_W = 50;
     // いまの三つの札
@@ -600,7 +600,9 @@ public class TrialBoardScreen extends Screen implements jp.revati.skyabyss.clien
             }
             g.pose().pushPose();
             g.pose().translate(c[0], c[1] + (1f - deal) * 60f, 0);
-            g.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees((1f - deal) * (i - 1) * 10f));
+            if (!jp.revati.skyabyss.client.ui.UiLook.plate()) {
+                g.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees((1f - deal) * (i - 1) * 10f));
+            }
             g.pose().translate(-c[0], -c[1], 0);
             jp.revati.skyabyss.client.ui.Paper.cut(g, "trial_card" + i, jp.revati.skyabyss.client.ui.Paper.rotRect(c[0], c[1], CARD_W, CARD_H, CARD_TILT[i]),
                     lift ? jp.revati.skyabyss.client.ui.Paper.PINK : jp.revati.skyabyss.client.ui.Paper.CREAM,

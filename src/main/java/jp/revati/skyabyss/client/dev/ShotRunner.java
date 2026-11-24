@@ -809,6 +809,16 @@ public final class ShotRunner {
                 mc.options.broadcastOptions();
                 return true;
             }
+            case "uislow" -> {
+                // uislow <n> : 職を選ぶ画面の動きを n 倍ゆっくりにする (動きの途中を撮るため。1 で戻す)
+                jp.revati.skyabyss.rpg.client.skill.JobChoiceScreen.slow = Math.max(1, line.intArg(0));
+                return true;
+            }
+            case "uilook" -> {
+                // uilook <paper|a|b|c> : 画面の絵柄を切り替える (a = 鐘の銅・b = 空見の石板・c = 淵の石。client/ui/UiLook)
+                jp.revati.skyabyss.client.ui.UiLook.set(jp.revati.skyabyss.client.ui.UiLook.parse(line.arg(0)));
+                return true;
+            }
             case "guiscale" -> {
                 mc.options.guiScale().set(line.intArg(0));
                 mc.resizeDisplay();
@@ -1327,6 +1337,26 @@ public final class ShotRunner {
             };
             // 封切り師の画面を見本の箱で (box_demo_list / spin / card / summary)
             case "box_demo_list", "box_demo_spin", "box_demo_card", "box_demo_summary" -> () -> jp.revati.skyabyss.client.box.BoxScreen.demo(name.substring("box_demo_".length()));
+            // 演出の見本: 作り直しの読み込み (regen_demo_<割合>)・空の鍵の場 (skykey_demo)・報いの祭壇 (reveal_demo。札 3 枚と添えの品)
+            case "regen_demo_0", "regen_demo_42", "regen_demo_100" -> () -> {
+                int pct = Integer.parseInt(name.substring("regen_demo_".length()));
+                jp.revati.skyabyss.client.upgrade.RegenLoadingScreen.receive(new jp.revati.skyabyss.upgrade.RegenLoading.State(true, false, 3, pct));
+                return mc.screen;
+            };
+            case "skykey_demo" -> () -> {
+                jp.revati.skyabyss.client.story.SkyKeyScene.open(new jp.revati.skyabyss.story.SkyKeyScenePayload(3, true));
+                return mc.screen;
+            };
+            case "reveal_demo" -> () -> {
+                java.util.List<jp.revati.skyabyss.rpg.aspect.AspectNet.Got> got = java.util.List.of(
+                        new jp.revati.skyabyss.rpg.aspect.AspectNet.Got("warrior_m_stone_whale1", 0, 1),
+                        new jp.revati.skyabyss.rpg.aspect.AspectNet.Got("warrior_e_stone_whale2", 1, 2),
+                        new jp.revati.skyabyss.rpg.aspect.AspectNet.Got("warrior_r_tide_shell1", 0, 1));
+                jp.revati.skyabyss.client.aspect.AspectRevealScreen.open(new jp.revati.skyabyss.rpg.aspect.AspectNet.Reveal("stone_whale", got,
+                        java.util.List.of(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_INGOT, 12),
+                                new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.AMETHYST_SHARD, 3))));
+                return null;
+            };
             // パーティー募集を見本の一覧で (6 件: 自分の募集・満員を含む。4 件より多いのでめくりが出る)
             case "party_finder_demo" -> () -> {
                 java.util.List<jp.revati.skyabyss.party.PartyFinder.Row> rows = java.util.List.of(
@@ -1361,6 +1391,18 @@ public final class ShotRunner {
             // パーティー募集の画面 (開いてから 2 秒ほどで一覧が届く)
             case "party_finder" -> () -> new jp.revati.skyabyss.party.client.PartyFinderScreen(null);
             // 見本の中身で開く (切り絵の 3 周目の確かめ。ふだんはサーバーが送る)
+            case "party_demo_6" -> () -> {
+                // 6 人そろったパーティー (上限。札が細くなり、招待の一覧は出ない)
+                String self = mc.player.getUUID().toString();
+                jp.revati.skyabyss.party.client.PartyClient.receive(new jp.revati.skyabyss.party.PartyNetwork.Sync(2, 30, 2, "?unseen", 50, java.util.List.of(
+                        new jp.revati.skyabyss.party.PartyNetwork.Member(self, mc.player.getName().getString(), 50, 180, 225, true, true, true),
+                        new jp.revati.skyabyss.party.PartyNetwork.Member(new java.util.UUID(1, 7).toString(), "Minato", 48, 200, 240, true, true, false),
+                        new jp.revati.skyabyss.party.PartyNetwork.Member(new java.util.UUID(3, 9).toString(), "Nagi", 47, 90, 180, true, false, false),
+                        new jp.revati.skyabyss.party.PartyNetwork.Member(new java.util.UUID(5, 2).toString(), "Isana", 45, 0, 200, false, false, false),
+                        new jp.revati.skyabyss.party.PartyNetwork.Member(new java.util.UUID(7, 4).toString(), "Sora", 44, 210, 2400, true, true, false),
+                        new jp.revati.skyabyss.party.PartyNetwork.Member(new java.util.UUID(9, 6).toString(), "カイ", 41, 150, 190, true, true, false)), ""));
+                return new jp.revati.skyabyss.party.client.PartyScreen();
+            };
             case "party_demo" -> () -> {
                 String self = mc.player.getUUID().toString();
                 jp.revati.skyabyss.party.client.PartyClient.receive(new jp.revati.skyabyss.party.PartyNetwork.Sync(2, 30, 2, "?unseen", 70, java.util.List.of(

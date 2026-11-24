@@ -138,8 +138,8 @@ public final class EnemyHealthBars {
         int alpha = hurt ? 0xFF : 0x70;
         float hw = WIDTH / 2;
         // 縁・溝・遅れ・体力 (奥から手前へ少しずつ前に)
-        quad(buf, pose, cam, left, up, c, s, -hw - 0.03f, -0.03f, hw + 0.03f, HEIGHT + 0.03f, 0.000f, (alpha * 3 / 4) << 24 | 0x181722);
-        quad(buf, pose, cam, left, up, c, s, -hw, 0, hw, HEIGHT, 0.002f, alpha << 24 | 0x2A1214);
+        quad(buf, pose, cam, left, up, c, s, -hw - 0.03f, -0.03f, hw + 0.03f, HEIGHT + 0.03f, 0.000f, (alpha * 3 / 4) << 24 | 0x07080C);
+        quad(buf, pose, cam, left, up, c, s, -hw, 0, hw, HEIGHT, 0.002f, alpha << 24 | 0x10131C);
         if (hurt && lag > frac) {
             quad(buf, pose, cam, left, up, c, s, -hw + WIDTH * frac, 0, -hw + WIDTH * lag, HEIGHT, 0.004f, alpha << 24 | 0xF0E6D8);
         }

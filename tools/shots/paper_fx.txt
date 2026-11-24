@@ -1,0 +1,76 @@
+# 演出の画面（切り絵）: 作り直しの読み込み・空の鍵の場・報いの祭壇・シネマの暗がり
+size 1920 1080
+guiscale 4
+timeout 600
+cmd gamemode creative
+cmd time set 6000
+camera 0 80 0 180 10
+waitchunks 300
+hud on
+cmd skyabyss cinematic stop
+wait 40
+chat clear
+
+# 作り直しの読み込み
+open regen_demo_0
+wait 20
+shot regen_0
+open regen_demo_42
+wait 40
+shot regen_42
+open regen_demo_100
+wait 20
+shot regen_100
+close
+wait 10
+
+# 報いの祭壇（題 → 札が配られる → めくり）
+open reveal_demo
+wait 10
+shot reveal_title
+wait 20
+shot reveal_cards
+wait 50
+shot reveal_flip1
+wait 100
+shot reveal_flip3
+close
+wait 10
+
+# 空の鍵の場（時間で進む: 合わさる 4.4 秒・札 20 秒）
+open skykey_demo
+wait 30
+shot skykey_1s
+wait 60
+shot skykey_4s
+wait 80
+shot skykey_8s
+wait 260
+shot skykey_card
+close
+wait 10
+
+# シネマの暗がり
+cmd skyabyss cinematic play opening
+wait 60
+shot cine_3s
+wait 120
+shot cine_9s
+cmd skyabyss cinematic stop
+wait 40
+
+# 小さい窓でも崩れないか
+size 1280 720
+guiscale 3
+open regen_demo_42
+wait 30
+shot regen_42_720
+close
+open reveal_demo
+wait 200
+shot reveal_720
+close
+open skykey_demo
+wait 420
+shot skykey_card_720
+close

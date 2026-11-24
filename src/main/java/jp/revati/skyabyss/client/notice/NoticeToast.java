@@ -42,13 +42,12 @@ public class NoticeToast implements Toast {
     public Visibility render(GuiGraphics g, ToastComponent toasts, long timeSinceLastVisible) {
         jp.revati.skyabyss.client.hud.HudManager.noteToast(g, height());
         Font font = toasts.getMinecraft().font;
-        jp.revati.skyabyss.client.ui.Golden.hudFrame(g, 0, 0, WIDTH, height);
-
-        g.fill(2, 2, 4, height - 2, 0xFF000000 | accent);
+        jp.revati.skyabyss.client.ui.Plate.hudCard(g, 0, 0, WIDTH, height, accent, 1f);
         g.drawString(font, head, 10, 7, 0xFF000000 | accent, false);
+        jp.revati.skyabyss.client.ui.Plate.hudRule(g, 8, 16, WIDTH - 14, 1f);
         int y = 19;
         for (FormattedCharSequence line : lines) {
-            g.drawString(font, line, 10, y, 0xFFE9E3D4, false);
+            g.drawString(font, line, 10, y, jp.revati.skyabyss.client.ui.Plate.hudText(1f), false);
             y += 10;
         }
         return timeSinceLastVisible >= DURATION * toasts.getNotificationDisplayTimeMultiplier() ? Visibility.HIDE : Visibility.SHOW;

@@ -101,11 +101,8 @@ public final class BackGaugeHud {
 
     // 角を落とした板と枠 (1 px)
     public static void frame(GuiGraphics g, int x, int y, int w, int h, int fill, int border) {
-        // 切り絵 (docs/design/56 の 5): 黒い紙に右下の濃い桃色の影、左の端に巨神の色の筋 (地の透かしはそのまま)
-        g.fill(x + 1, y + 1, x + w + 1, y + h + 1, 0xFF8C2C60);
-        g.fill(x, y, x + w, y + h, (fill & 0xFF000000) | 0x181722);
-        g.fill(x, y, x + w, y + 1, 0xFF3A3644);
-        g.fill(x, y, x + 2, y + h, border);
+        // HUD の札の地 (Plate.hudCard。docs/design/56 の 5)。左の端の筋だけ巨神の色 (border) を残す。fill の色は使わない (どの背も同じ石の地)
+        g.drawManaged(() -> jp.revati.skyabyss.client.ui.Plate.hudCard(g, x, y, x + w, y + h, border, 1f));
     }
 
     // 文を幅 room に収めて描く (狭い画面で幅が足りなければ、はみ出す分を切る。枠の外へは出さない)

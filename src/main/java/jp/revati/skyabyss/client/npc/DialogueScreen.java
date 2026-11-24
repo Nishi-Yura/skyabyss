@@ -233,15 +233,24 @@ public class DialogueScreen extends Screen {
         int y = panelY;
         // 黒い帯 (窓の幅いっぱい。上の辺は手で決めた点で、少しずつ斜めに切る)
         int bw = width;
-        jp.revati.skyabyss.client.ui.Paper.cut(g, "talk_band", new float[] {-4, y + 2, bw * 0.38f, y - 2, bw * 0.81f, y + 3, bw + 4, y - 1, bw + 4, height + 4, -4, height + 4},
-                jp.revati.skyabyss.client.ui.Paper.BLACK, jp.revati.skyabyss.client.ui.Paper.PINK_LO, 0, -3);
+        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+            // 板の絵柄: 窓の幅いっぱいの板 (左右と下の縁は窓の外。上の銅の縁だけが見える)
+            jp.revati.skyabyss.client.ui.Plate.panel(g, -8, y - 2, bw + 16, height - y + 12, 0, jp.revati.skyabyss.client.ui.Plate.GOLD);
+        } else {
+            jp.revati.skyabyss.client.ui.Paper.cut(g, "talk_band", new float[] {-4, y + 2, bw * 0.38f, y - 2, bw * 0.81f, y + 3, bw + 4, y - 1, bw + 4, height + 4, -4, height + 4},
+                    jp.revati.skyabyss.client.ui.Paper.BLACK, jp.revati.skyabyss.client.ui.Paper.PINK_LO, 0, -3);
+        }
         // 顔の札 (傾けて、帯の上へはみ出す)
         int cw = faceColW();
         int ch = faceColH();
         float ccx = x + cw / 2f;
         float ccy = y + ch / 2f - 18;
-        jp.revati.skyabyss.client.ui.Paper.cut(g, "talk_card", jp.revati.skyabyss.client.ui.Paper.rotRect(ccx, ccy, cw, ch, -4), jp.revati.skyabyss.client.ui.Paper.CREAM,
-                jp.revati.skyabyss.client.ui.Paper.BLACK_LO, 3, 3);
+        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+            jp.revati.skyabyss.client.ui.Plate.tile(g, Math.round(ccx - cw / 2f), Math.round(ccy - ch / 2f), cw, ch, jp.revati.skyabyss.client.ui.Plate.REST, jp.revati.skyabyss.client.ui.Plate.GOLD);
+        } else {
+            jp.revati.skyabyss.client.ui.Paper.cut(g, "talk_card", jp.revati.skyabyss.client.ui.Paper.rotRect(ccx, ccy, cw, ch, -4), jp.revati.skyabyss.client.ui.Paper.CREAM,
+                    jp.revati.skyabyss.client.ui.Paper.BLACK_LO, 3, 3);
+        }
         int fx = Math.round(ccx - face / 2f);
         int fy = Math.round(ccy - ch / 2f + 6);
         g.fill(fx - 1, fy - 1, fx + face + 1, fy + face + 1, 0xFF0E0D14);

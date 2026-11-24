@@ -101,13 +101,25 @@ public final class ChallengeHud {
         }
         Font font = mc.font;
         int y = r.y();
-        g.drawString(font, b.title(), r.right() - font.width(b.title()), y, 0xF89CD2, true);
+        List<List<ChallengeBand.Tag>> rows = tagRows(font, b.tags(), r.w());
+        int cw = Math.max(font.width(b.title()), font.width(b.sub()));
+        for (List<ChallengeBand.Tag> row : rows) {
+            int w = 0;
+            for (int i = 0; i < row.size(); i++) {
+                w += font.width(row.get(i).text()) + (i > 0 ? font.width("・") : 0);
+            }
+            cw = Math.max(cw, w);
+        }
+        int ch = (1 + (b.sub().getString().isEmpty() ? 0 : 1) + rows.size()) * 11;
+        final int cardW = cw;
+        g.drawManaged(() -> jp.revati.skyabyss.client.ui.Plate.hudCard(g, r.right() - cardW - 5, r.y() - 3, r.right() + 3, r.y() + ch - 1, 0, 1f));
+        g.drawString(font, b.title(), r.right() - font.width(b.title()), y, jp.revati.skyabyss.client.ui.Plate.hudHead(1f), true);
         y += 11;
         if (!b.sub().getString().isEmpty()) {
-            g.drawString(font, b.sub(), r.right() - font.width(b.sub()), y, 0xE9E3D4, true);
+            g.drawString(font, b.sub(), r.right() - font.width(b.sub()), y, jp.revati.skyabyss.client.ui.Plate.hudText(1f), true);
             y += 11;
         }
-        for (List<ChallengeBand.Tag> row : tagRows(font, b.tags(), r.w())) {
+        for (List<ChallengeBand.Tag> row : rows) {
             int w = 0;
             for (int i = 0; i < row.size(); i++) {
                 w += font.width(row.get(i).text()) + (i > 0 ? font.width("・") : 0);
@@ -115,7 +127,7 @@ public final class ChallengeHud {
             int x = r.right() - w;
             for (int i = 0; i < row.size(); i++) {
                 if (i > 0) {
-                    g.drawString(font, "・", x, y, 0xB4BBD6, true);
+                    g.drawString(font, "・", x, y, jp.revati.skyabyss.client.ui.Plate.hudSoft(1f), true);
                     x += font.width("・");
                 }
                 g.drawString(font, row.get(i).text(), x, y, 0xFF000000 | row.get(i).rgb(), true);

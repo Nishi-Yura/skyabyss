@@ -32,6 +32,7 @@ import net.neoforged.neoforge.client.event.ScreenEvent;
 //   cut           画面の範囲 (TextBounds) で文字が切られた
 //   ellipsis      末尾を「…」で省いた字 (幅に入らず省かれた)
 // ツールチップ (奥行き 400 より手前) は見ない
+// 名前が「hud」で始まる検査 (「overlap hud_…」) は、画面を開いていなければ HUD の一枚を調べる (下の onHudPre)
 @EventBusSubscriber(modid = SkyAbyss.MODID, value = Dist.CLIENT)
 public final class OverlapAudit {
     private record Rect(float x, float y, float w, float h) {
@@ -102,7 +103,7 @@ public final class OverlapAudit {
 
     public static void text(GuiGraphics g, Font font, Object text, int x, int y, int width, boolean cut) {
         Matrix4f m = g.pose().last().pose();
-        if (m.m32() >= 300f) {
+        if (!hud && m.m32() >= 300f) {
             return;
         }
         String s = text instanceof String str ? str : text instanceof FormattedCharSequence seq ? plain(seq) : "";
@@ -166,6 +167,7 @@ public final class OverlapAudit {
             WIDGETS.clear();
             owner = null;
             capturing = true;
+            hud = false;
         }
     }
 
@@ -175,7 +177,36 @@ public final class OverlapAudit {
             return;
         }
         capturing = false;
-        Screen screen = event.getScreen();
+        finish(event.getScreen().getClass().getSimpleName());
+    }
+
+    // HUD の一枚 (画面を開いていないとき)。名前が「hud」で始まる検査だけ (「overlap hud_…」)。ほかの名前は今までどおり、次に描く画面を待つ。
+    // バニラの層と mod の層が描いた字 (手もとの数・体力の数・札の字) を集める。トーストは HUD の外で描かれるので入らない
+    private static boolean hud;
+
+    @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.HIGHEST)
+    static void onHudPre(net.neoforged.neoforge.client.event.RenderGuiEvent.Pre event) {
+        if (armed != null && armed.startsWith("hud") && Minecraft.getInstance().screen == null) {
+            TEXTS.clear();
+            WIDGETS.clear();
+            owner = null;
+            capturing = true;
+            hud = true;
+        }
+    }
+
+    @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.LOWEST)
+    static void onHudPost(net.neoforged.neoforge.client.event.RenderGuiEvent.Post event) {
+        if (armed == null || !capturing || !hud) {
+            return;
+        }
+        capturing = false;
+        hud = false;
+        finish("Hud");
+    }
+
+    // 集めた字と部品を調べて overlap.txt に書く (what = 画面のクラスの名前、HUD なら「Hud」)
+    private static void finish(String what) {
         List<Rect> widgets = new ArrayList<>();
         List<String> names = new ArrayList<>();
         for (Widget w : WIDGETS) {
@@ -236,7 +267,7 @@ public final class OverlapAudit {
         }
         Minecraft mc = Minecraft.getInstance();
         StringBuilder sb = new StringBuilder();
-        sb.append("== ").append(armed).append("  ").append(screen.getClass().getSimpleName()).append("  gui ")
+        sb.append("== ").append(armed).append("  ").append(what).append("  gui ")
                 .append(mc.getWindow().getGuiScaledWidth()).append('x').append(mc.getWindow().getGuiScaledHeight())
                 .append(" (scale ").append((int) mc.getWindow().getGuiScale()).append(")  texts ").append(texts.size())
                 .append("  widgets ").append(widgets.size()).append("  issues ").append(out.size()).append('\n');

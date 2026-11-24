@@ -28,7 +28,7 @@ public class GlassChestScreen extends AbstractContainerScreen<ChestMenu> impleme
     // 箱の枠 (帳面の中) と袋の枠 (右の黒い紙)
     private static final int BOX_X = 40;
     private static final int BOX_Y = 42;
-    private static final int BAG_X = 244;
+    private static final int BAG_X = 239;
     private static final int BAG_Y = 34;
     private final UiFit fit = new UiFit();
 

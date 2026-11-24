@@ -1,0 +1,92 @@
+# 画素の板の絵柄の試作を、都の景色の上で撮る (昼と夜)。世界の名前が opening で始まるので都が建つ
+# 2026-11-24 にユーザーが a を選んだ。uilook b・c の段は、いまは a (既定) で撮れる (見比べの絵は docs/review/plate_ui/pilot_*.png に残してある)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/plate_capital.txt -PshotsName=plate_capital
+world opening_plate normal
+size 1920 1080
+guiscale 4
+timeout 1800
+render 12
+
+wait 100
+cmd skyabyss cinematic stop
+wait 10
+cmd skyabyss cinematic stop
+cmd time set 2000
+cmd weather clear
+cmd gamerule doDaylightCycle false
+cmd gamemode spectator
+cmd skyabyss dev opening build
+hud off
+cmd skyabyss dev opening at shelter 0 0 2 116 180 -8
+waitchunks
+wait 60
+shot day_world
+cmd gamemode creative
+wait 10
+
+uilook paper
+open job_choice_warrior
+hover 300 132
+wait 30
+shot day_paper_warrior
+close
+wait 4
+uilook a
+open job_choice_warrior
+hover 300 132
+wait 30
+shot day_a_warrior
+close
+wait 4
+uilook b
+open job_choice_warrior
+hover 300 132
+wait 30
+shot day_b_warrior
+close
+wait 4
+uilook c
+open job_choice_warrior
+hover 300 132
+wait 30
+shot day_c_warrior
+close
+wait 4
+
+cmd time set 18000
+cmd gamemode spectator
+cmd skyabyss dev opening at shelter 0 0 3 70 180 -4
+waitchunks
+wait 60
+shot night_world
+cmd gamemode creative
+wait 10
+uilook paper
+open job_room_mage
+hover 300 132
+wait 30
+shot night_paper_mage
+close
+wait 4
+uilook a
+open job_room_mage
+hover 300 132
+wait 30
+shot night_a_mage
+close
+wait 4
+uilook b
+open job_room_mage
+hover 300 132
+wait 30
+shot night_b_mage
+close
+wait 4
+uilook c
+open job_room_mage
+hover 300 132
+wait 30
+shot night_c_mage
+close
+wait 4
+uilook paper

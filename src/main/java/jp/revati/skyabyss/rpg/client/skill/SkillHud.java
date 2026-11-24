@@ -36,6 +36,11 @@ public final class SkillHud {
     public static final int MANA_ROW = 6;
     static final int SLOT = 20;
     static final int SLOT_GAP = 2;
+    // 待ちの覆い (深い石の色。少し透ける)
+    static final int COVER = 0xC80B0D13;
+    // 待ちが明けた瞬間の光 (枠ごと。明けた時刻と、待っていたか)
+    private static final long[] READY_AT = new long[16];
+    private static final boolean[] WAITING = new boolean[16];
 
     private SkillHud() {
     }
@@ -141,11 +146,7 @@ public final class SkillHud {
     }
 
     static void diamond(GuiGraphics g, int x, int y, int c) {
-        g.fill(x + 2, y, x + 3, y + 5, jp.revati.skyabyss.client.ui.Paper.BLACK);
-        g.fill(x, y + 2, x + 5, y + 3, jp.revati.skyabyss.client.ui.Paper.BLACK);
-        g.fill(x + 1, y + 1, x + 4, y + 4, jp.revati.skyabyss.client.ui.Paper.BLACK);
-        g.fill(x + 2, y + 1, x + 3, y + 4, c);
-        g.fill(x + 1, y + 2, x + 4, y + 3, c);
+        jp.revati.skyabyss.client.ui.Plate.pip(g, x, y, c, 1f);
     }
 
     private static void renderMana(GuiGraphics g, Minecraft mc, SkillData d) {
@@ -183,7 +184,7 @@ public final class SkillHud {
         }
         int x = o[0] + (anySlot(d) ? d.slotCount() * (SLOT + SLOT_GAP) - SLOT_GAP + 11 + CHARM_GAP : 0);
         int y = o[1];
-        jp.revati.skyabyss.client.ui.Golden.slot(g, x, y, SLOT);
+        jp.revati.skyabyss.client.ui.Plate.tile(g, x, y, SLOT, SLOT, jp.revati.skyabyss.client.ui.Plate.REST, jp.revati.skyabyss.client.ui.Plate.GOLD);
         g.renderItem(stack, x + 2, y + 2);
         boolean ready = jp.revati.skyabyss.item.GearLevel.meets(mc.player, stack);
         float cd = mc.player.getCooldowns().getCooldownPercent(stack.getItem(), delta.getGameTimeDeltaPartialTick(true));
@@ -193,7 +194,7 @@ public final class SkillHud {
             g.fill(x + 2, y + 2, x + 18, y + 18, 0x9A3A1010);
         } else if (cd > 0) {
             int h = Mth.clamp(Math.round(16f * cd), 1, 16);
-            g.fill(x + 2, y + 2, x + 18, y + 2 + h, 0xC8181722);
+            g.fill(x + 2, y + 2, x + 18, y + 2 + h, COVER);
         }
         String k = jp.revati.skyabyss.client.accessory.AccessoryClient.CHARM_KEY.getTranslatedKeyMessage().getString();
         if (k.length() > 3) {
@@ -222,8 +223,12 @@ public final class SkillHud {
         for (int i = 0; i < d.slotCount(); i++) {
             int x = o[0] + i * (SLOT + SLOT_GAP);
             int y = o[1];
-            jp.revati.skyabyss.client.ui.Golden.slot(g, x, y, SLOT);
             Skill s = d.slot(i);
+            if (s != null) {
+                jp.revati.skyabyss.client.ui.Plate.tile(g, x, y, SLOT, SLOT, jp.revati.skyabyss.client.ui.Plate.REST, jp.revati.skyabyss.client.ui.Plate.GOLD);
+            } else {
+                jp.revati.skyabyss.client.ui.Plate.well(g, x, y, SLOT, SLOT);
+            }
             if (s != null) {
                 int rank = d.rank(s);
                 drawIcon(g, jp.revati.skyabyss.rpg.skill.SkillChanges.icon(mc.player, s), x + 2, y + 2);
@@ -241,15 +246,33 @@ public final class SkillHud {
                 int total = SkillManager.cooldownFor(mc.player, s);
                 if (left > 0) {
                     int h = Mth.clamp(Math.round(16f * left / total), 1, 16);
-                    g.fill(x + 2, y + 2, x + 18, y + 2 + h, 0xC8181722);
-                    // 待ちの覆いの下の端に桃色の線 (下から明けていく所が見えるように)
+                    g.fill(x + 2, y + 2, x + 18, y + 2 + h, COVER);
+                    // 待ちの覆いの下の端に明るい銅の線 (下から明けていく所が見えるように)
                     if (h < 16) {
-                        g.fill(x + 2, y + 1 + h, x + 18, y + 2 + h, 0xFFE45A9C);
+                        g.fill(x + 2, y + 1 + h, x + 18, y + 2 + h, jp.revati.skyabyss.client.ui.Plate.pal().fHi);
                     }
                     String sec = String.valueOf((left + 19) / 20);
-                    g.drawString(font, sec, x + 10 - font.width(sec) / 2, y + 6, 0xECE8DC, true);
+                    g.pose().pushPose();
+                    g.pose().translate(0, 0, 200);
+                    jp.revati.skyabyss.client.hud.BandHud.outlined(g, font, sec, x + 10 - font.width(sec) / 2, y + 6, 0xFFFFF6EA);
+                    g.pose().popPose();
                 } else if (d.globalCooldown > 0) {
-                    g.fill(x + 2, y + 2, x + 18, y + 18, 0x70181722);
+                    g.fill(x + 2, y + 2, x + 18, y + 18, 0x700B0D13);
+                }
+                // 待ちが明けた瞬間: 升の縁を明るい銅の光が一度まわる (使えるようになった手応え)
+                long nowMs = net.minecraft.Util.getMillis();
+                if (left > 0) {
+                    READY_AT[i & 15] = 0;
+                    WAITING[i & 15] = true;
+                } else if (WAITING[i & 15]) {
+                    WAITING[i & 15] = false;
+                    READY_AT[i & 15] = nowMs;
+                }
+                if (READY_AT[i & 15] != 0 && nowMs - READY_AT[i & 15] < 420) {
+                    g.pose().pushPose();
+                    g.pose().translate(0, 0, 200);
+                    jp.revati.skyabyss.client.ui.Plate.runLight(g, x, y, SLOT, SLOT, 0, (nowMs - READY_AT[i & 15]) / 420f, 14, jp.revati.skyabyss.client.ui.Plate.pal().fHi & 0xFFFFFF);
+                    g.pose().popPose();
                 }
             }
             // 光る: 使えた (白く)・使えなかった (赤紫の縁)

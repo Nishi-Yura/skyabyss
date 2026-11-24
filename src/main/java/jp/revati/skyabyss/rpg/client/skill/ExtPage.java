@@ -413,7 +413,7 @@ final class ExtPage {
         int body = !known ? (onCream ? 0xFFB8AEA4 : Paper.GREY_LO) : onCream ? Paper.BLACK_LO : hover ? 0xFFFFF6EA : Paper.CREAM;
         int under = worn ? Paper.PINK_LO : onCream ? 0xFFB8AEA4 : Paper.BLACK_LO;
         int off = worn ? 3 : 1;
-        float tilt = seq % 3 == 0 ? -2.5f : seq % 3 == 1 ? 1.5f : 3f;
+        float tilt = jp.revati.skyabyss.client.ui.UiLook.plate() ? 0f : seq % 3 == 0 ? -2.5f : seq % 3 == 1 ? 1.5f : 3f;
         int lift = hover && known ? 1 : 0;
         String name = "aspect_tile_" + s + "_" + Integer.toHexString(body) + "_" + Integer.toHexString(under) + "_" + off + "_" + tilt;
         Paper.draw(g, name, "", x - 4, y - 4 - lift, s + 9, s + 9,

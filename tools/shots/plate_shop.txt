@@ -1,0 +1,84 @@
+# 画素の板の絵柄の試作 (店・買い取り)。uilook a = 鐘の銅・b = 空見の石板・c = 淵の石
+# 2026-11-24 にユーザーが a を選んだ。uilook b・c の段は、いまは a (既定) で撮れる (見比べの絵は docs/review/plate_ui/pilot_*.png に残してある)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/plate_shop.txt -PshotsName=plate_shop
+world plate_shop flat
+size 1920 1080
+timeout 600
+render 4
+clouds off
+guiscale 4
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss playtest skip opening
+cmd skyabyss cinematic stop
+cmd skyabyss level set @p 12
+cmd skyabyss job choose mage
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+cmd skyabyss facility coins 5000
+wait 20
+
+uilook paper
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop smithy
+hover 300 262
+wait 14
+shot paper_shop
+close
+wait 4
+
+uilook a
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop smithy
+hover 300 262
+wait 14
+overlap a_shop
+shot a_shop
+hover 110 104
+wait 6
+shot a_shop_hover
+close
+wait 4
+cmd skyabyss facility act buyback
+hover 110 104
+wait 14
+shot a_buyback
+close
+wait 4
+
+uilook b
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop smithy
+hover 300 262
+wait 14
+shot b_shop
+close
+wait 4
+
+uilook c
+cmd skyabyss cinematic stop
+cmd skyabyss facility shop smithy
+hover 300 262
+wait 14
+shot c_shop
+close
+wait 4
+
+# 開く動き (a)
+uilook a
+cmd skyabyss facility shop smithy
+hover 110 80
+wait 1
+shot a_shop_open_0
+wait 1
+shot a_shop_open_1
+wait 2
+shot a_shop_open_2
+close
+wait 4
+uilook paper

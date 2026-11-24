@@ -3,7 +3,7 @@ package jp.revati.skyabyss.client.hud;
 import javax.annotation.Nullable;
 
 import jp.revati.skyabyss.SkyAbyss;
-import jp.revati.skyabyss.client.ui.Golden;
+import jp.revati.skyabyss.client.ui.Plate;
 import jp.revati.skyabyss.hud.HudLayout.Id;
 import jp.revati.skyabyss.hud.HudLayout.Rect;
 import jp.revati.skyabyss.rpg.Growth;
@@ -12,7 +12,6 @@ import jp.revati.skyabyss.rpg.GrowthRules;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
@@ -33,8 +32,8 @@ public final class BandHud {
     static final int ROW_UP = 39;
     // 経験値のバーの上端 (ホットバーの下端から。バニラと同じ)
     static final int XP_UP = 29;
-    private static final ResourceLocation XP_BG = ResourceLocation.withDefaultNamespace("hud/experience_bar_background");
-    private static final ResourceLocation XP_FILL = ResourceLocation.withDefaultNamespace("hud/experience_bar_progress");
+    // 経験値の帯の塗り (バニラの経験値と同じ緑。Lv の数の色と同じ系)
+    static final int XP_GREEN = 0x6CC83C;
 
     private BandHud() {
     }
@@ -107,9 +106,9 @@ public final class BandHud {
         // スキルの枠の地 (枠そのものは SkillHud)
         Rect sk = joinedSkills();
         if (sk != null) {
-            Golden.hudFrame(g, sk.x() - 2, sk.y() - 2, sk.right() + 2, hb.bottom() + 1);
+            g.drawManaged(() -> Plate.hud(g, sk.x() - 2, sk.y() - 2, sk.right() + 2, hb.bottom() + 1));
         }
-        // 経験値のバー (バニラの絵)。Lv 50 では今のジョブの熟練の進み
+        // 経験値の帯 (バニラの経験値のバーの場所。溝の中に緑の塗り、十等分の目盛り)。Lv 50 では今のジョブの熟練の進み
         GrowthData data = Growth.get(p);
         boolean max = data.level >= GrowthRules.MAX_LEVEL;
         jp.revati.skyabyss.rpg.skill.Job job = max ? jp.revati.skyabyss.rpg.client.GrowthHud.masteryJob(mc) : null;
@@ -117,25 +116,30 @@ public final class BandHud {
                 : max ? 1f : (float) data.xp / Math.max(1, data.xpNeed());
         int xx = hb.x();
         int xy = hb.bottom() - XP_UP;
-        g.blitSprite(XP_BG, xx, xy, 182, 5);
-        int fill = Mth.clamp(Math.round(182 * frac), 0, 182);
-        if (fill > 0) {
-            g.blitSprite(XP_FILL, 182, 5, 0, 0, xx, xy, fill, 5);
-        }
-        if (jp.revati.skyabyss.rpg.client.GrowthClient.barFlash > 0 && !max && fill > 2) {
-            int a = (int) (jp.revati.skyabyss.rpg.client.GrowthClient.barFlash / 12f * 0xC0);
-            g.fill(xx + 1, xy + 1, xx + fill - 1, xy + 4, (a << 24) | 0xFFFFFF);
-        }
-        // Lv の数 (バニラと同じ緑・黒の縁取り)。振っていない点があれば右に金の点
+        int fill = Mth.clamp(Math.round(180 * frac), 0, 180);
+        // Lv の札: 体力の帯とマナの帯のあいだ (二つの帯と一続きの板に見える)。数はバニラと同じ緑・黒の縁取り
+        int cx0 = hb.x() + 81;
+        int cx1 = hb.right() - 81;
+        int cy = hb.bottom() - ROW_UP;
+        Plate.Pal pal = Plate.pal();
+        g.drawManaged(() -> {
+            Plate.bar(g, xx, xy, 182, 5, frac, 0f, XP_GREEN, 0, 1f);
+            Plate.barTicks(g, xx, xy, 182, 5, 10, 1f);
+            if (jp.revati.skyabyss.rpg.client.GrowthClient.barFlash > 0 && !max && fill > 2) {
+                int a = (int) (jp.revati.skyabyss.rpg.client.GrowthClient.barFlash / 12f * 0xC0);
+                g.fill(xx + 1, xy + 1, xx + 1 + fill, xy + 4, (a << 24) | 0xFFFFFF);
+            }
+            g.fill(cx0, cy, cx1, cy + 1, pal.f);
+            g.fill(cx0, cy + 1, cx1, cy + 2, pal.slabHi);
+            g.fill(cx0, cy + 2, cx1, cy + ROW_H - 1, pal.slab);
+            g.fill(cx0, cy + ROW_H - 1, cx1, cy + ROW_H, pal.fLo);
+            g.fill(cx0, cy + ROW_H, cx1, cy + ROW_H + 1, 0x70000000);
+        });
         String lv = Integer.toString(data.level);
-        int lx = hb.x() + hb.w() / 2 - font.width(lv) / 2;
-        int ly = hb.bottom() - XP_UP - 6;
-        outlined(g, font, lv, lx, ly, 0xFF80FF20);
+        outlined(g, font, lv, (cx0 + cx1) / 2 - font.width(lv) / 2, cy + 1, 0xFF80FF20);
+        // 振っていない点があれば、札の上に金の菱が灯る
         if (data.unspentPoints() > 0) {
-            int dx = lx + font.width(lv) + 3;
-            g.fill(dx - 1, ly + 1, dx + 4, ly + 6, 0xFF000000);
-            g.fill(dx, ly + 3, dx + 3, ly + 4, 0xFFFFE08C);
-            g.fill(dx + 1, ly + 2, dx + 2, ly + 5, 0xFFFFE08C);
+            g.drawManaged(() -> Plate.pip(g, (cx0 + cx1) / 2 - 2, cy - 6, 0xFFE08C, 1f));
         }
     }
 
@@ -152,20 +156,22 @@ public final class BandHud {
     static void armorTab(GuiGraphics g, Font font, Rect r, int armor, Runnable icon) {
         String t = Integer.toString(armor);
         int w = 13 + font.width(t) + 4;
-        Golden.hudFrame(g, r.x(), r.y(), r.x() + w, r.y() + r.h() + 1);
-        icon.run();
-        g.drawString(font, t, r.x() + 13, r.y() + 2, 0xECE8DC, false);
+        g.drawManaged(() -> {
+            Plate.hud(g, r.x(), r.y(), r.x() + w, r.y() + r.h() + 1);
+            icon.run();
+        });
+        g.drawString(font, t, r.x() + 13, r.y() + 3, Plate.hudText(1f), false);
     }
 
     // 息の札 (マナの帯の右上)。細い帯と秒
     static void airTab(GuiGraphics g, Font font, Rect r, float frac, int color, String text) {
-        Golden.hudFrame(g, r.x(), r.y(), r.right(), r.bottom() + 1);
         int tw = font.width(text);
         int bx = r.x() + 3;
         int bw = r.w() - 6 - tw - 3;
-        g.fill(bx, r.y() + 4, bx + bw, r.y() + 8, Golden.OUTLINE);
-        int fill = Mth.clamp(Math.round((bw - 2) * frac), 0, bw - 2);
-        g.fill(bx + 1, r.y() + 5, bx + 1 + fill, r.y() + 7, color);
-        g.drawString(font, text, r.right() - 3 - tw, r.y() + 2, 0xECE8DC, false);
+        g.drawManaged(() -> {
+            Plate.hud(g, r.x(), r.y(), r.right(), r.bottom() + 1);
+            Plate.bar(g, bx, r.y() + 4, bw, 5, frac, 0f, color, 0, 1f);
+        });
+        g.drawString(font, text, r.right() - 3 - tw, r.y() + 3, Plate.hudText(1f), false);
     }
 }

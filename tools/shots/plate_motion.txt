@@ -1,0 +1,172 @@
+# 画素の板の絵柄の動き (職えらび・絵柄 a)。uislow でゆっくりにして、開く・職を替える・決めるの途中を撮る (GIF は tools/sheets/plate_pilot_sheet.py gif)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/plate_motion.txt -PshotsName=plate_motion
+size 1280 720
+guiscale 3
+timeout 900
+cmd gamemode creative
+cmd time set 6000
+camera 0 80 0 180 10
+waitchunks 300
+hud on
+cmd skyabyss cinematic stop
+wait 40
+chat clear
+
+uilook a
+uislow 10
+open job_choice_warrior
+hover 230 100
+shot open_0
+shot open_1
+shot open_2
+shot open_3
+shot open_4
+shot open_5
+shot open_6
+shot open_7
+shot open_8
+shot open_9
+shot open_10
+shot open_11
+shot open_12
+shot open_13
+shot open_14
+shot open_15
+shot open_16
+shot open_17
+shot open_18
+shot open_19
+shot open_20
+shot open_21
+shot open_22
+shot open_23
+shot open_24
+shot open_25
+shot open_26
+shot open_27
+shot open_28
+shot open_29
+shot open_30
+shot open_31
+shot open_32
+shot open_33
+wait 80
+click 171 190
+hover 230 100
+shot swap_0
+shot swap_1
+shot swap_2
+shot swap_3
+shot swap_4
+shot swap_5
+shot swap_6
+shot swap_7
+shot swap_8
+shot swap_9
+shot swap_10
+shot swap_11
+shot swap_12
+shot swap_13
+shot swap_14
+shot swap_15
+shot swap_16
+shot swap_17
+shot swap_18
+shot swap_19
+shot swap_20
+shot swap_21
+wait 40
+click 336 204
+hover 336 204
+shot armed_0
+wait 6
+shot armed_1
+wait 6
+shot armed_2
+wait 6
+shot armed_3
+wait 6
+shot armed_4
+wait 6
+shot armed_5
+wait 6
+shot armed_6
+wait 6
+shot armed_7
+wait 6
+shot armed_8
+wait 6
+shot armed_9
+wait 6
+close
+wait 4
+open job_choice_decide
+hover 230 100
+wait 172
+shot decide_0
+shot decide_1
+shot decide_2
+shot decide_3
+shot decide_4
+shot decide_5
+shot decide_6
+shot decide_7
+shot decide_8
+shot decide_9
+shot decide_10
+shot decide_11
+shot decide_12
+shot decide_13
+shot decide_14
+shot decide_15
+shot decide_16
+shot decide_17
+shot decide_18
+shot decide_19
+shot decide_20
+shot decide_21
+shot decide_22
+shot decide_23
+shot decide_24
+shot decide_25
+shot decide_26
+shot decide_27
+shot decide_28
+shot decide_29
+shot decide_30
+shot decide_31
+shot decide_32
+shot decide_33
+shot decide_34
+shot decide_35
+shot decide_36
+shot decide_37
+shot decide_38
+shot decide_39
+shot decide_40
+shot decide_41
+shot decide_42
+shot decide_43
+shot decide_44
+shot decide_45
+shot decide_46
+shot decide_47
+shot decide_48
+shot decide_49
+shot decide_50
+shot decide_51
+shot decide_52
+shot decide_53
+shot decide_54
+shot decide_55
+shot decide_56
+shot decide_57
+shot decide_58
+shot decide_59
+shot decide_60
+shot decide_61
+shot decide_62
+shot decide_63
+close
+uislow 1
+uilook paper

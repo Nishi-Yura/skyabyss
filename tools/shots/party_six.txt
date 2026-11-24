@@ -1,0 +1,43 @@
+# 6 人のパーティー (上限) の画面と、職を選ぶ画面の見出し。字の重なりも見る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/party_six.txt -PshotsName=party_six
+size 1920 1080
+guiscale 4
+timeout 600
+cmd gamemode creative
+cmd time set 6000
+camera 0 80 0 180 10
+waitchunks 300
+hud on
+cmd skyabyss cinematic stop
+wait 40
+chat clear
+window 1920 1080
+guiscale 4
+wait 10
+open party_demo_6
+wait 20
+overlap party6_1920_g4
+shot party6_1920_g4
+close
+wait 4
+open party_demo
+wait 20
+overlap party4_1920_g4
+shot party4_1920_g4
+close
+wait 4
+open job_choice_warrior
+hover 300 132
+wait 30
+shot job_1920_g4
+close
+wait 4
+window 1280 720
+guiscale 3
+wait 20
+open party_demo_6
+wait 20
+overlap party6_1280_g3
+shot party6_1280_g3
+close
+wait 4

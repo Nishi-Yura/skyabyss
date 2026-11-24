@@ -155,7 +155,7 @@
   "gui.skyabyss.job_choice.first_hint": "菱 = 最初に覚える・乗せると詳しく",
   "gui.skyabyss.job_choice.first_tag": "（最初に覚える）",
   "gui.skyabyss.job_choice.cost": "マナ %s・クールダウン %s 秒",
-  "gui.skyabyss.job_choice.skills_head": "使える技",
+  "gui.skyabyss.job_choice.skills_head": "使えるスキル",
   "gui.skyabyss.job_choice.decided": "決めた",
   "gui.skyabyss.job_room.same": "いまのジョブ",
   "gui.skyabyss.job_choice.range": "間合い",

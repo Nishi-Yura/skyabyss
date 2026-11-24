@@ -91,10 +91,8 @@ public final class AbyssHud {
         g.drawString(font, dep, right - font.width(dep), top, 0xFFC9D3E6, true);
         int bw = 60;
         int bx = right - bw;
-        g.fill(bx, top + 12, bx + bw, top + 15, 0x88000000);
-        int fillW = Math.round(bw * voice / 100f);
         int c = voice < 40 ? 0xFF7A5FB0 : voice < 70 ? 0xFFB05F9A : 0xFFD0453F;
-        g.fill(bx, top + 12, bx + fillW, top + 15, c);
+        g.drawManaged(() -> jp.revati.skyabyss.client.ui.Plate.bar(g, bx, top + 11, bw, 5, voice / 100f, 0f, c, 0, 1f));
         if (weight >= 10) {
             Component wt = Component.translatable("hud.skyabyss.abyss.weight", weight);
             g.drawString(font, wt, right - font.width(wt), top + 19, 0xFFB8A98A, true);

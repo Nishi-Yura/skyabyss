@@ -1,0 +1,184 @@
+# 画素の板の絵柄の試作 (職えらび)。uilook a = 鐘の銅・b = 空見の石板・c = 淵の石
+# 2026-11-24 にユーザーが a を選んだ。uilook b・c の段は、いまは a (既定) で撮れる (見比べの絵は docs/review/plate_ui/pilot_*.png に残してある)
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/plate_pilot.txt -PshotsName=plate_pilot
+size 1920 1080
+guiscale 4
+timeout 900
+cmd gamemode creative
+cmd time set 6000
+camera 0 80 0 180 10
+waitchunks 300
+hud on
+cmd skyabyss cinematic stop
+wait 40
+chat clear
+# 前に撮ったときの窓の大きさが残るので、ここで決め直す
+window 1920 1080
+guiscale 4
+wait 10
+
+uilook a
+open job_choice_warrior
+hover 300 132
+wait 30
+overlap a_warrior
+shot a_warrior
+close
+wait 4
+open job_choice_hover
+hover 300 132
+wait 30
+shot a_archer_hover
+close
+wait 4
+open job_room_mage
+hover 300 132
+wait 30
+overlap a_room_mage
+shot a_room_mage
+close
+wait 4
+open job_choice
+hover 300 132
+wait 30
+overlap a_lead
+shot a_lead
+close
+wait 4
+open job_choice_shaman
+hover 217 201
+wait 30
+shot a_assassin_tilehover
+close
+wait 4
+
+uilook b
+open job_choice_warrior
+hover 300 132
+wait 30
+overlap b_warrior
+shot b_warrior
+close
+wait 4
+open job_choice_hover
+hover 300 132
+wait 30
+shot b_archer_hover
+close
+wait 4
+open job_room_mage
+hover 300 132
+wait 30
+overlap b_room_mage
+shot b_room_mage
+close
+wait 4
+
+uilook c
+open job_choice_warrior
+hover 300 132
+wait 30
+overlap c_warrior
+shot c_warrior
+close
+wait 4
+open job_choice_hover
+hover 300 132
+wait 30
+shot c_archer_hover
+close
+wait 4
+open job_room_mage
+hover 300 132
+wait 30
+overlap c_room_mage
+shot c_room_mage
+close
+wait 4
+
+uilook a
+open job_choice_warrior
+hover 300 132
+wait 30
+click 362 219
+hover 362 219
+wait 12
+overlap a_armed
+shot a_armed
+close
+wait 4
+uilook a
+open job_choice_warrior
+hover 300 132
+wait 1
+shot m_open_0
+wait 1
+shot m_open_1
+wait 1
+shot m_open_2
+wait 2
+shot m_open_3
+wait 2
+shot m_open_4
+wait 3
+shot m_open_5
+wait 20
+click 177 201
+hover 300 132
+wait 1
+shot m_swap_0
+wait 1
+shot m_swap_1
+wait 2
+shot m_swap_2
+wait 2
+shot m_swap_3
+close
+wait 4
+open job_choice_decide
+hover 300 132
+wait 18
+wait 1
+shot m_decide_0
+wait 2
+shot m_decide_1
+wait 2
+shot m_decide_2
+wait 3
+shot m_decide_3
+wait 3
+shot m_decide_4
+wait 2
+shot m_decide_5
+close
+wait 4
+
+# 1280x720・GUI 3 でも入るか
+window 1280 720
+guiscale 3
+wait 20
+uilook a
+open job_choice_warrior
+hover 300 132
+wait 30
+overlap a_warrior_1280
+shot a_warrior_1280
+close
+wait 4
+uilook b
+open job_choice_warrior
+hover 300 132
+wait 30
+overlap b_warrior_1280
+shot b_warrior_1280
+close
+wait 4
+uilook c
+open job_choice_warrior
+hover 300 132
+wait 30
+overlap c_warrior_1280
+shot c_warrior_1280
+close
+wait 4
+uilook paper

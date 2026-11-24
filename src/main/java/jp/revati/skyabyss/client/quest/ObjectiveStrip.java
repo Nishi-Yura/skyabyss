@@ -493,11 +493,16 @@ public final class ObjectiveStrip {
         java.util.List<String> lines = wrap(font, text, w - 6, Math.max(1, (rect.h() - 5 - extra) / 10));
         int bottom = y + lines.size() * 10 + extra + 1;
         float glow = now < flashUntil ? Mth.clamp((flashUntil - now) / 1400f, 0f, 1f) : 0f;
-        int bg = ((int) ((0xE8 + glow * 0x10) * a)) << 24 | 0x181722;
-        g.fill(x - 3, y - 2, x + w + 3, bottom, bg);
-        int accent = ((int) (255 * a)) << 24 | 0xF89CD2;
-        g.fill(x - 3, y - 2, x - 2, bottom, accent);
-        int textColor = ((int) (255 * a)) << 24 | 0xE9E3D4;
+        // 札の地 (Plate.hudCard)。左の筋は鐘の金。目的が替わった直後は、上の銅の線が白く光って消える
+        final int cardBottom = bottom;
+        final float fa = a;
+        g.drawManaged(() -> {
+            jp.revati.skyabyss.client.ui.Plate.hudCard(g, x - 3, y - 2, x + w + 3, cardBottom, jp.revati.skyabyss.client.ui.Plate.pal().head, fa);
+            if (glow > 0f) {
+                g.fill(x - 2, y - 2, x + w + 2, y - 1, jp.revati.skyabyss.client.ui.Plate.alpha(0xFFFFFF, 0xFF, fa * glow));
+            }
+        });
+        int textColor = jp.revati.skyabyss.client.ui.Plate.hudText(a);
         int ty = y + 1;
         for (String line : lines) {
             g.drawString(font, Component.literal(line), x + 1, ty, textColor, true);
@@ -531,7 +536,7 @@ public final class ObjectiveStrip {
                         fx += 9;
                     }
                 }
-                g.drawString(font, far, fx, fy, ((int) (255 * a)) << 24 | (resolved.inside() ? 0x9A9AAE : 0xECE4D6), true);
+                g.drawString(font, far, fx, fy, resolved.inside() ? jp.revati.skyabyss.client.ui.Plate.hudSoft(a) : jp.revati.skyabyss.client.ui.Plate.hudValue(a), true);
             }
         }
     }

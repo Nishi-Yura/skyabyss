@@ -1092,7 +1092,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             // 切り絵の小さな札 (少し傾けた四角)。いまの木は桃色
             int body = on ? Paper.PINK : Paper.CREAM_LO;
             Paper.draw(g, "skill_treetab_" + (on ? 1 : 0), "", x - 4, y - 4, TREE_TAB + 9, TREE_TAB + 9,
-                    s -> s.layer(Paper.rotRect(12, 12, TREE_TAB + 3, TREE_TAB + 3, on ? -5 : 4), body, Paper.BLACK_LO, 1, 1));
+                    s -> s.layer(Paper.rotRect(12, 12, TREE_TAB + 3, TREE_TAB + 3, jp.revati.skyabyss.client.ui.UiLook.plate() ? 0 : on ? -5 : 4), body, Paper.BLACK_LO, 1, 1));
             if (!on) {
                 g.setColor(0.7f, 0.7f, 0.76f, 1f);
             }
@@ -1209,6 +1209,13 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
 
     // 黒い紙と桃色の山は窓の端まで (論理の座標で、窓の四隅まで)。峰と菱は手で置いた
     private void renderSheet(GuiGraphics g) {
+        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+            // 板の絵柄: 舞台の大きさの板を一枚。下の段 (SP・技の枠・釦) は沈んだ欄
+            jp.revati.skyabyss.client.ui.Plate.openFade(g);
+            jp.revati.skyabyss.client.ui.Plate.panel(g, 0, 0, W, H, 0, jp.revati.skyabyss.client.ui.Plate.GOLD);
+            jp.revati.skyabyss.client.ui.Plate.well(g, 6, 187, W - 12, 35);
+            return;
+        }
         int x0 = (int) Math.floor(fit.x(0));
         int y0 = (int) Math.floor(fit.y(0));
         int x1 = (int) Math.ceil(fit.x(width));
@@ -1358,9 +1365,14 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
         return (r * 45 + ir * 55) / 100 << 16 | (gg * 45 + ig * 55) / 100 << 8 | (b * 45 + ib * 55) / 100;
     }
 
+    // 行に焼いてある色: 切り絵では生成りの上の墨へ、板の絵柄では暗い升の上なので明るいまま (桃色だけ銅の金へ)
+    private static int inkStyle(int rgb) {
+        return jp.revati.skyabyss.client.ui.UiLook.plate() ? jp.revati.skyabyss.client.ui.Plate.textColor(0xFF000000 | rgb) & 0xFFFFFF : ink(rgb);
+    }
+
     private static FormattedCharSequence ink(FormattedCharSequence seq) {
         return sink -> seq.accept((i, st, cp) -> sink.accept(i,
-                st.getColor() == null ? st : st.withColor(net.minecraft.network.chat.TextColor.fromRgb(ink(st.getColor().getValue()))), cp));
+                st.getColor() == null ? st : st.withColor(net.minecraft.network.chat.TextColor.fromRgb(inkStyle(st.getColor().getValue()))), cp));
     }
 
     // 太さ w のまっすぐな線 (斜めも)
@@ -1752,7 +1764,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             boolean usable = r.held(minecraft.player);
             boolean hover = in(mx, my, x, ly, w - 4, 12) && usable;
             g.fill(x, ly, x + w - 4, ly + 12, mine ? Paper.PINK_LO : runeArmed == 4 ? 0xFF000000 | INK_DENY : usable ? 0xFF8C8078 : 0xFFB8AEA4);
-            g.fill(x + 1, ly + 1, x + w - 5, ly + 11, mine ? Paper.PINK : hover ? 0xFFFFF6EA : Paper.CREAM_LO);
+            g.fill(x + 1, ly + 1, x + w - 5, ly + 11, jp.revati.skyabyss.client.ui.Plate.card(mine ? Paper.PINK : hover ? 0xFFFFF6EA : Paper.CREAM_LO));
             Component name = Component.translatable("gui.skyabyss.skill.rune_legend", Component.translatable(r.nameKey()));
             g.drawString(font, name, x + (w - 4 - font.width(name)) / 2, ly + 2, mine || usable ? Paper.INK : Paper.INK_SOFT, false);
             if (hover) {
@@ -1870,7 +1882,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             Skill s = d.slot(i);
             // 技の枠: 少し傾けた生成りの札 (技を置いた枠は桃色)
             boolean filled = s != null;
-            float tilt = i % 2 == 0 ? -4 : 3;
+            float tilt = jp.revati.skyabyss.client.ui.UiLook.plate() ? 0 : i % 2 == 0 ? -4 : 3;
             int body = filled ? Paper.PINK : Paper.CREAM;
             Paper.draw(g, "skill_slot_" + i + "_" + (filled ? 1 : 0), "", x - 4, y - 4, NODE + 9, NODE + 9,
                     sh -> sh.layer(Paper.rotRect(NODE / 2f + 4, NODE / 2f + 4, NODE, NODE, tilt), body, Paper.BLACK_LO, 1, 2));
@@ -1910,7 +1922,7 @@ public class SkillScreen extends Screen implements jp.revati.skyabyss.client.ui.
             int y = top + ARTS_Y + (i / 2) * (ARTS_BOX + 2);
             boolean on = i < held.size();
             // 秘伝の枠: 小さな紙の升 (付けていれば桃色の縁に黒の地、空きは生成り)
-            g.fill(x, y, x + ARTS_BOX, y + ARTS_BOX, on ? Paper.PINK : Paper.CREAM_LO);
+            g.fill(x, y, x + ARTS_BOX, y + ARTS_BOX, on ? Paper.PINK : jp.revati.skyabyss.client.ui.Plate.card(Paper.CREAM_LO));
             g.fill(x + 1, y + 1, x + ARTS_BOX - 1, y + ARTS_BOX - 1, on ? Paper.BLACK_LO : 0xFFD8D0C4);
             if (on) {
                 var h = held.get(i);

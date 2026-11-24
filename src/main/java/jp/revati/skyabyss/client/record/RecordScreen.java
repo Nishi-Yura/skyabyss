@@ -32,7 +32,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 // 鯨骨の枠に一枚の羊皮紙。上につまみ 4 つ、左に行の一覧、右に選んだ行の詳しい頁 (在りか・守り・取り戻し方)。
 // 中身はサーバーが組んだもの (RecordSnapshot) をそのまま描く。開いているあいだ 1 秒ごとに最新を頼み、
 // 値が変わった行には金のきらめきを 10 秒付ける。テクスチャは tools/gen/story/gen_record_screen.py (32px 密度) の b 案
-public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded {
+public class RecordScreen extends Screen implements jp.revati.skyabyss.client.ui.TextBounded, jp.revati.skyabyss.client.ui.Plate.Parchment {
     static final ResourceLocation LEDGER = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/record/ledger.png");
     static final ResourceLocation WIDGETS = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/record/widgets.png");
     static final int LEDGER_W = 608;

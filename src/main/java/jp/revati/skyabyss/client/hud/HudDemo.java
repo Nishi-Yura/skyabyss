@@ -196,7 +196,7 @@ public final class HudDemo {
             }
         }
         if (has(Part.LEVELUP) && NoticeClient.idle(Notice.Channel.CENTER)) {
-            notice(Notice.Kind.LEVEL_UP, "技の点が 1 増えた", "");
+            notice(Notice.Kind.LEVEL_UP, "SPが 1 増えた（残り 3）", "");
         }
         if (has(Part.BANNER) && NoticeClient.idle(Notice.Channel.BANNER)) {
             notice(Notice.Kind.PLACE, "岩鯨の背", "空を泳ぐものの、いちばん高い所");
@@ -225,7 +225,9 @@ public final class HudDemo {
                     new PartyNetwork.Member(mc.player.getUUID().toString(), "あなた", 9, 20f, 20f, true, true, false),
                     new PartyNetwork.Member(a, "イサナ", 12, 18f, 20f, true, true, true),
                     new PartyNetwork.Member(b, "カイ", 8, 7f, 20f, true, true, false),
-                    new PartyNetwork.Member(c, "ミオ", 10, 20f, 20f, true, false, false)), ""));
+                    new PartyNetwork.Member(c, "ミオ", 10, 20f, 20f, true, false, false),
+                    new PartyNetwork.Member("00000000-0000-4000-8000-0000000000e1", "ソラ", 15, 12f, 20f, true, true, false),
+                    new PartyNetwork.Member("00000000-0000-4000-8000-0000000000e2", "ナギ", 11, 20f, 20f, false, false, false)), ""));
         }
         // 仲間・倒れた仲間・「ここ」の印・墓の標を、向きの違う所へ (札と画面の外の矢印)
         if (slow && has(Part.MARKERS)) {

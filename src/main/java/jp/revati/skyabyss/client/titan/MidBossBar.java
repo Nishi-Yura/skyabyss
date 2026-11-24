@@ -66,21 +66,28 @@ public final class MidBossBar {
         g.blit(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/boss/" + look.icon() + "_icon.png"), x, y, 0, 0, ICON, ICON, ICON, ICON);
         g.drawString(mc.font, boss.getName(), x + ICON + 4, y + 4, 0xFFFFFF, true);
         int by = y + ICON + 2;
-        // 切り絵 (docs/design/56 の 5): 黒い紙に右下の濃い桃色の影
-        g.fill(x + 1, by + 1, x + WIDTH + 1, by + BAR_H + 1, 0xFF8C2C60);
-        g.fill(x, by, x + WIDTH, by + BAR_H, 0xFF181722);
+        // HUD の帯 (Plate.bar。docs/design/56 の 5): 銅の縁の溝に、中ボスごとの色の塗り。減った分は明るい影で残って遅れて縮む。十分の一ごとに目盛り
         float p = Math.max(0f, Math.min(1f, boss.getProgress()));
-        int track = WIDTH - 4;
-        int fill = Math.round(track * p);
-        if (fill > 0) {
-            g.fill(x + 2, by + 2, x + 2 + fill, by + BAR_H - 2, 0xFF000000 | look.fill());
-            g.fill(x + 2, by + 2, x + 2 + fill, by + 3, 0xFF000000 | look.top());
+        long now = net.minecraft.Util.getMillis();
+        if (!boss.getId().equals(ghostOf) || p >= ghost) {
+            ghostOf = boss.getId();
+            ghost = p;
+            ghostHold = now + 300;
+        } else if (now > ghostHold) {
+            ghost = Math.max(p, ghost - 0.7f * Math.min(0.1f, (now - ghostAt) / 1000f));
         }
+        ghostAt = now;
+        float gh = ghost;
+        g.drawManaged(() -> {
+            jp.revati.skyabyss.client.ui.Plate.bar(g, x, by, WIDTH, BAR_H, p, gh, look.fill(), 0, 1f);
+            jp.revati.skyabyss.client.ui.Plate.barTicks(g, x, by, WIDTH, BAR_H, 10, 1f);
+        });
         jp.revati.skyabyss.client.titan.PhasedBossBar.drawHp(g, mc, boss, x, by + BAR_H / 2);
-        // 目盛り: 十分の一ごとに細い線
-        for (int i = 1; i < 10; i++) {
-            int tx = x + 2 + track * i / 10;
-            g.fill(tx, by + 1, tx + 1, by + BAR_H - 1, 0x66000000);
-        }
     }
+
+    // 減った分の影 (帯ごと。遅れて縮む)
+    private static java.util.UUID ghostOf;
+    private static float ghost;
+    private static long ghostHold;
+    private static long ghostAt;
 }

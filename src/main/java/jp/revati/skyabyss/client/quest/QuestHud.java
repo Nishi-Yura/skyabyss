@@ -21,10 +21,10 @@ public final class QuestHud {
         return Math.min(150, ObjectiveStrip.bandWidth(Minecraft.getInstance()));
     }
 
-    static final int TITLE = 0xFFECE4D6;
-    static final int MAIN_TITLE = 0xFFF89CD2;
-    static final int TEXT = 0xFFE0DCD0;
-    static final int SOFT = 0xFF9A9AAE;
+    static final int TITLE = 0xFFECE6D6;
+    static final int MAIN_TITLE = 0xFFF2C47C;
+    static final int TEXT = 0xFFECE6D6;
+    static final int SOFT = 0xFFA9ABB8;
     private static int flash;
 
     private QuestHud() {
@@ -126,10 +126,15 @@ public final class QuestHud {
         int WIDTH = w();
         int h = 12 + lines.size() * 10 + 3 + (withGuide ? 10 : 0);
         int bg = flash > 0 ? Mth.clamp(flash * 6, 0, 0x60) : 0;
-        // 切り絵: 右下に濃い桃色の影を置いてから黒い紙
-        g.fill(X - 2, top - 2, X + WIDTH + 4, top + h - 1, 0xFF8C2C60);
-        g.fill(X - 3, top - 3, X + WIDTH + 3, top + h - 2, Math.min(0xF4, 0xE8 + bg / 4) << 24 | 0x181722);
-        g.fill(X - 3, top - 3, X - 2, top + h - 2, main ? MAIN_TITLE : TITLE);
+        // 札の地 (Plate.hudCard)。左の筋は主の筋 = 鐘の金・ほか = 骨色。題の下に区切り。進んだ直後は上の銅の線が白く光る
+        final int glow = bg;
+        g.drawManaged(() -> {
+            jp.revati.skyabyss.client.ui.Plate.hudCard(g, X - 3, top - 3, X + WIDTH + 3, top + h - 2, main ? MAIN_TITLE : TITLE, 1f);
+            jp.revati.skyabyss.client.ui.Plate.hudRule(g, X, top + 9, WIDTH, 1f);
+            if (glow > 0) {
+                g.fill(X - 2, top - 3, X + WIDTH + 2, top - 2, Math.min(0xFF, glow * 3) << 24 | 0xFFFFFF);
+            }
+        });
         // 長い題は省かずに横へ流す (Marquee)
         jp.revati.skyabyss.client.ui.Marquee.draw(g, font, title.getString(), X + 1, top, WIDTH - 2, main ? MAIN_TITLE : TITLE, true);
         guide.run();
@@ -155,7 +160,7 @@ public final class QuestHud {
         Font font = mc.font;
         if (r.inside()) {
             String s = Component.translatable("gui.skyabyss.guide.inside").getString();
-            g.drawString(font, s, X + 1, top, 0xFF9A9AAE, true);
+            g.drawString(font, s, X + 1, top, SOFT, true);
             return;
         }
         if (r.pos() == null) {
@@ -179,7 +184,7 @@ public final class QuestHud {
                 fx += 9;
             }
         }
-        g.drawString(font, far, fx, top, 0xFFECE4D6, true);
+        g.drawString(font, far, fx, top, jp.revati.skyabyss.client.ui.Plate.hudValue(1f), true);
     }
 
     record Line(String text, int indent, int color) {

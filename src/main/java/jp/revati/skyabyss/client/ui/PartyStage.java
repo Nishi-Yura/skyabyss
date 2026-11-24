@@ -73,7 +73,11 @@ public final class PartyStage {
 
     // 右の帯 (見出しつき)
     public static void strip(GuiGraphics g, Font font, Component head) {
-        Paper.cut(g, "party_strip", STRIP, Paper.CREAM, Paper.PINK_LO, 3, 4);
+        if (UiLook.plate()) {
+            Plate.well(g, 272, 55, 129, 134);
+        } else {
+            Paper.cut(g, "party_strip", STRIP, Paper.CREAM, Paper.PINK_LO, 3, 4);
+        }
         if (head != null) {
             FitText.draw(g, font, Component.literal(head.getString()), STRIP_X, STRIP_Y, STRIP_W, Paper.INK_HEAD, false);
         }
@@ -81,23 +85,42 @@ public final class PartyStage {
 
     // 右上から差し込む桃色の紙 (招待・知らせ)。字の左上 {x, y} を返す
     public static int[] note(GuiGraphics g) {
+        if (UiLook.plate()) {
+            Plate.tile(g, 250, 7, 151, 38, Plate.ON, Plate.GOLD);
+            return new int[] {258, 12};
+        }
         Paper.cut(g, "party_note", new float[] {250, 6, 408, 2, 410, 42, 246, 46}, Paper.PINK, Paper.BLACK_LO, -2, 3);
         return new int[] {258, 12};
     }
 
     // n 枚のうち i 枚目の札の真ん中 {x, y} (扇。左寄り)
     public static int[] cardAt(int i, int n) {
-        // 四枚でも右の帯 (x 270 から) にかからないように詰める
-        int cx = n >= 4 ? 44 + i * 61 : 52 + i * 68;
-        int cy = 140 + Math.round(Math.abs(i - (n - 1) / 2f) * 6);
+        // 四枚でも右の帯 (x 270 から) にかからないように詰める。五枚・六枚 (パーティーは 6 人まで) は細い札にして同じ幅に収める
+        int cx = n >= 5 ? 34 + i * 41 : n >= 4 ? 44 + i * 61 : 52 + i * 68;
+        // 板の絵柄では一列にそろえる (切り絵のときは扇の弧)
+        int cy = UiLook.plate() ? 140 : 140 + Math.round(Math.abs(i - (n - 1) / 2f) * 6);
         return new int[] {cx, cy};
     }
+
+    // 札の幅 (五枚・六枚のときは細い札。顔 32 は入る)
+    public static int cardW(int n) {
+        return n >= 5 ? 40 : CARD_W;
+    }
+
+    // いま描いている札の幅 (card が覚える。cardText が字の幅に使う)
+    private static int lastW = CARD_W;
 
     // 札を一枚 (pink = 長・自分など目立たせる札)
     public static void card(GuiGraphics g, int i, int n, boolean pink) {
         int[] c = cardAt(i, n);
+        lastW = cardW(n);
+        if (UiLook.plate()) {
+            // 板の絵柄: 札はまっすぐな升 (長・自分は灯る)
+            Plate.tile(g, c[0] - lastW / 2, c[1] - CARD_H / 2, lastW, CARD_H, pink ? Plate.ON : Plate.REST, Plate.GOLD);
+            return;
+        }
         float ang = TILT[Math.min(i, TILT.length - 1)] * (n == 1 ? 0 : 1);
-        Paper.cut(g, "party_card" + i, Paper.rotRect(c[0], c[1], CARD_W, CARD_H, ang), pink ? Paper.PINK : Paper.CREAM, Paper.BLACK_LO, 2, 3);
+        Paper.cut(g, "party_card" + i, Paper.rotRect(c[0], c[1], lastW, CARD_H, ang), pink ? Paper.PINK : Paper.CREAM, Paper.BLACK_LO, 2, 3);
     }
 
     // 札の上の顔 (32 角)
@@ -107,12 +130,12 @@ public final class PartyStage {
 
     // 札の字 (名前・二行目・三行目)
     public static void cardText(GuiGraphics g, Font font, int cx, int cy, Component name, Component second, Component third, boolean pink) {
-        FitText.drawCentered(g, font, Component.literal(name.getString()), cx, cy, CARD_W - 6, Paper.INK, false);
+        FitText.drawCentered(g, font, Component.literal(name.getString()), cx, cy, lastW - 6, Paper.INK, false);
         if (second != null) {
-            FitText.drawCentered(g, font, second, cx, cy + 12, CARD_W - 6, pink ? ON_PINK : Paper.INK_HEAD, false);
+            FitText.drawCentered(g, font, second, cx, cy + 12, lastW - 6, pink ? ON_PINK : Paper.INK_HEAD, false);
         }
         if (third != null) {
-            FitText.drawCentered(g, font, third, cx, cy + 24, CARD_W - 6, pink ? ON_PINK : Paper.INK_SOFT, false);
+            FitText.drawCentered(g, font, third, cx, cy + 24, lastW - 6, pink ? ON_PINK : Paper.INK_SOFT, false);
         }
     }
 

@@ -31,9 +31,9 @@ public final class GrowthHud {
     static final int BAR_W = 64;
     static final int BAR_H = 5;
 
-    static final int TEXT = 0xECE4D6;
-    static final int GOLD = 0xF89CD2;
-    static final int SOFT = 0xB8B8C8;
+    static final int TEXT = 0xECE6D6;
+    static final int GOLD = 0xF2C47C;
+    static final int SOFT = 0xA9ABB8;
 
     private GrowthHud() {
     }
@@ -222,7 +222,7 @@ public final class GrowthHud {
         g.drawCenteredString(font, head, cx, y, (a << 24) | TEXT);
         // 線は時間とともに左右へ伸びる
         int half = (int) (Math.min(1f, t / 20f) * 60);
-        int lineColor = ((int) (a * 0.7f) << 24) | 0xECE4D6;
+        int lineColor = ((int) (a * 0.9f) << 24) | 0xC48A44;
         g.fill(cx - half, y + 11, cx + half, y + 12, lineColor);
         g.pose().pushPose();
         g.pose().translate(cx, y + 15, 0);

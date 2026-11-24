@@ -126,7 +126,7 @@ public final class BossAttackCue {
             int lw = mc.font.width(e.label);
             int iconW = e.icon == null ? 0 : 12;
             int x = cx - (lw + iconW) / 2;
-            g.fill(x - 3, y - 1, x + lw + iconW + 3, y + 9, ((int) (a * 220) << 24) | 0x181722);
+            jp.revati.skyabyss.client.ui.Plate.hudCard(g, x - 3, y - 2, x + lw + iconW + 3, y + 9, 0, a);
             if (e.icon != null) {
                 g.setColor(1f, 1f, 1f, a);
                 g.blit(e.icon, x - 1, y - 1, 10, 10, 0, 0, 32, 32, 32, 32);
@@ -162,8 +162,7 @@ public final class BossAttackCue {
         if (k <= 1f) {
             int bw = 48;
             int left = Math.round(bw * (1f - k));
-            g.fill(cx - bw / 2, y + 38, cx + bw / 2, y + 40, (a / 2 << 24) | 0x3A3644);
-            g.fill(cx - bw / 2, y + 38, cx - bw / 2 + left, y + 40, (a << 24) | 0xF89CD2);
+            jp.revati.skyabyss.client.ui.Plate.bar(g, cx - bw / 2 - 1, y + 37, bw + 2, 4, left / (float) bw, 0f, jp.revati.skyabyss.client.ui.Plate.pal().fHi, 0, alpha);
         }
     }
 }

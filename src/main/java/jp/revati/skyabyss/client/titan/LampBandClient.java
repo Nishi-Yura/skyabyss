@@ -90,11 +90,10 @@ public final class LampBandClient {
         // 入りきらない行は最後の行へつないで流す (Marquee)
         lines = new java.util.ArrayList<>(jp.revati.skyabyss.client.ui.Marquee.joinRestStrings(lines, max));
         int bottom = y + lines.size() * 10 - 2;
-        g.fill(x - 3, y - 2, x + w + 3, bottom, ((int) (0xE8 * a)) << 24 | 0x181722);
-        g.fill(x - 3, y - 2, x - 2, bottom, ((int) (255 * a)) << 24 | 0xECE4D6);
+        jp.revati.skyabyss.client.ui.Plate.hudCard(g, x - 3, y - 2, x + w + 3, bottom, jp.revati.skyabyss.client.ui.Plate.pal().text, a);
         int ty = y + 1;
         for (String line : lines) {
-            jp.revati.skyabyss.client.ui.Marquee.draw(g, font, line, x + 1, ty, w - 6, ((int) (255 * a)) << 24 | 0xE9E3D4, true);
+            jp.revati.skyabyss.client.ui.Marquee.draw(g, font, line, x + 1, ty, w - 6, jp.revati.skyabyss.client.ui.Plate.hudText(a), true);
             ty += 10;
         }
     }

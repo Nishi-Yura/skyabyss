@@ -67,8 +67,10 @@ public final class PickStage {
         }
         int[] c = center(i, n, false);
         g.pose().pushPose();
-        g.pose().translate(c[0], c[1] + (1f - d) * 60f, 0);
-        g.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees((1f - d) * (i - (n - 1) / 2f) * 10f));
+        g.pose().translate(c[0], c[1] + (1f - d) * (UiLook.plate() ? 14f : 60f), 0);
+        if (!UiLook.plate()) {
+            g.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees((1f - d) * (i - (n - 1) / 2f) * 10f));
+        }
         g.pose().translate(-c[0], -c[1], 0);
         return true;
     }
@@ -103,6 +105,11 @@ public final class PickStage {
     // 札を一枚 (pink = 乗せている・選んでいる)
     public static void card(GuiGraphics g, int i, int n, boolean lift, boolean pink) {
         int[] c = center(i, n, lift);
+        if (UiLook.plate()) {
+            // 板の絵柄: 札はまっすぐな升 (乗せた札・選んだ札は灯る)
+            Plate.tile(g, c[0] - CARD_W / 2, c[1] - CARD_H / 2, CARD_W, CARD_H, pink ? Plate.ON : Plate.REST, Plate.GOLD);
+            return;
+        }
         Paper.cut(g, "pick_card" + i, Paper.rotRect(c[0], c[1], CARD_W, CARD_H, tilt(i, n)), pink ? Paper.PINK : Paper.CREAM,
                 pink ? Paper.BLACK_LO : Paper.PINK_LO, 2, 4);
     }

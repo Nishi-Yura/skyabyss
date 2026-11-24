@@ -153,6 +153,14 @@ public final class UiSkin {
         // ツールチップは板と同じ絵柄 (黒い紙に桃色の細い縁。docs/design/56 の 2.1)。絵柄のパックの有無によらない。
         // 品のレア度は縁の色でなく名前の色で見せる (縁が品ごとに変わると板の縁とそろわない)
         static void onTooltipColor(RenderTooltipEvent.Color event) {
+            if (UiLook.plate()) {
+                // 画素の板の絵柄: 暗い石の地に、絵柄の縁の色 (銅・石・細い線)
+                Plate.Pal p = Plate.pal();
+                event.setBackground(0xF00C0E15);
+                event.setBorderStart(UiLook.get() == UiLook.BRONZE ? p.f : UiLook.get() == UiLook.STONE ? p.slab : p.fHi);
+                event.setBorderEnd(UiLook.get() == UiLook.BRONZE ? p.fLo : UiLook.get() == UiLook.STONE ? p.slabLo : p.f);
+                return;
+            }
             event.setBackground(0xF0181722);
             event.setBorderStart(Paper.PINK);
             event.setBorderEnd(Paper.PINK_LO);

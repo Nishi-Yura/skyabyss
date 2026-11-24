@@ -409,7 +409,7 @@ public class BoxScreen extends Screen implements jp.revati.skyabyss.client.ui.Te
             ItemStack s = reel.get(i);
             int col = 0xFF000000 | tier(s).rgb();
             // 品の札 (生成り。下の端に階級の色)
-            g.fill(ixi + 2, bandY + 4, ixi + RC - 2, bandY + bandH - 4, Paper.CREAM);
+            g.fill(ixi + 2, bandY + 4, ixi + RC - 2, bandY + bandH - 4, jp.revati.skyabyss.client.ui.Plate.card(Paper.CREAM));
             g.fill(ixi + 2, bandY + bandH - 7, ixi + RC - 2, bandY + bandH - 4, col);
             item(g, s, ixi + 1, bandY + 4, 2);
         }

@@ -67,7 +67,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
     private static final int MAT_SY = 38;
     private static final int GEAR_SX = 324;
     private static final int GEAR_SY = 32;
-    private static final int INV_SX = 244;
+    private static final int INV_SX = 239;
     private static final int INV_SY = 138;
     // 細工の列 (帳面の下の端)
     private static final int PART_SX = 44;
@@ -531,9 +531,9 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
                 int state = i == selected ? 2 : hover ? 1 : 0;
                 // 候補の札: 欄の地。選んだ札は金の縁、重ねた札は淡い縁、まだ試していない枠は縁だけ暗く
                 // 帳面の上: 選んだ札は桃色の紙、乗せた札は明るい生成り、まだ試していない枠は薄く
-                g.fill(cx, cy, cx + CARD_W, cy + CARD_H - 1, state == 2 ? Paper.PINK : state == 1 ? Paper.CREAM_HI : Paper.CREAM_LO);
+                g.fill(cx, cy, cx + CARD_W, cy + CARD_H - 1, jp.revati.skyabyss.client.ui.Plate.card(state == 2 ? Paper.PINK : state == 1 ? Paper.CREAM_HI : Paper.CREAM_LO));
                 if (state != 2 && i >= count) {
-                    g.fill(cx + 1, cy + 1, cx + CARD_W - 1, cy + CARD_H - 2, Paper.CREAM);
+                    g.fill(cx + 1, cy + 1, cx + CARD_W - 1, cy + CARD_H - 2, jp.revati.skyabyss.client.ui.Plate.card(Paper.CREAM));
                 }
             }
         }
@@ -798,7 +798,7 @@ public class ResonanceForgeScreen extends AbstractContainerScreen<ResonanceForge
             int py = topPos + PART_SY;
             ItemStack s = d.part(parts.get(k));
             g.fill(px - 1, py - 1, px + 17, py + 17, Paper.CREAM_LO);
-            g.fill(px, py, px + 17, py + 17, parts.get(k) == hover ? Paper.PINK_HI : 0xFFDCD2C2);
+            g.fill(px, py, px + 17, py + 17, parts.get(k) == hover ? jp.revati.skyabyss.client.ui.Plate.card(Paper.PINK_HI) : 0xFFDCD2C2);
             g.renderItem(s, px, py);
             g.renderItemDecorations(font, s, px, py);
         }

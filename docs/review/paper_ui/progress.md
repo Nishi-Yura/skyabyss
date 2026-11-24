@@ -1,4 +1,4 @@
-# 切り絵の作り替えの進み具合（docs/design/56 の 2.1）
+# 切り絵の作り替えの進み具合（2026-11-24 深夜に「鐘の銅」へ替わった。今の決まりは docs/design/56 の 2.1、状態は docs/HANDOFF.md。下は切り絵のときの記録）
 
 - 1 周目: 共通の部品 `client/ui/Golden` の描く関数（panel・headLine・frame・recess・selected・stripe・rule・tab・button・slot・gem）を切り絵にした。画面の大中小の板（論理の 0,0 の Layout）は黒い紙と桃色の山を窓の端まで敷く。HUD の枠 `hudFrame` は夜空のまま（範囲外）。
 - 2 周目（2026-11-24）:
@@ -28,7 +28,7 @@
 | 板を使わない画面: 持ち物（SkyInventoryScreen）・ポーチ（PouchScreen・BoxPouchScreen・PouchWheelScreen）・旅の地図（地の暗さだけ）・輪（WheelScreen）・チャット（入力欄はパック A の黒い紙） | 色だけ | 0 |
 | 伝承の書（LoreBookScreen）・記録の帳（RecordScreen）: ユーザー「切り絵に寄せる」→ 絵柄 p（`tools/gen/story/paper_cut.py`。`python -I tools/gen/story/gen_lore_book.py --install p`・`gen_record_screen.py --install p`。アイテムの絵は替えない）。黒い紙に生成りの頁を重ね、つまみは斜めの紙（重ねて並ぶので筋なし）。字は墨・墨の桃色。記録の進みの琥珀色は意味の色で残す。撮影 `tools/shots/paper_books.txt`（重なり 0）、絵 `books_1920_g4.png` | 組み直し | 0 |
 | バニラの釦・滑り棒・入力欄・箱の画面（リソースパック skyabyss_ui_a。`tools/ui/gen_vanilla_skin.py`） | 切り絵 | — |
-| 表の外（HUD の知らせと演出。手を付けていない）: QuestToast・CardFeed・QuickCard・SkillHud・AspectRevealScreen・SkyKeyScene・RegenLoadingScreen・CinematicScreen | 夜空のまま | 28 |
+| HUD の知らせと演出: QuestToast・CardFeed・QuickCard・SkillHud・AspectRevealScreen（報いの祭壇。小さい窓では札ごと縮める）・SkyKeyScene・RegenLoadingScreen・CinematicScreen。撮影 `tools/shots/paper_fx.txt`（見本 `regen_demo_<0|42|100>`・`reveal_demo`・`skykey_demo`）、絵 `fx_v2.png`。開幕の題字（`OpeningOverlay`・`TextStyle` の青緑の光と金）とシネマの話し手の色（天の声の金・人の青・心の声の青緑）は今のまま残す（2026-11-24 にユーザーが決めた） | 色だけ | 0 |
 | ツールチップ: 地と縁は切り絵（黒い紙・桃色の縁）。中の字の色（神器の目覚め・装備の属性）は品の色のまま | 地だけ | — |
 | 旅の地図の枠（藍の縁・青緑の菱）は地図の絵の側。地の暗さだけ替えた | 枠は夜空 | — |
 

@@ -2,7 +2,7 @@
 """バニラの画面 (箱の画面・ボタン・ホットバー・ツールチップ・メニューの背景) を mod の絵柄で描き直したリソースパックを作る。
 
 python -I tools/ui/gen_vanilla_skin.py      → src/main/resources/resourcepacks/skyabyss_ui_<a|b|c>/
-  a = 切り絵 (mod の画面と同じ: 黒い紙の板・灰の細い縁の升・右上に桃色の菱・釦は斜めの短冊。docs/design/56 の 2.1)  … 既定
+  a = 鐘の銅 (mod の画面と同じ: 深い石の板・銅の縁・暗い升。docs/design/56 の 2.1)  … 既定
   b = 帳面 (羊皮紙の板、焦げ茶の縁、金の隅。伝承の書と同じ)
   c = 黒い石と金 (炭の石の板、金の縁、琥珀の隅。炉の画面と同じ)
 バニラの絵はマス目と窓の位置を読むためだけに使う。板・縁・マス目・窓は一から描き、矢印や炎の枠のような小さな印だけ形を mod の色で塗り直す。
@@ -26,11 +26,12 @@ S = 2  # 細かさ
 
 SKINS = {
     # 色は client/ui/Paper と同じ (BLACK・BLACK_LO・PINK・PINK_LO・GREY・GREY_LO・CREAM)
-    'a': dict(name='切り絵 (mod の画面と同じ)', paper=True, panel=(24, 23, 34), panel2=(24, 23, 34), edge=(24, 23, 34), edge2=(14, 13, 20),
-              corner=(228, 90, 156), slot=(14, 13, 20), slot_lo=(58, 54, 66), slot_hi=(58, 54, 66), window=(14, 13, 20), window2=(14, 13, 20),
-              ink=(236, 228, 214), ramp=[(14, 13, 20), (90, 84, 96), (168, 162, 154), (236, 228, 214)], label=0xECE4D6, label_dim=0x9A929C,
-              button=(236, 228, 214), button_hi=(255, 246, 234), button_edge=(14, 13, 20), button_edge_hi=(228, 90, 156),
-              cream=(236, 228, 214), cream_lo=(201, 191, 174), pink=(228, 90, 156), pink_lo=(140, 44, 96), grey_lo=(90, 84, 96), black=(24, 23, 34), black_lo=(14, 13, 20)),
+    # 2026-11-24: 板の絵柄 A 鐘の銅に合わせた (client/ui/Plate の石と銅)。鍵の名前は切り絵のときのまま (pink = 銅、cream = 釦の石、black = 板の石)
+    'a': dict(name='鐘の銅 (mod の画面と同じ)', paper=True, panel=(24, 28, 40), panel2=(24, 28, 40), edge=(131, 80, 42), edge2=(7, 8, 12),
+              corner=(196, 138, 68), slot=(16, 19, 28), slot_lo=(8, 9, 14), slot_hi=(42, 48, 68), window=(16, 19, 28), window2=(16, 19, 28),
+              ink=(236, 230, 214), ramp=[(15, 18, 26), (76, 82, 100), (169, 171, 184), (236, 230, 214)], label=0xECE6D6, label_dim=0xA9ABB8,
+              button=(42, 48, 68), button_hi=(52, 60, 86), button_edge=(7, 8, 12), button_edge_hi=(242, 196, 124),
+              cream=(42, 48, 68), cream_lo=(32, 37, 52), pink=(196, 138, 68), pink_lo=(131, 80, 42), grey_lo=(76, 82, 100), black=(24, 28, 40), black_lo=(15, 18, 26)),
     'b': dict(name='帳面 (羊皮紙)', panel=(222, 207, 170), panel2=(210, 193, 152), edge=(92, 62, 38), edge2=(64, 42, 26),
               corner=(196, 152, 64), slot=(186, 168, 128), slot_lo=(150, 130, 94), slot_hi=(236, 224, 196), window=(58, 44, 32), window2=(96, 76, 52),
               ink=(52, 38, 26), ramp=[(52, 38, 26), (120, 96, 64), (180, 160, 120), (240, 230, 206)], label=0x3A2A1C, label_dim=0x6E5A44,

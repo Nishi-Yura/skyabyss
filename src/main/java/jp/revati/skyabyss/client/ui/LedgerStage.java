@@ -80,6 +80,13 @@ public final class LedgerStage {
 
     // 黒い紙・山・目録の帯 (fit.begin のあと)
     public static void backdrop(GuiGraphics g, UiFit fit, int width, int height) {
+        if (UiLook.plate()) {
+            // 板の絵柄: 板を一枚。読む中身は左の板の上にじかに、目録は右の沈んだ欄に
+            Plate.openFade(g);
+            Plate.panel(g, 0, 0, W, H, 0, Plate.GOLD);
+            Plate.well(g, 272, 7, 129, 214);
+            return;
+        }
         Paper.stage(g, fit, width, height, "ledger", PEAKS, DIAMONDS);
         Paper.cut(g, "ledger_index", INDEX, Paper.CREAM, Paper.BLACK_LO, -3, 3);
     }
@@ -108,6 +115,13 @@ public final class LedgerStage {
         int dy = Math.round(flagY) - y;
         g.pose().pushPose();
         g.pose().translate(0, dy, 0);
+        if (UiLook.plate()) {
+            // 選んだ行: 欄から左へ少しはみ出す灯った升 (左の端に金の印)
+            Plate.tile(g, 264, y - 1, INDEX_X + INDEX_W + 5 - 264, h + 2, Plate.ON, Plate.GOLD);
+            g.fill(266, y + 2, 268, y + h - 2, 0xFFF2C47C);
+            g.pose().popPose();
+            return;
+        }
         Paper.cut(g, "ledger_flag", new float[] {252, y - 1, INDEX_X + INDEX_W + 2, y - 1, INDEX_X + INDEX_W + 4, y + h, 256, y + h + 1}, Paper.PINK, Paper.BLACK_LO, 1, 2);
         Paper.pin(g, 260, y + h / 2, 2, false);
         g.pose().popPose();

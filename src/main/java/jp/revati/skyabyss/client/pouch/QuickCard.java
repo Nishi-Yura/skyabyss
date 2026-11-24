@@ -53,7 +53,7 @@ public final class QuickCard {
     // 入れ替わりの強調 (ms) と、名前を出している間
     private static final long HIGHLIGHT_MS = 1600;
     private static final long NAME_MS = 2600;
-    private static final int PINK_HI = 0xF89CD2;
+    private static final int PINK_HI = 0xF2C47C;
     // 見回りの間隔 (tick) と、巨神・乗り場・嵐を探す範囲
     private static final int SCAN_INTERVAL = 10;
     private static final double TITAN_RANGE = 128;
@@ -281,7 +281,7 @@ public final class QuickCard {
         float glow = age < HIGHLIGHT_MS ? 1f - age / (float) HIGHLIGHT_MS : 0f;
 
         // 枠は下の一枚の帯 (client/hud/BandHud) と同じ絵柄
-        jp.revati.skyabyss.client.ui.Golden.hudFrame(g, itemX - 3, h - 23, itemX + 19, h - 1);
+        jp.revati.skyabyss.client.ui.Plate.hud(g, itemX - 3, h - 23, itemX + 19, h - 1);
         if (glow > 0f) {
             int a = (int) (glow * 150) << 24;
             // 縁にそった明るい桃色の線 (ホットバーの絵に合わせた細い角ばった枠)
@@ -310,6 +310,12 @@ public final class QuickCard {
         // 字は等倍 (docs/design/56)。絵の上の一行
         int tw = mc.font.width(label);
         int lx = Math.round((leftSide ? spriteX + 11.5f : spriteX + 17.5f) - tw / 2f);
+        // 道具の名前を出している間の長い行は、手もとの枠と体力の帯にかからないよう手前で止める (字と帯が重なっていた)
+        jp.revati.skyabyss.hud.HudLayout.Rect hb = jp.revati.skyabyss.client.hud.HudManager.result().vanilla.get(jp.revati.skyabyss.hud.HudLayout.Id.V_HOTBAR);
+        if (hb != null) {
+            lx = leftSide ? Math.min(lx, hb.x() - 3 - tw) : Math.max(lx, hb.right() + 3);
+        }
+        lx = Math.max(2, Math.min(lx, g.guiWidth() - 2 - tw));
         int ly = Math.round(spriteY) - 10;
         float alpha = age < NAME_MS ? 1f : 0.7f;
         int color = ((int) (Mth.clamp(alpha, 0f, 1f) * 255) << 24) | 0xD8DCE6;

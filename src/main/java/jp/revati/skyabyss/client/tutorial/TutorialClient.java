@@ -245,12 +245,12 @@ public final class TutorialClient {
             int x0 = cx - tw / 2 - 14;
             int x1 = cx + tw / 2 + 14;
             float a = l.alpha * (l.done ? 1f : pulse);
-            g.fill(x0, y - 2, x1, y + 11, ((int) (a * 0xE8) << 24) | 0x181722);
-            g.fill(x0, y - 2, x0 + 1, y + 11, ((int) (a * 0xC0) << 24) | (l.done ? 0xECE4D6 : 0xF89CD2));
+            int ac = l.done ? jp.revati.skyabyss.client.ui.Plate.pal().text : jp.revati.skyabyss.client.ui.Plate.pal().head;
+            jp.revati.skyabyss.client.ui.Plate.hudCard(g, x0, y - 2, x1, y + 11, ac, a);
             String mark = l.done ? "✔" : "◆";
-            g.drawString(mc.font, mark, x0 + 5, y, ((int) (a * 255) << 24) | (l.done ? 0xECE4D6 : 0xF89CD2), true);
+            g.drawString(mc.font, mark, x0 + 5, y, jp.revati.skyabyss.client.ui.Plate.alpha(ac, 0xFF, Math.max(0.04f, a)), true);
             // 入らない文は札の中で横へ流す (Marquee。前は「…」で切っていた)
-            jp.revati.skyabyss.client.ui.Marquee.draw(g, mc.font, shown, cx - tw / 2 + 2, y, tw, ((int) (Mth.clamp(a, 0.05f, 1f) * 255) << 24) | 0xFFFFFF, true);
+            jp.revati.skyabyss.client.ui.Marquee.draw(g, mc.font, shown, cx - tw / 2 + 2, y, tw, jp.revati.skyabyss.client.ui.Plate.hudText(Mth.clamp(a, 0.05f, 1f)), true);
             y += 13;
         }
     }

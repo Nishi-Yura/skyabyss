@@ -73,10 +73,10 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
                 int[] c = PartyStage.cardAt(i, n);
                 int by = c[1] + PartyStage.CARD_H / 2 + 4;
                 addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.party.promote"), b -> send(PartyNetwork.Action.PROMOTE, m.name()))
-                        .bounds(c[0] - 25, by, 24, Golden.BTN).tooltip(net.minecraft.client.gui.components.Tooltip.create(
+                        .bounds(c[0] - (n >= 5 ? 20 : 25), by, n >= 5 ? 19 : 24, Golden.BTN).tooltip(net.minecraft.client.gui.components.Tooltip.create(
                                 Component.translatable("gui.skyabyss.party.promote_tip"))).build());
                 addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.party.kick"), b -> send(PartyNetwork.Action.KICK, m.name()))
-                        .bounds(c[0] + 1, by, 24, Golden.BTN).tooltip(net.minecraft.client.gui.components.Tooltip.create(
+                        .bounds(c[0] + 1, by, n >= 5 ? 19 : 24, Golden.BTN).tooltip(net.minecraft.client.gui.components.Tooltip.create(
                                 Component.translatable("gui.skyabyss.party.kick_tip"))).build());
             }
         }
@@ -92,7 +92,7 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
                 Component.translatable("gui.skyabyss.party.finder.open_tip"))).build());
         // 招待できる人 (右の帯)
         inviteButtons.clear();
-        if (leader && s.members().size() < 4) {
+        if (leader && s.members().size() < jp.revati.skyabyss.party.Parties.MAX_MEMBERS) {
             for (String name : candidates(s)) {
                 inviteButtons.add(addRenderableWidget(Paper.tag(Component.translatable("gui.skyabyss.party.invite"),
                         b -> send(PartyNetwork.Action.INVITE, name)).bounds(CAND_X + CAND_W - 44 - ScrollPanel.GUTTER, CAND_Y, 44, Golden.BTN).build()));
@@ -147,7 +147,7 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
         jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.party.story", s.stage(), 4, s.cap()), hx, 26, hw, PartyStage.ON_PINK, false);
         jp.revati.skyabyss.client.ui.FitText.draw(g, font, next, hx, 38, hw, Paper.ON_BLACK_SOFT, false);
         jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.party.world", s.worldStage(), 4), hx, 50, hw, Paper.ON_BLACK_SOFT, false);
-        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.party.members", s.members().size(), 4, s.sharePercent()), hx, 68, hw,
+        jp.revati.skyabyss.client.ui.FitText.draw(g, font, Component.translatable("gui.skyabyss.party.members", s.members().size(), jp.revati.skyabyss.party.Parties.MAX_MEMBERS, s.sharePercent()), hx, 68, hw,
                 Paper.ON_BLACK_HI, false);
         // 招待 (右上の桃色の紙)
         if (!s.inviteFrom().isEmpty()) {
@@ -183,7 +183,7 @@ public final class PartyScreen extends Screen implements jp.revati.skyabyss.clie
                 PartyStage.leaderPin(g, c[0], c[1]);
             }
             // 仲間の今のクエスト: 札に指を置くと、メインと追いかけているクエストを出す (2026-11-08)
-            if (m.online() && PartyStage.in(mouseX, mouseY, c[0] - PartyStage.CARD_W / 2, c[1] - PartyStage.CARD_H / 2, PartyStage.CARD_W, PartyStage.CARD_H)) {
+            if (m.online() && PartyStage.in(mouseX, mouseY, c[0] - PartyStage.cardW(n) / 2, c[1] - PartyStage.CARD_H / 2, PartyStage.CARD_W, PartyStage.CARD_H)) {
                 questTip = questLines(m);
             }
         }

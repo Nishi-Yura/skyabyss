@@ -58,7 +58,9 @@ public final class SkillStage {
         g.pose().translate(x + tw / 2f, y + 6, 0);
         float sc = 1f + (1f - st) * 0.5f;
         g.pose().scale(sc, sc, 1f);
-        g.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees(-3f + (1f - st) * -9f));
+        if (!jp.revati.skyabyss.client.ui.UiLook.plate()) {
+            g.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees(-3f + (1f - st) * -9f));
+        }
         Paper.cut(g, "skst_" + (pink ? "p" : "g") + tw, Paper.quad(-tw / 2f, -6, tw, 12, 1, -1, 1, -1),
                 pink ? Paper.PINK : Paper.GREY_LO, pink ? Paper.PINK_LO : Paper.BLACK_LO, 2, 2);
         g.drawString(font, text, -tw / 2 + 5, -4, 0xFF000000 | Paper.ON_BLACK_HI, false);
@@ -92,6 +94,21 @@ public final class SkillStage {
     // 生成りの紙の札 (説明の欄)。shape は舞台の座標の点。dx だけ右へずらして描く
     // lift だけ下の辺を持ち上げる (中身が短い札)。下の辺の点 (y が 110 より下) を上へずらす
     public static void card(GuiGraphics g, float[] shape, int x, int y, int w, int h, int dx, int lift) {
+        if (jp.revati.skyabyss.client.ui.UiLook.plate()) {
+            // 板の絵柄: 説明の札はまっすぐな浮いた升 (紙の形の外接の四角)
+            float x0 = Float.MAX_VALUE, y0 = Float.MAX_VALUE, x1 = -Float.MAX_VALUE, y1 = -Float.MAX_VALUE;
+            for (int i = 0; i < shape.length; i += 2) {
+                x0 = Math.min(x0, shape[i]);
+                x1 = Math.max(x1, shape[i]);
+                y0 = Math.min(y0, shape[i + 1]);
+                y1 = Math.max(y1, shape[i + 1]);
+            }
+            int bx = Math.round(x0) + 2 + dx;
+            int by = Math.round(y0) + 2;
+            jp.revati.skyabyss.client.ui.Plate.tile(g, bx, by, Math.min(Math.round(x1) - 2, 401) + dx - bx, Math.round(y1) - 4 - lift - by,
+                    jp.revati.skyabyss.client.ui.Plate.REST, jp.revati.skyabyss.client.ui.Plate.GOLD);
+            return;
+        }
         float[] s = shape.clone();
         for (int i = 0; i < s.length; i += 2) {
             s[i] -= x;

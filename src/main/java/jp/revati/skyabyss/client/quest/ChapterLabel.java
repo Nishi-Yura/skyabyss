@@ -95,7 +95,11 @@ public final class ChapterLabel {
         lines = new java.util.ArrayList<>(jp.revati.skyabyss.client.ui.Marquee.joinRestStrings(lines, maxLines));
         // 細い金の線 (帯の金の縁と揃える) と、小さめの字
         int alpha = ((int) (255 * a)) << 24;
-        g.fill(x - 3, y, x - 2, y + lines.size() * ROWS - 3, alpha | 0xA88A3C);
+        int tw = 0;
+        for (String line : lines) {
+            tw = Math.max(tw, font.width(line));
+        }
+        jp.revati.skyabyss.client.ui.Plate.hudCard(g, x - 3, y - 3, x + 1 + Math.min(tw, r.w() - 8) + 4, y + lines.size() * ROWS - 1, 0xA88A3C, a);
         for (String line : lines) {
             jp.revati.skyabyss.client.ui.Marquee.draw(g, font, line, x + 1, y, r.w() - 8, alpha | 0xD9C48A, true);
             y += ROWS;

@@ -98,9 +98,19 @@ public final class VowHud {
         Font font = mc.font;
         int y = r.y();
         boolean first = true;
-        for (Component line : lines(s, net.minecraft.Util.getMillis() - receivedAt)) {
+        java.util.List<Component> shownLines = lines(s, net.minecraft.Util.getMillis() - receivedAt);
+        int cw = 0;
+        for (Component line : shownLines) {
+            cw = Math.max(cw, Math.min(font.width(line), r.w()));
+        }
+        final int cardW = cw;
+        final int cardH = shownLines.size() * 11;
+        if (cardH > 0) {
+            g.drawManaged(() -> jp.revati.skyabyss.client.ui.Plate.hudCard(g, r.right() - cardW - 5, r.y() - 3, r.right() + 3, r.y() + cardH - 1, 0, 1f));
+        }
+        for (Component line : shownLines) {
             net.minecraft.util.FormattedCharSequence shown = net.minecraft.locale.Language.getInstance().getVisualOrder(font.substrByWidth(line, r.w()));
-            g.drawString(font, shown, r.right() - Math.min(font.width(line), r.w()), y, first ? 0xF89CD2 : 0xE9E3D4, true);
+            g.drawString(font, shown, r.right() - Math.min(font.width(line), r.w()), y, first ? jp.revati.skyabyss.client.ui.Plate.hudHead(1f) : jp.revati.skyabyss.client.ui.Plate.hudText(1f), true);
             first = false;
             y += 11;
         }

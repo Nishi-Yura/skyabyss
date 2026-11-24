@@ -38,13 +38,12 @@ public class QuestToast implements Toast {
         Font font = toasts.getMinecraft().font;
         int w = width();
         int h = height();
-        jp.revati.skyabyss.client.ui.Golden.hudFrame(g, 0, 0, w, h);
-
-        g.fill(2, 2, 4, h - 2, main ? 0xFFF89CD2 : 0xFFECE4D6);
-        g.drawString(font, head, 10, 7, main ? 0xFFF89CD2 : 0xFFECE4D6, false);
+        jp.revati.skyabyss.client.ui.Plate.hudCard(g, 0, 0, w, h, main ? QuestHud.MAIN_TITLE : QuestHud.TITLE, 1f);
+        g.drawString(font, head, 10, 6, main ? QuestHud.MAIN_TITLE : QuestHud.TITLE, false);
+        jp.revati.skyabyss.client.ui.Plate.hudRule(g, 8, 15, w - 14, 1f);
         int y = 18;
         for (FormattedCharSequence line : lines) {
-            g.drawString(font, line, 10, y, 0xFFE9E3D4, false);
+            g.drawString(font, line, 10, y, jp.revati.skyabyss.client.ui.Plate.hudText(1f), false);
             y += 10;
         }
         return timeSinceLastVisible >= DURATION * toasts.getNotificationDisplayTimeMultiplier() ? Visibility.HIDE : Visibility.SHOW;

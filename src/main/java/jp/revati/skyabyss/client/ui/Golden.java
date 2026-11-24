@@ -186,6 +186,14 @@ public final class Golden {
     // 板 (切り絵。docs/design/56 の「切り絵」): 画面の大中小の板 (論理の 0,0 に置いた Layout の板) なら、黒い紙と桃色の山を窓の端まで敷く。
     // それ以外の板 (会話の帯・部品の板) は、手で切った黒い紙を一枚 (濃い桃色の影をずらして)
     public static void panel(GuiGraphics g, Box b) {
+        if (UiLook.plate()) {
+            // 板の絵柄: 板の大きさのまま銅の縁の板を一枚 (画面の大中小の板は開くときに濃くなる)
+            if (b.x() == 0 && b.y() == 0) {
+                Plate.openFade(g);
+            }
+            Plate.panel(g, b.x(), b.y(), b.w(), b.h(), 0, Plate.GOLD);
+            return;
+        }
         if (b.x() == 0 && b.y() == 0 && (b.w() == L_W && b.h() == L_H || b.w() == M_W && b.h() == M_H || b.w() == S_W && b.h() == S_H)) {
             sheet(g, b);
             return;
@@ -274,6 +282,12 @@ public final class Golden {
 
     // 欄: 黒い紙の上に一段暗い紙を重ねる (右と下に濃い桃色の細い影)
     public static void recess(GuiGraphics g, Box b) {
+        if (UiLook.plate()) {
+            if (b.w() >= 4 && b.h() >= 4) {
+                Plate.well(g, b.x(), b.y(), b.w(), b.h());
+            }
+            return;
+        }
         g.fill(b.x() + 2, b.bottom(), b.right() + 2, b.bottom() + 2, Paper.PINK_LO);
         g.fill(b.right(), b.y() + 2, b.right() + 2, b.bottom(), Paper.PINK_LO);
         g.fill(b.x(), b.y(), b.right(), b.bottom(), Paper.BLACK_LO);
@@ -307,6 +321,10 @@ public final class Golden {
 
     // 品の枠 (size 角。一段暗い紙の升に、灰の細い縁)
     public static void slot(GuiGraphics g, int x, int y, int size) {
+        if (UiLook.plate()) {
+            Plate.well(g, x, y, size, size);
+            return;
+        }
         g.fill(x, y, x + size, y + size, Paper.BLACK_LO);
         outline(g, x, y, x + size, y + size, 0xFF3A3644);
     }
@@ -314,6 +332,10 @@ public final class Golden {
     // HUD の枠 (藍の半透明の地・外の暗い線・金の細い線)
     // HUD の地 (切り絵: 黒い紙に右下の濃い桃色の影。2026-11-24 に HUD も夜空から替えた。docs/design/56 の 5)
     public static void hudFrame(GuiGraphics g, int x0, int y0, int x1, int y1) {
+        if (UiLook.plate()) {
+            Plate.hud(g, x0, y0, x1, y1);
+            return;
+        }
         g.fill(x0 + 1, y0 + 1, x1 + 1, y1 + 1, Paper.PINK_LO);
         g.fill(x0, y0, x1, y1, Paper.BLACK);
         g.fill(x0, y0, x1, y0 + 1, Paper.EDGE);

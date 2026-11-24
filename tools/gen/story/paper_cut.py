@@ -6,12 +6,13 @@ gen_lore_book.py と gen_record_screen.py の絵柄 "p" がここを使う。色
 光の輪・角の丸い札・ぼかし・乱数のまだら・左右対称の飾りは使わない。絵は 2 倍の細かさ (画面には半分で描く)。
 """
 from PIL import Image, ImageDraw
+# 2026-11-24: 色は板の絵柄 A 鐘の銅 (client/ui/Plate の石と銅) に合わせた。名前は切り絵のときのまま (BLACK = 石、PINK = 銅)
 
-BLACK = (24, 23, 34)
-BLACK_LO = (14, 13, 20)
-PINK = (228, 90, 156)
-PINK_HI = (248, 156, 210)
-PINK_LO = (140, 44, 96)
+BLACK = (24, 28, 40)
+BLACK_LO = (15, 18, 26)
+PINK = (196, 138, 68)
+PINK_HI = (242, 196, 124)
+PINK_LO = (131, 80, 42)
 GREY = (168, 162, 154)
 GREY_LO = (90, 84, 96)
 CREAM = (236, 228, 214)
