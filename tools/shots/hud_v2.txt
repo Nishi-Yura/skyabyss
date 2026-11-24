@@ -1,0 +1,65 @@
+# HUD v2 (paper-cut strip bars, A): full / hit trail / low / poison / whole HUD demo
+world hud_v2 flat
+size 1920 1080
+timeout 900
+render 6
+clouds off
+guiscale 4
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss level set @p 32
+cmd skyabyss job choose mage
+cmd give @s skyabyss:storm_staff
+cmd give @s skyabyss:dried_fish 12
+cmd give @s skyabyss:antidote 3
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 1500
+guiscale 3
+window 1280 720
+wait 20
+shot full
+cmd damage @s 8 minecraft:generic
+wait 3
+shot hit
+wait 30
+cmd damage @s 14 minecraft:generic
+wait 20
+shot low
+cmd effect give @s minecraft:instant_health 1 10 true
+cmd effect give @s minecraft:poison 20 0 true
+cmd effect give @s minecraft:absorption 60 1 true
+cmd item replace entity @s armor.chest with skyabyss:ember_chestplate
+wait 20
+shot poison
+cmd effect clear @s
+huddemo all
+wait 40
+shot demo_1280_g3
+guiscale 4
+window 1920 1080
+wait 30
+shot demo_1920_g4
+huddemo back
+wait 40
+shot back_1920_g4
+huddemo boss
+wait 40
+shot boss_1920_g4
+guiscale 3
+window 1280 720
+huddemo back
+wait 30
+shot back_1280_g3
+huddemo off
+guiscale 4
+window 1920 1080
+wait 20
+key key.skyabyss.skill_slot_1
+wait 4
+shot cd_1920_g4
+huddemo off

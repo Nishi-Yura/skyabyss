@@ -7,23 +7,23 @@ import net.minecraft.network.chat.Component;
 
 // スキルの木 v2 の部品 (docs/design/56 の「切り絵」。JobChoiceScreen と同じ言葉)。
 // SkillScreen は状態と押したときの処理、ここは描くだけ。字の色は ARGB (alpha 0 は Font が不透明に扱うので 6 以上)
-final class SkillStage {
+public final class SkillStage {
     private SkillStage() {
     }
 
-    static float clamp01(float t) {
+    public static float clamp01(float t) {
         return t < 0 ? 0 : t > 1 ? 1 : t;
     }
 
     // 減速して止まる
-    static float out(float t) {
+    public static float out(float t) {
         t = clamp01(t);
         float u = 1 - t;
         return 1 - u * u * u;
     }
 
     // 少し行き過ぎて戻る
-    static float back(float t) {
+    public static float back(float t) {
         t = clamp01(t);
         float c = 1.9f;
         float u = t - 1;
@@ -31,13 +31,13 @@ final class SkillStage {
     }
 
     // 色に濃さを掛ける (字用)
-    static int fade(int rgb, float a) {
+    public static int fade(int rgb, float a) {
         int al = Math.max(6, Math.min(255, Math.round(255 * clamp01(a))));
         return (al << 24) | (rgb & 0xFFFFFF);
     }
 
     // 2 倍の字 (入らなければ 1 倍)。描いた高さを返す
-    static int big(GuiGraphics g, Font font, Component text, int x, int y, int maxW, int color) {
+    public static int big(GuiGraphics g, Font font, Component text, int x, int y, int maxW, int color) {
         int sc = font.width(text) * 2 <= maxW ? 2 : 1;
         g.pose().pushPose();
         g.pose().translate(x, y, 0);
@@ -48,7 +48,7 @@ final class SkillStage {
     }
 
     // 判子: 少し傾けた桃色の紙に字。press = 0..1 (0 で大きく浮き、1 で押されて止まる)。描いた幅を返す
-    static int stamp(GuiGraphics g, Font font, Component text, int x, int y, float press, boolean pink) {
+    public static int stamp(GuiGraphics g, Font font, Component text, int x, int y, float press, boolean pink) {
         int tw = font.width(text) + 10;
         if (press <= 0.05f) {
             return tw;
@@ -67,7 +67,7 @@ final class SkillStage {
     }
 
     // 札 (生成りの地の上の小さな札)。dark なら黒い札に生成りの字。描いた幅を返す
-    static int chip(GuiGraphics g, Font font, Component text, int x, int y, boolean dark) {
+    public static int chip(GuiGraphics g, Font font, Component text, int x, int y, boolean dark) {
         int w = font.width(text) + 8;
         int bg = dark ? Paper.BLACK : Paper.CREAM_LO;
         g.fill(x, y, x + w, y + 11, bg);
@@ -77,7 +77,7 @@ final class SkillStage {
     }
 
     // 菱の列 (filled 個が桃色)。大きさ r の菱を step ごとに。描いた幅を返す
-    static int pips(GuiGraphics g, int x, int y, int count, int filled, int r, boolean onBlack) {
+    public static int pips(GuiGraphics g, int x, int y, int count, int filled, int r, boolean onBlack) {
         int step = 2 * r + 3;
         for (int i = 0; i < count; i++) {
             boolean on = i < filled;
@@ -91,7 +91,7 @@ final class SkillStage {
 
     // 生成りの紙の札 (説明の欄)。shape は舞台の座標の点。dx だけ右へずらして描く
     // lift だけ下の辺を持ち上げる (中身が短い札)。下の辺の点 (y が 110 より下) を上へずらす
-    static void card(GuiGraphics g, float[] shape, int x, int y, int w, int h, int dx, int lift) {
+    public static void card(GuiGraphics g, float[] shape, int x, int y, int w, int h, int dx, int lift) {
         float[] s = shape.clone();
         for (int i = 0; i < s.length; i += 2) {
             s[i] -= x;

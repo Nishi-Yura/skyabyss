@@ -101,7 +101,7 @@ public final class ChallengeHud {
         }
         Font font = mc.font;
         int y = r.y();
-        g.drawString(font, b.title(), r.right() - font.width(b.title()), y, 0xE9C46A, true);
+        g.drawString(font, b.title(), r.right() - font.width(b.title()), y, 0xF89CD2, true);
         y += 11;
         if (!b.sub().getString().isEmpty()) {
             g.drawString(font, b.sub(), r.right() - font.width(b.sub()), y, 0xE9E3D4, true);

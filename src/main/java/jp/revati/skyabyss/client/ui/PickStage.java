@@ -28,13 +28,63 @@ public final class PickStage {
         Paper.stage(g, fit, width, height, "pick", PEAKS, DIAMONDS);
     }
 
-    // 題 (左上) と添えの一行
-    public static void title(GuiGraphics g, Font font, Component title, Component sub) {
-        Paper.pin(g, 14, 13, 3, true);
-        FitText.draw(g, font, title, 22, 9, 250, Paper.ON_BLACK_PINK, false);
-        if (sub != null) {
-            FitText.draw(g, font, sub, 22, 21, 250, Paper.ON_BLACK_SOFT, false);
+    // 動き (docs/design/56 の 2.1「動き」): 画面が替わったら開いた時を覚える。題は左から入り、札は一枚ずつ配られる
+    private static Object owner;
+    private static long openedAt;
+    private static int lastHot = -1;
+
+    private static void track() {
+        Object s = net.minecraft.client.Minecraft.getInstance().screen;
+        if (s != owner) {
+            owner = s;
+            openedAt = net.minecraft.Util.getMillis();
+            lastHot = -1;
         }
+    }
+
+    private static float since(long delay, float ms) {
+        return (net.minecraft.Util.getMillis() - openedAt - delay) / ms;
+    }
+
+    // 題 (左上。入れば 2 倍) と添えの一行
+    public static void title(GuiGraphics g, Font font, Component title, Component sub) {
+        track();
+        float a = jp.revati.skyabyss.rpg.client.skill.SkillStage.out(since(0, 240));
+        Paper.pin(g, 14, 13, 3, true);
+        int dx = Math.round((1f - a) * -12f);
+        int h = jp.revati.skyabyss.rpg.client.skill.SkillStage.big(g, font, title, 22 + dx, 8, 250, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_HI, a));
+        if (sub != null) {
+            FitText.draw(g, font, sub, 22 + dx, 8 + h + 3, 250, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_SOFT, a), false);
+        }
+    }
+
+    // 札を配る: i 枚目を下から少し回して入れ、行き過ぎて止める。描かない間は false (そのときは undeal を呼ばない)
+    public static boolean deal(GuiGraphics g, int i, int n) {
+        track();
+        float d = jp.revati.skyabyss.rpg.client.skill.SkillStage.back(since(90 + i * 60L, 260));
+        if (d < 0.12f) {
+            return false;
+        }
+        int[] c = center(i, n, false);
+        g.pose().pushPose();
+        g.pose().translate(c[0], c[1] + (1f - d) * 60f, 0);
+        g.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees((1f - d) * (i - (n - 1) / 2f) * 10f));
+        g.pose().translate(-c[0], -c[1], 0);
+        return true;
+    }
+
+    public static void undeal(GuiGraphics g) {
+        g.pose().popPose();
+    }
+
+    // 乗せた札が替わったら小さな音
+    public static void hover(int hot) {
+        track();
+        if (hot != lastHot && hot >= 0) {
+            net.minecraft.client.Minecraft.getInstance().getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
+                    net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), 2.0f, 0.12f));
+        }
+        lastHot = hot;
     }
 
     // n 枚のうち i 枚目の札の真ん中 {x, y}。lift なら持ち上げる

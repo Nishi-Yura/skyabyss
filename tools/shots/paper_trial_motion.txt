@@ -1,0 +1,79 @@
+# trial board / party finder motion frames
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/paper_trial_motion.txt -PshotsName=paper_trial_motion
+world paper_trial flat
+size 1920 1080
+timeout 600
+render 4
+clouds off
+guiscale 4
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss playtest skip opening
+cmd skyabyss cinematic stop
+cmd skyabyss level set @p 12
+cmd skyabyss job choose mage
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+
+
+window 1280 720
+wait 10
+guiscale 3
+wait 10
+open shrine_demo
+shot s0_1280_g3
+wait 2
+shot s1_1280_g3
+wait 3
+shot s2_1280_g3
+wait 20
+shot s3_1280_g3
+close
+wait 4
+open party_finder_demo
+shot p0_1280_g3
+wait 2
+shot p1_1280_g3
+wait 3
+shot p2_1280_g3
+wait 20
+shot p3_1280_g3
+close
+wait 4
+open shrine_demo_hover
+wait 20
+overlap shrine_demo_hover_1280_g3
+shot shrine_demo_hover_1280_g3
+close
+wait 4
+open shrine_demo_armed
+wait 20
+overlap shrine_demo_armed_1280_g3
+shot shrine_demo_armed_1280_g3
+close
+wait 4
+open route_boon_demo
+shot r0_1280_g3
+wait 2
+shot r1_1280_g3
+wait 3
+shot r2_1280_g3
+wait 20
+shot r3_1280_g3
+close
+wait 4
+open deep_choice
+shot d0_1280_g3
+wait 2
+shot d1_1280_g3
+wait 3
+shot d2_1280_g3
+wait 20
+shot d3_1280_g3
+close
+wait 4

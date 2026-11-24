@@ -312,10 +312,11 @@ public final class Golden {
     }
 
     // HUD の枠 (藍の半透明の地・外の暗い線・金の細い線)
+    // HUD の地 (切り絵: 黒い紙に右下の濃い桃色の影。2026-11-24 に HUD も夜空から替えた。docs/design/56 の 5)
     public static void hudFrame(GuiGraphics g, int x0, int y0, int x1, int y1) {
-        g.fill(x0 + 1, y0 + 1, x1 - 1, y1 - 1, GLASS_HUD);
-        outline(g, x0, y0, x1, y1, OUTLINE);
-        outline(g, x0 + 1, y0 + 1, x1 - 1, y1 - 1, LINE);
+        g.fill(x0 + 1, y0 + 1, x1 + 1, y1 + 1, Paper.PINK_LO);
+        g.fill(x0, y0, x1, y1, Paper.BLACK);
+        g.fill(x0, y0, x1, y0 + 1, Paper.EDGE);
     }
 
     // 空の欄の一行 (何をすると埋まるか)。欄の真ん中に淡い字で、幅で折り返す

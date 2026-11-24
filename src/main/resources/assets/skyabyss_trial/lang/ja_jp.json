@@ -374,6 +374,8 @@
   "gui.skyabyss.trial.tab.vow": "誓い",
   "gui.skyabyss.trial.tab.how": "心得",
   "gui.skyabyss.shrine.go": "仲間と渡る",
+  "gui.skyabyss.shrine.shards_label": "歌片",
+  "gui.skyabyss.shrine.go_confirm": "もう一度",
   "gui.skyabyss.shrine.go_tip": "台のそばにパーティー全員がそろったら押す。5 秒数えてルートへ送る（歌片が一つ要る）",
   "gui.skyabyss.shrine.vow_head": "誓いの段 %s ・ 素材 %s%%（最大 %s つ）・ 最高の段 %s",
   "gui.skyabyss.shrine.vow_tip": "クリックで立てる / 降ろす",

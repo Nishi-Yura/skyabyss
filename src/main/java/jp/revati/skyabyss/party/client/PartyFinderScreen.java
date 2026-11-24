@@ -39,6 +39,27 @@ public final class PartyFinderScreen extends Screen implements jp.revati.skyabys
     private int ticks;
     // 撮影の見本 (一覧を求めない)
     private boolean demo;
+    // 動き (docs/design/56 の 2.1「動き」): 開くと題が入り、札が一枚ずつ配られる。募集を出すと帯に「募集中」の判が押される
+    private final long openedAt = net.minecraft.Util.getMillis();
+    private long dealAt = openedAt;
+    private int lastHot = -1;
+    private Boolean postedSeen;
+    private long postedAt = -100000;
+
+    private float since(long from, long delay, float ms) {
+        return (net.minecraft.Util.getMillis() - from - delay) / ms;
+    }
+
+    private int hotCard(int mx, int my, int count) {
+        int n = Math.max(2, count);
+        for (int i = count - 1; i >= 0; i--) {
+            int[] c = PartyStage.cardAt(i, n);
+            if (Math.abs(mx - c[0]) <= PartyStage.CARD_W / 2 && Math.abs(my - c[1]) <= PartyStage.CARD_H / 2) {
+                return i;
+            }
+        }
+        return -1;
+    }
 
     public PartyFinderScreen(Screen parent) {
         super(Component.translatable("gui.skyabyss.party.finder.title"));
@@ -119,10 +140,12 @@ public final class PartyFinderScreen extends Screen implements jp.revati.skyabys
         if (pages() > 1) {
             addRenderableWidget(Paper.tag(Component.literal("‹"), b -> {
                 page = (page + pages() - 1) % pages();
+                dealAt = net.minecraft.Util.getMillis();
                 rebuildWidgets();
             }).bounds(300, PartyStage.FOOT_Y, 22, Golden.BTN).build());
             addRenderableWidget(Paper.tag(Component.literal("›"), b -> {
                 page = (page + 1) % pages();
+                dealAt = net.minecraft.Util.getMillis();
                 rebuildWidgets();
             }).bounds(350, PartyStage.FOOT_Y, 22, Golden.BTN).build());
         }
@@ -155,10 +178,15 @@ public final class PartyFinderScreen extends Screen implements jp.revati.skyabys
         fit.begin(g);
         PartyStage.backdrop(g, fit, width, height);
         PartyNetwork.Finder f = last;
-        PartyStage.title(g, font, title);
-        FitText.draw(g, font, Component.translatable("gui.skyabyss.party.finder.list", f.rows().size()), PartyStage.HEAD_X, 26, PartyStage.HEAD_W, PartyStage.ON_PINK, false);
+        // 題: 2 倍の「パーティー募集」と、募集の数の判子
+        float h0 = jp.revati.skyabyss.rpg.client.skill.SkillStage.out(since(openedAt, 0, 240));
+        Paper.pin(g, PartyStage.HEAD_X - 8, 16, 3, true);
+        int tx = PartyStage.HEAD_X + Math.round((1f - h0) * -12f);
+        jp.revati.skyabyss.rpg.client.skill.SkillStage.big(g, font, title, tx, 10, PartyStage.HEAD_W, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_HI, h0));
+        Component count = Component.translatable("gui.skyabyss.party.finder.count", f.rows().size());
+        jp.revati.skyabyss.rpg.client.skill.SkillStage.stamp(g, font, count, tx + font.width(title) * 2 + 8, 12, jp.revati.skyabyss.rpg.client.skill.SkillStage.clamp01(since(openedAt, 120, 260)), true);
         if (f.inParty()) {
-            FitText.draw(g, font, Component.translatable("gui.skyabyss.party.finder.in_party"), PartyStage.HEAD_X, 38, PartyStage.HEAD_W, Paper.ON_BLACK_SOFT, false);
+            FitText.draw(g, font, Component.translatable("gui.skyabyss.party.finder.in_party"), PartyStage.HEAD_X, 32, PartyStage.HEAD_W, jp.revati.skyabyss.rpg.client.skill.SkillStage.fade(Paper.ON_BLACK_SOFT, h0), false);
         }
         // 募集の札
         List<PartyFinder.Row> rows = shown();
@@ -166,9 +194,23 @@ public final class PartyFinderScreen extends Screen implements jp.revati.skyabys
             FitText.draw(g, font, Component.translatable("gui.skyabyss.party.finder.empty"), PartyStage.HEAD_X, 120, PartyStage.HEAD_W, Paper.ON_BLACK_SOFT, false);
         }
         int n = Math.max(2, rows.size());
+        int hot = hotCard(mouseX, mouseY, rows.size());
+        if (hot != lastHot && hot >= 0) {
+            minecraft.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), 2.0f, 0.12f));
+        }
+        lastHot = hot;
+        float[] deals = new float[rows.size()];
         for (int i = 0; i < rows.size(); i++) {
             PartyFinder.Row r = rows.get(i);
             int[] c = PartyStage.cardAt(i, n);
+            // 配る: 一枚ずつ 55ms 遅れて下から入り、行き過ぎて止まる。乗せた札は少し浮く
+            float deal = jp.revati.skyabyss.rpg.client.skill.SkillStage.back(since(dealAt, 80 + i * 55L, 240));
+            deals[i] = deal;
+            if (deal < 0.12f) {
+                continue;
+            }
+            g.pose().pushPose();
+            g.pose().translate(0, (1f - deal) * 50f - (i == hot ? 3 : 0), 0);
             PartyStage.card(g, i, n, r.mine());
             PartyStage.face(g, faceId(r.leaderName()), c[0], c[1]);
             PartyStage.cardText(g, font, c[0], c[1], Component.literal(r.leaderName()), Component.translatable("gui.skyabyss.party.goal." + r.goal()),
@@ -176,6 +218,7 @@ public final class PartyFinderScreen extends Screen implements jp.revati.skyabys
             if (r.mine()) {
                 PartyStage.leaderPin(g, c[0], c[1]);
             }
+            g.pose().popPose();
         }
         if (pages() > 1) {
             FitText.drawCentered(g, font, Component.literal((page + 1) + "/" + pages()), 336, PartyStage.FOOT_Y + 3, 24, PartyStage.ON_PINK, false);
@@ -186,11 +229,27 @@ public final class PartyFinderScreen extends Screen implements jp.revati.skyabys
                 : f.myGoal().isEmpty() ? Component.translatable("gui.skyabyss.party.finder.mine_none")
                 : Component.translatable("gui.skyabyss.party.finder.mine", Component.translatable("gui.skyabyss.party.goal." + f.myGoal()));
         int y = PartyStage.STRIP_Y;
+        // 募集を出した: 帯の上に「募集中」の判を押す (出した瞬間は大きく浮いて押される)
+        boolean posted = !f.myGoal().isEmpty();
+        if (postedSeen != null && posted && !postedSeen) {
+            postedAt = net.minecraft.Util.getMillis();
+        }
+        postedSeen = posted;
+        if (posted) {
+            float press = net.minecraft.Util.getMillis() - postedAt > 400 ? 1f : jp.revati.skyabyss.rpg.client.skill.SkillStage.clamp01((net.minecraft.Util.getMillis() - postedAt) / 260f);
+            jp.revati.skyabyss.rpg.client.skill.SkillStage.stamp(g, font, Component.translatable("gui.skyabyss.party.finder.posted"), PartyStage.STRIP_X, y, Math.max(press, 0.06f), true);
+            y += 18;
+        }
         for (FormattedCharSequence line : JpWrap.split(font, Component.literal(state.getString()), PartyStage.STRIP_W - 4)) {
             g.drawString(font, line, PartyStage.STRIP_X, y, f.myGoal().isEmpty() ? Paper.INK_SOFT : Paper.INK_HEAD, false);
             y += 11;
         }
         for (net.minecraft.client.gui.components.Renderable r : renderables) {
+            // 「加わる」は札が止まってから
+            int ji = joinButtons.indexOf(r);
+            if (ji >= 0 && ji < deals.length && deals[ji] < 0.85f) {
+                continue;
+            }
             r.render(g, mouseX, mouseY, partialTick);
         }
         fit.end(g);

@@ -1,0 +1,163 @@
+# trial board / shrine pages / party finder (v2 pass)
+# bash tools/dev/mc_run.sh runShots --no-daemon -Pscript=tools/shots/paper_trial.txt -PshotsName=paper_trial
+world paper_trial flat
+size 1920 1080
+timeout 600
+render 4
+clouds off
+guiscale 4
+
+cmd time set noon
+cmd weather clear
+cmd gamemode survival
+cmd skyabyss playtest skip opening
+cmd skyabyss cinematic stop
+cmd skyabyss level set @p 12
+cmd skyabyss job choose mage
+hud on
+camera 0 -60 8 180 0
+waitchunks
+chat clear
+wait 40
+
+
+window 1920 1080
+wait 10
+guiscale 4
+wait 10
+open shrine_demo
+wait 30
+overlap shrine_demo_1920_g4
+shot shrine_demo_1920_g4
+close
+wait 4
+open shrine_demo_codex
+wait 30
+overlap shrine_demo_codex_1920_g4
+shot shrine_demo_codex_1920_g4
+close
+wait 4
+open shrine_demo_vow
+wait 30
+overlap shrine_demo_vow_1920_g4
+shot shrine_demo_vow_1920_g4
+close
+wait 4
+open shrine_demo_rewards
+wait 30
+overlap shrine_demo_rewards_1920_g4
+shot shrine_demo_rewards_1920_g4
+close
+wait 4
+open shrine_demo_how
+wait 30
+overlap shrine_demo_how_1920_g4
+shot shrine_demo_how_1920_g4
+close
+wait 4
+open trial_board_demo
+wait 30
+overlap trial_board_demo_1920_g4
+shot trial_board_demo_1920_g4
+close
+wait 4
+open party_finder_demo
+wait 30
+overlap party_finder_demo_1920_g4
+shot party_finder_demo_1920_g4
+close
+wait 4
+
+window 1280 720
+wait 10
+guiscale 3
+wait 10
+open shrine_demo
+wait 30
+overlap shrine_demo_1280_g3
+shot shrine_demo_1280_g3
+close
+wait 4
+open shrine_demo_codex
+wait 30
+overlap shrine_demo_codex_1280_g3
+shot shrine_demo_codex_1280_g3
+close
+wait 4
+open shrine_demo_vow
+wait 30
+overlap shrine_demo_vow_1280_g3
+shot shrine_demo_vow_1280_g3
+close
+wait 4
+open shrine_demo_rewards
+wait 30
+overlap shrine_demo_rewards_1280_g3
+shot shrine_demo_rewards_1280_g3
+close
+wait 4
+open shrine_demo_how
+wait 30
+overlap shrine_demo_how_1280_g3
+shot shrine_demo_how_1280_g3
+close
+wait 4
+open trial_board_demo
+wait 30
+overlap trial_board_demo_1280_g3
+shot trial_board_demo_1280_g3
+close
+wait 4
+open party_finder_demo
+wait 30
+overlap party_finder_demo_1280_g3
+shot party_finder_demo_1280_g3
+close
+wait 4
+
+window 1920 1080
+wait 10
+guiscale 2
+wait 10
+open shrine_demo
+wait 30
+overlap shrine_demo_1920_g2
+shot shrine_demo_1920_g2
+close
+wait 4
+open shrine_demo_codex
+wait 30
+overlap shrine_demo_codex_1920_g2
+shot shrine_demo_codex_1920_g2
+close
+wait 4
+open shrine_demo_vow
+wait 30
+overlap shrine_demo_vow_1920_g2
+shot shrine_demo_vow_1920_g2
+close
+wait 4
+open shrine_demo_rewards
+wait 30
+overlap shrine_demo_rewards_1920_g2
+shot shrine_demo_rewards_1920_g2
+close
+wait 4
+open shrine_demo_how
+wait 30
+overlap shrine_demo_how_1920_g2
+shot shrine_demo_how_1920_g2
+close
+wait 4
+open trial_board_demo
+wait 30
+overlap trial_board_demo_1920_g2
+shot trial_board_demo_1920_g2
+close
+wait 4
+open party_finder_demo
+wait 30
+overlap party_finder_demo_1920_g2
+shot party_finder_demo_1920_g2
+close
+wait 4

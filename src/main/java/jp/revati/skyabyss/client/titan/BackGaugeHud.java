@@ -101,12 +101,11 @@ public final class BackGaugeHud {
 
     // 角を落とした板と枠 (1 px)
     public static void frame(GuiGraphics g, int x, int y, int w, int h, int fill, int border) {
-        g.fill(x + 2, y, x + w - 2, y + h, fill);
-        g.fill(x, y + 2, x + w, y + h - 2, fill);
-        g.fill(x + 2, y, x + w - 2, y + 1, border);
-        g.fill(x + 2, y + h - 1, x + w - 2, y + h, border);
-        g.fill(x, y + 2, x + 1, y + h - 2, border);
-        g.fill(x + w - 1, y + 2, x + w, y + h - 2, border);
+        // 切り絵 (docs/design/56 の 5): 黒い紙に右下の濃い桃色の影、左の端に巨神の色の筋 (地の透かしはそのまま)
+        g.fill(x + 1, y + 1, x + w + 1, y + h + 1, 0xFF8C2C60);
+        g.fill(x, y, x + w, y + h, (fill & 0xFF000000) | 0x181722);
+        g.fill(x, y, x + w, y + 1, 0xFF3A3644);
+        g.fill(x, y, x + 2, y + h, border);
     }
 
     // 文を幅 room に収めて描く (狭い画面で幅が足りなければ、はみ出す分を切る。枠の外へは出さない)

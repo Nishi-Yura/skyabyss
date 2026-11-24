@@ -73,6 +73,8 @@
   "gui.skyabyss.party.finder.mine_none": "Pick a goal and press Post to be listed",
   "gui.skyabyss.party.finder.mine": "Recruiting: %s (people who join become members)",
   "gui.skyabyss.party.finder.list": "Listings (%s)",
+  "gui.skyabyss.party.finder.posted": "Posted",
+  "gui.skyabyss.party.finder.count": "%s open",
   "gui.skyabyss.party.finder.empty": "No listings right now. Post your own",
   "gui.skyabyss.party.finder.row": "%s/%s Lv%s",
   "gui.skyabyss.party.finder.in_party": "You cannot join other listings while in a party",

@@ -193,7 +193,7 @@ public final class SkillHud {
             g.fill(x + 2, y + 2, x + 18, y + 18, 0x9A3A1010);
         } else if (cd > 0) {
             int h = Mth.clamp(Math.round(16f * cd), 1, 16);
-            g.fill(x + 2, y + 2, x + 18, y + 2 + h, 0xB00A0E1E);
+            g.fill(x + 2, y + 2, x + 18, y + 2 + h, 0xC8181722);
         }
         String k = jp.revati.skyabyss.client.accessory.AccessoryClient.CHARM_KEY.getTranslatedKeyMessage().getString();
         if (k.length() > 3) {
@@ -241,11 +241,15 @@ public final class SkillHud {
                 int total = SkillManager.cooldownFor(mc.player, s);
                 if (left > 0) {
                     int h = Mth.clamp(Math.round(16f * left / total), 1, 16);
-                    g.fill(x + 2, y + 2, x + 18, y + 2 + h, 0xB00A0E1E);
+                    g.fill(x + 2, y + 2, x + 18, y + 2 + h, 0xC8181722);
+                    // 待ちの覆いの下の端に桃色の線 (下から明けていく所が見えるように)
+                    if (h < 16) {
+                        g.fill(x + 2, y + 1 + h, x + 18, y + 2 + h, 0xFFE45A9C);
+                    }
                     String sec = String.valueOf((left + 19) / 20);
                     g.drawString(font, sec, x + 10 - font.width(sec) / 2, y + 6, 0xECE8DC, true);
                 } else if (d.globalCooldown > 0) {
-                    g.fill(x + 2, y + 2, x + 18, y + 18, 0x500A0E1E);
+                    g.fill(x + 2, y + 2, x + 18, y + 18, 0x70181722);
                 }
             }
             // 光る: 使えた (白く)・使えなかった (赤紫の縁)

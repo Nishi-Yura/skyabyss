@@ -108,23 +108,12 @@ public final class VitalsHud {
         }
         float max = Math.max(1f, p.getMaxHealth());
         float hp = Mth.clamp(p.getHealth(), 0f, max);
-        int color = 0xFFD45864;
-        if (p.hasEffect(MobEffects.POISON)) {
-            color = 0xFF8CAA3C;
-        } else if (p.hasEffect(MobEffects.WITHER)) {
-            color = 0xFF4A4452;
-        } else if (p.isFullyFrozen()) {
-            color = 0xFF7FB4D6;
-        }
-        // 傷が浅いうちは落ち着いた赤、残りが四分の一以下なら脈打つ
-        if (hp <= max * 0.25f) {
-            float k = 0.65f + 0.35f * (float) Math.sin(p.tickCount * 0.45f);
-            color = scale(color, k);
-        }
+        // 毒・衰弱・凍えの色 (0 = ふつうの桃色)
+        int status = p.hasEffect(MobEffects.POISON) ? 0xFF8CAA3C : p.hasEffect(MobEffects.WITHER) ? 0xFF4A4452 : p.isFullyFrozen() ? 0xFF7FB4D6 : 0;
         // 数は中の値の 10 倍で見せる (jp.revati.skyabyss.Hp。中の 20 = 帯の「200/200」)
         int absorb = (int) Math.ceil(jp.revati.skyabyss.Hp.shown(p.getAbsorptionAmount()));
         String text = (int) Math.ceil(jp.revati.skyabyss.Hp.shown(hp) - 1e-4) + "/" + (int) Math.ceil(jp.revati.skyabyss.Hp.shown(max) - 1e-4);
-        bar(g, mc.font, r, HEART, 0xFFE0606C, hp / max, color, text, 0xFFF4EEE6, p.hurtTime > 0 || p.invulnerableTime > 10);
+        bar(g, mc.font, r, 0, hp / max, status, text, p.hurtTime > 0 || p.invulnerableTime > 10, hp <= max * 0.25f);
         if (absorb > 0) {
             // 吸収: 帯のすぐ上の金の細線 (最大の体力に対する割合)。数は出さない (数字が重なって読めなかった。2026-11-11)
             int len = Math.max(2, Math.min(r.w(), Math.round(r.w() * Math.min(1f, p.getAbsorptionAmount() / max))));
@@ -157,7 +146,7 @@ public final class VitalsHud {
         double mana = Mth.clamp(Math.max(0, d.mana), 0, max);
         // 足りずに撃てなかった直後は帯が光る (SkillClient.manaFlash)
         boolean flash = jp.revati.skyabyss.rpg.client.skill.SkillClient.manaFlash > 0;
-        bar(g, mc.font, r, DROP, 0xFF7FC8F0, (float) (mana / max), 0xFF3C82D2, (int) Math.floor(mana) + "/" + (int) Math.ceil(max), 0xFFEAF4FC, flash);
+        bar(g, mc.font, r, 1, (float) (mana / max), 0, (int) Math.floor(mana) + "/" + (int) Math.ceil(max), flash, false);
         drawGauge(g, mc, p, r);
     }
 
@@ -183,15 +172,15 @@ public final class VitalsHud {
         }
         int fc = color;
         g.drawManaged(() -> {
-            g.fill(x0 - 1, y0 - 1, x0 + w + 1, y0 + 4, EDGE);
-            g.fill(x0, y0, x0 + w, y0 + 3, TROUGH);
+            g.fill(x0, y0, x0 + w + 1, y0 + 4, P_PINK_LO);
+            g.fill(x0 - 1, y0 - 1, x0 + w, y0 + 3, P_BLACK);
             if (k.pips()) {
                 // 点: 数だけ等しく分けた升
                 int gap = 1;
                 int cell = Math.max(1, (w - gap * (k.max - 1)) / k.max);
                 for (int i = 0; i < k.max; i++) {
                     int cx = x0 + i * (cell + gap);
-                    g.fill(cx, y0, Math.min(x0 + w, cx + cell), y0 + 3, i < value ? fc : 0xFF1C2444);
+                    g.fill(cx, y0, Math.min(x0 + w, cx + cell), y0 + 3, i < value ? fc : 0xFF3A3644);
                 }
             } else {
                 int fill = Math.round(w * value / (float) k.max);
@@ -223,25 +212,90 @@ public final class VitalsHud {
         BandHud.airTab(g, mc.font, r, air / (float) max, color, text);
     }
 
-    // 帯の一本: 暗い石板 + 青緑の縁、左に小さな絵、中に割合の色、右に数字
-    private static void bar(GuiGraphics g, Font font, Rect r, String[] icon, int iconColor, float frac, int color, String text, int textColor, boolean flash) {
-        // 塗りだけ先に一度に送り、字はそのあと上に (fill ごとに描き出さない。出る絵は同じ)
+    // ---- 帯 (切り絵の短冊。2026-11-24 に 3 案からユーザーが A を選んだ。docs/design/56 の 5)
+    // 帯ごと (0 = 体力・1 = マナ) の見えている割合と、減った分を遅れて追う影 (減ると 0.3 秒待ってから縮む)
+    private static final float[] SHOWN = {-1f, -1f};
+    private static final float[] GHOST = {-1f, -1f};
+    private static final long[] HOLD = {0L, 0L};
+    private static final long[] LAST = {0L, 0L};
+
+    private static void step(int k, float frac) {
+        long now = net.minecraft.Util.getMillis();
+        float dt = LAST[k] == 0 ? 1f : Math.min(0.1f, (now - LAST[k]) / 1000f);
+        LAST[k] = now;
+        if (SHOWN[k] < 0) {
+            SHOWN[k] = frac;
+            GHOST[k] = frac;
+        }
+        // 見えている割合は速く寄る (増えるときは少し遅く。回復が伸びて見える)
+        float rate = frac > SHOWN[k] ? 6f : 18f;
+        SHOWN[k] += (frac - SHOWN[k]) * Math.min(1f, rate * dt);
+        if (frac >= GHOST[k]) {
+            GHOST[k] = Math.max(frac, SHOWN[k]);
+            HOLD[k] = now + 300;
+        } else if (now > HOLD[k]) {
+            GHOST[k] = Math.max(frac, GHOST[k] - 0.7f * dt);
+        }
+    }
+
+    static final int P_BLACK = 0xFF181722;
+    static final int P_PINK = 0xFFE45A9C;
+    static final int P_PINK_HI = 0xFFF89CD2;
+    static final int P_PINK_LO = 0xFF8C2C60;
+    static final int P_CREAM = 0xFFECE4D6;
+    static final int P_CREAM_LO = 0xFFC9BFAE;
+    static final int P_ON = 0xFFFFF6EA;
+
+    // 斜めの一行 (平行四辺形の帯の一行。右へ傾ける: 上の行ほど右へずれる)
+    static void slantRow(GuiGraphics g, int x0, int x1, int y, int h, int row, int color) {
+        int off = (h - 1 - row) / 3;
+        g.fill(x0 + off, y + row, x1 + off, y + row + 1, color);
+    }
+
+    // 帯の一本: 右へ傾けた黒い紙の短冊 (下に濃い桃色の影)、左の端に斜めの筋、中に塗り (体力 = 桃色・マナ = 生成り)。
+    // 減った分は影の色で残って遅れて縮む。四分の一以下は塗りが脈打つ。打たれた・足りなかった瞬間は紙が生成りに光る。数は右寄せで縁取り
+    private static void bar(GuiGraphics g, Font font, Rect r, int k, float frac, int status, String text, boolean flash, boolean low) {
+        step(k, Mth.clamp(frac, 0f, 1f));
+        float shown = Mth.clamp(SHOWN[k], 0f, 1f);
+        float ghost = Mth.clamp(GHOST[k], 0f, 1f);
+        // 毒・衰弱・凍えは体力の塗りをその色に
+        boolean statusColor = k == 0 && status != 0;
+        int base = k == 0 ? (statusColor ? status : P_PINK) : P_CREAM;
+        if (low && !statusColor) {
+            float pulse = 0.5f + 0.5f * (float) Math.sin(net.minecraft.Util.getMillis() / 130.0);
+            base = scale(P_PINK, 0.8f + 0.35f * pulse);
+        }
+        final int fillC = base;
+        final int fillHi = k == 0 ? (statusColor ? scale(status, 1.25f) : P_PINK_HI) : P_ON;
+        final int ghostC = k == 0 ? P_ON : P_PINK_HI;
+        int x = r.x();
+        int y = r.y();
+        int w = r.w();
+        int h = r.h();
         g.drawManaged(() -> {
-            g.fill(r.x(), r.y(), r.right(), r.bottom(), flash ? 0xFFE9E3D4 : 0xFF05070F);
-            g.fill(r.x() + 1, r.y() + 1, r.right() - 1, r.bottom() - 1, SLAB);
-            drawIcon(g, icon, r.x() + 3, r.y() + (r.h() - icon.length) / 2, iconColor);
-            int bx = r.x() + 12;
-            int bw = r.w() - 12 - 1;
-            g.fill(bx, r.y() + 1, bx + bw, r.bottom() - 1, TROUGH);
-            int fill = Mth.clamp(Math.round(bw * Mth.clamp(frac, 0f, 1f)), frac > 0f ? 1 : 0, bw);
-            if (fill > 0) {
-                g.fill(bx, r.y() + 1, bx + fill, r.bottom() - 1, color);
-                // 上辺に明るい一段 (石板に彫った段の感じ)
-                g.fill(bx, r.y() + 1, bx + fill, r.y() + 2, scale(color, 1.25f));
+            for (int row = 0; row < h; row++) {
+                slantRow(g, x + 1, x + w + 1, y + 1, h, row, P_PINK_LO);
+            }
+            for (int row = 0; row < h; row++) {
+                slantRow(g, x, x + w, y, h, row, flash ? P_CREAM : P_BLACK);
+            }
+            int bx = x + 6;
+            int bw = w - 8;
+            int gEnd = Math.round(bw * ghost);
+            int sEnd = Math.round(bw * shown);
+            for (int row = 1; row < h - 1; row++) {
+                if (gEnd > sEnd) {
+                    slantRow(g, bx + sEnd, bx + gEnd, y, h, row, ghostC);
+                }
+                if (sEnd > 0) {
+                    slantRow(g, bx, bx + sEnd, y, h, row, row == 1 ? fillHi : fillC);
+                }
+            }
+            for (int row = 0; row < h; row++) {
+                slantRow(g, x + 2, x + 4, y, h, row, k == 0 ? P_PINK : P_CREAM_LO);
             }
         });
-        // 数は黒の縁取り (どの色の帯の上でも読めるように)
-        BandHud.outlined(g, font, text, r.right() - 3 - font.width(text), r.y() + 1, textColor);
+        BandHud.outlined(g, font, text, x + w - 2 - font.width(text), y + 1, P_ON);
     }
 
     private static int scale(int argb, float k) {

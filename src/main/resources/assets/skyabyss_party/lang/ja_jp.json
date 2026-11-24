@@ -73,6 +73,8 @@
   "gui.skyabyss.party.finder.mine_none": "目的を選んで「募集する」を押すと、一覧に出る",
   "gui.skyabyss.party.finder.mine": "募集中: %s（入った人はそのまま仲間になる）",
   "gui.skyabyss.party.finder.list": "募集の一覧（%s）",
+  "gui.skyabyss.party.finder.posted": "募集中",
+  "gui.skyabyss.party.finder.count": "募集 %s",
   "gui.skyabyss.party.finder.empty": "いまは募集がない。自分で出してみよう",
   "gui.skyabyss.party.finder.row": "%s/%s Lv%s",
   "gui.skyabyss.party.finder.in_party": "パーティーにいるあいだは、ほかの募集に加われない",

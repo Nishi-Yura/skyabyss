@@ -63,9 +63,9 @@ public final class MidBossBar {
         g.blit(ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/boss/" + look.icon() + "_icon.png"), x, y, 0, 0, ICON, ICON, ICON, ICON);
         g.drawString(mc.font, boss.getName(), x + ICON + 4, y + 4, 0xFFFFFF, true);
         int by = y + ICON + 2;
-        // 板: 青緑の縁 + 暗い石 + 帯
-        g.fill(x, by, x + WIDTH, by + BAR_H, 0xFFC9A85C);
-        g.fill(x + 1, by + 1, x + WIDTH - 1, by + BAR_H - 1, 0xFF0A0E1E);
+        // 切り絵 (docs/design/56 の 5): 黒い紙に右下の濃い桃色の影
+        g.fill(x + 1, by + 1, x + WIDTH + 1, by + BAR_H + 1, 0xFF8C2C60);
+        g.fill(x, by, x + WIDTH, by + BAR_H, 0xFF181722);
         float p = Math.max(0f, Math.min(1f, boss.getProgress()));
         int track = WIDTH - 4;
         int fill = Math.round(track * p);

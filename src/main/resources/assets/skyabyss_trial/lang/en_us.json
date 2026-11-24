@@ -374,6 +374,8 @@
   "gui.skyabyss.trial.tab.vow": "Vows",
   "gui.skyabyss.trial.tab.how": "Guide",
   "gui.skyabyss.shrine.go": "Cross with party",
+  "gui.skyabyss.shrine.shards_label": "Shards",
+  "gui.skyabyss.shrine.go_confirm": "Again",
   "gui.skyabyss.shrine.go_tip": "Press when the whole party stands by the pad. After a 5 second count everyone is sent to the route (needs one song shard)",
   "gui.skyabyss.shrine.vow_head": "Vow level %s · materials %s%% (up to %s) · best %s",
   "gui.skyabyss.shrine.vow_tip": "Click to take or lift",

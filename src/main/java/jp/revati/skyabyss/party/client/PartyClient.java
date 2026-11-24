@@ -125,7 +125,7 @@ public final class PartyClient {
         int x = r.x() + 2;
         int y = r.y() + 2;
         for (PartyNetwork.Member m : others(mc)) {
-            g.fill(x - 2, y - 2, x + W + 2, y + 15, 0x60000000);
+            g.fill(x - 2, y - 2, x + W + 2, y + 15, 0xE8181722);
             int color = !m.online() ? 0x707070 : m.sameDim() ? 0xE8F4FF : 0x9AA6B8;
             // 順路の段 (docs/design/32 の 6 章): 同じ背にいる仲間には、いまの段の番号を添える
             String step = m.sameDim() && jp.revati.skyabyss.client.trial.TrialBoardClient.routeActive(mc)
@@ -135,7 +135,7 @@ public final class PartyClient {
             jp.revati.skyabyss.client.ui.FitText.draw(g, font, net.minecraft.network.chat.Component.literal(name), x, y, W - 28, color, true);
             if (m.online()) {
                 String lv = "Lv" + m.level();
-                g.drawString(font, lv, x + W - font.width(lv), y, 0x8FD0FF, true);
+                g.drawString(font, lv, x + W - font.width(lv), y, 0xECE4D6, true);
                 float f = m.maxHealth() <= 0 ? 0 : Mth.clamp(m.health() / m.maxHealth(), 0, 1);
                 g.fill(x, y + 10, x + W, y + 13, 0xFF3A1E22);
                 int hp = f > 0.5f ? 0xFF6BD06B : f > 0.25f ? 0xFFE8C04A : 0xFFE05050;
@@ -145,7 +145,7 @@ public final class PartyClient {
             if (away != null) {
                 int tw = Math.min(font.width(away), W);
                 int x0 = x + W - tw;
-                g.fill(x0 - 2, y + 15, x + W + 2, y + 25, 0x60000000);
+                g.fill(x0 - 2, y + 15, x + W + 2, y + 25, 0xE8181722);
                 g.drawString(font, net.minecraft.locale.Language.getInstance().getVisualOrder(font.substrByWidth(away, tw)), x0, y + 16, 0x9AA6B8, true);
             }
             y += rowHeight(m);

@@ -59,9 +59,13 @@ public class DeepChoiceScreen extends Screen {
         PickStage.backdrop(g, fit, width, height);
         PickStage.title(g, font, title, null);
         int hot = PickStage.at(mx, my, 2);
+        PickStage.hover(hot);
         for (int i = 0; i < 2; i++) {
             boolean deep = i == 1;
             boolean lift = i == hot;
+            if (!PickStage.deal(g, i, 2)) {
+                continue;
+            }
             PickStage.card(g, i, 2, lift, lift);
             int[] c = PickStage.center(i, 2, lift);
             if (deep) {
@@ -85,6 +89,7 @@ public class DeepChoiceScreen extends Screen {
                 }
                 y += 3;
             }
+            PickStage.undeal(g);
         }
         // 右の列: 層の気配と、仲間への手引き
         int rx = PickStage.RIGHT_X;

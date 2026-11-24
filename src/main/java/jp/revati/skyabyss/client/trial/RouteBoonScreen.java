@@ -171,9 +171,13 @@ public class RouteBoonScreen extends Screen implements jp.revati.skyabyss.client
         PickStage.backdrop(g, fit, width, height);
         int left = (int) Math.max(0, Math.ceil((until - System.currentTimeMillis()) / 1000.0));
         PickStage.title(g, font, Component.translatable("gui.skyabyss.boon.title"), Component.translatable("gui.skyabyss.boon.choose", left));
+        PickStage.hover(hover);
         for (int i = 0; i < 2; i++) {
             RouteBoons.Boon b = boons[i];
             boolean on = hover == i;
+            if (!PickStage.deal(g, i, 2)) {
+                continue;
+            }
             PickStage.card(g, i, 2, on, on);
             int[] in = PickStage.inner(i, 2, on);
             int x = in[0];
@@ -192,6 +196,7 @@ public class RouteBoonScreen extends Screen implements jp.revati.skyabyss.client
                 g.drawString(font, lines.get(l), x, Golden.textY(ly, Golden.ROW), argb(1f, on ? 0xFFF6EA : Paper.INK), false);
                 ly += Golden.ROW;
             }
+            PickStage.undeal(g);
         }
         int ry = 44;
         for (FormattedCharSequence line : jp.revati.skyabyss.client.ui.JpWrap.split(font, Component.translatable("gui.skyabyss.boon.help"), PickStage.RIGHT_W)) {

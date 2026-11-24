@@ -1399,6 +1399,8 @@ public final class ShotRunner {
             case "shrine_demo_codex", "shrine_demo_vow", "shrine_demo_rewards", "shrine_demo_how" -> () -> new jp.revati.skyabyss.client.trial.TrialBoardScreen(trialDemo(true))
                     .page(java.util.List.of("codex", "vow", "rewards", "how").indexOf(name.substring("shrine_demo_".length())) + 1);
             case "trial_board_demo" -> () -> new jp.revati.skyabyss.client.trial.TrialBoardScreen(trialDemo(false));
+            case "shrine_demo_hover" -> () -> new jp.revati.skyabyss.client.trial.TrialBoardScreen(trialDemo(true)).demoHover(1);
+            case "shrine_demo_armed" -> () -> new jp.revati.skyabyss.client.trial.TrialBoardScreen(trialDemo(true)).demoArmed();
             case "deep_choice" -> () -> new jp.revati.skyabyss.client.dungeon.DeepChoiceScreen(new jp.revati.skyabyss.dungeon.DeepChoice.Open("deep_fort",
                     jp.revati.skyabyss.dungeon.DungeonMood.values()[0].nameKey(), jp.revati.skyabyss.dungeon.DungeonMood.values()[0].descKey()));
             // 転生の画面 (魂盤・ビルドを組み直す)。開くまえに cmd skyabyss dev rebirth <n> で転生の数を入れておく
