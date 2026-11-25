@@ -1,0 +1,428 @@
+# ember の土地全体の書き出し。gen_land_dump.py が書く (22 点を回り、40 区画を書き出す)
+world land_ember continent
+size 960 540
+timeout 6720
+render 8
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd skyabyss dev opening build
+wait 100
+cmd gamemode creative
+cmd tp @s -1224 200 1008
+waitchunks 300
+wait 500
+cmd tp @s -894 200 1008
+waitchunks 300
+wait 500
+cmd tp @s -564 200 678
+waitchunks 300
+wait 500
+cmd tp @s -564 200 1008
+waitchunks 300
+wait 500
+cmd tp @s -564 200 1338
+waitchunks 300
+wait 500
+cmd tp @s -234 200 678
+waitchunks 300
+wait 500
+cmd tp @s -234 200 1008
+waitchunks 300
+wait 500
+cmd tp @s -234 200 1338
+waitchunks 300
+wait 500
+cmd tp @s 96 200 678
+waitchunks 300
+wait 500
+cmd tp @s 96 200 1008
+waitchunks 300
+wait 500
+cmd tp @s 96 200 1338
+waitchunks 300
+wait 500
+cmd tp @s 426 200 348
+waitchunks 300
+wait 500
+cmd tp @s 426 200 678
+waitchunks 300
+wait 500
+cmd tp @s 426 200 1008
+waitchunks 300
+wait 500
+cmd tp @s 426 200 1338
+waitchunks 300
+wait 500
+cmd tp @s 756 200 348
+waitchunks 300
+wait 500
+cmd tp @s 756 200 678
+waitchunks 300
+wait 500
+cmd tp @s 756 200 1008
+waitchunks 300
+wait 500
+cmd tp @s 756 200 1338
+waitchunks 300
+wait 500
+cmd tp @s 1086 200 678
+waitchunks 300
+wait 500
+cmd tp @s 1086 200 1008
+waitchunks 300
+wait 500
+cmd tp @s 1086 200 1338
+waitchunks 300
+wait 500
+cmd tp @s -1224 200 1008
+waitchunks 200
+wait 120
+cmd tp @s -894 200 1008
+waitchunks 200
+wait 120
+cmd tp @s -564 200 678
+waitchunks 200
+wait 120
+cmd tp @s -564 200 1008
+waitchunks 200
+wait 120
+cmd tp @s -564 200 1338
+waitchunks 200
+wait 120
+cmd tp @s -234 200 678
+waitchunks 200
+wait 120
+cmd tp @s -234 200 1008
+waitchunks 200
+wait 120
+cmd tp @s -234 200 1338
+waitchunks 200
+wait 120
+cmd tp @s 96 200 678
+waitchunks 200
+wait 120
+cmd tp @s 96 200 1008
+waitchunks 200
+wait 120
+cmd tp @s 96 200 1338
+waitchunks 200
+wait 120
+cmd tp @s 426 200 348
+waitchunks 200
+wait 120
+cmd tp @s 426 200 678
+waitchunks 200
+wait 120
+cmd tp @s 426 200 1008
+waitchunks 200
+wait 120
+cmd tp @s 426 200 1338
+waitchunks 200
+wait 120
+cmd tp @s 756 200 348
+waitchunks 200
+wait 120
+cmd tp @s 756 200 678
+waitchunks 200
+wait 120
+cmd tp @s 756 200 1008
+waitchunks 200
+wait 120
+cmd tp @s 756 200 1338
+waitchunks 200
+wait 120
+cmd tp @s 1086 200 678
+waitchunks 200
+wait 120
+cmd tp @s 1086 200 1008
+waitchunks 200
+wait 120
+cmd tp @s 1086 200 1338
+waitchunks 200
+wait 120
+cmd gamemode spectator
+cmd forceload remove all
+cmd forceload add -1280 768 -1025 1023
+camera -1152 220 896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_-5_3 -1280 24 768 -1025 250 1023
+waitdump
+cmd forceload remove all
+cmd forceload add -1280 1024 -1025 1279
+camera -1152 220 1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_-5_4 -1280 24 1024 -1025 250 1279
+waitdump
+cmd forceload remove all
+cmd forceload add -1024 768 -769 1023
+camera -896 220 896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_-4_3 -1024 24 768 -769 250 1023
+waitdump
+cmd forceload remove all
+cmd forceload add -1024 1024 -769 1279
+camera -896 220 1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_-4_4 -1024 24 1024 -769 250 1279
+waitdump
+cmd forceload remove all
+cmd forceload add -768 768 -513 1023
+camera -640 220 896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_-3_3 -768 24 768 -513 250 1023
+waitdump
+cmd forceload remove all
+cmd forceload add -768 1024 -513 1279
+camera -640 220 1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_-3_4 -768 24 1024 -513 250 1279
+waitdump
+cmd forceload remove all
+cmd forceload add -768 1280 -513 1535
+camera -640 220 1408 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_-3_5 -768 24 1280 -513 250 1535
+waitdump
+cmd forceload remove all
+cmd forceload add -512 768 -257 1023
+camera -384 220 896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_-2_3 -512 24 768 -257 250 1023
+waitdump
+cmd forceload remove all
+cmd forceload add -512 1024 -257 1279
+camera -384 220 1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_-2_4 -512 24 1024 -257 250 1279
+waitdump
+cmd forceload remove all
+cmd forceload add -512 1280 -257 1535
+camera -384 220 1408 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_-2_5 -512 24 1280 -257 250 1535
+waitdump
+cmd forceload remove all
+cmd forceload add -256 512 -1 767
+camera -128 220 640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_-1_2 -256 24 512 -1 250 767
+waitdump
+cmd forceload remove all
+cmd forceload add -256 768 -1 1023
+camera -128 220 896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_-1_3 -256 24 768 -1 250 1023
+waitdump
+cmd forceload remove all
+cmd forceload add -256 1024 -1 1279
+camera -128 220 1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_-1_4 -256 24 1024 -1 250 1279
+waitdump
+cmd forceload remove all
+cmd forceload add -256 1280 -1 1535
+camera -128 220 1408 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_-1_5 -256 24 1280 -1 250 1535
+waitdump
+cmd forceload remove all
+cmd forceload add 0 512 255 767
+camera 128 220 640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_0_2 0 24 512 255 250 767
+waitdump
+cmd forceload remove all
+cmd forceload add 0 768 255 1023
+camera 128 220 896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_0_3 0 24 768 255 250 1023
+waitdump
+cmd forceload remove all
+cmd forceload add 0 1024 255 1279
+camera 128 220 1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_0_4 0 24 1024 255 250 1279
+waitdump
+cmd forceload remove all
+cmd forceload add 0 1280 255 1535
+camera 128 220 1408 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_0_5 0 24 1280 255 250 1535
+waitdump
+cmd forceload remove all
+cmd forceload add 256 256 511 511
+camera 384 220 384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_1_1 256 24 256 511 250 511
+waitdump
+cmd forceload remove all
+cmd forceload add 256 512 511 767
+camera 384 220 640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_1_2 256 24 512 511 250 767
+waitdump
+cmd forceload remove all
+cmd forceload add 256 768 511 1023
+camera 384 220 896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_1_3 256 24 768 511 250 1023
+waitdump
+cmd forceload remove all
+cmd forceload add 256 1024 511 1279
+camera 384 220 1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_1_4 256 24 1024 511 250 1279
+waitdump
+cmd forceload remove all
+cmd forceload add 256 1280 511 1535
+camera 384 220 1408 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_1_5 256 24 1280 511 250 1535
+waitdump
+cmd forceload remove all
+cmd forceload add 512 256 767 511
+camera 640 220 384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_2_1 512 24 256 767 250 511
+waitdump
+cmd forceload remove all
+cmd forceload add 512 512 767 767
+camera 640 220 640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_2_2 512 24 512 767 250 767
+waitdump
+cmd forceload remove all
+cmd forceload add 512 768 767 1023
+camera 640 220 896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_2_3 512 24 768 767 250 1023
+waitdump
+cmd forceload remove all
+cmd forceload add 512 1024 767 1279
+camera 640 220 1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_2_4 512 24 1024 767 250 1279
+waitdump
+cmd forceload remove all
+cmd forceload add 512 1280 767 1535
+camera 640 220 1408 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_2_5 512 24 1280 767 250 1535
+waitdump
+cmd forceload remove all
+cmd forceload add 768 256 1023 511
+camera 896 220 384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_3_1 768 24 256 1023 250 511
+waitdump
+cmd forceload remove all
+cmd forceload add 768 512 1023 767
+camera 896 220 640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_3_2 768 24 512 1023 250 767
+waitdump
+cmd forceload remove all
+cmd forceload add 768 768 1023 1023
+camera 896 220 896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_3_3 768 24 768 1023 250 1023
+waitdump
+cmd forceload remove all
+cmd forceload add 768 1024 1023 1279
+camera 896 220 1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_3_4 768 24 1024 1023 250 1279
+waitdump
+cmd forceload remove all
+cmd forceload add 768 1280 1023 1535
+camera 896 220 1408 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_3_5 768 24 1280 1023 250 1535
+waitdump
+cmd forceload remove all
+cmd forceload add 768 1536 1023 1791
+camera 896 220 1664 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_3_6 768 24 1536 1023 250 1791
+waitdump
+cmd forceload remove all
+cmd forceload add 1024 768 1279 1023
+camera 1152 220 896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_4_3 1024 24 768 1279 250 1023
+waitdump
+cmd forceload remove all
+cmd forceload add 1024 1024 1279 1279
+camera 1152 220 1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_4_4 1024 24 1024 1279 250 1279
+waitdump
+cmd forceload remove all
+cmd forceload add 1024 1280 1279 1535
+camera 1152 220 1408 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_4_5 1024 24 1280 1279 250 1535
+waitdump
+cmd forceload remove all
+cmd forceload add 1024 1536 1279 1791
+camera 1152 220 1664 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_4_6 1024 24 1536 1279 250 1791
+waitdump
+cmd forceload remove all
+cmd forceload add 1280 768 1535 1023
+camera 1408 220 896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_5_3 1280 24 768 1535 250 1023
+waitdump
+cmd forceload remove all
+cmd forceload add 1280 1024 1535 1279
+camera 1408 220 1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump ember_5_4 1280 24 1024 1535 250 1279
+waitdump
+cmd forceload remove all

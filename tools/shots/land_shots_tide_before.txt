@@ -1,0 +1,63 @@
+# tide の土地の比べ (前)。gen_land_shots.py が書く
+world land_tide continent
+size 1600 900
+timeout 2400
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd gamemode spectator
+hud off
+camera 1400 185 230 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot town
+camera 1413 185 -203 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot massif_0
+camera 1626 185 -119 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot massif_1
+camera 1566 185 -581 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot massif_2
+camera 1563 185 734 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot waterfall_0
+camera 1472 185 352 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot arch_0
+camera 1724 185 658 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot arch_1
+camera 1370 185 -582 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot hamlet_0

@@ -1,0 +1,51 @@
+# meadow の土地の比べ (前)。gen_land_shots.py が書く
+world land_meadow continent
+size 1600 900
+timeout 2400
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd gamemode spectator
+hud off
+camera -165 185 332 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot massif_0
+camera 115 185 440 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot massif_1
+camera -478 185 452 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot massif_2
+camera 46 185 187 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot waterfall_0
+camera -379 185 325 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot arch_0
+camera -1042 188 833 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot arch_1

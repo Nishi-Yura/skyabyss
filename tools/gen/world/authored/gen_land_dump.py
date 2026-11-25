@@ -16,7 +16,7 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[4]
-REGIONS = {"whale": 2, "tide": 3, "storm": 4, "ember": 5}
+REGIONS = {"meadow": 0, "outskirts": 1, "whale": 2, "tide": 3, "storm": 4, "ember": 5}
 Y0, Y1 = 24, 250
 STEP = 330
 

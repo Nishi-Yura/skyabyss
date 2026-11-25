@@ -1,0 +1,27 @@
+# outskirts の土地の比べ (後)。gen_land_shots.py が書く
+world land_outskirts_after continent
+size 1600 900
+timeout 2400
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd skyabyss dev opening build
+wait 100
+cmd gamemode creative
+cmd tp @s -1645 200 1608
+waitchunks 300
+wait 300
+cmd gamemode spectator
+hud off
+camera -1575 185 1678 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot massif_0

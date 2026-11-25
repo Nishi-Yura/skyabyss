@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import gzip
+import os
 import json
 import math
 import struct
@@ -20,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT / "tools" / "structure"))
 import sbd  # noqa: E402
 
-OUT_DIR = ROOT / "src" / "main" / "resources" / "data" / "skyabyss" / "continent" / "authored"
+OUT_DIR = Path(os.environ["SKYABYSS_AUTHORED_OUT"]) if os.environ.get("SKYABYSS_AUTHORED_OUT") else ROOT / "src" / "main" / "resources" / "data" / "skyabyss" / "continent" / "authored"  # 仮の置き場 (ゲームが動いている間に書くとき)
 
 # 自然の地面・石・草木 (これ以外が列にあれば、人の作った物 = 町・見どころ・道の飾り)
 NATURAL_PREFIX = (
@@ -37,6 +38,13 @@ NATURAL_PREFIX = (
     "minecraft:bush", "minecraft:seagrass", "minecraft:kelp", "minecraft:vine", "minecraft:glow_lichen", "minecraft:mushroom",
     "minecraft:brown_mushroom", "minecraft:red_mushroom", "minecraft:pointed_dripstone", "minecraft:dripstone_block",
     "minecraft:dirt_path", "minecraft:packed_mud", "minecraft:mangrove_roots", "minecraft:hanging_roots",
+    # ほかの土地の自然の地面 (荒野の素焼きと赤い砂・玄武岩・黒い石、嵐の高地の氷、鉱石、紫水晶の晶洞)
+    "minecraft:terracotta", "minecraft:white_terracotta", "minecraft:orange_terracotta", "minecraft:yellow_terracotta",
+    "minecraft:red_terracotta", "minecraft:brown_terracotta", "minecraft:light_gray_terracotta", "minecraft:red_sand",
+    "minecraft:basalt", "minecraft:blackstone", "minecraft:smooth_basalt", "minecraft:sandstone", "minecraft:gold_ore",
+    "minecraft:lapis_ore", "minecraft:emerald_ore", "minecraft:redstone_ore", "minecraft:diamond_ore", "minecraft:tall_seagrass",
+    "minecraft:packed_ice", "minecraft:ice", "minecraft:blue_ice", "minecraft:infested_stone", "minecraft:amethyst_block",
+    "minecraft:budding_amethyst", "minecraft:magma_block", "minecraft:powder_snow",
 )
 
 

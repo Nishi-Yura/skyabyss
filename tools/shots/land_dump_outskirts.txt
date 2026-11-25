@@ -1,0 +1,75 @@
+# outskirts の土地全体の書き出し。gen_land_dump.py が書く (4 点を回り、5 区画を書き出す)
+world land_outskirts continent
+size 960 540
+timeout 1440
+render 8
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd skyabyss dev opening build
+wait 100
+cmd gamemode creative
+cmd tp @s -1940 200 1752
+waitchunks 300
+wait 500
+cmd tp @s -1610 200 1092
+waitchunks 300
+wait 500
+cmd tp @s -1610 200 1422
+waitchunks 300
+wait 500
+cmd tp @s -1610 200 1752
+waitchunks 300
+wait 500
+cmd tp @s -1940 200 1752
+waitchunks 200
+wait 120
+cmd tp @s -1610 200 1092
+waitchunks 200
+wait 120
+cmd tp @s -1610 200 1422
+waitchunks 200
+wait 120
+cmd tp @s -1610 200 1752
+waitchunks 200
+wait 120
+cmd gamemode spectator
+cmd forceload remove all
+cmd forceload add -2048 1536 -1793 1791
+camera -1920 220 1664 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump outskirts_-8_6 -2048 24 1536 -1793 250 1791
+waitdump
+cmd forceload remove all
+cmd forceload add -2048 1792 -1793 2047
+camera -1920 220 1920 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump outskirts_-8_7 -2048 24 1792 -1793 250 2047
+waitdump
+cmd forceload remove all
+cmd forceload add -1792 1536 -1537 1791
+camera -1664 220 1664 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump outskirts_-7_6 -1792 24 1536 -1537 250 1791
+waitdump
+cmd forceload remove all
+cmd forceload add -1792 1792 -1537 2047
+camera -1664 220 1920 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump outskirts_-7_7 -1792 24 1792 -1537 250 2047
+waitdump
+cmd forceload remove all
+cmd forceload add -1536 1024 -1281 1279
+camera -1408 220 1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump outskirts_-6_4 -1536 24 1024 -1281 250 1279
+waitdump
+cmd forceload remove all

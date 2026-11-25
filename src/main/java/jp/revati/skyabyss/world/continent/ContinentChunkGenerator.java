@@ -546,7 +546,9 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
     @Override
     public int getBaseHeight(int x, int z, Heightmap.Types type, LevelHeightAccessor level, RandomState random) {
         if (ContinentAuthored.chunk(x >> 4, z >> 4)) {
-            return ContinentAuthored.top(x, z) + 1;
+            // 海の底・地面の高さは組んだ地面 (木・草・雪の層を除く)。ほかは一番上の固いもの
+            boolean floor = type == Heightmap.Types.OCEAN_FLOOR || type == Heightmap.Types.OCEAN_FLOOR_WG;
+            return (floor ? ContinentAuthored.ground(x, z) : ContinentAuthored.top(x, z)) + 1;
         }
         int top = ContinentMap.get().surface(x, z);
         if (type == Heightmap.Types.OCEAN_FLOOR || type == Heightmap.Types.OCEAN_FLOOR_WG) {

@@ -1,0 +1,63 @@
+# ember の土地の比べ (前)。gen_land_shots.py が書く
+world land_ember continent
+size 1600 900
+timeout 2400
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd gamemode spectator
+hud off
+camera -230 185 1170 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot town
+camera -423 185 1239 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot massif_0
+camera -117 185 1329 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot massif_1
+camera 562 196 1067 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot massif_2
+camera -244 185 1373 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot arch_0
+camera 968 185 1014 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot arch_1
+camera 654 185 646 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot hamlet_0
+camera 990 185 1090 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot hamlet_1

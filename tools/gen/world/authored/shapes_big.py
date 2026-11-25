@@ -44,7 +44,7 @@ def _top_of(v, x, z, y_hi):
     return y_hi - 80
 
 
-def massif(v, cx, base, cz, rnd: random.Random, radius=24.0, height=50.0, peaks=3, steep=False):
+def massif(v, cx, base, cz, rnd: random.Random, radius=24.0, height=50.0, peaks=3, steep=False, hold=None):
     """岩山 (2026-11-25 の 3 回目): 盛り上がった裾野から、切り立った壁の岩の柱の群れが立つ (岩塔・トア)。
     - 裾野: その場の地面から、真ん中へなだらかに盛る (縁に段を作らない)。岩のそばは崩れ石
     - 柱: 壁はほぼ垂直、頂は平らに近く、高さは柱ごとにばらつく。縦の割れ目 (節理) で柱に分かれる
@@ -68,6 +68,8 @@ def massif(v, cx, base, cz, rnd: random.Random, radius=24.0, height=50.0, peaks=
             top = _top_of(v, x, z, int(peak_foot) + 14)
             t = (1 - d) ** 1.4
             t = t * t * (3 - 2 * t)
+            if hold is not None:  # 道・守る所のそばでは裾野を盛らない (hold(x, z) = 0..1)
+                t *= hold(x, z)
             wob = 0.7 + 0.6 * float(value_noise(np.array(float(x)), np.array(float(z)), 13.0, salt))
             bump = 2.0 * (float(value_noise(np.array(float(x)), np.array(float(z)), 5.0, salt + 4)) - 0.5) * t
             target = int(round(top + (peak_foot - top) * t * wob + bump))

@@ -227,6 +227,9 @@ python tools/audit/check_light.py        # 都の街路・広場・階段の明�
 ## 前もって組む土地 (`world/continent/ContinentAuthored`、試作)
 
 - 土地全体: `python -I tools/gen/world/authored/gen_land_dump.py whale` → `SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/land_dump_whale.txt -PshotsName=land_whale`（約 45 分）→ `python -I -u tools/gen/world/authored/land.py whale [tx_tz ...]`（約 7 分）→ `authored/whale/<tx>_<tz>.bin` と `index.json`。比べは `gen_land_shots.py whale` の台本 2 本と `gen_land_shots.py whale sheet`。
+- 岩鯨より後の土地は `land.py` の `LANDS` で `style: relief`（書き出しの地面・木・草を列ごと上下させて起伏をつけ、岩山・池・岩の門は `subst` で土地の石に読み替える）。撮る場所は `gen_land_shots.py` が `run/shots/land_<土地>/feats.json` から選ぶ。二つの土地にまたがる区画は、ゲームが列ごとにその地域の土地の列を使う。
+- 確かめ（ゲームなし）: `python -I tools/gen/world/authored/check_land.py <土地> ...`（道の 2 段以上・自己テストの穴の見本の所）。ゲームが動いている間に組むときは `SKYABYSS_AUTHORED_OUT=<仮の置き場>` で書いてから写す（動いているゲームがあると processResources が失敗する）。
+- 組み直したあとに後の絵を撮り直すときは、先に `run/shots/land_<土地>_after/saves/land_<土地>_after` を消す（残っていると前の地形のまま）。
 - 書き出しの世界で外れの集落が建たないときは、木の房 (歪んだ菌の塊) を地面と見ていないか (`SiteJob.solidGround`) を見る。
 - 書き出し `SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/whale_authored_dump.txt -PshotsName=whale_authored` → `python -I tools/gen/world/authored/whale_town.py` → `data/skyabyss/continent/authored/whale_town.sbd`（`index.json` に名前）。ゲームが読むのは環境変数 `SKYABYSS_AUTHORED=1` のときだけ（試作のあいだ）。上から見る `preview.py <.sbd> <png>`、比べの台本 `gen_whale_shots.py`、比べ絵 `cmp_sheet.py`。
 - 書き出しは観戦者だと見どころが建たない（創造で町に立って待つ）。範囲は `forceload` を 256 チャンク以下ずつ。書き出しの header の `sites` が、建て直さない町・見どころ・祠の記録。

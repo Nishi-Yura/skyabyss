@@ -1,0 +1,90 @@
+# storm の土地の比べ (後)。gen_land_shots.py が書く
+world land_storm_after continent
+size 1600 900
+timeout 2400
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd skyabyss dev opening build
+wait 100
+cmd gamemode creative
+cmd tp @s -1180 200 -100
+waitchunks 300
+wait 300
+cmd tp @s -1150 200 370
+waitchunks 300
+wait 300
+cmd tp @s -1100 200 456
+waitchunks 300
+wait 300
+cmd tp @s -1544 200 894
+waitchunks 300
+wait 300
+cmd tp @s -839 200 -424
+waitchunks 300
+wait 300
+cmd tp @s -1306 200 838
+waitchunks 300
+wait 300
+cmd tp @s -936 200 -1060
+waitchunks 300
+wait 300
+cmd tp @s -1412 200 920
+waitchunks 300
+wait 300
+cmd gamemode spectator
+hud off
+camera -1110 238 -30 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot town
+camera -1080 231 440 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot massif_0
+camera -1030 229 526 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot massif_1
+camera -1474 185 964 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot massif_2
+camera -769 301 -354 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot waterfall_0
+camera -1236 213 908 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot arch_0
+camera -866 205 -990 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot hamlet_0
+camera -1342 185 990 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot hamlet_1

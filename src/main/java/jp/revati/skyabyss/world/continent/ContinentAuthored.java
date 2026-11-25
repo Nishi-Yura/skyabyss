@@ -123,17 +123,32 @@ public final class ContinentAuthored {
             return last;
         }
 
+        // 立てる地面の高さ。上に薄い岩 (道をまたぐ岩の門・張り出し、厚さ 12 まで) が浮いているときは、その下の地面
         int ground(int x, int z) {
             int o = col(x, z);
             int n = runs[o] & 0xFFFF;
             int yy = y0;
             int last = y0 - 1;
+            int below = y0 - 1; // 4 以上の空きの下の地面
+            int gapFrom = Integer.MIN_VALUE; // 今の地面の塊が始まった高さ (空き 4 以上のあと)
+            int air = 0;
             for (int i = 0; i < n; i++) {
                 int len = runs[o + 1 + i * 2] & 0xFFFF;
-                if (ground[runs[o + 2 + i * 2] & 0xFFFF]) {
+                int id = runs[o + 2 + i * 2] & 0xFFFF;
+                if (ground[id]) {
+                    if (air >= 4 && last >= y0) {
+                        below = last;
+                        gapFrom = yy;
+                    }
                     last = yy + len - 1;
+                    air = 0;
+                } else if (palette[id].isAir()) {
+                    air += len;
                 }
                 yy += len;
+            }
+            if (gapFrom != Integer.MIN_VALUE && last - gapFrom < 24) {
+                return below;
             }
             return last;
         }
@@ -164,7 +179,15 @@ public final class ContinentAuthored {
                 || s.is(net.minecraft.tags.BlockTags.SAND) || s.is(Blocks.GRAVEL) || s.is(Blocks.MOSS_BLOCK)
                 || s.is(Blocks.SNOW_BLOCK) || s.is(Blocks.CALCITE) || s.is(Blocks.MOSSY_COBBLESTONE) || s.is(Blocks.COBBLESTONE)
                 || s.is(Blocks.DIRT_PATH) || s.is(Blocks.PACKED_MUD) || s.is(Blocks.STONE_BRICKS) || s.is(Blocks.MOSSY_STONE_BRICKS)
-                || s.is(Blocks.CRACKED_STONE_BRICKS) || s.is(Blocks.CLAY) || s.is(Blocks.MUD) || s.is(Blocks.BEDROCK);
+                || s.is(Blocks.CRACKED_STONE_BRICKS) || s.is(Blocks.CLAY) || s.is(Blocks.MUD) || s.is(Blocks.BEDROCK)
+                // 土地ごとの岩 (潮の浜の砂岩・砂漠の素焼き・灰の荒野の黒い石と玄武岩)
+                || s.is(Blocks.SANDSTONE) || s.is(Blocks.SMOOTH_SANDSTONE) || s.is(Blocks.CUT_SANDSTONE) || s.is(Blocks.RED_SANDSTONE)
+                || s.is(net.minecraft.tags.BlockTags.TERRACOTTA) || s.is(Blocks.BLACKSTONE) || s.is(Blocks.BASALT)
+                || s.is(Blocks.SMOOTH_BASALT) || s.is(Blocks.COBBLED_DEEPSLATE) || s.is(Blocks.COARSE_DIRT)
+                // 敷石 (都の広場・町の道)
+                || s.is(Blocks.POLISHED_ANDESITE) || s.is(Blocks.POLISHED_DIORITE) || s.is(Blocks.POLISHED_GRANITE) || s.is(Blocks.SMOOTH_STONE)
+                || s.is(Blocks.POLISHED_BLACKSTONE) || s.is(Blocks.POLISHED_BLACKSTONE_BRICKS) || s.is(Blocks.MUD_BRICKS)
+                || s.is(Blocks.POLISHED_DEEPSLATE) || s.is(Blocks.DEEPSLATE_BRICKS) || s.is(Blocks.DEEPSLATE_TILES);
     }
 
     private static volatile List<Land> lands;
@@ -174,7 +197,10 @@ public final class ContinentAuthored {
             return size() > 12;
         }
     };
-    private static final Map<Long, Land> TILE_LAND = new HashMap<>();
+    private static final Map<Long, List<Land>> TILE_LAND = new HashMap<>();
+    // 土地の名前 → 地域 (ContinentMap の番号)。二つの土地にまたがる区画は、列ごとにその地域の土地の列を使う
+    private static final Map<String, Integer> LAND_REGION = Map.of("meadow", ContinentMap.MEADOW, "outskirts", ContinentMap.OUTSKIRTS,
+            "whale", ContinentMap.WHALE, "tide", ContinentMap.TIDE, "storm", ContinentMap.STORM, "ember", ContinentMap.EMBER);
 
     static long key(int tx, int tz) {
         return ((long) tx << 32) ^ (tz & 0xFFFFFFFFL);
@@ -204,17 +230,26 @@ public final class ContinentAuthored {
         int tx = Math.floorDiv(x, TILE);
         int tz = Math.floorDiv(z, TILE);
         long k = key(tx, tz);
-        Land land = TILE_LAND.get(k);
-        if (land == null) {
+        List<Land> owners = TILE_LAND.get(k);
+        if (owners == null) {
             return null;
         }
         synchronized (CACHE) {
             Tile t = CACHE.get(k);
             if (t == null) {
-                t = readTile(land.name, tx, tz);
-                if (t == null) {
+                List<Tile> parts = new ArrayList<>();
+                List<Integer> regions = new ArrayList<>();
+                for (Land land : owners) {
+                    Tile p = readTile(land.name, tx, tz);
+                    if (p != null) {
+                        parts.add(p);
+                        regions.add(LAND_REGION.getOrDefault(land.name, -1));
+                    }
+                }
+                if (parts.isEmpty()) {
                     return null;
                 }
+                t = parts.size() == 1 ? parts.get(0) : merge(parts, regions);
                 CACHE.put(k, t);
             }
             return t;
@@ -324,7 +359,7 @@ public final class ContinentAuthored {
                 JsonArray a = t.getAsJsonArray();
                 long k = key(a.get(0).getAsInt(), a.get(1).getAsInt());
                 land.tiles.put(k, true);
-                TILE_LAND.put(k, land);
+                TILE_LAND.computeIfAbsent(k, q -> new ArrayList<>()).add(land);
             }
             JsonObject sites = o.getAsJsonObject("sites");
             if (sites != null) {
@@ -347,6 +382,65 @@ public final class ContinentAuthored {
             SkyAbyss.LOGGER.error("authored lands: cannot read {}", path, e);
             return null;
         }
+    }
+
+    // 二つ以上の土地の同じ区画を一枚に: 列ごとに、その列の地域の土地の列 (なければ組んだほうの列)
+    static Tile merge(List<Tile> parts, List<Integer> regions) {
+        Tile a = parts.get(0);
+        for (Tile p : parts) {
+            if (p.y0 != a.y0) {
+                SkyAbyss.LOGGER.warn("authored lands: tile {},{} has different bottoms, using one land", a.x0, a.z0);
+                return a;
+            }
+        }
+        List<BlockState> pal = new ArrayList<>();
+        Map<BlockState, Integer> index = new HashMap<>();
+        int[][] remap = new int[parts.size()][];
+        int total = 0;
+        for (int i = 0; i < parts.size(); i++) {
+            Tile p = parts.get(i);
+            remap[i] = new int[p.palette.length];
+            for (int j = 0; j < p.palette.length; j++) {
+                remap[i][j] = index.computeIfAbsent(p.palette[j], s -> {
+                    pal.add(s);
+                    return pal.size() - 1;
+                });
+            }
+            total = Math.max(total, 0) + p.runs.length;
+        }
+        ContinentMap map = ContinentMap.get();
+        int[] off = new int[TILE * TILE];
+        short[] runs = new short[total];
+        int pos = 0;
+        for (int c = 0; c < TILE * TILE; c++) {
+            int region = map.region(a.x0 + c % TILE, a.z0 + c / TILE);
+            int best = -1;
+            for (int i = 0; i < parts.size(); i++) {
+                if (parts.get(i).off[c] >= 0) {
+                    if (best < 0) {
+                        best = i;
+                    }
+                    if (regions.get(i) == region) {
+                        best = i;
+                        break;
+                    }
+                }
+            }
+            if (best < 0) {
+                off[c] = -1;
+                continue;
+            }
+            Tile p = parts.get(best);
+            int o = p.off[c];
+            int n = p.runs[o] & 0xFFFF;
+            off[c] = pos;
+            runs[pos++] = (short) n;
+            for (int i = 0; i < n; i++) {
+                runs[pos++] = p.runs[o + 1 + i * 2];
+                runs[pos++] = (short) remap[best][p.runs[o + 2 + i * 2] & 0xFFFF];
+            }
+        }
+        return new Tile(a.x0, a.z0, a.y0, pal.toArray(new BlockState[0]), off, java.util.Arrays.copyOf(runs, pos));
     }
 
     @Nullable

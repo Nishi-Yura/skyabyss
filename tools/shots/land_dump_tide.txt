@@ -1,0 +1,303 @@
+# tide の土地全体の書き出し。gen_land_dump.py が書く (14 点を回り、29 区画を書き出す)
+world land_tide continent
+size 960 540
+timeout 4920
+render 8
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd skyabyss dev opening build
+wait 100
+cmd gamemode creative
+cmd tp @s 836 200 -192
+waitchunks 300
+wait 500
+cmd tp @s 836 200 468
+waitchunks 300
+wait 500
+cmd tp @s 1166 200 -852
+waitchunks 300
+wait 500
+cmd tp @s 1166 200 -522
+waitchunks 300
+wait 500
+cmd tp @s 1166 200 -192
+waitchunks 300
+wait 500
+cmd tp @s 1166 200 138
+waitchunks 300
+wait 500
+cmd tp @s 1166 200 468
+waitchunks 300
+wait 500
+cmd tp @s 1166 200 798
+waitchunks 300
+wait 500
+cmd tp @s 1496 200 -852
+waitchunks 300
+wait 500
+cmd tp @s 1496 200 -522
+waitchunks 300
+wait 500
+cmd tp @s 1496 200 -192
+waitchunks 300
+wait 500
+cmd tp @s 1496 200 138
+waitchunks 300
+wait 500
+cmd tp @s 1496 200 468
+waitchunks 300
+wait 500
+cmd tp @s 1496 200 798
+waitchunks 300
+wait 500
+cmd tp @s 836 200 -192
+waitchunks 200
+wait 120
+cmd tp @s 836 200 468
+waitchunks 200
+wait 120
+cmd tp @s 1166 200 -852
+waitchunks 200
+wait 120
+cmd tp @s 1166 200 -522
+waitchunks 200
+wait 120
+cmd tp @s 1166 200 -192
+waitchunks 200
+wait 120
+cmd tp @s 1166 200 138
+waitchunks 200
+wait 120
+cmd tp @s 1166 200 468
+waitchunks 200
+wait 120
+cmd tp @s 1166 200 798
+waitchunks 200
+wait 120
+cmd tp @s 1496 200 -852
+waitchunks 200
+wait 120
+cmd tp @s 1496 200 -522
+waitchunks 200
+wait 120
+cmd tp @s 1496 200 -192
+waitchunks 200
+wait 120
+cmd tp @s 1496 200 138
+waitchunks 200
+wait 120
+cmd tp @s 1496 200 468
+waitchunks 200
+wait 120
+cmd tp @s 1496 200 798
+waitchunks 200
+wait 120
+cmd gamemode spectator
+cmd forceload remove all
+cmd forceload add 768 -768 1023 -513
+camera 896 220 -640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_3_-3 768 24 -768 1023 250 -513
+waitdump
+cmd forceload remove all
+cmd forceload add 768 -512 1023 -257
+camera 896 220 -384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_3_-2 768 24 -512 1023 250 -257
+waitdump
+cmd forceload remove all
+cmd forceload add 768 -256 1023 -1
+camera 896 220 -128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_3_-1 768 24 -256 1023 250 -1
+waitdump
+cmd forceload remove all
+cmd forceload add 768 256 1023 511
+camera 896 220 384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_3_1 768 24 256 1023 250 511
+waitdump
+cmd forceload remove all
+cmd forceload add 768 512 1023 767
+camera 896 220 640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_3_2 768 24 512 1023 250 767
+waitdump
+cmd forceload remove all
+cmd forceload add 1024 -1024 1279 -769
+camera 1152 220 -896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_4_-4 1024 24 -1024 1279 250 -769
+waitdump
+cmd forceload remove all
+cmd forceload add 1024 -768 1279 -513
+camera 1152 220 -640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_4_-3 1024 24 -768 1279 250 -513
+waitdump
+cmd forceload remove all
+cmd forceload add 1024 -512 1279 -257
+camera 1152 220 -384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_4_-2 1024 24 -512 1279 250 -257
+waitdump
+cmd forceload remove all
+cmd forceload add 1024 -256 1279 -1
+camera 1152 220 -128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_4_-1 1024 24 -256 1279 250 -1
+waitdump
+cmd forceload remove all
+cmd forceload add 1024 0 1279 255
+camera 1152 220 128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_4_0 1024 24 0 1279 250 255
+waitdump
+cmd forceload remove all
+cmd forceload add 1024 256 1279 511
+camera 1152 220 384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_4_1 1024 24 256 1279 250 511
+waitdump
+cmd forceload remove all
+cmd forceload add 1024 512 1279 767
+camera 1152 220 640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_4_2 1024 24 512 1279 250 767
+waitdump
+cmd forceload remove all
+cmd forceload add 1024 768 1279 1023
+camera 1152 220 896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_4_3 1024 24 768 1279 250 1023
+waitdump
+cmd forceload remove all
+cmd forceload add 1280 -1024 1535 -769
+camera 1408 220 -896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_5_-4 1280 24 -1024 1535 250 -769
+waitdump
+cmd forceload remove all
+cmd forceload add 1280 -768 1535 -513
+camera 1408 220 -640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_5_-3 1280 24 -768 1535 250 -513
+waitdump
+cmd forceload remove all
+cmd forceload add 1280 -512 1535 -257
+camera 1408 220 -384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_5_-2 1280 24 -512 1535 250 -257
+waitdump
+cmd forceload remove all
+cmd forceload add 1280 -256 1535 -1
+camera 1408 220 -128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_5_-1 1280 24 -256 1535 250 -1
+waitdump
+cmd forceload remove all
+cmd forceload add 1280 0 1535 255
+camera 1408 220 128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_5_0 1280 24 0 1535 250 255
+waitdump
+cmd forceload remove all
+cmd forceload add 1280 256 1535 511
+camera 1408 220 384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_5_1 1280 24 256 1535 250 511
+waitdump
+cmd forceload remove all
+cmd forceload add 1280 512 1535 767
+camera 1408 220 640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_5_2 1280 24 512 1535 250 767
+waitdump
+cmd forceload remove all
+cmd forceload add 1280 768 1535 1023
+camera 1408 220 896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_5_3 1280 24 768 1535 250 1023
+waitdump
+cmd forceload remove all
+cmd forceload add 1280 1024 1535 1279
+camera 1408 220 1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_5_4 1280 24 1024 1535 250 1279
+waitdump
+cmd forceload remove all
+cmd forceload add 1536 -1024 1791 -769
+camera 1664 220 -896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_6_-4 1536 24 -1024 1791 250 -769
+waitdump
+cmd forceload remove all
+cmd forceload add 1536 -768 1791 -513
+camera 1664 220 -640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_6_-3 1536 24 -768 1791 250 -513
+waitdump
+cmd forceload remove all
+cmd forceload add 1536 -512 1791 -257
+camera 1664 220 -384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_6_-2 1536 24 -512 1791 250 -257
+waitdump
+cmd forceload remove all
+cmd forceload add 1536 -256 1791 -1
+camera 1664 220 -128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_6_-1 1536 24 -256 1791 250 -1
+waitdump
+cmd forceload remove all
+cmd forceload add 1536 0 1791 255
+camera 1664 220 128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_6_0 1536 24 0 1791 250 255
+waitdump
+cmd forceload remove all
+cmd forceload add 1536 256 1791 511
+camera 1664 220 384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_6_1 1536 24 256 1791 250 511
+waitdump
+cmd forceload remove all
+cmd forceload add 1536 512 1791 767
+camera 1664 220 640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump tide_6_2 1536 24 512 1791 250 767
+waitdump
+cmd forceload remove all

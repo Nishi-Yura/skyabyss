@@ -1,0 +1,90 @@
+# tide の土地の比べ (後)。gen_land_shots.py が書く
+world land_tide_after continent
+size 1600 900
+timeout 2400
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd skyabyss dev opening build
+wait 100
+cmd gamemode creative
+cmd tp @s 1330 200 160
+waitchunks 300
+wait 300
+cmd tp @s 1343 200 -273
+waitchunks 300
+wait 300
+cmd tp @s 1556 200 -189
+waitchunks 300
+wait 300
+cmd tp @s 1496 200 -651
+waitchunks 300
+wait 300
+cmd tp @s 1493 200 664
+waitchunks 300
+wait 300
+cmd tp @s 1402 200 282
+waitchunks 300
+wait 300
+cmd tp @s 1654 200 588
+waitchunks 300
+wait 300
+cmd tp @s 1300 200 -652
+waitchunks 300
+wait 300
+cmd gamemode spectator
+hud off
+camera 1400 185 230 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot town
+camera 1413 185 -203 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot massif_0
+camera 1626 185 -119 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot massif_1
+camera 1566 185 -581 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot massif_2
+camera 1563 185 734 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot waterfall_0
+camera 1472 185 352 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot arch_0
+camera 1724 185 658 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot arch_1
+camera 1370 185 -582 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot hamlet_0

@@ -1,0 +1,130 @@
+{
+ "tile": 256,
+ "tiles": [
+  [
+   -8,
+   6
+  ],
+  [
+   -8,
+   7
+  ],
+  [
+   -7,
+   6
+  ],
+  [
+   -7,
+   7
+  ],
+  [
+   -6,
+   4
+  ]
+ ],
+ "sites": {
+  "entries": [
+   {
+    "kind": "outskirts",
+    "index": 0,
+    "pos": [
+     -1668,
+     81,
+     1714
+    ],
+    "yaw": 0
+   },
+   {
+    "kind": "outskirts",
+    "index": 1,
+    "pos": [
+     -1624,
+     82,
+     1752
+    ],
+    "yaw": 0
+   },
+   {
+    "kind": "outskirts",
+    "index": 2,
+    "pos": [
+     -1578,
+     67,
+     1716
+    ],
+    "yaw": 0
+   },
+   {
+    "kind": "ch:ch1_trace_camp",
+    "index": 0,
+    "pos": [
+     -1656,
+     97,
+     1548
+    ],
+    "yaw": 2
+   },
+   {
+    "kind": "poi",
+    "index": 0,
+    "pos": [
+     -1746,
+     82,
+     1813
+    ],
+    "yaw": 2
+   },
+   {
+    "kind": "footprint",
+    "index": 0,
+    "pos": [
+     -1876,
+     76,
+     1694
+    ],
+    "yaw": 1
+   },
+   {
+    "kind": "footprint",
+    "index": 1,
+    "pos": [
+     -1806,
+     76,
+     1683
+    ],
+    "yaw": 5
+   },
+   {
+    "kind": "ch:ch1_trace_cart",
+    "index": 0,
+    "pos": [
+     -1918,
+     87,
+     1739
+    ],
+    "yaw": 0
+   },
+   {
+    "kind": "camp",
+    "index": 0,
+    "pos": [
+     -1924,
+     69,
+     1820
+    ],
+    "yaw": 0
+   },
+   {
+    "kind": "ch:ch1_trace_altar",
+    "index": 0,
+    "pos": [
+     -1809,
+     88,
+     1804
+    ],
+    "yaw": 1
+   }
+  ],
+  "shrines": {}
+ }
+}

@@ -1,0 +1,376 @@
+# meadow の土地全体の書き出し。gen_land_dump.py が書く (18 点を回り、36 区画を書き出す)
+world land_meadow continent
+size 960 540
+timeout 6000
+render 8
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd skyabyss dev opening build
+wait 100
+cmd gamemode creative
+cmd tp @s -1296 200 972
+waitchunks 300
+wait 500
+cmd tp @s -966 200 312
+waitchunks 300
+wait 500
+cmd tp @s -966 200 642
+waitchunks 300
+wait 500
+cmd tp @s -966 200 972
+waitchunks 300
+wait 500
+cmd tp @s -636 200 -1008
+waitchunks 300
+wait 500
+cmd tp @s -636 200 -678
+waitchunks 300
+wait 500
+cmd tp @s -636 200 -348
+waitchunks 300
+wait 500
+cmd tp @s -636 200 -18
+waitchunks 300
+wait 500
+cmd tp @s -636 200 312
+waitchunks 300
+wait 500
+cmd tp @s -636 200 642
+waitchunks 300
+wait 500
+cmd tp @s -306 200 -348
+waitchunks 300
+wait 500
+cmd tp @s -306 200 -18
+waitchunks 300
+wait 500
+cmd tp @s -306 200 312
+waitchunks 300
+wait 500
+cmd tp @s -306 200 642
+waitchunks 300
+wait 500
+cmd tp @s 24 200 -348
+waitchunks 300
+wait 500
+cmd tp @s 24 200 -18
+waitchunks 300
+wait 500
+cmd tp @s 24 200 312
+waitchunks 300
+wait 500
+cmd tp @s 24 200 642
+waitchunks 300
+wait 500
+cmd tp @s -1296 200 972
+waitchunks 200
+wait 120
+cmd tp @s -966 200 312
+waitchunks 200
+wait 120
+cmd tp @s -966 200 642
+waitchunks 200
+wait 120
+cmd tp @s -966 200 972
+waitchunks 200
+wait 120
+cmd tp @s -636 200 -1008
+waitchunks 200
+wait 120
+cmd tp @s -636 200 -678
+waitchunks 200
+wait 120
+cmd tp @s -636 200 -348
+waitchunks 200
+wait 120
+cmd tp @s -636 200 -18
+waitchunks 200
+wait 120
+cmd tp @s -636 200 312
+waitchunks 200
+wait 120
+cmd tp @s -636 200 642
+waitchunks 200
+wait 120
+cmd tp @s -306 200 -348
+waitchunks 200
+wait 120
+cmd tp @s -306 200 -18
+waitchunks 200
+wait 120
+cmd tp @s -306 200 312
+waitchunks 200
+wait 120
+cmd tp @s -306 200 642
+waitchunks 200
+wait 120
+cmd tp @s 24 200 -348
+waitchunks 200
+wait 120
+cmd tp @s 24 200 -18
+waitchunks 200
+wait 120
+cmd tp @s 24 200 312
+waitchunks 200
+wait 120
+cmd tp @s 24 200 642
+waitchunks 200
+wait 120
+cmd gamemode spectator
+cmd forceload remove all
+cmd forceload add -1536 1024 -1281 1279
+camera -1408 220 1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-6_4 -1536 24 1024 -1281 250 1279
+waitdump
+cmd forceload remove all
+cmd forceload add -1280 512 -1025 767
+camera -1152 220 640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-5_2 -1280 24 512 -1025 250 767
+waitdump
+cmd forceload remove all
+cmd forceload add -1280 768 -1025 1023
+camera -1152 220 896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-5_3 -1280 24 768 -1025 250 1023
+waitdump
+cmd forceload remove all
+cmd forceload add -1280 1024 -1025 1279
+camera -1152 220 1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-5_4 -1280 24 1024 -1025 250 1279
+waitdump
+cmd forceload remove all
+cmd forceload add -1024 -1024 -769 -769
+camera -896 220 -896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-4_-4 -1024 24 -1024 -769 250 -769
+waitdump
+cmd forceload remove all
+cmd forceload add -1024 -768 -769 -513
+camera -896 220 -640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-4_-3 -1024 24 -768 -769 250 -513
+waitdump
+cmd forceload remove all
+cmd forceload add -1024 -512 -769 -257
+camera -896 220 -384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-4_-2 -1024 24 -512 -769 250 -257
+waitdump
+cmd forceload remove all
+cmd forceload add -1024 -256 -769 -1
+camera -896 220 -128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-4_-1 -1024 24 -256 -769 250 -1
+waitdump
+cmd forceload remove all
+cmd forceload add -1024 0 -769 255
+camera -896 220 128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-4_0 -1024 24 0 -769 250 255
+waitdump
+cmd forceload remove all
+cmd forceload add -1024 256 -769 511
+camera -896 220 384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-4_1 -1024 24 256 -769 250 511
+waitdump
+cmd forceload remove all
+cmd forceload add -1024 512 -769 767
+camera -896 220 640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-4_2 -1024 24 512 -769 250 767
+waitdump
+cmd forceload remove all
+cmd forceload add -1024 768 -769 1023
+camera -896 220 896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-4_3 -1024 24 768 -769 250 1023
+waitdump
+cmd forceload remove all
+cmd forceload add -768 -1024 -513 -769
+camera -640 220 -896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-3_-4 -768 24 -1024 -513 250 -769
+waitdump
+cmd forceload remove all
+cmd forceload add -768 -768 -513 -513
+camera -640 220 -640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-3_-3 -768 24 -768 -513 250 -513
+waitdump
+cmd forceload remove all
+cmd forceload add -768 -512 -513 -257
+camera -640 220 -384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-3_-2 -768 24 -512 -513 250 -257
+waitdump
+cmd forceload remove all
+cmd forceload add -768 -256 -513 -1
+camera -640 220 -128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-3_-1 -768 24 -256 -513 250 -1
+waitdump
+cmd forceload remove all
+cmd forceload add -768 0 -513 255
+camera -640 220 128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-3_0 -768 24 0 -513 250 255
+waitdump
+cmd forceload remove all
+cmd forceload add -768 256 -513 511
+camera -640 220 384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-3_1 -768 24 256 -513 250 511
+waitdump
+cmd forceload remove all
+cmd forceload add -768 512 -513 767
+camera -640 220 640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-3_2 -768 24 512 -513 250 767
+waitdump
+cmd forceload remove all
+cmd forceload add -512 -768 -257 -513
+camera -384 220 -640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-2_-3 -512 24 -768 -257 250 -513
+waitdump
+cmd forceload remove all
+cmd forceload add -512 -512 -257 -257
+camera -384 220 -384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-2_-2 -512 24 -512 -257 250 -257
+waitdump
+cmd forceload remove all
+cmd forceload add -512 -256 -257 -1
+camera -384 220 -128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-2_-1 -512 24 -256 -257 250 -1
+waitdump
+cmd forceload remove all
+cmd forceload add -512 0 -257 255
+camera -384 220 128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-2_0 -512 24 0 -257 250 255
+waitdump
+cmd forceload remove all
+cmd forceload add -512 256 -257 511
+camera -384 220 384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-2_1 -512 24 256 -257 250 511
+waitdump
+cmd forceload remove all
+cmd forceload add -512 512 -257 767
+camera -384 220 640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-2_2 -512 24 512 -257 250 767
+waitdump
+cmd forceload remove all
+cmd forceload add -256 -512 -1 -257
+camera -128 220 -384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-1_-2 -256 24 -512 -1 250 -257
+waitdump
+cmd forceload remove all
+cmd forceload add -256 -256 -1 -1
+camera -128 220 -128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-1_-1 -256 24 -256 -1 250 -1
+waitdump
+cmd forceload remove all
+cmd forceload add -256 0 -1 255
+camera -128 220 128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-1_0 -256 24 0 -1 250 255
+waitdump
+cmd forceload remove all
+cmd forceload add -256 256 -1 511
+camera -128 220 384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-1_1 -256 24 256 -1 250 511
+waitdump
+cmd forceload remove all
+cmd forceload add -256 512 -1 767
+camera -128 220 640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_-1_2 -256 24 512 -1 250 767
+waitdump
+cmd forceload remove all
+cmd forceload add 0 -512 255 -257
+camera 128 220 -384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_0_-2 0 24 -512 255 250 -257
+waitdump
+cmd forceload remove all
+cmd forceload add 0 -256 255 -1
+camera 128 220 -128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_0_-1 0 24 -256 255 250 -1
+waitdump
+cmd forceload remove all
+cmd forceload add 0 0 255 255
+camera 128 220 128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_0_0 0 24 0 255 250 255
+waitdump
+cmd forceload remove all
+cmd forceload add 0 256 255 511
+camera 128 220 384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_0_1 0 24 256 255 250 511
+waitdump
+cmd forceload remove all
+cmd forceload add 0 512 255 767
+camera 128 220 640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_0_2 0 24 512 255 250 767
+waitdump
+cmd forceload remove all
+cmd forceload add 256 0 511 255
+camera 384 220 128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump meadow_1_0 256 24 0 511 250 255
+waitdump
+cmd forceload remove all
