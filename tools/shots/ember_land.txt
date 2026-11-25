@@ -1,0 +1,65 @@
+# 灰の荒野の木 (EmberTrees 煤垂れの樹) を、ふつうの生成 (荒野・林の荒野) と、三つの大きさの並べで撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/ember_land.txt -PshotsName=ember_land (新しい世界の最初の回は遠くの木が描かれないので 2 回回す)
+world ember_land continent
+size 1600 900
+timeout 1500
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd gamemode spectator
+hud off
+camera -632 92 1125 180 6
+waitchunks 600
+wait 60
+cmd fill -670 76 1065 -663 120 1100 air replace #minecraft:leaves
+cmd fill -670 76 1065 -663 120 1100 air replace #minecraft:logs
+cmd fill -662 76 1065 -655 120 1100 air replace #minecraft:leaves
+cmd fill -662 76 1065 -655 120 1100 air replace #minecraft:logs
+cmd fill -654 76 1065 -647 120 1100 air replace #minecraft:leaves
+cmd fill -654 76 1065 -647 120 1100 air replace #minecraft:logs
+cmd fill -646 76 1065 -639 120 1100 air replace #minecraft:leaves
+cmd fill -646 76 1065 -639 120 1100 air replace #minecraft:logs
+cmd fill -638 76 1065 -631 120 1100 air replace #minecraft:leaves
+cmd fill -638 76 1065 -631 120 1100 air replace #minecraft:logs
+cmd fill -630 76 1065 -623 120 1100 air replace #minecraft:leaves
+cmd fill -630 76 1065 -623 120 1100 air replace #minecraft:logs
+cmd fill -622 76 1065 -615 120 1100 air replace #minecraft:leaves
+cmd fill -622 76 1065 -615 120 1100 air replace #minecraft:logs
+cmd fill -614 76 1065 -607 120 1100 air replace #minecraft:leaves
+cmd fill -614 76 1065 -607 120 1100 air replace #minecraft:logs
+cmd fill -606 76 1065 -599 120 1100 air replace #minecraft:leaves
+cmd fill -606 76 1065 -599 120 1100 air replace #minecraft:logs
+cmd fill -598 76 1065 -591 120 1100 air replace #minecraft:leaves
+cmd fill -598 76 1065 -591 120 1100 air replace #minecraft:logs
+cmd execute positioned -656 0 1082 positioned over world_surface run skyabyss dev tree soot_young ~ ~ ~ s1
+cmd execute positioned -634 0 1082 positioned over world_surface run skyabyss dev tree soot ~ ~ ~ s1
+cmd execute positioned -606 0 1082 positioned over world_surface run skyabyss dev tree soot_old ~ ~ ~ s1
+camera -632 125 1200 180 18
+waitchunks 1200
+wait 200
+camera -320 125 1370 180 24
+waitchunks 1200
+wait 200
+close
+camera -632 125 1200 180 18
+waitchunks 1200
+wait 120
+shot el_badlands
+camera -320 125 1370 180 24
+waitchunks 1200
+wait 120
+shot el_wooded
+camera -632 92 1125 180 6
+waitchunks 600
+wait 80
+shot el_sizes
+camera -628 84 1100 180 -6
+waitchunks 300
+wait 40
+shot el_under

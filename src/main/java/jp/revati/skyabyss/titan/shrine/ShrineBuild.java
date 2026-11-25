@@ -251,6 +251,7 @@ final class ShrineBuild {
                 || st.is(Blocks.GRANITE) || st.is(Blocks.TUFF) || st.is(Blocks.GRAVEL) || st.is(Blocks.SAND) || st.is(Blocks.SNOW) || st.is(Blocks.SNOW_BLOCK)
                 || st.is(Blocks.COARSE_DIRT) || st.is(Blocks.PODZOL) || st.is(Blocks.DIRT_PATH)
                 || st.is(net.minecraft.tags.BlockTags.LEAVES) || st.is(net.minecraft.tags.BlockTags.LOGS) || st.is(net.minecraft.tags.BlockTags.FLOWERS)
+                || st.is(Blocks.WARPED_WART_BLOCK) || st.is(Blocks.SHROOMLIGHT) || st.is(Blocks.CAVE_VINES) || st.is(Blocks.CAVE_VINES_PLANT) || st.is(Blocks.SPORE_BLOSSOM) || st.is(Blocks.AMETHYST_CLUSTER) || st.is(Blocks.MANGROVE_ROOTS)
                 || st.is(Blocks.SHORT_GRASS) || st.is(Blocks.TALL_GRASS) || st.is(Blocks.FERN) || st.is(Blocks.LARGE_FERN) || st.is(Blocks.SWEET_BERRY_BUSH) || st.is(Blocks.DEAD_BUSH);
     }
 

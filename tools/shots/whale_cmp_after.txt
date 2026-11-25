@@ -1,0 +1,141 @@
+# 鯨見の町の試作の比べ (後)。gen_whale_shots.py が書く
+world whale_after continent
+size 1600 900
+timeout 3000
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd skyabyss dev opening build
+wait 100
+cmd gamemode creative
+cmd tp @s -120 118 -760
+waitchunks 600
+wait 3600
+cmd gamemode spectator
+hud off
+camera -10 165 -650 135 30
+waitchunks 600
+wait 60
+close
+wait 5
+shot air_se
+camera -240 165 -880 315 30
+waitchunks 600
+wait 60
+close
+wait 5
+shot air_nw
+camera -120 175 -560 180 22
+waitchunks 600
+wait 60
+close
+wait 5
+shot air_far_s
+camera -120 250 -760 0 90
+waitchunks 600
+wait 60
+close
+wait 5
+shot top
+camera -10 126 -761 90 4
+waitchunks 600
+wait 60
+close
+wait 5
+shot gate_east
+camera -226 120 -724 225 4
+waitchunks 600
+wait 60
+close
+wait 5
+shot gate_west
+camera -118 119 -870 0 4
+waitchunks 600
+wait 60
+close
+wait 5
+shot gate_north
+camera 60 132 -730 115 4
+waitchunks 600
+wait 60
+close
+wait 5
+shot road_far_e
+camera -270 172 -600 225 16
+waitchunks 600
+wait 60
+close
+wait 5
+shot hill_view
+camera -160 138 -700 53 -4
+waitchunks 600
+wait 60
+close
+wait 5
+shot spire_se
+camera -140 142 -850 135 -4
+waitchunks 600
+wait 60
+close
+wait 5
+shot spire_nw
+camera -45 150 -705 0 10
+waitchunks 600
+wait 60
+close
+wait 5
+shot trees_all
+camera -20 145 -680 34 2
+waitchunks 600
+wait 60
+close
+wait 5
+shot massif_s
+camera -54 152 -868 180 18
+waitchunks 600
+wait 60
+close
+wait 5
+shot grove_over
+camera -54 132 -893 180 -4
+waitchunks 600
+wait 60
+close
+wait 5
+shot grove_in
+camera -80 142 -680 0 -3
+waitchunks 600
+wait 60
+close
+wait 5
+shot tree_a
+camera -45 142 -685 0 -3
+waitchunks 600
+wait 60
+close
+wait 5
+shot tree_b
+camera -10 142 -680 0 -3
+waitchunks 600
+wait 60
+close
+wait 5
+shot tree_c
+camera 25 146 -598 180 14
+waitchunks 600
+wait 60
+close
+wait 5
+shot pond
+camera 2 123 -805 233 -6
+waitchunks 600
+wait 60
+close
+wait 5
+shot arch

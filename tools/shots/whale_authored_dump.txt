@@ -1,0 +1,24 @@
+# 鯨見の町のまわりの今の姿を書き出す (前もって組む試作の元)。whale_authored.txt で町と見どころが建った世界を使う
+# SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/whale_authored_dump.txt -PshotsName=whale_authored
+# → run/shots/whale_authored/dumps/whale_src.sbd
+world whale_authored continent
+size 960 540
+timeout 3000
+render 12
+wait 100
+# 見どころは観戦者では建たない。町の真ん中に立って 240 以内のものを建てさせる
+cmd gamemode creative
+cmd tp @s -120 118 -760
+waitchunks 600
+wait 3600
+cmd gamemode spectator
+camera -96 140 -768 0 60
+wait 100
+cmd forceload add -336 -976 -209 -561
+cmd forceload add -208 -976 -81 -561
+cmd forceload add -80 -976 47 -561
+cmd forceload add 48 -976 143 -561
+wait 600
+cmd skyabyss dev dump whale_src -336 30 -976 143 190 -561
+waitdump
+cmd forceload remove all

@@ -1,0 +1,83 @@
+# 岩鯨の外れの集落 2 と奥のダンジョンを建てて、その区画を書き出し直す (gen_land_dump.py の補い)
+world land_whale continent
+size 960 540
+timeout 2400
+render 8
+wait 100
+cmd gamemode creative
+cmd tp @s 724 200 -1112
+waitchunks 300
+wait 1200
+cmd tp @s -528 200 -1204
+waitchunks 300
+wait 1200
+cmd tp @s 1280 200 -1176
+waitchunks 300
+wait 1200
+cmd tp @s 724 200 -1112
+waitchunks 300
+wait 300
+cmd tp @s -528 200 -1204
+waitchunks 300
+wait 300
+cmd tp @s 1280 200 -1176
+waitchunks 300
+wait 300
+cmd gamemode spectator
+cmd forceload remove all
+cmd forceload add -768 -1536 -513 -1281
+camera -640 220 -1408 0 90
+waitchunks 300
+wait 200
+cmd skyabyss dev dump whale_-3_-6 -768 24 -1536 -513 250 -1281
+waitdump
+cmd forceload remove all
+cmd forceload add -768 -1280 -513 -1025
+camera -640 220 -1152 0 90
+waitchunks 300
+wait 200
+cmd skyabyss dev dump whale_-3_-5 -768 24 -1280 -513 250 -1025
+waitdump
+cmd forceload remove all
+cmd forceload add -512 -1536 -257 -1281
+camera -384 220 -1408 0 90
+waitchunks 300
+wait 200
+cmd skyabyss dev dump whale_-2_-6 -512 24 -1536 -257 250 -1281
+waitdump
+cmd forceload remove all
+cmd forceload add -512 -1280 -257 -1025
+camera -384 220 -1152 0 90
+waitchunks 300
+wait 200
+cmd skyabyss dev dump whale_-2_-5 -512 24 -1280 -257 250 -1025
+waitdump
+cmd forceload remove all
+cmd forceload add 512 -1280 767 -1025
+camera 640 220 -1152 0 90
+waitchunks 300
+wait 200
+cmd skyabyss dev dump whale_2_-5 512 24 -1280 767 250 -1025
+waitdump
+cmd forceload remove all
+cmd forceload add 768 -1280 1023 -1025
+camera 896 220 -1152 0 90
+waitchunks 300
+wait 200
+cmd skyabyss dev dump whale_3_-5 768 24 -1280 1023 250 -1025
+waitdump
+cmd forceload remove all
+cmd forceload add 1024 -1280 1279 -1025
+camera 1152 220 -1152 0 90
+waitchunks 300
+wait 200
+cmd skyabyss dev dump whale_4_-5 1024 24 -1280 1279 250 -1025
+waitdump
+cmd forceload remove all
+cmd forceload add 1280 -1280 1535 -1025
+camera 1408 220 -1152 0 90
+waitchunks 300
+wait 200
+cmd skyabyss dev dump whale_5_-5 1280 24 -1280 1535 250 -1025
+waitdump
+cmd forceload remove all

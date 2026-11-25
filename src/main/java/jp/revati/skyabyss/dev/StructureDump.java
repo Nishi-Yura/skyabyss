@@ -452,6 +452,38 @@ public final class StructureDump {
             return next >= total;
         }
 
+        // 範囲の中の建った場所 (SiteData)。前もって組んだ土地 (world/continent/ContinentAuthored) が、建て直さずに記録だけ写すのに使う
+        JsonObject sitesInBox() {
+            JsonObject out = new JsonObject();
+            JsonArray list = new JsonArray();
+            jp.revati.skyabyss.opening.site.SiteData sd = jp.revati.skyabyss.opening.site.SiteData.get(level);
+            List<jp.revati.skyabyss.opening.site.SiteData.Entry> all = new ArrayList<>(sd.entries());
+            // 章の小要素 (ChapterSites の計画の sites) も
+            sd.plans().forEach(p -> all.addAll(p.sites));
+            for (jp.revati.skyabyss.opening.site.SiteData.Entry e : all) {
+                if (!e.built || e.pos == null || e.pos.getX() < box.x1 || e.pos.getX() > box.x2 || e.pos.getZ() < box.z1 || e.pos.getZ() > box.z2) {
+                    continue;
+                }
+                JsonObject o = new JsonObject();
+                o.addProperty("kind", e.kind);
+                o.addProperty("index", e.index);
+                o.add("pos", pos(e.pos));
+                o.addProperty("yaw", e.yaw);
+                list.add(o);
+            }
+            out.add("entries", list);
+            // 巨神の祠 (碑の位置)。前もって組んだ土地の中にあれば、建て直さずに記録だけ写す
+            JsonObject shrines = new JsonObject();
+            for (String titan : new String[] {"stone_whale", "tide_shell", "thunder_wing", "ember"}) {
+                BlockPos t = jp.revati.skyabyss.titan.shrine.TitanShrine.posOf(level.getServer(), titan);
+                if (t != null && t.getX() >= box.x1 && t.getX() <= box.x2 && t.getZ() >= box.z1 && t.getZ() <= box.z2) {
+                    shrines.add(titan, pos(t));
+                }
+            }
+            out.add("shrines", shrines);
+            return out;
+        }
+
         void write(Path file) throws IOException {
             JsonObject head = new JsonObject();
             head.addProperty("name", name);
@@ -472,6 +504,9 @@ public final class StructureDump {
             head.add("points", points);
             head.add("signs", signs);
             head.add("blockEntities", blockEntities);
+            if (level.dimension() == net.minecraft.world.level.Level.OVERWORLD) {
+                head.add("sites", sitesInBox());
+            }
             byte[] json = new GsonBuilder().disableHtmlEscaping().create().toJson(head).getBytes(StandardCharsets.UTF_8);
             Files.createDirectories(file.getParent());
             Path tmp = file.resolveSibling(file.getFileName() + ".tmp");

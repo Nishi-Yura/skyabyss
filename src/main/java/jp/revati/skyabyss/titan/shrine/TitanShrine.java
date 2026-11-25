@@ -128,6 +128,17 @@ public final class TitanShrine {
             }
             return have;
         }
+        // 前もって組んだ土地 (ContinentAuthored) に祠が入っていれば、建てずに碑の位置だけ記録する
+        if (level.getChunkSource().getGenerator() instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator) {
+            BlockPos pre = jp.revati.skyabyss.world.continent.ContinentAuthored.shrine(titan);
+            if (pre != null) {
+                data.pos.put(titan, pre);
+                data.ver.put(titan, ShrineBuild.VERSION);
+                data.setDirty();
+                SkyAbyss.LOGGER.info("The shrine of the {} is in the authored area (tablet {})", titan, pre);
+                return pre;
+            }
+        }
         // 跡地 (ChapterGrounds) が取っておいた台座の場所。跡地がまだ決まっていない世界だけ、方位と距離の帯の近い端
         // 大陸: 決まった道ばたの広場 (world.continent.ContinentLairs.shrine。2026-10-28 の試遊「祠が地形になじまない、どうやって行けばいい」)
         int[] fixed = jp.revati.skyabyss.world.continent.ContinentLairs.shrine(server.overworld(), titan);

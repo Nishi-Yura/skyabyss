@@ -1,0 +1,98 @@
+# desert tree roughs (DesertTrees) on the flat desert at x1296-1424 z-112..-32 (tide region). A bottle / B crook / C cage
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/desert_trees.txt -PshotsName=desert_trees (run twice on a new world)
+world desert_trees continent
+size 1600 900
+timeout 1500
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd gamemode spectator
+hud off
+camera 1361 104 -8 180 12
+waitchunks 600
+wait 100
+cmd fill 1290 70 -100 1297 115 -50 air replace #minecraft:leaves
+cmd fill 1290 70 -100 1297 115 -50 air replace #minecraft:logs
+cmd fill 1290 70 -100 1297 115 -50 air replace minecraft:mangrove_roots
+cmd fill 1298 70 -100 1305 115 -50 air replace #minecraft:leaves
+cmd fill 1298 70 -100 1305 115 -50 air replace #minecraft:logs
+cmd fill 1298 70 -100 1305 115 -50 air replace minecraft:mangrove_roots
+cmd fill 1306 70 -100 1313 115 -50 air replace #minecraft:leaves
+cmd fill 1306 70 -100 1313 115 -50 air replace #minecraft:logs
+cmd fill 1306 70 -100 1313 115 -50 air replace minecraft:mangrove_roots
+cmd fill 1314 70 -100 1321 115 -50 air replace #minecraft:leaves
+cmd fill 1314 70 -100 1321 115 -50 air replace #minecraft:logs
+cmd fill 1314 70 -100 1321 115 -50 air replace minecraft:mangrove_roots
+cmd fill 1322 70 -100 1329 115 -50 air replace #minecraft:leaves
+cmd fill 1322 70 -100 1329 115 -50 air replace #minecraft:logs
+cmd fill 1322 70 -100 1329 115 -50 air replace minecraft:mangrove_roots
+cmd fill 1330 70 -100 1337 115 -50 air replace #minecraft:leaves
+cmd fill 1330 70 -100 1337 115 -50 air replace #minecraft:logs
+cmd fill 1330 70 -100 1337 115 -50 air replace minecraft:mangrove_roots
+cmd fill 1338 70 -100 1345 115 -50 air replace #minecraft:leaves
+cmd fill 1338 70 -100 1345 115 -50 air replace #minecraft:logs
+cmd fill 1338 70 -100 1345 115 -50 air replace minecraft:mangrove_roots
+cmd fill 1346 70 -100 1353 115 -50 air replace #minecraft:leaves
+cmd fill 1346 70 -100 1353 115 -50 air replace #minecraft:logs
+cmd fill 1346 70 -100 1353 115 -50 air replace minecraft:mangrove_roots
+cmd fill 1354 70 -100 1361 115 -50 air replace #minecraft:leaves
+cmd fill 1354 70 -100 1361 115 -50 air replace #minecraft:logs
+cmd fill 1354 70 -100 1361 115 -50 air replace minecraft:mangrove_roots
+cmd fill 1362 70 -100 1369 115 -50 air replace #minecraft:leaves
+cmd fill 1362 70 -100 1369 115 -50 air replace #minecraft:logs
+cmd fill 1362 70 -100 1369 115 -50 air replace minecraft:mangrove_roots
+cmd fill 1370 70 -100 1377 115 -50 air replace #minecraft:leaves
+cmd fill 1370 70 -100 1377 115 -50 air replace #minecraft:logs
+cmd fill 1370 70 -100 1377 115 -50 air replace minecraft:mangrove_roots
+cmd fill 1378 70 -100 1385 115 -50 air replace #minecraft:leaves
+cmd fill 1378 70 -100 1385 115 -50 air replace #minecraft:logs
+cmd fill 1378 70 -100 1385 115 -50 air replace minecraft:mangrove_roots
+cmd fill 1386 70 -100 1393 115 -50 air replace #minecraft:leaves
+cmd fill 1386 70 -100 1393 115 -50 air replace #minecraft:logs
+cmd fill 1386 70 -100 1393 115 -50 air replace minecraft:mangrove_roots
+cmd fill 1394 70 -100 1401 115 -50 air replace #minecraft:leaves
+cmd fill 1394 70 -100 1401 115 -50 air replace #minecraft:logs
+cmd fill 1394 70 -100 1401 115 -50 air replace minecraft:mangrove_roots
+cmd fill 1402 70 -100 1409 115 -50 air replace #minecraft:leaves
+cmd fill 1402 70 -100 1409 115 -50 air replace #minecraft:logs
+cmd fill 1402 70 -100 1409 115 -50 air replace minecraft:mangrove_roots
+cmd fill 1410 70 -100 1417 115 -50 air replace #minecraft:leaves
+cmd fill 1410 70 -100 1417 115 -50 air replace #minecraft:logs
+cmd fill 1410 70 -100 1417 115 -50 air replace minecraft:mangrove_roots
+cmd fill 1418 70 -100 1425 115 -50 air replace #minecraft:leaves
+cmd fill 1418 70 -100 1425 115 -50 air replace #minecraft:logs
+cmd fill 1418 70 -100 1425 115 -50 air replace minecraft:mangrove_roots
+cmd fill 1426 70 -100 1433 115 -50 air replace #minecraft:leaves
+cmd fill 1426 70 -100 1433 115 -50 air replace #minecraft:logs
+cmd fill 1426 70 -100 1433 115 -50 air replace minecraft:mangrove_roots
+cmd execute positioned 1305 0 -80 positioned over world_surface run skyabyss dev tree desert_a_big ~ ~ ~ s1
+cmd execute positioned 1327 0 -72 positioned over world_surface run skyabyss dev tree desert_a ~ ~ ~ s2
+cmd execute positioned 1350 0 -80 positioned over world_surface run skyabyss dev tree desert_b_big ~ ~ ~ s1
+cmd execute positioned 1372 0 -72 positioned over world_surface run skyabyss dev tree desert_b ~ ~ ~ s2
+cmd execute positioned 1395 0 -80 positioned over world_surface run skyabyss dev tree desert_c_big ~ ~ ~ s1
+cmd execute positioned 1417 0 -72 positioned over world_surface run skyabyss dev tree desert_c ~ ~ ~ s2
+wait 40
+camera 1361 100 -14 180 9
+waitchunks 600
+wait 60
+close
+wait 100
+shot desert_all
+camera 1316 86 -40 180 5
+waitchunks 300
+wait 40
+shot desert_a
+camera 1361 86 -40 180 5
+waitchunks 300
+wait 40
+shot desert_b
+camera 1406 86 -40 180 5
+waitchunks 300
+wait 40
+shot desert_c

@@ -1,0 +1,71 @@
+# 外れの木 (OutskirtsTrees 雲玉の樫) を、ふつうの生成 (草地・森) と、三つの大きさの並べで撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/outskirts_land.txt -PshotsName=outskirts_land (新しい世界の最初の回は遠くの木が描かれないので 2 回回す)
+world outskirts_land continent
+size 1600 900
+timeout 1500
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd gamemode spectator
+hud off
+camera -1840 92 1730 180 5
+waitchunks 600
+wait 60
+cmd fill -1890 72 1660 -1883 115 1700 air replace #minecraft:leaves
+cmd fill -1890 72 1660 -1883 115 1700 air replace #minecraft:logs
+cmd fill -1882 72 1660 -1875 115 1700 air replace #minecraft:leaves
+cmd fill -1882 72 1660 -1875 115 1700 air replace #minecraft:logs
+cmd fill -1874 72 1660 -1867 115 1700 air replace #minecraft:leaves
+cmd fill -1874 72 1660 -1867 115 1700 air replace #minecraft:logs
+cmd fill -1866 72 1660 -1859 115 1700 air replace #minecraft:leaves
+cmd fill -1866 72 1660 -1859 115 1700 air replace #minecraft:logs
+cmd fill -1858 72 1660 -1851 115 1700 air replace #minecraft:leaves
+cmd fill -1858 72 1660 -1851 115 1700 air replace #minecraft:logs
+cmd fill -1850 72 1660 -1843 115 1700 air replace #minecraft:leaves
+cmd fill -1850 72 1660 -1843 115 1700 air replace #minecraft:logs
+cmd fill -1842 72 1660 -1835 115 1700 air replace #minecraft:leaves
+cmd fill -1842 72 1660 -1835 115 1700 air replace #minecraft:logs
+cmd fill -1834 72 1660 -1827 115 1700 air replace #minecraft:leaves
+cmd fill -1834 72 1660 -1827 115 1700 air replace #minecraft:logs
+cmd fill -1826 72 1660 -1819 115 1700 air replace #minecraft:leaves
+cmd fill -1826 72 1660 -1819 115 1700 air replace #minecraft:logs
+cmd fill -1818 72 1660 -1811 115 1700 air replace #minecraft:leaves
+cmd fill -1818 72 1660 -1811 115 1700 air replace #minecraft:logs
+cmd fill -1810 72 1660 -1803 115 1700 air replace #minecraft:leaves
+cmd fill -1810 72 1660 -1803 115 1700 air replace #minecraft:logs
+cmd fill -1802 72 1660 -1795 115 1700 air replace #minecraft:leaves
+cmd fill -1802 72 1660 -1795 115 1700 air replace #minecraft:logs
+cmd fill -1794 72 1660 -1787 115 1700 air replace #minecraft:leaves
+cmd fill -1794 72 1660 -1787 115 1700 air replace #minecraft:logs
+cmd execute positioned -1868 0 1680 positioned over world_surface run skyabyss dev tree cloud_young ~ ~ ~ s1
+cmd execute positioned -1844 0 1680 positioned over world_surface run skyabyss dev tree cloud ~ ~ ~ s1
+cmd execute positioned -1812 0 1680 positioned over world_surface run skyabyss dev tree cloud_old ~ ~ ~ s1
+camera -1832 140 1930 180 22
+waitchunks 1200
+wait 200
+camera -1728 150 1680 180 24
+waitchunks 1200
+wait 200
+close
+camera -1832 140 1930 180 22
+waitchunks 1200
+wait 120
+shot ol_birch
+camera -1728 150 1680 180 24
+waitchunks 1200
+wait 120
+shot ol_forest
+camera -1840 92 1730 180 5
+waitchunks 600
+wait 80
+shot ol_sizes
+camera -1838 82 1705 180 -6
+waitchunks 300
+wait 40
+shot ol_under

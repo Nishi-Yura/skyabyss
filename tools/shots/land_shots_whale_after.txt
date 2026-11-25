@@ -1,0 +1,108 @@
+# whale の土地の比べ (後)。gen_land_shots.py が書く
+world land_whale_after continent
+size 1600 900
+timeout 2400
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd skyabyss dev opening build
+wait 100
+cmd gamemode creative
+cmd tp @s -120 200 -760
+waitchunks 300
+wait 300
+cmd tp @s 724 200 -1112
+waitchunks 300
+wait 300
+cmd tp @s -528 200 -1204
+waitchunks 300
+wait 300
+cmd tp @s 230 200 -1000
+waitchunks 300
+wait 300
+cmd tp @s -256 200 -529
+waitchunks 300
+wait 300
+cmd tp @s 1042 200 -834
+waitchunks 300
+wait 300
+cmd tp @s 420 200 -720
+waitchunks 300
+wait 300
+cmd tp @s 0 200 -1300
+waitchunks 300
+wait 300
+cmd tp @s 1150 200 -1250
+waitchunks 300
+wait 300
+cmd tp @s -560 200 -800
+waitchunks 300
+wait 300
+cmd gamemode spectator
+hud off
+camera -50 185 -690 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot town
+camera 794 185 -1042 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot hamlet_ne
+camera -458 185 -1134 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot hamlet_nw
+camera 300 185 -930 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot lair
+camera -186 185 -459 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot dock_s
+camera 1112 185 -764 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot dock_ne
+camera 490 185 -650 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot mid_e
+camera 70 185 -1230 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot mid_n
+camera 1220 185 -1180 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot far_ne
+camera -490 185 -730 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot far_w

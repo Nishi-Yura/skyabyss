@@ -27,10 +27,71 @@ final class ContinentTrees {
     }
 
     enum Kind {
-        BROAD, OLD_BROAD, BIRCH, CONIFER, SNOW_CONIFER, PINE, FLAT, WILLOW, BLOSSOM, DEAD, ASH
+        BROAD, OLD_BROAD, BIRCH, CONIFER, SNOW_CONIFER, PINE, FLAT, WILLOW, BLOSSOM, ASH,
+        // 岩鯨の土地の木 (WhaleTrees)
+        FIR, FIR_BIG, PALE, MOSS_LOW, TEAL,
+        // 鐘の野の木 (MeadowTrees。花傘の樹の若木・ふつう・古木)
+        BLOSSOM_YOUNG, BLOSSOM_UMBRELLA, BLOSSOM_OLD,
+        // 潮の浜の木 (TideTrees。汐傘の樹の若木・ふつう・古木)
+        PARASOL_YOUNG, PARASOL, PARASOL_OLD,
+        // 嵐の高地の木 (StormTrees。雷晶の螺旋木の若木・ふつう・古木)
+        SPIRAL_YOUNG, SPIRAL, SPIRAL_OLD,
+        // 灰の荒野の木 (EmberTrees。煤垂れの樹の若木・ふつう・古木)
+        SOOT_YOUNG, SOOT, SOOT_OLD,
+        // 外れの木 (OutskirtsTrees。雲玉の樫の若木・ふつう・古木)
+        CLOUD_YOUNG, CLOUD, CLOUD_OLD,
+        // 砂漠 (どの土地でも) と灰の荒野の外の荒野の木 (DesertTrees。砂紐の樹の若木・ふつう・古木)
+        CROOK_YOUNG, CROOK, CROOK_OLD
     }
 
     // 土地ごとの {升の幅, 植える割合}。0 なら植えない
+    // 場所ごとの {升の幅, 植える割合}。鐘の野 (都のまわり) の平原と草地は花傘の樹を近めに、ゆっくりした揺らぎで林と開けた野に分ける
+    static double[] spacingAt(ContinentMap map, int x, int z) {
+        int biome = map.biome(x, z);
+        if (map.region(x, z) == ContinentMap.MEADOW && (biome == ContinentBiomes.PLAINS || biome == ContinentBiomes.MEADOW)) {
+            double grove = ContinentMap.value(x / 70.0, z / 70.0, 0x51A7);
+            return new double[] {17, Math.max(0.12, 0.5 + 0.45 * grove)};
+        }
+        // 鐘の野の林 (森の生物群系): 大きな傘が重なって一面の桜色にならないよう、升を広げて間を空ける
+        if (map.region(x, z) == ContinentMap.MEADOW && spacing(biome)[0] > 0 && spacing(biome)[0] < 17) {
+            return new double[] {20, 0.6};
+        }
+        // 潮の浜: サバンナは汐傘の樹をゆっくりした揺らぎで木立と開けた野に分ける。湿地は少し近めに
+        if (map.region(x, z) == ContinentMap.TIDE && biome == ContinentBiomes.SAVANNA) {
+            double grove = ContinentMap.value(x / 80.0, z / 80.0, 0x71DE);
+            return new double[] {22, Math.max(0.15, 0.55 + 0.4 * grove)};
+        }
+        if (map.region(x, z) == ContinentMap.TIDE && biome == ContinentBiomes.SWAMP) {
+            return new double[] {20, 0.45};
+        }
+        // 嵐の高地の松の森: 螺旋の枝が広いので升を広げる
+        if (map.region(x, z) == ContinentMap.STORM && biome == ContinentBiomes.PINE_TAIGA) {
+            return new double[] {16, 0.8};
+        }
+        // 灰の荒野: 荒野はまばら (揺らぎで寄り合う所だけ)、林の荒野は傘が重ならない程度に
+        if (map.region(x, z) == ContinentMap.EMBER && biome == ContinentBiomes.BADLANDS) {
+            double grove = ContinentMap.value(x / 90.0, z / 90.0, 0x50D7);
+            return new double[] {30, Math.max(0.08, 0.2 + 0.35 * grove)};
+        }
+        if (map.region(x, z) == ContinentMap.EMBER && biome == ContinentBiomes.WOODED_BADLANDS) {
+            return new double[] {19, 0.6};
+        }
+        // 外れ: 森と白樺の森は玉が重ならない程度に升を広げる。草地と平原は揺らぎで木立と開けた野
+        if (map.region(x, z) == ContinentMap.OUTSKIRTS && (biome == ContinentBiomes.FOREST || biome == ContinentBiomes.BIRCH_FOREST)) {
+            return new double[] {18, 0.75};
+        }
+        if (map.region(x, z) == ContinentMap.OUTSKIRTS && (biome == ContinentBiomes.MEADOW || biome == ContinentBiomes.PLAINS)) {
+            double grove = ContinentMap.value(x / 75.0, z / 75.0, 0x0C1D);
+            return new double[] {24, Math.max(0.12, 0.4 + 0.4 * grove)};
+        }
+        // 砂漠: 砂紐の樹を揺らぎで寄り合わせる (オアシスのまわりのような木立と、何もない砂の広がり)
+        if (biome == ContinentBiomes.DESERT) {
+            double grove = ContinentMap.value(x / 85.0, z / 85.0, 0x5A2D);
+            return new double[] {26, Math.max(0.1, 0.3 + 0.4 * grove)};
+        }
+        return spacing(biome);
+    }
+
     static double[] spacing(int biome) {
         return switch (biome) {
             case ContinentBiomes.FOREST -> new double[] {15, 0.85};
@@ -64,12 +125,12 @@ final class ContinentTrees {
             case ContinentBiomes.SAVANNA -> Kind.FLAT;
             case ContinentBiomes.SWAMP -> Kind.WILLOW;
             case ContinentBiomes.WOODED_BADLANDS -> Kind.ASH;
-            default -> Kind.DEAD;
+            default -> Kind.CROOK;
         };
     }
 
     static boolean green(Kind k) {
-        return k != Kind.DEAD && k != Kind.ASH;
+        return k != Kind.ASH && k != Kind.CROOK_YOUNG && k != Kind.CROOK && k != Kind.CROOK_OLD;
     }
 
     // 砂丘のまわりのこの幅には緑の木を植えない
@@ -84,7 +145,7 @@ final class ContinentTrees {
         List<Integer> sizes = new ArrayList<>();
         for (int dx = 0; dx <= 16; dx += 8) {
             for (int dz = 0; dz <= 16; dz += 8) {
-                int s = (int) spacing(map.biome(x0 + Math.min(15, dx), z0 + Math.min(15, dz)))[0];
+                int s = (int) spacingAt(map, x0 + Math.min(15, dx), z0 + Math.min(15, dz))[0];
                 if (s > 0 && !sizes.contains(s)) {
                     sizes.add(s);
                 }
@@ -101,11 +162,42 @@ final class ContinentTrees {
                         continue;
                     }
                     int biome = map.biome(x, z);
-                    double[] sp = spacing(biome);
+                    double[] sp = spacingAt(map, x, z);
                     if ((int) sp[0] != s || r.nextFloat() >= sp[1]) {
                         continue;
                     }
                     Kind k = kind(biome, r);
+                    int region = map.region(x, z);
+                    if (biome == ContinentBiomes.DESERT || k == Kind.CROOK && region != ContinentMap.EMBER && region != ContinentMap.WHALE
+                            && region != ContinentMap.MEADOW) {
+                        // 砂漠はどの土地でも砂紐の樹 (若木が多め)。灰の荒野の外の荒野も
+                        float roll = r.nextFloat();
+                        k = roll < 0.15f ? Kind.CROOK_OLD : roll < 0.5f ? Kind.CROOK_YOUNG : Kind.CROOK;
+                    } else if (map.region(x, z) == ContinentMap.WHALE) {
+                        k = whaleKind(biome, r, x, z);
+                    } else if (map.region(x, z) == ContinentMap.MEADOW) {
+                        float roll = r.nextFloat();
+                        k = roll < 0.15f ? Kind.BLOSSOM_OLD : roll < 0.4f ? Kind.BLOSSOM_YOUNG : Kind.BLOSSOM_UMBRELLA;
+                    } else if (map.region(x, z) == ContinentMap.TIDE && (biome == ContinentBiomes.SAVANNA || biome == ContinentBiomes.SWAMP)) {
+                        float roll = r.nextFloat();
+                        boolean swamp = biome == ContinentBiomes.SWAMP;
+                        k = roll < (swamp ? 0.08f : 0.15f) ? Kind.PARASOL_OLD : roll < (swamp ? 0.55f : 0.4f) ? Kind.PARASOL_YOUNG : Kind.PARASOL;
+                    } else if (map.region(x, z) == ContinentMap.STORM && green(k)) {
+                        // 嵐の高地: 森は古木まじり、吹きさらしと雪の斜面は若木が多い
+                        float roll = r.nextFloat();
+                        boolean forest = biome == ContinentBiomes.PINE_TAIGA;
+                        k = roll < (forest ? 0.2f : 0.08f) ? Kind.SPIRAL_OLD : roll < (forest ? 0.45f : 0.6f) ? Kind.SPIRAL_YOUNG : Kind.SPIRAL;
+                    } else if (map.region(x, z) == ContinentMap.EMBER && (biome == ContinentBiomes.BADLANDS || biome == ContinentBiomes.WOODED_BADLANDS)) {
+                        // 灰の荒野: 林は古木まじり、開けた荒野は若木が多い
+                        float roll = r.nextFloat();
+                        boolean wood = biome == ContinentBiomes.WOODED_BADLANDS;
+                        k = roll < (wood ? 0.2f : 0.1f) ? Kind.SOOT_OLD : roll < (wood ? 0.45f : 0.6f) ? Kind.SOOT_YOUNG : Kind.SOOT;
+                    } else if (map.region(x, z) == ContinentMap.OUTSKIRTS && green(k)) {
+                        // 外れ: 森は古木まじり、草地は若木が多い
+                        float roll = r.nextFloat();
+                        boolean wood = biome == ContinentBiomes.FOREST || biome == ContinentBiomes.BIRCH_FOREST;
+                        k = roll < (wood ? 0.2f : 0.1f) ? Kind.CLOUD_OLD : roll < (wood ? 0.45f : 0.55f) ? Kind.CLOUD_YOUNG : Kind.CLOUD;
+                    }
                     if (green(k) && nearSand(map, x, z)) {
                         continue;
                     }
@@ -124,9 +216,49 @@ final class ContinentTrees {
         return switch (k) {
             case OLD_BROAD, FLAT -> 6;
             case BROAD, WILLOW, BLOSSOM -> 5;
-            case CONIFER, SNOW_CONIFER, ASH, DEAD -> 4;
+            case CONIFER, SNOW_CONIFER, ASH -> 4;
             case BIRCH, PINE -> 3;
+            case FIR, PALE -> 4;
+            case FIR_BIG -> 8;
+            case MOSS_LOW -> 7;
+            case TEAL -> 12;
+            case BLOSSOM_YOUNG -> 7;
+            case BLOSSOM_UMBRELLA -> 11;
+            case BLOSSOM_OLD -> 14;
+            case PARASOL_YOUNG -> 7;
+            case PARASOL -> 10;
+            case PARASOL_OLD -> 14;
+            case SPIRAL_YOUNG -> 8;
+            case SPIRAL -> 11;
+            case SPIRAL_OLD -> 14;
+            case SOOT_YOUNG -> 8;
+            case SOOT -> 10;
+            case SOOT_OLD -> 13;
+            case CLOUD_YOUNG -> 9;
+            case CLOUD -> 12;
+            case CLOUD_OLD -> 15;
+            case CROOK_YOUNG -> 10;
+            case CROOK -> 12;
+            case CROOK_OLD -> 15;
         };
+    }
+
+    // 岩鯨の土地の木の選び方 (2026-11-25 の試作で決めた森): 森の土地は垂れ枝の樅 (大木まじり)・骨白の細木、
+    // 森の中の揺らぎの島だけ灯り葉の樹の林。開けた土地は苔の低木・骨白の細木・ときどき樅
+    static Kind whaleKind(int biome, RandomSource r, int x, int z) {
+        boolean forest = switch (biome) {
+            case ContinentBiomes.TAIGA, ContinentBiomes.PINE_TAIGA, ContinentBiomes.FOREST, ContinentBiomes.BIRCH_FOREST,
+                    ContinentBiomes.WINDSWEPT_HILLS, ContinentBiomes.GRAVELLY_HILLS, ContinentBiomes.SNOWY_SLOPES -> true;
+            default -> false;
+        };
+        float roll = r.nextFloat();
+        if (forest) {
+            if (ContinentMap.value(x / 55.0, z / 55.0, 0x7EA1) > 0.4 && roll < 0.55f) {
+                return Kind.TEAL;
+            }
+            return roll < 0.2f ? Kind.FIR_BIG : roll < 0.32f ? Kind.PALE : Kind.FIR;
+        }
+        return roll < 0.5f ? Kind.MOSS_LOW : roll < 0.75f ? Kind.PALE : Kind.FIR;
     }
 
     static boolean nearSand(ContinentMap map, int x, int z) {
@@ -192,7 +324,29 @@ final class ContinentTrees {
             case WILLOW -> willow(g, base, r);
             case BLOSSOM -> blossom(g, base, r);
             case ASH -> dead(g, base, r, Blocks.DARK_OAK_LOG, true);
-            case DEAD -> dead(g, base, r, r.nextBoolean() ? Blocks.STRIPPED_OAK_LOG : Blocks.OAK_LOG, false);
+            case FIR -> WhaleTrees.fir(g, base, r, false);
+            case FIR_BIG -> WhaleTrees.fir(g, base, r, true);
+            case PALE -> WhaleTrees.pale(g, base, r);
+            case MOSS_LOW -> WhaleTrees.mossLow(g, base, r);
+            case TEAL -> WhaleTrees.teal(g, base, r);
+            case BLOSSOM_YOUNG -> MeadowTrees.blossomUmbrella(g, base, r, 0.65);
+            case BLOSSOM_UMBRELLA -> MeadowTrees.blossomUmbrella(g, base, r, 1.0);
+            case BLOSSOM_OLD -> MeadowTrees.blossomUmbrella(g, base, r, 1.35);
+            case PARASOL_YOUNG -> TideTrees.parasol(g, base, r, 0.7);
+            case PARASOL -> TideTrees.parasol(g, base, r, 1.0);
+            case PARASOL_OLD -> TideTrees.parasol(g, base, r, 1.3);
+            case SPIRAL_YOUNG -> StormTrees.spiral(g, base, r, 0.7);
+            case SPIRAL -> StormTrees.spiral(g, base, r, 1.0);
+            case SPIRAL_OLD -> StormTrees.spiral(g, base, r, 1.3);
+            case SOOT_YOUNG -> EmberTrees.sootWeeper(g, base, r, 0.75);
+            case SOOT -> EmberTrees.sootWeeper(g, base, r, 1.0);
+            case SOOT_OLD -> EmberTrees.sootWeeper(g, base, r, 1.3);
+            case CLOUD_YOUNG -> OutskirtsTrees.cloudOak(g, base, r, 0.75);
+            case CLOUD -> OutskirtsTrees.cloudOak(g, base, r, 1.0);
+            case CLOUD_OLD -> OutskirtsTrees.cloudOak(g, base, r, 1.3);
+            case CROOK_YOUNG -> DesertTrees.crook(g, base, r, 0.75);
+            case CROOK -> DesertTrees.crook(g, base, r, 1.0);
+            case CROOK_OLD -> DesertTrees.crook(g, base, r, 1.3);
         }
         g.finish();
     }

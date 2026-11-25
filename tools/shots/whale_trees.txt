@@ -1,0 +1,45 @@
+# 岩鯨の土地の木 (world/continent/WhaleTrees) を、試作の範囲の外 (ふつうの生成) で見る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/whale_trees.txt -PshotsName=whale_trees
+world whale_trees continent
+size 1600 900
+timeout 1500
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd gamemode spectator
+hud off
+camera 300 175 -820 150 28
+waitchunks 600
+wait 60
+close
+shot wt_east
+camera -480 175 -860 210 28
+waitchunks 600
+wait 60
+close
+shot wt_west
+camera 20 180 -1120 180 28
+waitchunks 600
+wait 60
+close
+shot wt_north
+camera 380 180 -1180 135 28
+waitchunks 600
+wait 60
+close
+shot wt_far_ne
+camera -300 175 -1150 200 25
+waitchunks 600
+wait 60
+close
+shot wt_far_nw
+camera 250 160 -650 160 20
+waitchunks 600
+wait 60
+close
+shot wt_south_e

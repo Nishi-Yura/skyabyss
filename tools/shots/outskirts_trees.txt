@@ -1,0 +1,82 @@
+# 外れの木のラフ 3 案 (OutskirtsTrees) を南西の外れの草地 (x-1840 z1690 あたり) に並べて撮る。A 垂れ白樺の株・B 雲玉の樫・C 風鈴の樹
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/outskirts_trees.txt -PshotsName=outskirts_trees (新しい世界の最初の回は遠くが描かれないので 2 回回す)
+world outskirts_trees continent
+size 1600 900
+timeout 1500
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd gamemode spectator
+hud off
+camera -1840 106 1760 180 12
+waitchunks 600
+wait 100
+cmd fill -1915 72 1655 -1908 115 1705 air replace #minecraft:leaves
+cmd fill -1915 72 1655 -1908 115 1705 air replace #minecraft:logs
+cmd fill -1907 72 1655 -1900 115 1705 air replace #minecraft:leaves
+cmd fill -1907 72 1655 -1900 115 1705 air replace #minecraft:logs
+cmd fill -1899 72 1655 -1892 115 1705 air replace #minecraft:leaves
+cmd fill -1899 72 1655 -1892 115 1705 air replace #minecraft:logs
+cmd fill -1891 72 1655 -1884 115 1705 air replace #minecraft:leaves
+cmd fill -1891 72 1655 -1884 115 1705 air replace #minecraft:logs
+cmd fill -1883 72 1655 -1876 115 1705 air replace #minecraft:leaves
+cmd fill -1883 72 1655 -1876 115 1705 air replace #minecraft:logs
+cmd fill -1875 72 1655 -1868 115 1705 air replace #minecraft:leaves
+cmd fill -1875 72 1655 -1868 115 1705 air replace #minecraft:logs
+cmd fill -1867 72 1655 -1860 115 1705 air replace #minecraft:leaves
+cmd fill -1867 72 1655 -1860 115 1705 air replace #minecraft:logs
+cmd fill -1859 72 1655 -1852 115 1705 air replace #minecraft:leaves
+cmd fill -1859 72 1655 -1852 115 1705 air replace #minecraft:logs
+cmd fill -1851 72 1655 -1844 115 1705 air replace #minecraft:leaves
+cmd fill -1851 72 1655 -1844 115 1705 air replace #minecraft:logs
+cmd fill -1843 72 1655 -1836 115 1705 air replace #minecraft:leaves
+cmd fill -1843 72 1655 -1836 115 1705 air replace #minecraft:logs
+cmd fill -1835 72 1655 -1828 115 1705 air replace #minecraft:leaves
+cmd fill -1835 72 1655 -1828 115 1705 air replace #minecraft:logs
+cmd fill -1827 72 1655 -1820 115 1705 air replace #minecraft:leaves
+cmd fill -1827 72 1655 -1820 115 1705 air replace #minecraft:logs
+cmd fill -1819 72 1655 -1812 115 1705 air replace #minecraft:leaves
+cmd fill -1819 72 1655 -1812 115 1705 air replace #minecraft:logs
+cmd fill -1811 72 1655 -1804 115 1705 air replace #minecraft:leaves
+cmd fill -1811 72 1655 -1804 115 1705 air replace #minecraft:logs
+cmd fill -1803 72 1655 -1796 115 1705 air replace #minecraft:leaves
+cmd fill -1803 72 1655 -1796 115 1705 air replace #minecraft:logs
+cmd fill -1795 72 1655 -1788 115 1705 air replace #minecraft:leaves
+cmd fill -1795 72 1655 -1788 115 1705 air replace #minecraft:logs
+cmd fill -1787 72 1655 -1780 115 1705 air replace #minecraft:leaves
+cmd fill -1787 72 1655 -1780 115 1705 air replace #minecraft:logs
+cmd fill -1779 72 1655 -1772 115 1705 air replace #minecraft:leaves
+cmd fill -1779 72 1655 -1772 115 1705 air replace #minecraft:logs
+cmd fill -1771 72 1655 -1764 115 1705 air replace #minecraft:leaves
+cmd fill -1771 72 1655 -1764 115 1705 air replace #minecraft:logs
+cmd execute positioned -1895 0 1675 positioned over world_surface run skyabyss dev tree out_a_big ~ ~ ~ s1
+cmd execute positioned -1873 0 1683 positioned over world_surface run skyabyss dev tree out_a ~ ~ ~ s2
+cmd execute positioned -1850 0 1675 positioned over world_surface run skyabyss dev tree out_b_big ~ ~ ~ s1
+cmd execute positioned -1828 0 1683 positioned over world_surface run skyabyss dev tree out_b ~ ~ ~ s2
+cmd execute positioned -1805 0 1675 positioned over world_surface run skyabyss dev tree out_c_big ~ ~ ~ s1
+cmd execute positioned -1783 0 1683 positioned over world_surface run skyabyss dev tree out_c ~ ~ ~ s2
+wait 40
+camera -1840 100 1765 180 9
+waitchunks 600
+wait 60
+close
+wait 100
+shot out_all
+camera -1885 88 1720 180 5
+waitchunks 300
+wait 40
+shot out_a
+camera -1840 88 1720 180 5
+waitchunks 300
+wait 40
+shot out_b
+camera -1795 88 1720 180 5
+waitchunks 300
+wait 40
+shot out_c

@@ -1,0 +1,144 @@
+# 嵐の高地の木のラフ 3 案 (StormTrees) を北西の吹きさらしの丘 (x-1455 z930 あたり) に並べて撮る。A 雷裂けの樅・B 霧氷の垂れ木・C 雷晶の螺旋木
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/storm_trees.txt -PshotsName=storm_trees (新しい世界の最初の回は遠くが描かれないので 2 回回す)
+world storm_trees continent
+size 1600 900
+timeout 1500
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd gamemode spectator
+hud off
+camera -1455 135 1010 180 15
+waitchunks 600
+wait 100
+cmd fill -1535 95 890 -1528 150 960 air replace #minecraft:leaves
+cmd fill -1535 95 890 -1528 150 960 air replace #minecraft:logs
+cmd fill -1535 95 890 -1528 150 960 air replace minecraft:ice
+cmd fill -1535 95 890 -1528 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1535 95 890 -1528 150 960 air replace minecraft:snow
+cmd fill -1527 95 890 -1520 150 960 air replace #minecraft:leaves
+cmd fill -1527 95 890 -1520 150 960 air replace #minecraft:logs
+cmd fill -1527 95 890 -1520 150 960 air replace minecraft:ice
+cmd fill -1527 95 890 -1520 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1527 95 890 -1520 150 960 air replace minecraft:snow
+cmd fill -1519 95 890 -1512 150 960 air replace #minecraft:leaves
+cmd fill -1519 95 890 -1512 150 960 air replace #minecraft:logs
+cmd fill -1519 95 890 -1512 150 960 air replace minecraft:ice
+cmd fill -1519 95 890 -1512 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1519 95 890 -1512 150 960 air replace minecraft:snow
+cmd fill -1511 95 890 -1504 150 960 air replace #minecraft:leaves
+cmd fill -1511 95 890 -1504 150 960 air replace #minecraft:logs
+cmd fill -1511 95 890 -1504 150 960 air replace minecraft:ice
+cmd fill -1511 95 890 -1504 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1511 95 890 -1504 150 960 air replace minecraft:snow
+cmd fill -1503 95 890 -1496 150 960 air replace #minecraft:leaves
+cmd fill -1503 95 890 -1496 150 960 air replace #minecraft:logs
+cmd fill -1503 95 890 -1496 150 960 air replace minecraft:ice
+cmd fill -1503 95 890 -1496 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1503 95 890 -1496 150 960 air replace minecraft:snow
+cmd fill -1495 95 890 -1488 150 960 air replace #minecraft:leaves
+cmd fill -1495 95 890 -1488 150 960 air replace #minecraft:logs
+cmd fill -1495 95 890 -1488 150 960 air replace minecraft:ice
+cmd fill -1495 95 890 -1488 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1495 95 890 -1488 150 960 air replace minecraft:snow
+cmd fill -1487 95 890 -1480 150 960 air replace #minecraft:leaves
+cmd fill -1487 95 890 -1480 150 960 air replace #minecraft:logs
+cmd fill -1487 95 890 -1480 150 960 air replace minecraft:ice
+cmd fill -1487 95 890 -1480 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1487 95 890 -1480 150 960 air replace minecraft:snow
+cmd fill -1479 95 890 -1472 150 960 air replace #minecraft:leaves
+cmd fill -1479 95 890 -1472 150 960 air replace #minecraft:logs
+cmd fill -1479 95 890 -1472 150 960 air replace minecraft:ice
+cmd fill -1479 95 890 -1472 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1479 95 890 -1472 150 960 air replace minecraft:snow
+cmd fill -1471 95 890 -1464 150 960 air replace #minecraft:leaves
+cmd fill -1471 95 890 -1464 150 960 air replace #minecraft:logs
+cmd fill -1471 95 890 -1464 150 960 air replace minecraft:ice
+cmd fill -1471 95 890 -1464 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1471 95 890 -1464 150 960 air replace minecraft:snow
+cmd fill -1463 95 890 -1456 150 960 air replace #minecraft:leaves
+cmd fill -1463 95 890 -1456 150 960 air replace #minecraft:logs
+cmd fill -1463 95 890 -1456 150 960 air replace minecraft:ice
+cmd fill -1463 95 890 -1456 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1463 95 890 -1456 150 960 air replace minecraft:snow
+cmd fill -1455 95 890 -1448 150 960 air replace #minecraft:leaves
+cmd fill -1455 95 890 -1448 150 960 air replace #minecraft:logs
+cmd fill -1455 95 890 -1448 150 960 air replace minecraft:ice
+cmd fill -1455 95 890 -1448 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1455 95 890 -1448 150 960 air replace minecraft:snow
+cmd fill -1447 95 890 -1440 150 960 air replace #minecraft:leaves
+cmd fill -1447 95 890 -1440 150 960 air replace #minecraft:logs
+cmd fill -1447 95 890 -1440 150 960 air replace minecraft:ice
+cmd fill -1447 95 890 -1440 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1447 95 890 -1440 150 960 air replace minecraft:snow
+cmd fill -1439 95 890 -1432 150 960 air replace #minecraft:leaves
+cmd fill -1439 95 890 -1432 150 960 air replace #minecraft:logs
+cmd fill -1439 95 890 -1432 150 960 air replace minecraft:ice
+cmd fill -1439 95 890 -1432 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1439 95 890 -1432 150 960 air replace minecraft:snow
+cmd fill -1431 95 890 -1424 150 960 air replace #minecraft:leaves
+cmd fill -1431 95 890 -1424 150 960 air replace #minecraft:logs
+cmd fill -1431 95 890 -1424 150 960 air replace minecraft:ice
+cmd fill -1431 95 890 -1424 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1431 95 890 -1424 150 960 air replace minecraft:snow
+cmd fill -1423 95 890 -1416 150 960 air replace #minecraft:leaves
+cmd fill -1423 95 890 -1416 150 960 air replace #minecraft:logs
+cmd fill -1423 95 890 -1416 150 960 air replace minecraft:ice
+cmd fill -1423 95 890 -1416 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1423 95 890 -1416 150 960 air replace minecraft:snow
+cmd fill -1415 95 890 -1408 150 960 air replace #minecraft:leaves
+cmd fill -1415 95 890 -1408 150 960 air replace #minecraft:logs
+cmd fill -1415 95 890 -1408 150 960 air replace minecraft:ice
+cmd fill -1415 95 890 -1408 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1415 95 890 -1408 150 960 air replace minecraft:snow
+cmd fill -1407 95 890 -1400 150 960 air replace #minecraft:leaves
+cmd fill -1407 95 890 -1400 150 960 air replace #minecraft:logs
+cmd fill -1407 95 890 -1400 150 960 air replace minecraft:ice
+cmd fill -1407 95 890 -1400 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1407 95 890 -1400 150 960 air replace minecraft:snow
+cmd fill -1399 95 890 -1392 150 960 air replace #minecraft:leaves
+cmd fill -1399 95 890 -1392 150 960 air replace #minecraft:logs
+cmd fill -1399 95 890 -1392 150 960 air replace minecraft:ice
+cmd fill -1399 95 890 -1392 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1399 95 890 -1392 150 960 air replace minecraft:snow
+cmd fill -1391 95 890 -1384 150 960 air replace #minecraft:leaves
+cmd fill -1391 95 890 -1384 150 960 air replace #minecraft:logs
+cmd fill -1391 95 890 -1384 150 960 air replace minecraft:ice
+cmd fill -1391 95 890 -1384 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1391 95 890 -1384 150 960 air replace minecraft:snow
+cmd fill -1383 95 890 -1376 150 960 air replace #minecraft:leaves
+cmd fill -1383 95 890 -1376 150 960 air replace #minecraft:logs
+cmd fill -1383 95 890 -1376 150 960 air replace minecraft:ice
+cmd fill -1383 95 890 -1376 150 960 air replace minecraft:amethyst_cluster
+cmd fill -1383 95 890 -1376 150 960 air replace minecraft:snow
+cmd execute positioned -1510 0 922 positioned over world_surface run skyabyss dev tree storm_a_big ~ ~ ~ s1
+cmd execute positioned -1488 0 930 positioned over world_surface run skyabyss dev tree storm_a ~ ~ ~ s2
+cmd execute positioned -1465 0 922 positioned over world_surface run skyabyss dev tree storm_b_big ~ ~ ~ s1
+cmd execute positioned -1443 0 930 positioned over world_surface run skyabyss dev tree storm_b ~ ~ ~ s2
+cmd execute positioned -1420 0 922 positioned over world_surface run skyabyss dev tree storm_c_big ~ ~ ~ s1
+cmd execute positioned -1398 0 930 positioned over world_surface run skyabyss dev tree storm_c ~ ~ ~ s2
+wait 40
+camera -1455 132 1010 180 13
+waitchunks 600
+wait 60
+close
+wait 100
+shot storm_all
+camera -1500 116 962 180 6
+waitchunks 300
+wait 40
+shot storm_a
+camera -1455 116 962 180 6
+waitchunks 300
+wait 40
+shot storm_b
+camera -1410 116 962 180 6
+waitchunks 300
+wait 40
+shot storm_c

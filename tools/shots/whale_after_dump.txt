@@ -1,0 +1,20 @@
+# 前もって組んだ世界 (whale_after) の町のまわりを書き出す。看板・碑の字が元の世界と同じかを比べる用
+# SKYABYSS_AUTHORED=1 SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/whale_after_dump.txt -PshotsName=whale_after
+world whale_after continent
+size 960 540
+timeout 1800
+render 12
+wait 100
+cmd gamemode creative
+cmd tp @s -120 118 -760
+waitchunks 600
+wait 200
+cmd gamemode spectator
+cmd forceload add -336 -976 -209 -561
+cmd forceload add -208 -976 -81 -561
+cmd forceload add -80 -976 47 -561
+cmd forceload add 48 -976 143 -561
+wait 600
+cmd skyabyss dev dump whale_after_chk -336 30 -976 143 190 -561
+waitdump
+cmd forceload remove all

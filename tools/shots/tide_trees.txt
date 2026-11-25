@@ -1,0 +1,132 @@
+# 潮の浜の木のラフ 3 案 (TideTrees) を東の大陸のサバンナ (x1395 z120 あたり) に並べて撮る。A 潮風の松・B 汐傘の樹・C 珊瑚実の樹
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/tide_trees.txt -PshotsName=tide_trees (新しい世界の最初の回は遠くが描かれないので 2 回回す)
+world tide_trees continent
+size 1600 900
+timeout 1500
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd gamemode spectator
+hud off
+camera 1395 110 200 180 15
+waitchunks 600
+wait 100
+cmd fill 1305 72 85 1317 103 160 air replace #minecraft:leaves
+cmd fill 1305 72 85 1317 103 160 air replace #minecraft:logs
+cmd fill 1305 72 85 1317 103 160 air replace minecraft:pearlescent_froglight
+cmd fill 1305 72 85 1317 103 160 air replace minecraft:ochre_froglight
+cmd fill 1305 72 85 1317 103 160 air replace minecraft:weeping_vines
+cmd fill 1305 72 85 1317 103 160 air replace minecraft:weeping_vines_plant
+cmd fill 1318 72 85 1330 103 160 air replace #minecraft:leaves
+cmd fill 1318 72 85 1330 103 160 air replace #minecraft:logs
+cmd fill 1318 72 85 1330 103 160 air replace minecraft:pearlescent_froglight
+cmd fill 1318 72 85 1330 103 160 air replace minecraft:ochre_froglight
+cmd fill 1318 72 85 1330 103 160 air replace minecraft:weeping_vines
+cmd fill 1318 72 85 1330 103 160 air replace minecraft:weeping_vines_plant
+cmd fill 1331 72 85 1343 103 160 air replace #minecraft:leaves
+cmd fill 1331 72 85 1343 103 160 air replace #minecraft:logs
+cmd fill 1331 72 85 1343 103 160 air replace minecraft:pearlescent_froglight
+cmd fill 1331 72 85 1343 103 160 air replace minecraft:ochre_froglight
+cmd fill 1331 72 85 1343 103 160 air replace minecraft:weeping_vines
+cmd fill 1331 72 85 1343 103 160 air replace minecraft:weeping_vines_plant
+cmd fill 1344 72 85 1356 103 160 air replace #minecraft:leaves
+cmd fill 1344 72 85 1356 103 160 air replace #minecraft:logs
+cmd fill 1344 72 85 1356 103 160 air replace minecraft:pearlescent_froglight
+cmd fill 1344 72 85 1356 103 160 air replace minecraft:ochre_froglight
+cmd fill 1344 72 85 1356 103 160 air replace minecraft:weeping_vines
+cmd fill 1344 72 85 1356 103 160 air replace minecraft:weeping_vines_plant
+cmd fill 1357 72 85 1369 103 160 air replace #minecraft:leaves
+cmd fill 1357 72 85 1369 103 160 air replace #minecraft:logs
+cmd fill 1357 72 85 1369 103 160 air replace minecraft:pearlescent_froglight
+cmd fill 1357 72 85 1369 103 160 air replace minecraft:ochre_froglight
+cmd fill 1357 72 85 1369 103 160 air replace minecraft:weeping_vines
+cmd fill 1357 72 85 1369 103 160 air replace minecraft:weeping_vines_plant
+cmd fill 1370 72 85 1382 103 160 air replace #minecraft:leaves
+cmd fill 1370 72 85 1382 103 160 air replace #minecraft:logs
+cmd fill 1370 72 85 1382 103 160 air replace minecraft:pearlescent_froglight
+cmd fill 1370 72 85 1382 103 160 air replace minecraft:ochre_froglight
+cmd fill 1370 72 85 1382 103 160 air replace minecraft:weeping_vines
+cmd fill 1370 72 85 1382 103 160 air replace minecraft:weeping_vines_plant
+cmd fill 1383 72 85 1395 103 160 air replace #minecraft:leaves
+cmd fill 1383 72 85 1395 103 160 air replace #minecraft:logs
+cmd fill 1383 72 85 1395 103 160 air replace minecraft:pearlescent_froglight
+cmd fill 1383 72 85 1395 103 160 air replace minecraft:ochre_froglight
+cmd fill 1383 72 85 1395 103 160 air replace minecraft:weeping_vines
+cmd fill 1383 72 85 1395 103 160 air replace minecraft:weeping_vines_plant
+cmd fill 1396 72 85 1408 103 160 air replace #minecraft:leaves
+cmd fill 1396 72 85 1408 103 160 air replace #minecraft:logs
+cmd fill 1396 72 85 1408 103 160 air replace minecraft:pearlescent_froglight
+cmd fill 1396 72 85 1408 103 160 air replace minecraft:ochre_froglight
+cmd fill 1396 72 85 1408 103 160 air replace minecraft:weeping_vines
+cmd fill 1396 72 85 1408 103 160 air replace minecraft:weeping_vines_plant
+cmd fill 1409 72 85 1421 103 160 air replace #minecraft:leaves
+cmd fill 1409 72 85 1421 103 160 air replace #minecraft:logs
+cmd fill 1409 72 85 1421 103 160 air replace minecraft:pearlescent_froglight
+cmd fill 1409 72 85 1421 103 160 air replace minecraft:ochre_froglight
+cmd fill 1409 72 85 1421 103 160 air replace minecraft:weeping_vines
+cmd fill 1409 72 85 1421 103 160 air replace minecraft:weeping_vines_plant
+cmd fill 1422 72 85 1434 103 160 air replace #minecraft:leaves
+cmd fill 1422 72 85 1434 103 160 air replace #minecraft:logs
+cmd fill 1422 72 85 1434 103 160 air replace minecraft:pearlescent_froglight
+cmd fill 1422 72 85 1434 103 160 air replace minecraft:ochre_froglight
+cmd fill 1422 72 85 1434 103 160 air replace minecraft:weeping_vines
+cmd fill 1422 72 85 1434 103 160 air replace minecraft:weeping_vines_plant
+cmd fill 1435 72 85 1447 103 160 air replace #minecraft:leaves
+cmd fill 1435 72 85 1447 103 160 air replace #minecraft:logs
+cmd fill 1435 72 85 1447 103 160 air replace minecraft:pearlescent_froglight
+cmd fill 1435 72 85 1447 103 160 air replace minecraft:ochre_froglight
+cmd fill 1435 72 85 1447 103 160 air replace minecraft:weeping_vines
+cmd fill 1435 72 85 1447 103 160 air replace minecraft:weeping_vines_plant
+cmd fill 1448 72 85 1460 103 160 air replace #minecraft:leaves
+cmd fill 1448 72 85 1460 103 160 air replace #minecraft:logs
+cmd fill 1448 72 85 1460 103 160 air replace minecraft:pearlescent_froglight
+cmd fill 1448 72 85 1460 103 160 air replace minecraft:ochre_froglight
+cmd fill 1448 72 85 1460 103 160 air replace minecraft:weeping_vines
+cmd fill 1448 72 85 1460 103 160 air replace minecraft:weeping_vines_plant
+cmd fill 1461 72 85 1473 103 160 air replace #minecraft:leaves
+cmd fill 1461 72 85 1473 103 160 air replace #minecraft:logs
+cmd fill 1461 72 85 1473 103 160 air replace minecraft:pearlescent_froglight
+cmd fill 1461 72 85 1473 103 160 air replace minecraft:ochre_froglight
+cmd fill 1461 72 85 1473 103 160 air replace minecraft:weeping_vines
+cmd fill 1461 72 85 1473 103 160 air replace minecraft:weeping_vines_plant
+cmd fill 1474 72 85 1486 103 160 air replace #minecraft:leaves
+cmd fill 1474 72 85 1486 103 160 air replace #minecraft:logs
+cmd fill 1474 72 85 1486 103 160 air replace minecraft:pearlescent_froglight
+cmd fill 1474 72 85 1486 103 160 air replace minecraft:ochre_froglight
+cmd fill 1474 72 85 1486 103 160 air replace minecraft:weeping_vines
+cmd fill 1474 72 85 1486 103 160 air replace minecraft:weeping_vines_plant
+cmd execute positioned 1329 0 118 positioned over world_surface run skyabyss dev tree tide_a_big ~ ~ ~ s1
+cmd execute positioned 1352 0 124 positioned over world_surface run skyabyss dev tree tide_a ~ ~ ~ s2
+cmd execute positioned 1384 0 118 positioned over world_surface run skyabyss dev tree tide_b_big ~ ~ ~ s1
+cmd execute positioned 1407 0 124 positioned over world_surface run skyabyss dev tree tide_b ~ ~ ~ s2
+cmd execute positioned 1439 0 118 positioned over world_surface run skyabyss dev tree tide_c_big ~ ~ ~ s1
+cmd execute positioned 1462 0 124 positioned over world_surface run skyabyss dev tree tide_c ~ ~ ~ s2
+wait 40
+camera 1395 100 205 180 10
+waitchunks 600
+wait 60
+close
+wait 100
+shot tide_all
+camera 1340 84 163 180 6
+waitchunks 300
+wait 40
+shot tide_a
+camera 1395 84 163 180 6
+waitchunks 300
+wait 40
+shot tide_b
+camera 1450 84 163 180 6
+waitchunks 300
+wait 40
+shot tide_c
+camera 1395 135 75 0 40
+waitchunks 300
+wait 40
+shot tide_top

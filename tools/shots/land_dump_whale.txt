@@ -1,0 +1,461 @@
+# whale の土地全体の書き出し。gen_land_dump.py が書く (24 点を回り、43 区画を書き出す)
+world land_whale continent
+size 960 540
+timeout 7200
+render 8
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd skyabyss dev opening build
+wait 100
+cmd gamemode creative
+cmd tp @s -700 200 -1600
+waitchunks 300
+wait 500
+cmd tp @s -700 200 -1270
+waitchunks 300
+wait 500
+cmd tp @s -700 200 -940
+waitchunks 300
+wait 500
+cmd tp @s -370 200 -1270
+waitchunks 300
+wait 500
+cmd tp @s -370 200 -940
+waitchunks 300
+wait 500
+cmd tp @s -370 200 -610
+waitchunks 300
+wait 500
+cmd tp @s -40 200 -1270
+waitchunks 300
+wait 500
+cmd tp @s -40 200 -940
+waitchunks 300
+wait 500
+cmd tp @s -40 200 -610
+waitchunks 300
+wait 500
+cmd tp @s 290 200 -1600
+waitchunks 300
+wait 500
+cmd tp @s 290 200 -1270
+waitchunks 300
+wait 500
+cmd tp @s 290 200 -940
+waitchunks 300
+wait 500
+cmd tp @s 290 200 -610
+waitchunks 300
+wait 500
+cmd tp @s 290 200 -280
+waitchunks 300
+wait 500
+cmd tp @s 620 200 -1600
+waitchunks 300
+wait 500
+cmd tp @s 620 200 -1270
+waitchunks 300
+wait 500
+cmd tp @s 620 200 -940
+waitchunks 300
+wait 500
+cmd tp @s 620 200 -610
+waitchunks 300
+wait 500
+cmd tp @s 620 200 -280
+waitchunks 300
+wait 500
+cmd tp @s 950 200 -1270
+waitchunks 300
+wait 500
+cmd tp @s 950 200 -940
+waitchunks 300
+wait 500
+cmd tp @s 950 200 -610
+waitchunks 300
+wait 500
+cmd tp @s 1280 200 -1270
+waitchunks 300
+wait 500
+cmd tp @s 1280 200 -940
+waitchunks 300
+wait 500
+cmd tp @s -700 200 -1600
+waitchunks 200
+wait 120
+cmd tp @s -700 200 -1270
+waitchunks 200
+wait 120
+cmd tp @s -700 200 -940
+waitchunks 200
+wait 120
+cmd tp @s -370 200 -1270
+waitchunks 200
+wait 120
+cmd tp @s -370 200 -940
+waitchunks 200
+wait 120
+cmd tp @s -370 200 -610
+waitchunks 200
+wait 120
+cmd tp @s -40 200 -1270
+waitchunks 200
+wait 120
+cmd tp @s -40 200 -940
+waitchunks 200
+wait 120
+cmd tp @s -40 200 -610
+waitchunks 200
+wait 120
+cmd tp @s 290 200 -1600
+waitchunks 200
+wait 120
+cmd tp @s 290 200 -1270
+waitchunks 200
+wait 120
+cmd tp @s 290 200 -940
+waitchunks 200
+wait 120
+cmd tp @s 290 200 -610
+waitchunks 200
+wait 120
+cmd tp @s 290 200 -280
+waitchunks 200
+wait 120
+cmd tp @s 620 200 -1600
+waitchunks 200
+wait 120
+cmd tp @s 620 200 -1270
+waitchunks 200
+wait 120
+cmd tp @s 620 200 -940
+waitchunks 200
+wait 120
+cmd tp @s 620 200 -610
+waitchunks 200
+wait 120
+cmd tp @s 620 200 -280
+waitchunks 200
+wait 120
+cmd tp @s 950 200 -1270
+waitchunks 200
+wait 120
+cmd tp @s 950 200 -940
+waitchunks 200
+wait 120
+cmd tp @s 950 200 -610
+waitchunks 200
+wait 120
+cmd tp @s 1280 200 -1270
+waitchunks 200
+wait 120
+cmd tp @s 1280 200 -940
+waitchunks 200
+wait 120
+cmd gamemode spectator
+cmd forceload remove all
+cmd forceload add -768 -1536 -513 -1281
+camera -640 220 -1408 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_-3_-6 -768 24 -1536 -513 250 -1281
+waitdump
+cmd forceload remove all
+cmd forceload add -768 -1280 -513 -1025
+camera -640 220 -1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_-3_-5 -768 24 -1280 -513 250 -1025
+waitdump
+cmd forceload remove all
+cmd forceload add -768 -1024 -513 -769
+camera -640 220 -896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_-3_-4 -768 24 -1024 -513 250 -769
+waitdump
+cmd forceload remove all
+cmd forceload add -512 -1536 -257 -1281
+camera -384 220 -1408 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_-2_-6 -512 24 -1536 -257 250 -1281
+waitdump
+cmd forceload remove all
+cmd forceload add -512 -1280 -257 -1025
+camera -384 220 -1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_-2_-5 -512 24 -1280 -257 250 -1025
+waitdump
+cmd forceload remove all
+cmd forceload add -512 -1024 -257 -769
+camera -384 220 -896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_-2_-4 -512 24 -1024 -257 250 -769
+waitdump
+cmd forceload remove all
+cmd forceload add -512 -768 -257 -513
+camera -384 220 -640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_-2_-3 -512 24 -768 -257 250 -513
+waitdump
+cmd forceload remove all
+cmd forceload add -256 -1536 -1 -1281
+camera -128 220 -1408 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_-1_-6 -256 24 -1536 -1 250 -1281
+waitdump
+cmd forceload remove all
+cmd forceload add -256 -1280 -1 -1025
+camera -128 220 -1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_-1_-5 -256 24 -1280 -1 250 -1025
+waitdump
+cmd forceload remove all
+cmd forceload add -256 -1024 -1 -769
+camera -128 220 -896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_-1_-4 -256 24 -1024 -1 250 -769
+waitdump
+cmd forceload remove all
+cmd forceload add -256 -768 -1 -513
+camera -128 220 -640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_-1_-3 -256 24 -768 -1 250 -513
+waitdump
+cmd forceload remove all
+cmd forceload add -256 -512 -1 -257
+camera -128 220 -384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_-1_-2 -256 24 -512 -1 250 -257
+waitdump
+cmd forceload remove all
+cmd forceload add 0 -1792 255 -1537
+camera 128 220 -1664 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_0_-7 0 24 -1792 255 250 -1537
+waitdump
+cmd forceload remove all
+cmd forceload add 0 -1536 255 -1281
+camera 128 220 -1408 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_0_-6 0 24 -1536 255 250 -1281
+waitdump
+cmd forceload remove all
+cmd forceload add 0 -1280 255 -1025
+camera 128 220 -1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_0_-5 0 24 -1280 255 250 -1025
+waitdump
+cmd forceload remove all
+cmd forceload add 0 -1024 255 -769
+camera 128 220 -896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_0_-4 0 24 -1024 255 250 -769
+waitdump
+cmd forceload remove all
+cmd forceload add 0 -768 255 -513
+camera 128 220 -640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_0_-3 0 24 -768 255 250 -513
+waitdump
+cmd forceload remove all
+cmd forceload add 0 -512 255 -257
+camera 128 220 -384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_0_-2 0 24 -512 255 250 -257
+waitdump
+cmd forceload remove all
+cmd forceload add 256 -1792 511 -1537
+camera 384 220 -1664 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_1_-7 256 24 -1792 511 250 -1537
+waitdump
+cmd forceload remove all
+cmd forceload add 256 -1536 511 -1281
+camera 384 220 -1408 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_1_-6 256 24 -1536 511 250 -1281
+waitdump
+cmd forceload remove all
+cmd forceload add 256 -1280 511 -1025
+camera 384 220 -1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_1_-5 256 24 -1280 511 250 -1025
+waitdump
+cmd forceload remove all
+cmd forceload add 256 -1024 511 -769
+camera 384 220 -896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_1_-4 256 24 -1024 511 250 -769
+waitdump
+cmd forceload remove all
+cmd forceload add 256 -768 511 -513
+camera 384 220 -640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_1_-3 256 24 -768 511 250 -513
+waitdump
+cmd forceload remove all
+cmd forceload add 256 -512 511 -257
+camera 384 220 -384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_1_-2 256 24 -512 511 250 -257
+waitdump
+cmd forceload remove all
+cmd forceload add 256 -256 511 -1
+camera 384 220 -128 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_1_-1 256 24 -256 511 250 -1
+waitdump
+cmd forceload remove all
+cmd forceload add 512 -1792 767 -1537
+camera 640 220 -1664 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_2_-7 512 24 -1792 767 250 -1537
+waitdump
+cmd forceload remove all
+cmd forceload add 512 -1536 767 -1281
+camera 640 220 -1408 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_2_-6 512 24 -1536 767 250 -1281
+waitdump
+cmd forceload remove all
+cmd forceload add 512 -1280 767 -1025
+camera 640 220 -1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_2_-5 512 24 -1280 767 250 -1025
+waitdump
+cmd forceload remove all
+cmd forceload add 512 -1024 767 -769
+camera 640 220 -896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_2_-4 512 24 -1024 767 250 -769
+waitdump
+cmd forceload remove all
+cmd forceload add 512 -768 767 -513
+camera 640 220 -640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_2_-3 512 24 -768 767 250 -513
+waitdump
+cmd forceload remove all
+cmd forceload add 512 -512 767 -257
+camera 640 220 -384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_2_-2 512 24 -512 767 250 -257
+waitdump
+cmd forceload remove all
+cmd forceload add 768 -1536 1023 -1281
+camera 896 220 -1408 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_3_-6 768 24 -1536 1023 250 -1281
+waitdump
+cmd forceload remove all
+cmd forceload add 768 -1280 1023 -1025
+camera 896 220 -1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_3_-5 768 24 -1280 1023 250 -1025
+waitdump
+cmd forceload remove all
+cmd forceload add 768 -1024 1023 -769
+camera 896 220 -896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_3_-4 768 24 -1024 1023 250 -769
+waitdump
+cmd forceload remove all
+cmd forceload add 768 -768 1023 -513
+camera 896 220 -640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_3_-3 768 24 -768 1023 250 -513
+waitdump
+cmd forceload remove all
+cmd forceload add 768 -512 1023 -257
+camera 896 220 -384 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_3_-2 768 24 -512 1023 250 -257
+waitdump
+cmd forceload remove all
+cmd forceload add 1024 -1536 1279 -1281
+camera 1152 220 -1408 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_4_-6 1024 24 -1536 1279 250 -1281
+waitdump
+cmd forceload remove all
+cmd forceload add 1024 -1280 1279 -1025
+camera 1152 220 -1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_4_-5 1024 24 -1280 1279 250 -1025
+waitdump
+cmd forceload remove all
+cmd forceload add 1024 -1024 1279 -769
+camera 1152 220 -896 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_4_-4 1024 24 -1024 1279 250 -769
+waitdump
+cmd forceload remove all
+cmd forceload add 1024 -768 1279 -513
+camera 1152 220 -640 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_4_-3 1024 24 -768 1279 250 -513
+waitdump
+cmd forceload remove all
+cmd forceload add 1280 -1536 1535 -1281
+camera 1408 220 -1408 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_5_-6 1280 24 -1536 1535 250 -1281
+waitdump
+cmd forceload remove all
+cmd forceload add 1280 -1280 1535 -1025
+camera 1408 220 -1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_5_-5 1280 24 -1280 1535 250 -1025
+waitdump
+cmd forceload remove all
+cmd forceload add 1536 -1280 1791 -1025
+camera 1664 220 -1152 0 90
+waitchunks 300
+wait 400
+cmd skyabyss dev dump whale_6_-5 1536 24 -1280 1791 250 -1025
+waitdump
+cmd forceload remove all

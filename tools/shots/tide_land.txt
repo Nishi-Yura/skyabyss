@@ -1,0 +1,66 @@
+# 潮の浜の木 (TideTrees 汐傘の樹) を、ふつうの生成 (サバンナ 2 か所・湿地) と、三つの大きさの並べで撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/tide_land.txt -PshotsName=tide_land (新しい世界の最初の回は遠くの木が描かれないので 2 回回す)
+world tide_land2 continent
+size 1600 900
+timeout 1500
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd gamemode spectator
+hud off
+camera 1398 86 160 180 4
+waitchunks 600
+wait 60
+cmd fill 1355 72 95 1367 105 135 air replace #minecraft:leaves
+cmd fill 1355 72 95 1367 105 135 air replace #minecraft:logs
+cmd fill 1368 72 95 1380 105 135 air replace #minecraft:leaves
+cmd fill 1368 72 95 1380 105 135 air replace #minecraft:logs
+cmd fill 1381 72 95 1393 105 135 air replace #minecraft:leaves
+cmd fill 1381 72 95 1393 105 135 air replace #minecraft:logs
+cmd fill 1394 72 95 1406 105 135 air replace #minecraft:leaves
+cmd fill 1394 72 95 1406 105 135 air replace #minecraft:logs
+cmd fill 1407 72 95 1419 105 135 air replace #minecraft:leaves
+cmd fill 1407 72 95 1419 105 135 air replace #minecraft:logs
+cmd fill 1420 72 95 1432 105 135 air replace #minecraft:leaves
+cmd fill 1420 72 95 1432 105 135 air replace #minecraft:logs
+cmd fill 1433 72 95 1445 105 135 air replace #minecraft:leaves
+cmd fill 1433 72 95 1445 105 135 air replace #minecraft:logs
+cmd execute positioned 1372 0 115 positioned over world_surface run skyabyss dev tree parasol_young ~ ~ ~ s1
+cmd execute positioned 1395 0 115 positioned over world_surface run skyabyss dev tree parasol ~ ~ ~ s1
+cmd execute positioned 1424 0 115 positioned over world_surface run skyabyss dev tree parasol_old ~ ~ ~ s1
+camera 1392 125 230 180 20
+waitchunks 1200
+wait 200
+camera 1296 125 -60 180 20
+waitchunks 1200
+wait 200
+camera 1296 115 700 180 22
+waitchunks 1200
+wait 200
+close
+camera 1392 125 230 180 20
+waitchunks 1200
+wait 120
+shot tl_savanna
+camera 1296 125 -60 180 20
+waitchunks 1200
+wait 120
+shot tl_savanna2
+camera 1296 115 700 180 22
+waitchunks 1200
+wait 120
+shot tl_swamp
+camera 1398 86 160 180 4
+waitchunks 600
+wait 80
+shot tl_sizes
+camera 1407 79 138 180 -8
+waitchunks 300
+wait 40
+shot tl_under

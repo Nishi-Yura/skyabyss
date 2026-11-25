@@ -1,0 +1,139 @@
+# 灰の荒野の木のラフ 3 案 (EmberTrees) を南の荒野 (x-632 z1090 あたり) に並べて撮る。A 煤垂れの樹・B 紅垂れの樹・C 灰骨の樹
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/ember_trees.txt -PshotsName=ember_trees (新しい世界の最初の回は遠くが描かれないので 2 回回す)
+world ember_trees continent
+size 1600 900
+timeout 1500
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd gamemode spectator
+hud off
+camera -632 110 1160 180 12
+waitchunks 600
+wait 100
+cmd fill -705 76 1060 -698 120 1110 air replace #minecraft:leaves
+cmd fill -705 76 1060 -698 120 1110 air replace #minecraft:logs
+cmd fill -705 76 1060 -698 120 1110 air replace minecraft:nether_wart_block
+cmd fill -705 76 1060 -698 120 1110 air replace minecraft:weeping_vines
+cmd fill -705 76 1060 -698 120 1110 air replace minecraft:weeping_vines_plant
+cmd fill -697 76 1060 -690 120 1110 air replace #minecraft:leaves
+cmd fill -697 76 1060 -690 120 1110 air replace #minecraft:logs
+cmd fill -697 76 1060 -690 120 1110 air replace minecraft:nether_wart_block
+cmd fill -697 76 1060 -690 120 1110 air replace minecraft:weeping_vines
+cmd fill -697 76 1060 -690 120 1110 air replace minecraft:weeping_vines_plant
+cmd fill -689 76 1060 -682 120 1110 air replace #minecraft:leaves
+cmd fill -689 76 1060 -682 120 1110 air replace #minecraft:logs
+cmd fill -689 76 1060 -682 120 1110 air replace minecraft:nether_wart_block
+cmd fill -689 76 1060 -682 120 1110 air replace minecraft:weeping_vines
+cmd fill -689 76 1060 -682 120 1110 air replace minecraft:weeping_vines_plant
+cmd fill -681 76 1060 -674 120 1110 air replace #minecraft:leaves
+cmd fill -681 76 1060 -674 120 1110 air replace #minecraft:logs
+cmd fill -681 76 1060 -674 120 1110 air replace minecraft:nether_wart_block
+cmd fill -681 76 1060 -674 120 1110 air replace minecraft:weeping_vines
+cmd fill -681 76 1060 -674 120 1110 air replace minecraft:weeping_vines_plant
+cmd fill -673 76 1060 -666 120 1110 air replace #minecraft:leaves
+cmd fill -673 76 1060 -666 120 1110 air replace #minecraft:logs
+cmd fill -673 76 1060 -666 120 1110 air replace minecraft:nether_wart_block
+cmd fill -673 76 1060 -666 120 1110 air replace minecraft:weeping_vines
+cmd fill -673 76 1060 -666 120 1110 air replace minecraft:weeping_vines_plant
+cmd fill -665 76 1060 -658 120 1110 air replace #minecraft:leaves
+cmd fill -665 76 1060 -658 120 1110 air replace #minecraft:logs
+cmd fill -665 76 1060 -658 120 1110 air replace minecraft:nether_wart_block
+cmd fill -665 76 1060 -658 120 1110 air replace minecraft:weeping_vines
+cmd fill -665 76 1060 -658 120 1110 air replace minecraft:weeping_vines_plant
+cmd fill -657 76 1060 -650 120 1110 air replace #minecraft:leaves
+cmd fill -657 76 1060 -650 120 1110 air replace #minecraft:logs
+cmd fill -657 76 1060 -650 120 1110 air replace minecraft:nether_wart_block
+cmd fill -657 76 1060 -650 120 1110 air replace minecraft:weeping_vines
+cmd fill -657 76 1060 -650 120 1110 air replace minecraft:weeping_vines_plant
+cmd fill -649 76 1060 -642 120 1110 air replace #minecraft:leaves
+cmd fill -649 76 1060 -642 120 1110 air replace #minecraft:logs
+cmd fill -649 76 1060 -642 120 1110 air replace minecraft:nether_wart_block
+cmd fill -649 76 1060 -642 120 1110 air replace minecraft:weeping_vines
+cmd fill -649 76 1060 -642 120 1110 air replace minecraft:weeping_vines_plant
+cmd fill -641 76 1060 -634 120 1110 air replace #minecraft:leaves
+cmd fill -641 76 1060 -634 120 1110 air replace #minecraft:logs
+cmd fill -641 76 1060 -634 120 1110 air replace minecraft:nether_wart_block
+cmd fill -641 76 1060 -634 120 1110 air replace minecraft:weeping_vines
+cmd fill -641 76 1060 -634 120 1110 air replace minecraft:weeping_vines_plant
+cmd fill -633 76 1060 -626 120 1110 air replace #minecraft:leaves
+cmd fill -633 76 1060 -626 120 1110 air replace #minecraft:logs
+cmd fill -633 76 1060 -626 120 1110 air replace minecraft:nether_wart_block
+cmd fill -633 76 1060 -626 120 1110 air replace minecraft:weeping_vines
+cmd fill -633 76 1060 -626 120 1110 air replace minecraft:weeping_vines_plant
+cmd fill -625 76 1060 -618 120 1110 air replace #minecraft:leaves
+cmd fill -625 76 1060 -618 120 1110 air replace #minecraft:logs
+cmd fill -625 76 1060 -618 120 1110 air replace minecraft:nether_wart_block
+cmd fill -625 76 1060 -618 120 1110 air replace minecraft:weeping_vines
+cmd fill -625 76 1060 -618 120 1110 air replace minecraft:weeping_vines_plant
+cmd fill -617 76 1060 -610 120 1110 air replace #minecraft:leaves
+cmd fill -617 76 1060 -610 120 1110 air replace #minecraft:logs
+cmd fill -617 76 1060 -610 120 1110 air replace minecraft:nether_wart_block
+cmd fill -617 76 1060 -610 120 1110 air replace minecraft:weeping_vines
+cmd fill -617 76 1060 -610 120 1110 air replace minecraft:weeping_vines_plant
+cmd fill -609 76 1060 -602 120 1110 air replace #minecraft:leaves
+cmd fill -609 76 1060 -602 120 1110 air replace #minecraft:logs
+cmd fill -609 76 1060 -602 120 1110 air replace minecraft:nether_wart_block
+cmd fill -609 76 1060 -602 120 1110 air replace minecraft:weeping_vines
+cmd fill -609 76 1060 -602 120 1110 air replace minecraft:weeping_vines_plant
+cmd fill -601 76 1060 -594 120 1110 air replace #minecraft:leaves
+cmd fill -601 76 1060 -594 120 1110 air replace #minecraft:logs
+cmd fill -601 76 1060 -594 120 1110 air replace minecraft:nether_wart_block
+cmd fill -601 76 1060 -594 120 1110 air replace minecraft:weeping_vines
+cmd fill -601 76 1060 -594 120 1110 air replace minecraft:weeping_vines_plant
+cmd fill -593 76 1060 -586 120 1110 air replace #minecraft:leaves
+cmd fill -593 76 1060 -586 120 1110 air replace #minecraft:logs
+cmd fill -593 76 1060 -586 120 1110 air replace minecraft:nether_wart_block
+cmd fill -593 76 1060 -586 120 1110 air replace minecraft:weeping_vines
+cmd fill -593 76 1060 -586 120 1110 air replace minecraft:weeping_vines_plant
+cmd fill -585 76 1060 -578 120 1110 air replace #minecraft:leaves
+cmd fill -585 76 1060 -578 120 1110 air replace #minecraft:logs
+cmd fill -585 76 1060 -578 120 1110 air replace minecraft:nether_wart_block
+cmd fill -585 76 1060 -578 120 1110 air replace minecraft:weeping_vines
+cmd fill -585 76 1060 -578 120 1110 air replace minecraft:weeping_vines_plant
+cmd fill -577 76 1060 -570 120 1110 air replace #minecraft:leaves
+cmd fill -577 76 1060 -570 120 1110 air replace #minecraft:logs
+cmd fill -577 76 1060 -570 120 1110 air replace minecraft:nether_wart_block
+cmd fill -577 76 1060 -570 120 1110 air replace minecraft:weeping_vines
+cmd fill -577 76 1060 -570 120 1110 air replace minecraft:weeping_vines_plant
+cmd fill -569 76 1060 -562 120 1110 air replace #minecraft:leaves
+cmd fill -569 76 1060 -562 120 1110 air replace #minecraft:logs
+cmd fill -569 76 1060 -562 120 1110 air replace minecraft:nether_wart_block
+cmd fill -569 76 1060 -562 120 1110 air replace minecraft:weeping_vines
+cmd fill -569 76 1060 -562 120 1110 air replace minecraft:weeping_vines_plant
+cmd fill -561 76 1060 -554 120 1110 air replace #minecraft:leaves
+cmd fill -561 76 1060 -554 120 1110 air replace #minecraft:logs
+cmd fill -561 76 1060 -554 120 1110 air replace minecraft:nether_wart_block
+cmd fill -561 76 1060 -554 120 1110 air replace minecraft:weeping_vines
+cmd fill -561 76 1060 -554 120 1110 air replace minecraft:weeping_vines_plant
+cmd execute positioned -687 0 1080 positioned over world_surface run skyabyss dev tree ember_a_big ~ ~ ~ s1
+cmd execute positioned -665 0 1088 positioned over world_surface run skyabyss dev tree ember_a ~ ~ ~ s2
+cmd execute positioned -642 0 1080 positioned over world_surface run skyabyss dev tree ember_b_big ~ ~ ~ s1
+cmd execute positioned -620 0 1088 positioned over world_surface run skyabyss dev tree ember_b ~ ~ ~ s2
+cmd execute positioned -597 0 1080 positioned over world_surface run skyabyss dev tree ember_c_big ~ ~ ~ s1
+cmd execute positioned -575 0 1088 positioned over world_surface run skyabyss dev tree ember_c ~ ~ ~ s2
+wait 40
+camera -632 104 1165 180 10
+waitchunks 600
+wait 60
+close
+wait 100
+shot ember_all
+camera -677 92 1125 180 6
+waitchunks 300
+wait 40
+shot ember_a
+camera -632 92 1125 180 6
+waitchunks 300
+wait 40
+shot ember_b
+camera -587 92 1125 180 6
+waitchunks 300
+wait 40
+shot ember_c

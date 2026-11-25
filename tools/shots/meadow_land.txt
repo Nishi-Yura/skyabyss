@@ -1,0 +1,69 @@
+# 鐘の野の木 (MeadowTrees 花傘の樹) を、都のまわりのふつうの生成と、三つの大きさの並べで撮る
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/meadow_land.txt -PshotsName=meadow_land
+world meadow_land continent
+size 1600 900
+timeout 1500
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd gamemode spectator
+hud off
+# まず一回り (遠くのチャンクの木が描かれるまで)
+camera -80 135 260 120 22
+waitchunks 1200
+wait 200
+camera -250 140 420 160 22
+waitchunks 1200
+wait 200
+camera -760 140 330 200 22
+waitchunks 1200
+wait 200
+camera -150 140 -300 30 22
+waitchunks 1200
+wait 200
+camera -260 92 170 160 2
+waitchunks 1200
+wait 200
+camera -80 135 260 120 22
+waitchunks 1200
+wait 120
+close
+shot ml_east
+camera -250 140 420 160 22
+waitchunks 1200
+wait 120
+close
+shot ml_south
+camera -760 140 330 200 22
+waitchunks 1200
+wait 120
+close
+shot ml_west
+camera -150 140 -300 30 22
+waitchunks 1200
+wait 120
+close
+shot ml_north
+camera -260 92 170 160 2
+waitchunks 1200
+wait 120
+close
+shot ml_low
+camera -300 120 175 180 20
+waitchunks 600
+wait 60
+cmd execute positioned -325 0 128 positioned over world_surface run skyabyss dev tree blossom_young ~ ~ ~ s9
+cmd execute positioned -300 0 128 positioned over world_surface run skyabyss dev tree blossom ~ ~ ~ s9
+cmd execute positioned -270 0 128 positioned over world_surface run skyabyss dev tree blossom_old ~ ~ ~ s9
+wait 40
+camera -298 98 175 180 0
+waitchunks 600
+wait 60
+close
+shot ml_sizes

@@ -224,6 +224,13 @@ python tools/audit/check_light.py        # 都の街路・広場・階段の明�
 - 撮影: `./gradlew runShots -Pscript=tools/shots/ground_sites_qa.txt -PshotsName=ground_sites_qa`（一〜三章の地上の場所を、目の高さと上から。拠点のまわりの場所＝旅の跡・荷車・日記は、この世界には建たない）
 - 地上の場所の浮き・くぼみ・漏れは、部品ごとに直す前に、建て終わりの仕上げ `SiteJob.settle()` で直せないかを見る
 
+## 前もって組む土地 (`world/continent/ContinentAuthored`、試作)
+
+- 土地全体: `python -I tools/gen/world/authored/gen_land_dump.py whale` → `SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/land_dump_whale.txt -PshotsName=land_whale`（約 45 分）→ `python -I -u tools/gen/world/authored/land.py whale [tx_tz ...]`（約 7 分）→ `authored/whale/<tx>_<tz>.bin` と `index.json`。比べは `gen_land_shots.py whale` の台本 2 本と `gen_land_shots.py whale sheet`。
+- 書き出しの世界で外れの集落が建たないときは、木の房 (歪んだ菌の塊) を地面と見ていないか (`SiteJob.solidGround`) を見る。
+- 書き出し `SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/whale_authored_dump.txt -PshotsName=whale_authored` → `python -I tools/gen/world/authored/whale_town.py` → `data/skyabyss/continent/authored/whale_town.sbd`（`index.json` に名前）。ゲームが読むのは環境変数 `SKYABYSS_AUTHORED=1` のときだけ（試作のあいだ）。上から見る `preview.py <.sbd> <png>`、比べの台本 `gen_whale_shots.py`、比べ絵 `cmp_sheet.py`。
+- 書き出しは観戦者だと見どころが建たない（創造で町に立って待つ）。範囲は `forceload` を 256 チャンク以下ずつ。書き出しの header の `sites` が、建て直さない町・見どころ・祠の記録。
+
 ## 構造をデータで確かめる (`dev/StructureDump` と `tools/structure/`)
 
 ブロックを範囲ごとファイル (`.sbd`) に書き出し、Python で図と検査を出す。歩いて回らなくても、穴・行き止まり・水漏れ・看板が分かる。

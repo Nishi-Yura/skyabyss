@@ -368,6 +368,11 @@ public final class ContinentMap {
 
     // 地面の上面の Y (道のそばは道の高さへならす)
     public int surface(int x, int z) {
+        // 前もって組んだ土地では、組んだ地面 (木・草・灯りを除く) の高さ
+        int ag = ContinentAuthored.ground(x, z);
+        if (ag != Integer.MIN_VALUE) {
+            return ag;
+        }
         // 巨神の居場所では、体の下の地面を体より低くする。祠の広場はならす (ContinentLairs)
         return Math.min(ContinentLairs.cap(x, z), (int) Math.floor(ContinentLairs.pad(this, x, z, graded(x, z))));
     }

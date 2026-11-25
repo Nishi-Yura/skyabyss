@@ -153,6 +153,14 @@ public final class SiteJob {
     // ---------------------------------------------------------------- LOAD
     private void load() {
         if (rect == null) {
+            authored = authoredSite();
+            if (authored != null) {
+                // 前もって組んだ土地に建った姿で入っている: 書き出したときの場所・向きに合わせる
+                entry.yaw = authored.yaw();
+                rot = SiteFinder.rot(authored.yaw());
+                mirror = SiteFinder.mirror(authored.yaw());
+                origin = authored.pos().below();
+            }
             rect = computeRect();
             for (int cx = rect[0] >> 4; cx <= rect[2] >> 4; cx++) {
                 for (int cz = rect[1] >> 4; cz <= rect[3] >> 4; cz++) {
@@ -173,7 +181,43 @@ public final class SiteJob {
             }
         }
         waited = 0;
+        if (authoredDone()) {
+            return;
+        }
         phase = Phase.ANALYZE;
+    }
+
+    // 前もって組んだ土地 (world/continent/ContinentAuthored) で、書き出した世界に建っていた同じ場所 (無ければ null)
+    @javax.annotation.Nullable
+    private jp.revati.skyabyss.world.continent.ContinentAuthored.Site authored;
+
+    @javax.annotation.Nullable
+    private jp.revati.skyabyss.world.continent.ContinentAuthored.Site authoredSite() {
+        if (!(level.getChunkSource().getGenerator() instanceof jp.revati.skyabyss.world.continent.ContinentChunkGenerator)) {
+            return null;
+        }
+        return jp.revati.skyabyss.world.continent.ContinentAuthored.site(entry.kind, entry.index, entry.pos);
+    }
+
+    // 組んだ立体に部品と整地の輪が全部入っていれば、建て直さずに仕上げ (印・札・係の人) だけする。
+    // 縁にまたがるなら、同じ場所・向きで建て直す (立体に入った自分の半分を「人の建物」と見て動かないように)
+    private boolean authoredDone() {
+        if (authored == null) {
+            return false;
+        }
+        if (!jp.revati.skyabyss.world.continent.ContinentAuthored.coversRect(rect[0], rect[1], rect[2], rect[3])) {
+            force = true;
+            return false;
+        }
+        post.finish(this);
+        entry.pos = authored.pos();
+        entry.built = true;
+        entry.started = true;
+        data.setDirty();
+        releaseTickets();
+        phase = Phase.DONE;
+        SkyAbyss.LOGGER.info("Opening site {}: already in the authored area, finishing only", label);
+        return true;
     }
 
     private void releaseTickets() {
@@ -242,6 +286,12 @@ public final class SiteJob {
         if (s.isAir() || s.canBeReplaced() || s.is(BlockTags.LEAVES) || s.is(BlockTags.LOGS) || s.is(BlockTags.FLOWERS) || isPlant(s)) {
             return false;
         }
+        // 岩鯨の土地の木の房と灯り (WhaleTrees) は木の一部。地面に数えない
+        if (s.is(Blocks.WARPED_WART_BLOCK) || s.is(Blocks.SHROOMLIGHT) || s.is(Blocks.SPORE_BLOSSOM) || s.is(Blocks.AMETHYST_CLUSTER)
+                // 砂漠の木 (DesertTrees) の乾いた紐
+                || s.is(Blocks.MANGROVE_ROOTS)) {
+            return false;
+        }
         return !s.getCollisionShape(level, p).isEmpty();
     }
 
@@ -272,7 +322,10 @@ public final class SiteJob {
     private static boolean naturalAbove(BlockState s) {
         return s.isAir() || s.canBeReplaced() || s.is(BlockTags.LEAVES) || s.is(BlockTags.LOGS) || s.is(BlockTags.FLOWERS) || s.is(BlockTags.SAPLINGS)
                 || isPlant(s) || s.is(BlockTags.SNOW) || s.is(Blocks.SNOW_BLOCK) || s.is(Blocks.COBWEB) || s.is(Blocks.MANGROVE_ROOTS)
-                || s.is(Blocks.HANGING_ROOTS) || s.is(Blocks.MOSSY_COBBLESTONE);
+                || s.is(Blocks.HANGING_ROOTS) || s.is(Blocks.MOSSY_COBBLESTONE)
+                // 岩鯨の土地の木 (world/continent/WhaleTrees) の房・灯り・つる・花 (2026-11-25。人の建物と見て外れの集落が建たなかった)
+                || s.is(Blocks.WARPED_WART_BLOCK) || s.is(Blocks.SHROOMLIGHT) || s.is(Blocks.CAVE_VINES) || s.is(Blocks.CAVE_VINES_PLANT)
+                || s.is(Blocks.SPORE_BLOSSOM) || s.is(Blocks.AMETHYST_CLUSTER);
     }
 
     // ---------------------------------------------------------------- ANALYZE
@@ -377,6 +430,10 @@ public final class SiteJob {
         }
         hs.sort(Comparator.naturalOrder());
         groundH = bp.anchor ? hs.get(hs.size() / 4) : hs.get(hs.size() / 2);
+        if (authored != null) {
+            // 組んだ土地の縁にまたがる場所: 書き出した世界と同じ高さ (立体に入った自分の半分の上に積まない)
+            groundH = authored.pos().getY() - 1;
+        }
         origin = new BlockPos(origin.getX(), groundH, origin.getZ());
         // 地下の部屋が地面の中に収まるか (斜面で横から顔を出さない)。収まらなければ次の場所へ
         if (!bp.level && !force && !entry.siteId.isEmpty() && !bp.deepRoofs.isEmpty() && !roofsCovered()) {

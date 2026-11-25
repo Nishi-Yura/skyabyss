@@ -150,6 +150,7 @@ final class ShapeJob {
     // 地面に数えない物 (木・葉・草花・雪・つる)
     private static boolean soft(BlockState s) {
         return s.canBeReplaced() || s.is(BlockTags.LEAVES) || s.is(BlockTags.LOGS) || s.is(BlockTags.FLOWERS) || s.is(BlockTags.SAPLINGS)
+                || s.is(Blocks.WARPED_WART_BLOCK) || s.is(Blocks.SHROOMLIGHT) || s.is(Blocks.CAVE_VINES) || s.is(Blocks.CAVE_VINES_PLANT) || s.is(Blocks.SPORE_BLOSSOM) || s.is(Blocks.AMETHYST_CLUSTER)
                 || s.is(Blocks.SNOW) || s.is(Blocks.VINE) || s.is(Blocks.CACTUS) || s.is(Blocks.SUGAR_CANE) || s.is(Blocks.BAMBOO)
                 || s.is(Blocks.SWEET_BERRY_BUSH) || s.is(Blocks.BROWN_MUSHROOM_BLOCK) || s.is(Blocks.RED_MUSHROOM_BLOCK) || s.is(Blocks.MUSHROOM_STEM)
                 || s.is(Blocks.MANGROVE_ROOTS) || s.is(Blocks.BEE_NEST) || s.is(Blocks.PUMPKIN) || s.is(Blocks.MELON) || s.is(Blocks.COCOA);

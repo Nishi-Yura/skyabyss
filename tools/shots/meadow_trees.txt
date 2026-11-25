@@ -1,0 +1,47 @@
+# 鐘の野の木のラフ 3 案 (MeadowTrees) を都の東の草地に並べて撮る。A 鐘房・B 花傘・C 鐘下げ
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/meadow_trees.txt -PshotsName=meadow_trees
+world meadow_trees continent
+size 1600 900
+timeout 1200
+render 10
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd gamemode spectator
+hud off
+camera -300 120 175 180 20
+waitchunks 600
+wait 100
+cmd execute positioned -335 0 128 positioned over world_surface run skyabyss dev tree meadow_a ~ ~ ~ s1
+cmd execute positioned -300 0 132 positioned over world_surface run skyabyss dev tree meadow_b ~ ~ ~ s1
+cmd execute positioned -265 0 128 positioned over world_surface run skyabyss dev tree meadow_c ~ ~ ~ s1
+cmd execute positioned -335 0 150 positioned over world_surface run skyabyss dev tree meadow_a ~ ~ ~ s2
+cmd execute positioned -300 0 154 positioned over world_surface run skyabyss dev tree meadow_b ~ ~ ~ s2
+cmd execute positioned -265 0 150 positioned over world_surface run skyabyss dev tree meadow_c ~ ~ ~ s2
+wait 40
+camera -300 104 205 180 4
+waitchunks 600
+wait 60
+close
+shot meadow_all
+camera -335 95 186 180 -2
+waitchunks 300
+wait 40
+shot meadow_a
+camera -300 97 188 180 -2
+waitchunks 300
+wait 40
+shot meadow_b
+camera -265 98 186 180 -4
+waitchunks 300
+wait 40
+shot meadow_c
+camera -300 135 120 0 35
+waitchunks 300
+wait 40
+shot meadow_top

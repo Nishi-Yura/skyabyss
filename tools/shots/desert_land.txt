@@ -1,0 +1,90 @@
+# desert trees (DesertTrees crook) in normal generation (tide desert ~x1464 z-104) and the three sizes in a row
+# bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/desert_land.txt -PshotsName=desert_land (run twice on a new world)
+world desert_land continent
+size 1600 900
+timeout 1500
+render 12
+guiscale 2
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd gamemode spectator
+hud off
+camera 1360 92 -20 180 5
+waitchunks 600
+wait 60
+cmd fill 1306 70 -100 1313 115 -55 air replace #minecraft:leaves
+cmd fill 1306 70 -100 1313 115 -55 air replace #minecraft:logs
+cmd fill 1306 70 -100 1313 115 -55 air replace minecraft:mangrove_roots
+cmd fill 1314 70 -100 1321 115 -55 air replace #minecraft:leaves
+cmd fill 1314 70 -100 1321 115 -55 air replace #minecraft:logs
+cmd fill 1314 70 -100 1321 115 -55 air replace minecraft:mangrove_roots
+cmd fill 1322 70 -100 1329 115 -55 air replace #minecraft:leaves
+cmd fill 1322 70 -100 1329 115 -55 air replace #minecraft:logs
+cmd fill 1322 70 -100 1329 115 -55 air replace minecraft:mangrove_roots
+cmd fill 1330 70 -100 1337 115 -55 air replace #minecraft:leaves
+cmd fill 1330 70 -100 1337 115 -55 air replace #minecraft:logs
+cmd fill 1330 70 -100 1337 115 -55 air replace minecraft:mangrove_roots
+cmd fill 1338 70 -100 1345 115 -55 air replace #minecraft:leaves
+cmd fill 1338 70 -100 1345 115 -55 air replace #minecraft:logs
+cmd fill 1338 70 -100 1345 115 -55 air replace minecraft:mangrove_roots
+cmd fill 1346 70 -100 1353 115 -55 air replace #minecraft:leaves
+cmd fill 1346 70 -100 1353 115 -55 air replace #minecraft:logs
+cmd fill 1346 70 -100 1353 115 -55 air replace minecraft:mangrove_roots
+cmd fill 1354 70 -100 1361 115 -55 air replace #minecraft:leaves
+cmd fill 1354 70 -100 1361 115 -55 air replace #minecraft:logs
+cmd fill 1354 70 -100 1361 115 -55 air replace minecraft:mangrove_roots
+cmd fill 1362 70 -100 1369 115 -55 air replace #minecraft:leaves
+cmd fill 1362 70 -100 1369 115 -55 air replace #minecraft:logs
+cmd fill 1362 70 -100 1369 115 -55 air replace minecraft:mangrove_roots
+cmd fill 1370 70 -100 1377 115 -55 air replace #minecraft:leaves
+cmd fill 1370 70 -100 1377 115 -55 air replace #minecraft:logs
+cmd fill 1370 70 -100 1377 115 -55 air replace minecraft:mangrove_roots
+cmd fill 1378 70 -100 1385 115 -55 air replace #minecraft:leaves
+cmd fill 1378 70 -100 1385 115 -55 air replace #minecraft:logs
+cmd fill 1378 70 -100 1385 115 -55 air replace minecraft:mangrove_roots
+cmd fill 1386 70 -100 1393 115 -55 air replace #minecraft:leaves
+cmd fill 1386 70 -100 1393 115 -55 air replace #minecraft:logs
+cmd fill 1386 70 -100 1393 115 -55 air replace minecraft:mangrove_roots
+cmd fill 1394 70 -100 1401 115 -55 air replace #minecraft:leaves
+cmd fill 1394 70 -100 1401 115 -55 air replace #minecraft:logs
+cmd fill 1394 70 -100 1401 115 -55 air replace minecraft:mangrove_roots
+cmd fill 1402 70 -100 1409 115 -55 air replace #minecraft:leaves
+cmd fill 1402 70 -100 1409 115 -55 air replace #minecraft:logs
+cmd fill 1402 70 -100 1409 115 -55 air replace minecraft:mangrove_roots
+cmd fill 1410 70 -100 1417 115 -55 air replace #minecraft:leaves
+cmd fill 1410 70 -100 1417 115 -55 air replace #minecraft:logs
+cmd fill 1410 70 -100 1417 115 -55 air replace minecraft:mangrove_roots
+cmd fill 1418 70 -100 1425 115 -55 air replace #minecraft:leaves
+cmd fill 1418 70 -100 1425 115 -55 air replace #minecraft:logs
+cmd fill 1418 70 -100 1425 115 -55 air replace minecraft:mangrove_roots
+cmd execute positioned 1325 0 -78 positioned over world_surface run skyabyss dev tree crook_young ~ ~ ~ s1
+cmd execute positioned 1355 0 -78 positioned over world_surface run skyabyss dev tree crook ~ ~ ~ s1
+cmd execute positioned 1392 0 -78 positioned over world_surface run skyabyss dev tree crook_old ~ ~ ~ s1
+camera 1495 100 40 180 10
+waitchunks 1200
+wait 200
+camera 1600 96 -30 110 8
+waitchunks 1200
+wait 200
+close
+camera 1495 100 40 180 10
+waitchunks 1200
+wait 120
+shot dl_south
+camera 1600 96 -30 110 8
+waitchunks 1200
+wait 120
+shot dl_east
+camera 1360 92 -20 180 5
+waitchunks 600
+wait 80
+shot dl_sizes
+camera 1340 84 -45 210 0
+waitchunks 300
+wait 40
+shot dl_side

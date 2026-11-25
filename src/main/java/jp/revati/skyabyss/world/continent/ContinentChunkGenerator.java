@@ -263,6 +263,11 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
 
     @Override
     public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunk) {
+        ContinentAuthored.Tile authored = ContinentAuthored.chunkTile(chunk.getPos().x, chunk.getPos().z);
+        if (authored != null) {
+            fillAuthored(authored, chunk);
+            return CompletableFuture.completedFuture(chunk);
+        }
         ContinentMap map = ContinentMap.get();
         int x0 = chunk.getPos().getMinBlockX();
         int z0 = chunk.getPos().getMinBlockZ();
@@ -325,6 +330,105 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
         }
         Heightmap.primeHeightmaps(chunk, EnumSet.of(Heightmap.Types.OCEAN_FLOOR_WG, Heightmap.Types.WORLD_SURFACE_WG));
         return CompletableFuture.completedFuture(chunk);
+    }
+
+    // 岩鯨の土地の雪のまだらを消す (2026-11-25。鯨見の町の試作と同じに)。寒い生物群系の凍らせる飾りが積む雪の層と、
+    // 雪の斜面の雪のブロックの地面を、雪の線 (WHALE_SNOW_LINE) より下では草に戻す。高い峰の雪は残す
+    static final int WHALE_SNOW_LINE = 165;
+
+    static void clearWhaleSnow(net.minecraft.world.level.WorldGenLevel level, ChunkAccess chunk) {
+        ContinentMap map = ContinentMap.get();
+        int x0 = chunk.getPos().getMinBlockX();
+        int z0 = chunk.getPos().getMinBlockZ();
+        BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+        for (int dz = 0; dz < 16; dz++) {
+            for (int dx = 0; dx < 16; dx++) {
+                int x = x0 + dx;
+                int z = z0 + dz;
+                if (map.region(x, z) != ContinentMap.WHALE) {
+                    continue;
+                }
+                // 飾りのあとの本当の上面 (WG の高さは地形を作った時のままで、雪の層の下を指す)
+                int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+                if (y >= WHALE_SNOW_LINE) {
+                    continue;
+                }
+                // 上から: 雪の層 → 消す、雪のブロック → 草、雪をかぶった草 → ふつうの草 (葉の上の雪も消す)
+                for (int k = 0; k < 5; k++) {
+                    p.set(x, y - k, z);
+                    BlockState s = level.getBlockState(p);
+                    if (s.is(Blocks.SNOW)) {
+                        level.setBlock(p, AIR, 2);
+                    } else if (s.is(Blocks.SNOW_BLOCK) && k <= 1) {
+                        level.setBlock(p, Blocks.GRASS_BLOCK.defaultBlockState(), 2);
+                        for (int j = 1; j <= 2; j++) {
+                            BlockPos q = p.below(j);
+                            if (level.getBlockState(q).is(Blocks.SNOW_BLOCK)) {
+                                level.setBlock(q, Blocks.DIRT.defaultBlockState(), 2);
+                            }
+                        }
+                        break;
+                    } else if (s.is(Blocks.GRASS_BLOCK) || s.is(Blocks.PODZOL)) {
+                        if (s.getValue(net.minecraft.world.level.block.SnowyDirtBlock.SNOWY)) {
+                            level.setBlock(p, s.setValue(net.minecraft.world.level.block.SnowyDirtBlock.SNOWY, false), 2);
+                        }
+                        break;
+                    } else if (!s.isAir() && !s.is(net.minecraft.tags.BlockTags.LEAVES)) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    // 前もって組んだ土地 (ContinentAuthored) のチャンク: 区画の列のとおりに積む。列の始まり (y0) より下は石、いちばん下は岩盤。
+    // 看板・宝箱・寝台など中身のある物は、空の中身 (BlockEntity) をここで付ける (文字は建てた場所の仕上げが書く)
+    private static void fillAuthored(ContinentAuthored.Tile t, ChunkAccess chunk) {
+        int x0 = chunk.getPos().getMinBlockX();
+        int z0 = chunk.getPos().getMinBlockZ();
+        int minY = chunk.getMinBuildHeight();
+        int maxY = chunk.getMaxBuildHeight() - 1;
+        LevelChunkSection[] sections = chunk.getSections();
+        List<BlockPos> withEntity = new java.util.ArrayList<>();
+        for (LevelChunkSection s : sections) {
+            s.acquire();
+        }
+        try {
+            for (int dz = 0; dz < 16; dz++) {
+                for (int dx = 0; dx < 16; dx++) {
+                    final int x = x0 + dx;
+                    final int z = z0 + dz;
+                    final int fdx = dx;
+                    final int fdz = dz;
+                    sections[chunk.getSectionIndex(minY)].setBlockState(dx, minY & 15, dz, BEDROCK, false);
+                    for (int y = minY + 1; y < t.y0; y++) {
+                        sections[chunk.getSectionIndex(y)].setBlockState(dx, y & 15, dz, y < 0 ? DEEPSLATE : STONE, false);
+                    }
+                    t.column(x, z, (ya, yb, st) -> {
+                        for (int y = ya; y <= Math.min(yb, maxY); y++) {
+                            sections[chunk.getSectionIndex(y)].setBlockState(fdx, y & 15, fdz, st, false);
+                            if (st.hasBlockEntity()) {
+                                withEntity.add(new BlockPos(x, y, z));
+                            }
+                        }
+                    });
+                }
+            }
+        } finally {
+            for (LevelChunkSection s : sections) {
+                s.release();
+            }
+        }
+        for (BlockPos p : withEntity) {
+            BlockState st = chunk.getBlockState(p);
+            if (st.getBlock() instanceof net.minecraft.world.level.block.EntityBlock eb) {
+                net.minecraft.world.level.block.entity.BlockEntity be = eb.newBlockEntity(p, st);
+                if (be != null) {
+                    chunk.setBlockEntity(be);
+                }
+            }
+        }
+        Heightmap.primeHeightmaps(chunk, EnumSet.of(Heightmap.Types.OCEAN_FLOOR_WG, Heightmap.Types.WORLD_SURFACE_WG));
     }
 
     // ---------------------------------------------------------------- 道 (layout.json の道。幅 5 の土の道、縁は荒れた土と砂利)
@@ -441,6 +545,9 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getBaseHeight(int x, int z, Heightmap.Types type, LevelHeightAccessor level, RandomState random) {
+        if (ContinentAuthored.chunk(x >> 4, z >> 4)) {
+            return ContinentAuthored.top(x, z) + 1;
+        }
         int top = ContinentMap.get().surface(x, z);
         if (type == Heightmap.Types.OCEAN_FLOOR || type == Heightmap.Types.OCEAN_FLOOR_WG) {
             return top + 1;
@@ -482,9 +589,13 @@ public final class ContinentChunkGenerator extends ChunkGenerator {
     // 生物群系の木や草のあとに、野の小さな飾り (岩・倒木・茂みなど)
     @Override
     public void applyBiomeDecoration(net.minecraft.world.level.WorldGenLevel level, ChunkAccess chunk, StructureManager structureManager) {
+        if (ContinentAuthored.chunk(chunk.getPos().x, chunk.getPos().z)) {
+            return; // 前もって組んだ土地は、木も草も立体に入っている
+        }
         super.applyBiomeDecoration(level, chunk, structureManager);
         ContinentScatter.decorate(level, chunk);
         ContinentTrees.plant(level, chunk);
+        clearWhaleSnow(level, chunk);
     }
 
     // 生まれたときの動物 (羊・牛など。生物群系のとおり。羊を連れ戻す頼みなどに要る)
