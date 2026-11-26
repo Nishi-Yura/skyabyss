@@ -149,7 +149,7 @@ def cast(pitch, slot_skill, cm, foe=False):
     return f"""camera 0.5 -60 0.5 0 {pitch}
 cmd skyabyss skill slot @s 1 {slot_skill}
 cmd kill @e[type=!player]
-{FOE if foe else ""}wait 30
+{(FOE.replace(" 4.5 ", f" {foe} ") if isinstance(foe, float) else FOE) if foe else ""}wait 30
 cmd skyabyss skill cooldowns @s
 cmd skyabyss skill mana @s full
 chat clear
@@ -180,7 +180,84 @@ def warrior(only):
     return out
 
 
-JOBS = {"mage": (mage, [s[0] for s in MAGE]), "warrior": (warrior, [s[0] for s in WARRIOR])}
+# ---------------------------------------------------------------- 暗殺者
+# (技, 枠に入れる技, 取る節の並び (None = dev prop で模型だけ置く, "learn" = skill learn で覚える), 撮る位置, 撮る tick の並び, 前に敵を置くか)
+# 踏み込み・跳び退き・風裂きは近くに敵がいないと放てない。双牙は敵へ向けて置く (targetOr)
+ASSASSIN = [
+    ("lunge", "lunge", ["lunge"], cam(10.5, -56, 1.5, 0.5, -59.5, 4.0, 0.8), [(2, "a")], True),
+    ("backstep", "backstep", ["backstep"], cam(8.5, -56.5, -4.5, 0.5, -59.5, -0.5, 0.65), [(3, "a")], True),
+    # 双牙は 3.5 ブロックまでしか届かない (FANG_RANGE)。野盗を 2.5 ブロック前に置く
+    ("twin_fang", "twin_fang", ["twin_fang"], cam(8.5, -56.5, -1.5, 0.5, -59.5, 3.0, 0.7), [(4, "a"), (5, "b")], 3.0),
+    ("wind_rend", "wind_rend", ["wind_rend"], cam(8.5, -57.5, 0.5, 0.5, -58.5, 3.5, 0.8), [(1, "a"), (1, "b")], True),
+    # 霧隠れ = 踏み込みの刻印 8「霧の踏み込み」(veil_lunge)。踏み込みのあと足もとに出る
+    ("mist_veil", "lunge", ["veil_lunge"], cam(7.5, -56, -3.5, 0.5, -58.5, 2.5, 0.75), [(6, "a")], True),
+]
+
+
+def assassin(only):
+    out = [HEAD.format(job="assassin", weapon="shrine_dagger")]
+    for look in LOOKS:
+        out.append(f"# ======== {look}\ngearlook skill {look}\n")
+        for name, slot_skill, nodes, cm, shots, foe in ASSASSIN:
+            if only and name not in only:
+                continue
+            if nodes is None:  # 模型だけを置く
+                kind = name.replace("_prop", "")
+                out.append(f"camera 0.5 -60 0.5 0 0\ncmd kill @e[type=!player]\nwait 30\nchat clear\n"
+                           f"cmd skyabyss dev prop ss_{kind} rise 0.5 -60 0.5\ncamera {cm}\nhud off\n")
+            else:
+                out.append("cmd skyabyss skill forget @s\ncmd skyabyss skill points @s 100\n")
+                if nodes == "learn":
+                    out.append(f"cmd skyabyss skill learn @s {slot_skill} 1\n")
+                else:
+                    out.append("".join(f"cmd skyabyss skill node @s {n}\n" for n in tree_path("assassin", nodes)))
+                out.append(cast(0, slot_skill, cm, foe))
+            for w, tag in shots:
+                out.append(f"wait {w}\nshot {look}_{name}_{tag}\n")
+            out.append("wait 40\n")
+    return out
+
+
+# ---------------------------------------------------------------- 弓使い
+# (技, 枠に入れる技, 取る節の並び, 放つ向きの pitch, 撮る位置, 撮る tick の並び, 前に敵を置くか)
+# 雲穿ちは矢が要る (撮影の頭で渡す)。空の雨は見ている先の地面へ降るので下を向いて放つ。
+# 雪縛り = 雲穿ちの刻印 8「縛りの矢」(snare_pierce)。12 ブロック以内・15 度の中の敵が要る
+ARCHER = [
+    # 的を置かずに 24 ブロック先へ飛ばす (6 tick)。近い的だと撮る前に飛び切る
+    ("cloud_pierce", "cloud_pierce", ["cloud_pierce"], 0, cam(14.5, -57.5, 9.0, 0.5, -58.5, 9.0, 0.9), [(1, "a"), (1, "b")], False),
+    ("bone_trap", "bone_trap", ["bone_trap"], 0, cam(5.5, -57.0, -1.0, 0.5, -59.8, 1.8, 0.75), [(5, "a")], False),
+    ("sky_rain", "sky_rain", ["sky_rain"], 14, cam(13.5, -54.0, 1.5, 0.5, -59.5, 7.0, 0.85), [(8, "a"), (14, "b")], False),
+    ("snare_shot", "cloud_pierce", ["snare_pierce"], 0, cam(8.5, -57.0, 1.0, 0.5, -59.0, 4.0, 0.8), [(1, "a"), (6, "b")], 6.0),
+    # 飛ぶ・降る形は技では速すぎて写らない (雲穿ちは 6 tick で 24 ブロック)。dev prop で遅く飛ばして撮る (40 tick・大きさ 1.4)
+    ("cloud_pierce_toss", "toss 0.5 -58.8 0.5 0.5 -58.8 24.5 40", None, 0, cam(9.0, -55.3, 6.0, 0.5, -55.8, 6.0, 0.8), [(10, "a")], False),
+    ("snare_shot_toss", "toss 0.5 -58.8 0.5 0.5 -58.8 24.5 40", None, 0, cam(9.0, -55.3, 6.0, 0.5, -55.8, 6.0, 0.8), [(10, "a")], False),
+    ("sky_rain_fall", "fall 0.5 -60 5.5 10", None, 0, cam(9.0, -57.0, 5.5, 0.5, -57.5, 5.5, 0.8), [(17, "a")], False),
+]
+
+
+def archer(only):
+    out = [HEAD.format(job="archer", weapon="shrine_bow"), "cmd give @s minecraft:arrow 64\n"]
+    for look in LOOKS:
+        out.append(f"# ======== {look}\ngearlook skill {look}\n")
+        for name, slot_skill, nodes, pitch, cm, shots, foe in ARCHER:
+            if only and name not in only:
+                continue
+            if nodes is None:  # dev prop で模型だけを飛ばす (slot_skill に toss / fall の引数)
+                kind = name.replace("_toss", "_fly")
+                out.append(f"camera 0.5 -60 0.5 0 0\ncmd kill @e[type=!player]\nwait 30\nchat clear\ncamera {cm}\nhud off\n"
+                           f"cmd skyabyss dev prop ss_{kind} {slot_skill}\n")
+            else:
+                out.append("cmd skyabyss skill forget @s\ncmd skyabyss skill points @s 100\n")
+                out.append("".join(f"cmd skyabyss skill node @s {n}\n" for n in tree_path("archer", nodes)))
+                out.append(cast(pitch, slot_skill, cm, foe))
+            for w, tag in shots:
+                out.append(f"wait {w}\nshot {look}_{name}_{tag}\n")
+            out.append("wait 80\n")
+    return out
+
+
+JOBS = {"mage": (mage, [s[0] for s in MAGE]), "warrior": (warrior, [s[0] for s in WARRIOR]),
+        "assassin": (assassin, [s[0] for s in ASSASSIN]), "archer": (archer, [s[0] for s in ARCHER])}
 
 
 def main():
