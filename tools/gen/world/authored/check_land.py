@@ -18,6 +18,9 @@ from pathlib import Path
 
 import numpy as np
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import lairs as L  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[4]
 OUT = Path(os.environ["SKYABYSS_AUTHORED_OUT"]) if os.environ.get("SKYABYSS_AUTHORED_OUT") else ROOT / "src" / "main" / "resources" / "data" / "skyabyss" / "continent" / "authored"
 T = 256
@@ -27,7 +30,7 @@ WINDOWS = ((-324, 444), (1184, 224), (-512, 812), (300, 1100), (-100, -600))
 
 GROUND_WORDS = ("dirt", "grass_block", "podzol", "mycelium", "stone", "granite", "diorite", "andesite", "tuff", "deepslate",
                 "sand", "gravel", "moss_block", "snow_block", "calcite", "cobblestone", "dirt_path", "packed_mud", "clay", "mud",
-                "bedrock", "terracotta", "blackstone", "basalt", "rooted_dirt", "polished_", "smooth_stone", "mud_bricks", "stone_bricks")
+                "bedrock", "terracotta", "blackstone", "basalt", "rooted_dirt", "polished_", "smooth_stone", "mud_bricks", "stone_bricks", "bone_block")
 NOT_GROUND = ("stairs", "slab", "wall", "button", "pressure", "mud_brick")
 
 
@@ -36,6 +39,11 @@ def is_ground(state):
     if any(w in b for w in NOT_GROUND):
         return False
     return any(w in b for w in GROUND_WORDS)
+
+
+# 自己テスト continent overhangs と同じ岩 (1〜2 段の空きの上に乗った岩)
+OVER_ROCK = ("minecraft:basalt", "minecraft:smooth_basalt", "minecraft:blackstone", "minecraft:gilded_blackstone", "minecraft:tuff")
+OVERHANGS = []
 
 
 def read_tile(land, tx, tz):
@@ -49,6 +57,8 @@ def read_tile(land, tx, tz):
     y0 = head["y0"]
     gnd = np.array([is_ground(s) for s in pal])
     air = np.array([s.endswith(":air") for s in pal])
+    rock = np.array([any(w in s.split("[")[0] for w in OVER_ROCK) for s in pal])
+    under = np.array([is_ground(s) or s.split("[")[0].endswith("_log") for s in pal])
     p = 12 + n + 4
     ground = np.full((T, T), -10**6, dtype=np.int32)
     for c in range(T * T):
@@ -63,7 +73,14 @@ def read_tile(land, tx, tz):
         below = y0 - 1
         gap_from = None
         air_n = 0
+        solid, gap = None, 0  # 張り出し: 下の固い所と、その上の空気の数
         for ln, pid in runs:
+            if air[pid]:
+                gap += int(ln)
+            else:
+                if rock[pid] and solid is not None and 1 <= gap <= 2 and under[solid]:
+                    OVERHANGS.append((land, tx * T + c % T, yy, tz * T + c // T))
+                solid, gap = pid, 0
             if gnd[pid]:
                 if air_n >= 4 and last >= y0:
                     below = last
@@ -156,8 +173,25 @@ def check(land):
     by = {}
     for s in steps:
         by.setdefault(s[0], []).append(s)
+    oh = [o for o in OVERHANGS if o[0] == land and mine(o[1], o[3])]
+    print(f"  overhangs {len(oh)}" + (f" e.g. {oh[:3]}" if oh else ""))
     for r, ss in sorted(by.items()):
         print(f"  road {r}: {len(ss)} steps, e.g. {ss[0][1]},{ss[0][2]} {ss[0][3]}->{ss[0][4]}")
+    # 4. 自己テスト titan lairs: 体の柱の下の地面が体の底より低い・祠の広場 (半径 6、3 おき) が平ら
+    touch = {}
+    for name, x, z, bottom in L.body_columns():
+        y = h(x, z)
+        if y is not None and mine(x, z) and y >= bottom:
+            touch[name] = touch.get(name, 0) + 1
+    for name, (sx, sz) in L.shrines().items():
+        y0_ = h(sx, sz)
+        if y0_ is None or not mine(sx, sz) or name in idx["sites"].get("shrines", {}):
+            continue  # 書き出した世界で建った祠は、自己テストも平らさを見ない
+        bad = [(sx + dx, sz + dz, h(sx + dx, sz + dz)) for dx in range(-6, 7, 3) for dz in range(-6, 7, 3)
+               if dx * dx + dz * dz <= 36 and h(sx + dx, sz + dz) != y0_]
+        print(f"  shrine {name} at {sx},{sz} y {y0_}: " + (f"NOT flat {bad[:3]}" if bad else "flat"))
+    if touch:
+        print(f"  lair ground touches the body: {touch}")
     return steps, pits
 
 

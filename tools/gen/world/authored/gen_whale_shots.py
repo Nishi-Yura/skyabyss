@@ -3,8 +3,8 @@
 同じ場所・同じ向きから撮るので、並べて比べられる。
 
     python -I tools/gen/world/authored/gen_whale_shots.py
-    SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/whale_cmp_before.txt -PshotsName=whale_authored
-    SKYABYSS_AUTHORED=1 SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/whale_cmp_after.txt -PshotsName=whale_after
+    SKYABYSS_AUTHORED=0 SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/whale_cmp_before.txt -PshotsName=whale_authored
+    SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/whale_cmp_after.txt -PshotsName=whale_after
 """
 from pathlib import Path
 

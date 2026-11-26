@@ -255,7 +255,8 @@ public final class FrontierTerrain {
                 return NONE;
             }
         }
-        int base = map.surface(cx, cz);
+        // 生成器の地面で選ぶ (前もって組んだ土地は、この選び方で置いた書き出しの世界から作る。組んだ起伏で選び直すと消える)
+        int base = map.generatedSurface(cx, cz);
         int sea = ContinentChunkGenerator.SEA_LEVEL;
         int kind;
         switch (region) {
@@ -272,7 +273,7 @@ public final class FrontierTerrain {
                 return NONE;
             }
             for (int[] d : new int[][] {{10, 0}, {-10, 0}, {0, 10}, {0, -10}}) {
-                if (map.surface(cx + d[0], cz + d[1]) > sea - 1) {
+                if (map.generatedSurface(cx + d[0], cz + d[1]) > sea - 1) {
                     return NONE;
                 }
             }
@@ -283,7 +284,7 @@ public final class FrontierTerrain {
             for (int a = 0; a < 12; a++) {
                 double ang = a * Math.PI / 6;
                 for (int rr : new int[] {8, 16, 26}) {
-                    highest = Math.max(highest, map.surface(cx + (int) Math.round(Math.cos(ang) * rr), cz + (int) Math.round(Math.sin(ang) * rr)));
+                    highest = Math.max(highest, map.generatedSurface(cx + (int) Math.round(Math.cos(ang) * rr), cz + (int) Math.round(Math.sin(ang) * rr)));
                 }
             }
             if (highest > base + 4) {
@@ -296,7 +297,7 @@ public final class FrontierTerrain {
         // 肋骨は平らな所だけ (斜面に弧を立てると足が宙に浮く)
         if (kind == 0) {
             for (int[] d : new int[][] {{12, 0}, {-12, 0}, {0, 12}, {0, -12}}) {
-                if (Math.abs(map.surface(cx + d[0], cz + d[1]) - base) > 4) {
+                if (Math.abs(map.generatedSurface(cx + d[0], cz + d[1]) - base) > 4) {
                     return NONE;
                 }
             }

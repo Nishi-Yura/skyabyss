@@ -373,6 +373,12 @@ public final class ContinentMap {
         if (ag != Integer.MIN_VALUE) {
             return ag;
         }
+        return generatedSurface(x, z);
+    }
+
+    // 生成器の地面の上面 (前もって組んだ土地を見ない)。組んだ土地は、この地面で書き出した世界から作るので、
+    // 書き出した世界で決まった物の置き場 (外れの帯の浮き岩など) を選び直すときはこちら
+    public int generatedSurface(int x, int z) {
         // 巨神の居場所では、体の下の地面を体より低くする。祠の広場はならす (ContinentLairs)
         return Math.min(ContinentLairs.cap(x, z), (int) Math.floor(ContinentLairs.pad(this, x, z, graded(x, z))));
     }

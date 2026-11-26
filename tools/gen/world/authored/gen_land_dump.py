@@ -4,7 +4,7 @@
 そのあと 256×256 の区画ごとに読み込んで書き出す (forceload は 1 区画 = 256 チャンクちょうど)。
 
     python -I tools/gen/world/authored/gen_land_dump.py whale
-    SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/land_dump_whale.txt -PshotsName=land_whale
+    SKYABYSS_AUTHORED=0 SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/land_dump_whale.txt -PshotsName=land_whale
     → run/shots/land_whale/dumps/whale_<tx>_<tz>.sbd
 """
 import gzip

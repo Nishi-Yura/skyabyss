@@ -210,6 +210,9 @@ public final class SiteJob {
             return false;
         }
         post.finish(this);
+        if (entry.kind.equals("shelter")) {
+            CapitalDoors.noteAlreadyOpen(level, entry);
+        }
         entry.pos = authored.pos();
         entry.built = true;
         entry.started = true;
@@ -315,7 +318,9 @@ public final class SiteJob {
                 // 章の跡地の灰の盆地の上面 (ShapeJob。灰のまだら)
                 || s.is(Blocks.GRAY_CONCRETE_POWDER) || s.is(Blocks.LIGHT_GRAY_CONCRETE_POWDER) || s.is(Blocks.BASALT)
                 // 天と淵の大陸の地面 (峰に出る鉱石・火山の黒い石と溶岩の塊)
-                || s.is(net.neoforged.neoforge.common.Tags.Blocks.ORES) || s.is(Blocks.BLACKSTONE) || s.is(Blocks.MAGMA_BLOCK);
+                || s.is(net.neoforged.neoforge.common.Tags.Blocks.ORES) || s.is(Blocks.BLACKSTONE) || s.is(Blocks.MAGMA_BLOCK)
+                // 前もって組んだ潮の土地の岩山の縞 (tools/gen/world/authored/land.py の subst。人の建物と見て潮だまりが建たなかった)
+                || s.is(Blocks.SMOOTH_SANDSTONE) || s.is(Blocks.CUT_SANDSTONE);
     }
 
     // 地面の上に自然にある物か (空気・草花・雪・葉・木・つる・実)

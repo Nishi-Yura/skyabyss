@@ -126,7 +126,42 @@ public final class CapitalDoors {
         if (sign != null && level.isLoaded(sign) && level.getBlockState(sign).is(ModBlocks.TABLET.get())) {
             Tablets.write(level, sign, "sign.skyabyss.capital." + f.id() + "_open");
         }
-        return any || f.marks().stream().allMatch(m -> e.extra(m) == null);
+        // 印のまわりは読み込んであり、もう鉄の戸も格子もない: 開いている (前もって組んだ土地の都は、書き出した世界で組合の戸が外れたまま入っている)
+        return true;
+    }
+
+    // 前もって組んだ土地の都を仕上げたとき: 書き出した世界でもう戸が外れていた施設 (組合) を、開いたと記録する
+    static void noteAlreadyOpen(ServerLevel level, SiteData.Entry e) {
+        for (Facility f : ALL) {
+            if (e.extra("opened_" + f.id()) != null || f.marks().stream().anyMatch(m -> e.extra(m) == null)) {
+                continue;
+            }
+            boolean iron = false;
+            BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+            for (String m : f.marks()) {
+                BlockPos at = e.extra(m);
+                level.getChunk(at);
+                for (int dx = -REACH; dx <= REACH && !iron; dx++) {
+                    for (int dz = -REACH; dz <= REACH && !iron; dz++) {
+                        for (int dy = -1; dy <= HEIGHT && !iron; dy++) {
+                            BlockState st = level.getBlockState(p.set(at.getX() + dx, at.getY() + dy, at.getZ() + dz));
+                            iron = st.is(Blocks.IRON_DOOR) || st.is(Blocks.IRON_BARS);
+                        }
+                    }
+                }
+            }
+            if (!iron) {
+                e.extra("opened_" + f.id(), e.pos);
+                BlockPos sign = e.extra("sign_" + f.id());
+                if (sign != null) {
+                    level.getChunk(sign);
+                    if (level.getBlockState(sign).is(ModBlocks.TABLET.get())) {
+                        Tablets.write(level, sign, "sign.skyabyss.capital." + f.id() + "_open");
+                    }
+                }
+                SkyAbyss.LOGGER.info("Capital: the {} is already open in the authored area", f.id());
+            }
+        }
     }
 
     // 開発・自己テスト用: 施設を今すぐ開ける

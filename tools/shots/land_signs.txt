@@ -1,0 +1,739 @@
+# 組んだ土地の看板のまわりだけを書き出す。sign_check.py gen が書く
+world land_signs continent
+size 960 540
+timeout 10800
+render 8
+wait 100
+cmd skyabyss cinematic stop
+cmd time set 4000
+cmd gamerule doDaylightCycle false
+cmd gamerule doMobSpawning false
+cmd weather clear
+cmd skyabyss dev opening build
+wait 100
+cmd gamemode creative
+cmd tp @s -1116 200 631
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-7_3 -1117 111 630 -1115 135 632
+waitdump
+cmd tp @s -839 200 -1005
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-6_-7 -840 121 -1006 -838 145 -1004
+waitdump
+cmd tp @s -878 200 670
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-6_4 -879 92 669 -877 116 671
+waitdump
+cmd tp @s -850 200 898
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-6_5 -851 74 897 -849 98 899
+waitdump
+cmd tp @s -697 200 -591
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-5_-4 -698 100 -592 -696 124 -590
+waitdump
+cmd tp @s -706 200 -445
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-5_-3 -707 106 -446 -705 130 -444
+waitdump
+cmd tp @s -722 200 219
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-5_1 -723 98 218 -721 122 220
+waitdump
+cmd tp @s -693 200 596
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-5_3 -694 75 595 -692 99 597
+waitdump
+cmd tp @s -633 200 -510
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-4_-4 -634 82 -511 -632 106 -509
+waitdump
+cmd tp @s -557 200 -392
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-4_-3 -558 78 -393 -556 102 -391
+waitdump
+cmd tp @s -598 200 -247
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-4_-2 -599 74 -248 -597 98 -246
+waitdump
+cmd tp @s -547 200 -19
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-4_-1 -598 61 -32 -495 88 -5
+waitdump
+cmd tp @s -527 200 45
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-4_0 -573 51 -1 -480 90 91
+waitdump
+cmd tp @s -544 200 378
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-4_2 -603 74 331 -485 100 426
+waitdump
+cmd tp @s -593 200 624
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-4_3 -631 75 621 -555 100 628
+waitdump
+cmd tp @s -414 200 -748
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-3_-5 -415 72 -749 -413 96 -747
+waitdump
+cmd tp @s -410 200 -354
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-3_-3 -464 71 -356 -355 99 -351
+waitdump
+cmd tp @s -387 200 -295
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-3_-2 -424 71 -307 -349 96 -283
+waitdump
+cmd tp @s -400 200 -75
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-3_-1 -445 61 -144 -354 90 -5
+waitdump
+cmd tp @s -417 200 77
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-3_0 -480 61 4 -353 90 151
+waitdump
+cmd tp @s -333 200 443
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-3_2 -334 70 442 -332 94 444
+waitdump
+cmd tp @s -463 200 549
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-3_3 -478 69 504 -448 96 595
+waitdump
+cmd tp @s -258 200 -528
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-2_-4 -259 107 -529 -257 131 -527
+waitdump
+cmd tp @s -178 200 -264
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-2_-2 -179 73 -265 -177 97 -263
+waitdump
+cmd tp @s -218 200 69
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-2_0 -219 71 68 -217 95 70
+waitdump
+cmd tp @s -104 200 -26
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-1_-1 -105 69 -27 -103 93 -25
+waitdump
+cmd tp @s -149 200 154
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-1_0 -150 68 153 -148 92 155
+waitdump
+cmd tp @s -7 200 422
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-1_2 -8 71 421 -6 95 423
+waitdump
+cmd tp @s -117 200 515
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_-1_3 -118 69 514 -116 93 516
+waitdump
+cmd tp @s 72 200 55
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_0_0 71 69 54 73 93 56
+waitdump
+cmd tp @s 124 200 274
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_0_1 123 65 273 125 89 275
+waitdump
+cmd tp @s 213 200 104
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_meadow_1_0 193 57 88 234 85 121
+waitdump
+cmd tp @s -1645 200 1735
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_outskirts_-11_10 -1666 69 1714 -1623 94 1756
+waitdump
+cmd tp @s -1577 200 1718
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_outskirts_-10_10 -1578 55 1717 -1576 79 1719
+waitdump
+cmd tp @s -524 200 -1208
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_-4_-8 -539 94 -1234 -509 123 -1182
+waitdump
+cmd tp @s -626 200 -1076
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_-4_-7 -627 103 -1077 -625 127 -1075
+waitdump
+cmd tp @s -408 200 -971
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_-3_-7 -409 109 -972 -407 133 -970
+waitdump
+cmd tp @s -414 200 -748
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_-3_-5 -415 72 -749 -413 96 -747
+waitdump
+cmd tp @s -294 200 -1106
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_-2_-7 -295 104 -1107 -293 128 -1105
+waitdump
+cmd tp @s -212 200 -838
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_-2_-6 -213 99 -839 -211 123 -837
+waitdump
+cmd tp @s -216 200 -733
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_-2_-5 -271 105 -788 -160 136 -678
+waitdump
+cmd tp @s -218 200 -547
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_-2_-4 -259 100 -566 -177 131 -527
+waitdump
+cmd tp @s -20 200 -1302
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_-1_-9 -21 98 -1303 -19 122 -1301
+waitdump
+cmd tp @s -129 200 -1210
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_-1_-8 -130 103 -1211 -128 127 -1209
+waitdump
+cmd tp @s -136 200 -1045
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_-1_-7 -137 112 -1046 -135 136 -1044
+waitdump
+cmd tp @s -10 200 -912
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_-1_-6 -11 103 -913 -9 127 -911
+waitdump
+cmd tp @s -105 200 -741
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_-1_-5 -159 105 -793 -51 134 -689
+waitdump
+cmd tp @s -26 200 -572
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_-1_-4 -27 108 -573 -25 132 -571
+waitdump
+cmd tp @s 124 200 -948
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_0_-6 123 94 -949 125 118 -947
+waitdump
+cmd tp @s 57 200 -741
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_0_-5 50 103 -791 64 129 -691
+waitdump
+cmd tp @s 152 200 -553
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_0_-4 151 105 -554 153 129 -552
+waitdump
+cmd tp @s 244 200 -1334
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_1_-9 243 104 -1335 245 128 -1333
+waitdump
+cmd tp @s 302 200 -1095
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_1_-7 301 98 -1096 303 122 -1094
+waitdump
+cmd tp @s 182 200 -795
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_1_-5 181 104 -796 183 128 -794
+waitdump
+cmd tp @s 292 200 -574
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_1_-4 291 107 -575 293 131 -573
+waitdump
+cmd tp @s 424 200 -1208
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_2_-8 423 100 -1209 425 124 -1207
+waitdump
+cmd tp @s 427 200 -1042
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_2_-7 426 93 -1043 428 117 -1041
+waitdump
+cmd tp @s 366 200 -872
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_2_-6 365 91 -873 367 115 -871
+waitdump
+cmd tp @s 338 200 -295
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_2_-2 337 82 -296 339 106 -294
+waitdump
+cmd tp @s 513 200 -857
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_3_-6 512 99 -858 514 123 -856
+waitdump
+cmd tp @s 747 200 -1122
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_4_-8 746 110 -1123 748 134 -1121
+waitdump
+cmd tp @s 725 200 -1106
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_4_-7 701 105 -1121 750 134 -1090
+waitdump
+cmd tp @s 1035 200 -846
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_6_-6 1034 97 -847 1036 121 -845
+waitdump
+cmd tp @s 1174 200 -688
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_7_-5 1173 61 -689 1175 85 -687
+waitdump
+cmd tp @s 1283 200 -1175
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_whale_8_-8 1282 90 -1176 1284 114 -1174
+waitdump
+cmd tp @s 923 200 390
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_5_2 908 56 389 938 85 391
+waitdump
+cmd tp @s 1035 200 -846
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_6_-6 1034 97 -847 1036 121 -845
+waitdump
+cmd tp @s 1046 200 -249
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_6_-2 1045 65 -250 1047 89 -248
+waitdump
+cmd tp @s 1059 200 332
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_6_2 1058 57 331 1060 81 333
+waitdump
+cmd tp @s 1097 200 955
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_6_5 1096 68 954 1098 92 956
+waitdump
+cmd tp @s 1174 200 -688
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_7_-5 1173 61 -689 1175 85 -687
+waitdump
+cmd tp @s 1123 200 -450
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_7_-3 1122 69 -451 1124 93 -449
+waitdump
+cmd tp @s 1226 200 -184
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_7_-2 1225 62 -185 1227 86 -183
+waitdump
+cmd tp @s 1274 200 -3
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_7_-1 1273 62 -4 1275 86 -2
+waitdump
+cmd tp @s 1246 200 139
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_7_0 1245 61 138 1247 85 140
+waitdump
+cmd tp @s 1229 200 192
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_7_1 1181 57 164 1278 91 220
+waitdump
+cmd tp @s 1192 200 550
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_7_3 1191 64 549 1193 88 551
+waitdump
+cmd tp @s 1214 200 800
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_7_5 1213 60 799 1215 84 801
+waitdump
+cmd tp @s 1306 200 -652
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_8_-5 1283 63 -663 1330 92 -640
+waitdump
+cmd tp @s 1288 200 -633
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_8_-4 1285 63 -637 1292 92 -628
+waitdump
+cmd tp @s 1302 200 -362
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_8_-3 1301 63 -363 1303 87 -361
+waitdump
+cmd tp @s 1433 200 -116
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_8_-1 1432 61 -117 1434 85 -115
+waitdump
+cmd tp @s 1361 200 144
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_8_0 1322 62 132 1401 93 156
+waitdump
+cmd tp @s 1321 200 196
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_8_1 1288 62 162 1355 91 231
+waitdump
+cmd tp @s 1361 200 445
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_8_2 1300 60 435 1422 86 455
+waitdump
+cmd tp @s 1553 200 -612
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_9_-4 1552 66 -613 1554 90 -611
+waitdump
+cmd tp @s 1575 200 -378
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_9_-3 1574 60 -379 1576 84 -377
+waitdump
+cmd tp @s 1581 200 -30
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_9_-1 1580 56 -31 1582 80 -29
+waitdump
+cmd tp @s 1500 200 53
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_9_0 1499 59 52 1501 83 54
+waitdump
+cmd tp @s 1581 200 258
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_9_1 1580 58 257 1582 82 259
+waitdump
+cmd tp @s 1530 200 375
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_tide_9_2 1463 62 329 1598 91 422
+waitdump
+cmd tp @s -1582 200 -1287
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-10_-9 -1583 139 -1288 -1581 163 -1286
+waitdump
+cmd tp @s -1491 200 -1160
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-10_-8 -1492 145 -1161 -1490 169 -1159
+waitdump
+cmd tp @s -1441 200 920
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-10_5 -1442 99 915 -1440 123 926
+waitdump
+cmd tp @s -1311 200 -274
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-9_-2 -1312 189 -275 -1310 213 -273
+waitdump
+cmd tp @s -1341 200 -137
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-9_-1 -1342 130 -138 -1340 154 -136
+waitdump
+cmd tp @s -1353 200 91
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-9_0 -1354 119 90 -1352 143 92
+waitdump
+cmd tp @s -1385 200 558
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-9_3 -1386 111 557 -1384 135 559
+waitdump
+cmd tp @s -1415 200 916
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-9_5 -1440 94 901 -1390 123 931
+waitdump
+cmd tp @s -1223 200 -943
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-8_-6 -1224 74 -944 -1222 98 -942
+waitdump
+cmd tp @s -1219 200 -774
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-8_-5 -1220 102 -775 -1218 126 -773
+waitdump
+cmd tp @s -1196 200 -165
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-8_-2 -1203 164 -170 -1188 190 -160
+waitdump
+cmd tp @s -1187 200 -118
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-8_-1 -1250 161 -160 -1123 192 -76
+waitdump
+cmd tp @s -1122 200 101
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-8_0 -1123 169 100 -1121 193 102
+waitdump
+cmd tp @s -1257 200 279
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-8_1 -1258 148 278 -1256 172 280
+waitdump
+cmd tp @s -1222 200 467
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-8_2 -1223 157 466 -1221 181 468
+waitdump
+cmd tp @s -1021 200 -864
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-7_-6 -1022 204 -865 -1020 228 -863
+waitdump
+cmd tp @s -1070 200 -267
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-7_-2 -1097 155 -321 -1043 223 -213
+waitdump
+cmd tp @s -1107 200 -55
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-7_-1 -1121 161 -91 -1093 190 -19
+waitdump
+cmd tp @s -1116 200 631
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-7_3 -1117 111 630 -1115 135 632
+waitdump
+cmd tp @s -893 200 -1045
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-6_-7 -947 121 -1086 -838 157 -1004
+waitdump
+cmd tp @s -919 200 -661
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-6_-5 -920 231 -662 -918 255 -660
+waitdump
+cmd tp @s -926 200 -462
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-6_-3 -927 234 -463 -925 258 -461
+waitdump
+cmd tp @s -899 200 -166
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-6_-2 -900 235 -167 -898 259 -165
+waitdump
+cmd tp @s -877 200 56
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-6_0 -878 237 55 -876 261 57
+waitdump
+cmd tp @s -878 200 670
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_storm_-6_4 -879 92 669 -877 116 671
+waitdump
+cmd tp @s -850 200 898
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_-6_5 -851 74 897 -849 98 899
+waitdump
+cmd tp @s -746 200 941
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_-5_5 -747 86 940 -745 110 942
+waitdump
+cmd tp @s -502 200 967
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_-4_6 -503 77 966 -501 101 968
+waitdump
+cmd tp @s -628 200 1201
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_-4_7 -629 57 1200 -627 81 1202
+waitdump
+cmd tp @s -394 200 794
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_-3_4 -395 77 793 -393 101 795
+waitdump
+cmd tp @s -345 200 1075
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_-3_6 -368 89 1032 -321 118 1118
+waitdump
+cmd tp @s -393 200 1189
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_-3_7 -433 64 1120 -352 118 1258
+waitdump
+cmd tp @s -254 200 811
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_-2_5 -255 86 810 -253 110 812
+waitdump
+cmd tp @s -273 200 1055
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_-2_6 -317 89 990 -229 146 1120
+waitdump
+cmd tp @s -320 200 1354
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_-2_8 -321 58 1353 -319 82 1355
+waitdump
+cmd tp @s -117 200 515
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_-1_3 -118 69 514 -116 93 516
+waitdump
+cmd tp @s -96 200 831
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_-1_5 -97 84 830 -95 108 832
+waitdump
+cmd tp @s -86 200 983
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_-1_6 -87 115 982 -85 139 984
+waitdump
+cmd tp @s -98 200 1159
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_-1_7 -99 86 1158 -97 110 1160
+waitdump
+cmd tp @s -100 200 1306
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_-1_8 -101 63 1305 -99 87 1307
+waitdump
+cmd tp @s 96 200 1183
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_0_7 95 155 1182 97 179 1184
+waitdump
+cmd tp @s 140 200 1320
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_0_8 139 86 1319 141 110 1321
+waitdump
+cmd tp @s 316 200 646
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_1_4 315 73 645 317 97 647
+waitdump
+cmd tp @s 243 200 916
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_1_5 242 86 915 244 110 917
+waitdump
+cmd tp @s 191 200 1076
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_1_6 190 157 1075 192 181 1077
+waitdump
+cmd tp @s 243 200 1225
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_1_7 242 151 1224 244 175 1226
+waitdump
+cmd tp @s 428 200 945
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_2_5 427 87 944 429 111 946
+waitdump
+cmd tp @s 590 200 572
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_3_3 573 77 546 608 106 598
+waitdump
+cmd tp @s 595 200 962
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_3_6 594 87 961 596 111 963
+waitdump
+cmd tp @s 923 200 390
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_5_2 908 56 389 938 85 391
+waitdump
+cmd tp @s 914 200 1021
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_5_6 898 66 997 931 95 1046
+waitdump
+cmd tp @s 1097 200 955
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_6_5 1096 68 954 1098 92 956
+waitdump
+cmd tp @s 1214 200 800
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_7_5 1213 60 799 1215 84 801
+waitdump
+cmd tp @s 1148 200 1130
+waitchunks 300
+wait 500
+cmd skyabyss dev dump sg_ember_7_7 1147 58 1129 1149 82 1131
+waitdump

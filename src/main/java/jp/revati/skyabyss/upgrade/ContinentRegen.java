@@ -68,7 +68,9 @@ public final class ContinentRegen {
     //      「雷のところ、中ダンジョンの入り口の場所がおかしい」。ContinentLairsSelfTest が祠と見どころの間をたしかめる)
     // 15 = 2026-11-15 (章の跡地のまわりの道を、跡地から 40 (生成の平らな所と同じ) の外からならす。前は 48 で、雷翼の跡地の脇の環の道に
     //      2 段の段が 2 か所あった。全段の自己テスト continent roads)
-    public static final int VERSION = 15;
+    // 16 = 2026-11-26 (前もって組んだ土地 (ContinentAuthored) を既定で使う。6 つの土地の地形・道・岩山・池・岩の門が変わる。
+    //      ユーザー「組んだ土地をふだんから使う」)
+    public static final int VERSION = 16;
     static final String FILE = "skyabyss/continent_version.txt";
     static final String BACKUP = "skyabyss_backup";
     // 人の永続データ: その人が入ったときの大陸の版 (倒れて消えても、埋まっていなければ何もしないので害はない)

@@ -44,7 +44,7 @@ NATURAL_PREFIX = (
     "minecraft:basalt", "minecraft:blackstone", "minecraft:smooth_basalt", "minecraft:sandstone", "minecraft:gold_ore",
     "minecraft:lapis_ore", "minecraft:emerald_ore", "minecraft:redstone_ore", "minecraft:diamond_ore", "minecraft:tall_seagrass",
     "minecraft:packed_ice", "minecraft:ice", "minecraft:blue_ice", "minecraft:infested_stone", "minecraft:amethyst_block",
-    "minecraft:budding_amethyst", "minecraft:magma_block", "minecraft:powder_snow",
+    "minecraft:budding_amethyst", "minecraft:magma_block", "minecraft:powder_snow", "minecraft:gilded_blackstone",
 )
 
 

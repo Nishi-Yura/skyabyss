@@ -27,11 +27,11 @@ import net.minecraft.world.level.block.state.BlockState;
 // 土地ごとに data/skyabyss/continent/authored/<土地>/ に、256×256 の区画のファイル (<tx>_<tz>.bin) と索引 (index.json)。
 // 区画の列は「y0 より下は石、y0 から (数, ブロック) の並び、上は空気」。組んでいない列 (0xFFFF) とチャンクは生成器のまま。
 // 作るのは tools/gen/world/authored/ (前の世界の書き出しを元に、道具の側で地形・道・建物・木をなじませる)。
-// 区画は必要になったときだけ読み、少しだけ覚えておく。試作のあいだは SKYABYSS_AUTHORED=1 のときだけ使う。
+// 区画は必要になったときだけ読み、少しだけ覚えておく。既定で使う (2026-11-26)。SKYABYSS_AUTHORED=0 で切る (組む前の世界を書き出すとき)。
 // 範囲の中で建った場所 (町・見どころ・章の跡地) と祠は、書き出したときの位置を索引に持つ。SiteJob・TitanShrine はそれを見て建て直さない。
 public final class ContinentAuthored {
     public static final int TILE = 256;
-    static final boolean ENABLED = "1".equals(System.getenv("SKYABYSS_AUTHORED"));
+    static final boolean ENABLED = !"0".equals(System.getenv("SKYABYSS_AUTHORED"));
     private static final BlockState AIR = Blocks.AIR.defaultBlockState();
     private static final int NONE = 0xFFFF;
 
@@ -187,7 +187,9 @@ public final class ContinentAuthored {
                 // 敷石 (都の広場・町の道)
                 || s.is(Blocks.POLISHED_ANDESITE) || s.is(Blocks.POLISHED_DIORITE) || s.is(Blocks.POLISHED_GRANITE) || s.is(Blocks.SMOOTH_STONE)
                 || s.is(Blocks.POLISHED_BLACKSTONE) || s.is(Blocks.POLISHED_BLACKSTONE_BRICKS) || s.is(Blocks.MUD_BRICKS)
-                || s.is(Blocks.POLISHED_DEEPSLATE) || s.is(Blocks.DEEPSLATE_BRICKS) || s.is(Blocks.DEEPSLATE_TILES);
+                || s.is(Blocks.POLISHED_DEEPSLATE) || s.is(Blocks.DEEPSLATE_BRICKS) || s.is(Blocks.DEEPSLATE_TILES)
+                // 岩鯨の土地の道に敷いた骨 (骨の上を歩くので地面。数えないと道に 2 段の段があるように見えた)
+                || s.is(Blocks.BONE_BLOCK);
     }
 
     private static volatile List<Land> lands;
@@ -301,6 +303,19 @@ public final class ContinentAuthored {
             }
         }
         return null;
+    }
+
+    // 書き出した世界で建った見どころ・隠しが (x, z) から水平 r 以内にあるか (自己テストで、建物の岩の屋根を自然の張り出しと数えない)
+    public static boolean nearBuiltPoi(int x, int z, int r) {
+        for (Land land : lands()) {
+            for (Site s : land.sites) {
+                if ((s.kind.equals("poi") || s.kind.equals("secret"))
+                        && Math.abs(s.pos.getX() - x) <= r && Math.abs(s.pos.getZ() - z) <= r) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     // 範囲 (x0, z0)〜(x1, z1) の列が全部組んであるか (四隅と中を見る)

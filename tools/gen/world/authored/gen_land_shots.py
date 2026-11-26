@@ -3,8 +3,8 @@
 前 = 書き出しに使った世界 (land_<土地>)、後 = 前もって組んだ土地の新しい世界 (land_<土地>_after)。
 
     python -I tools/gen/world/authored/gen_land_shots.py whale
-    SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/land_shots_whale_before.txt -PshotsName=land_whale
-    SKYABYSS_AUTHORED=1 SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/land_shots_whale_after.txt -PshotsName=land_whale_after
+    SKYABYSS_AUTHORED=0 SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/land_shots_whale_before.txt -PshotsName=land_whale
+    SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/land_shots_whale_after.txt -PshotsName=land_whale_after
 """
 import sys
 from pathlib import Path

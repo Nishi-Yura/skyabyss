@@ -85,7 +85,9 @@ public final class ContinentLairsSelfTest {
                 continue;
             }
             int y = map.surface(c[0], c[1]);
-            for (int dx = -6; dx <= 6; dx += 3) {
+            // 前もって組んだ土地に祠が建っていれば (書き出した世界で建てた祠)、広場の上は祠の石段なので平らさは見ない
+            boolean standing = ContinentAuthored.shrine(t) != null;
+            for (int dx = standing ? 99 : -6; dx <= 6; dx += 3) {
                 for (int dz = -6; dz <= 6; dz += 3) {
                     if (dx * dx + dz * dz <= 36 && map.surface(c[0] + dx, c[1] + dz) != y) {
                         f.add(t + ": the shrine pad is not flat at " + (c[0] + dx) + ", " + (c[1] + dz));

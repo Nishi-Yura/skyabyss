@@ -30,6 +30,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import alib  # noqa: E402
 import shapes as S  # noqa: E402
 import shapes_big as B  # noqa: E402
+import lairs as LAIRS  # noqa: E402
 
 LANDS = {"whale": {"region": 2, "town": (-120, -760), "half": 71, "lairs": [(230, -1000)],
                    "ponds": [(25, -640)], "n_big": 14, "n_small": 22, "n_ponds": 6, "n_arches": 5}}
@@ -110,6 +111,9 @@ def main():
 
     # ------------------------------------------------------------ 1. 集める (区画ごとに読んで 2 次元だけ残す)
     g = np.full((D, W), -1, dtype=np.int32)
+    made2d = np.zeros((D, W), dtype=bool)  # 張り出しの下の地面から 5 までに人の作った物がある列
+    pathy = np.full((D, W), -1, dtype=np.int32)  # 上から 18 までのいちばん上の土の道 (道に乗った岩の下の道)
+    gfloor = np.full((D, W), -1, dtype=np.int32)  # 張り出しの下の地面 (上の岩が 12 以下の厚さで、下に 4 以上の空き)。道の高さに使う
     NAMES = {}  # ブロックの名前 → 番号 (岩山の素材をまわりの地面から取る)
     top2d = np.full((D, W), -1, dtype=np.int32)
     sub2d = np.full((D, W), -1, dtype=np.int32)
@@ -145,6 +149,18 @@ def main():
         sz = slice((tz - TZ0) * T, (tz - TZ0 + 1) * T)
         sx = slice((tx - TX0) * T, (tx - TX0 + 1) * T)
         g[sz, sx] = gg
+        ya = np.where((~gnd & (yy < gg[None])).any(axis=0), v.sy - 1 - (~gnd & (yy < gg[None]))[::-1].argmax(axis=0), -1)
+        yb = np.where((gnd & (yy < ya[None])).any(axis=0), v.sy - 1 - (gnd & (yy < ya[None]))[::-1].argmax(axis=0), -1)
+        roof = (ya >= 0) & (yb >= 0) & (gg - ya <= 12) & (ya - yb >= 4)
+        gfloor[sz, sx] = np.where(roof, yb, gg)
+        isp = (np.array([s_ == "minecraft:dirt_path" for s_ in st])[v.ids]) & (yy >= (gg - 18)[None]) & (yy <= gg[None])
+        py_ = np.where(isp.any(axis=0), v.sy - 1 - isp[::-1].argmax(axis=0), -1)
+        # 道の上に乗っているのが岩と空気 (と草) だけのときだけ (人の作った物の下の道は触らない)
+        rockish = ~np.array([any(w in s_.split("[")[0] for w in MADE_WORDS) for s_ in st])
+        pile_bad = (~rockish[v.ids] & (yy > py_[None]) & (yy <= gg[None])).any(axis=0)
+        pathy[sz, sx] = np.where(pile_bad, -1, py_)
+        gf_ = gfloor[sz, sx]
+        made2d[sz, sx] = (~rockish[v.ids] & (yy >= (gf_ - 5)[None]) & (yy <= gf_[None])).any(axis=0)
         if relief:
             glob_of = np.array([NAMES.setdefault(q.split("[")[0], len(NAMES)) for q in st], dtype=np.int32)
             zi, xi = np.arange(T)[:, None], np.arange(T)[None, :]
@@ -218,6 +234,19 @@ def main():
             site_keep |= (xs - e["pos"][0]) ** 2 + (zs - e["pos"][2]) ** 2 < r * r
     for (lx, lz) in cfg["lairs"]:
         site_keep |= (xs - lx) ** 2 + (zs - lz) ** 2 < 90 ** 2
+    # 巨神の体の下となじませの幅・祠の広場 (lairs.json)。書き出した世界の地面がもう体の下を下げ、広場をならしている (自己テスト titan lairs)
+    # 生成器の「平らに残す所」(ContinentMap の flats: 都 175・始まり 30・船着き場と渡し場 24・町 100) も。岩鯨の町は町の四角 (in_town) で扱う
+    zone = LAIRS.zone(X0, Z0, W, D)
+    flats = [(lay["capital"], 175), (lay["start"], 30), (lay["dock"], 24)] + [(p, 24) for f_ in lay["ferry_docks"] for p in f_]
+    # 章の跡地のまわり (要素は跡地から 150 以内に置く)。起伏で平らな所が減ると、骨の隠し場や碑が斜面に置かれて沈んだ (自己テスト build audit)
+    flats += [(p, 160) for p in lay["sites"].values()]
+    if relief:
+        flats += [(p, 100) for p in lay["towns"].values()]
+    for (fx_, fz_), r_ in flats:
+        zone |= (xs - fx_) ** 2 + (zs - fz_) ** 2 <= r_ * r_
+    zone &= ~in_town
+    no_road_fix = site_keep | LAIRS.zone(X0, Z0, W, D)  # 道のならしをしない所 (平らに残す所の道はならす)
+    site_keep |= zone
     dist_site = ndimage.distance_transform_edt(~site_keep)
     keep = ~mine | in_town | (dist_built <= 3) | (dist_water <= 3) | site_keep
     if relief:
@@ -230,6 +259,8 @@ def main():
             small[1:] = area < 150
             keep &= ~small[lab_k]
         keep |= dist_road <= 2.5  # 道は生成器のならしのまま (上下させない)
+    # 建物のある所: 岩の下の木を消す手・張り出しの下の隙間を埋める手を使わない (都の梁の黒樫の丸太が木として消え、吊り灯の下が埋まった)
+    protect = site_keep | (dist_built <= 3) | in_town
     dist_nl = ndimage.distance_transform_edt(mine)  # 土地の外 (海・ほかの地域) からの距離
     edge = dist_nl
     print(f"town ground {P + OY}; land cols {int(mine.sum())}")
@@ -251,6 +282,10 @@ def main():
     Hroad = ndimage.gaussian_filter(Hf, 7)
     core = np.clip(1 - (dist_road - 3.5) / 8, 0, 1)
     Hf = Hf * (1 - core) + Hroad * core
+    # 守る所 (体の下・祠の広場・平らに残す所) の縁は 16 かけて書き出しの地面へなじませる (町のそばを下げる分 low が縁で崖になった)
+    wz = smooth(ndimage.distance_transform_edt(~zone) / 16)
+    Hf = g + (Hf - g) * wz
+    Hroad = g + (Hroad - g) * wz
     H = np.floor(Hf + 0.5).astype(np.int32)
     road_base = np.floor(Hroad).astype(np.int32)
     road_half = (Hroad - road_base) >= 0.5
@@ -346,8 +381,13 @@ def main():
             continue
         if int(road_base[iz, ix]) + OY + 22 + 16 > 245:  # 門のてっぺんが立体の上 (Y 250) で切れない高さだけ
             continue
-        if dist_road[az - Z0, ax - X0] < 8 or dist_road[bz - Z0, bx - X0] < 8:  # 門の脚が曲がった道の上に立たない
+        lim = 14 if relief else 8  # 起伏の土地は脚の岩が広がるので離す (灰の崖の道で脚が道に乗った)
+        if dist_road[az - Z0, ax - X0] < lim or dist_road[bz - Z0, bx - X0] < lim:  # 門の脚が曲がった道の上に立たない
             continue
+        if relief:  # 門の下の道が 5 より上り下りしない (崖をまたぐ道では門の腹が道に近づく)
+            hh_ = H[max(0, iz - 28):iz + 29, max(0, ix - 28):ix + 29][road_out[max(0, iz - 28):iz + 29, max(0, ix - 28):ix + 29]]
+            if hh_.size and int(hh_.max()) - int(hh_.min()) > 5:
+                continue
         ry = int(road_base[iz, ix]) + OY
         feats.append(("arch", x, z, 34, {"a": (ax, ay, az), "b": (bx, by, bz), "rise": (ry + 22) - (ay + by) / 2, "n": len(arches)}))
         extra_zone |= (xs - x) ** 2 + (zs - z) ** 2 < 30 * 30
@@ -369,9 +409,9 @@ def main():
         rng = ndimage.maximum_filter(H, size=61) - ndimage.minimum_filter(H, size=61)
         free &= rng < 16
         free &= H + OY < 175  # 岩山の頭が立体の上に出ない高さだけ
-    if relief:  # 自己テスト continent の穴を見る 5 か所 (ふつうの地面の見本) には岩山を置かない
-        for (wx, wz) in ((-324, 444), (1184, 224), (-512, 812), (300, 1100), (-100, -600)):
-            free &= (np.abs(xs - wx) > 150) | (np.abs(zs - wz) > 150)
+    # 自己テスト continent の穴を見る 5 か所 (ふつうの地面の見本) には岩山を置かない (岩鯨でも、脇の小さな岩が穴に数えられた)
+    for (wx, wz) in ((-324, 444), (1184, 224), (-512, 812), (300, 1100), (-100, -600)):
+        free &= (np.abs(xs - wx) > 150) | (np.abs(zs - wz) > 150)
     spires = []
     for big, n_want, need in ((True, cfg["n_big"], 30), (False, cfg["n_small"], 16)):
         cand = np.argwhere(free & (dist_keep > need * (2 if relief else 1)) & (dist_road > need * 1.5))
@@ -457,19 +497,29 @@ def main():
 
     # 道の段をならす: 道の列どうしで 2 以上の段があれば、低いほうを上げる (乗り物が越えられる 1 段ずつに)
     R = np.where(keep, g, np.where(road_out, road_base, H)) if not relief else np.where(keep, g, H)
-    roadc = road2d & mine & ~in_town & ~site_keep & ((dist_built > 1) | relief) & (g + OY >= 62) & ~(pond_wl > -10**5)
+    if relief:
+        # 土の道が岩に埋まって消えた列は、まわり 2 の道の高さを使う (岩が 1〜4 段乗った所だけ)
+        for _ in range(8):  # 埋もれた道が長いときは、道に沿って少しずつ広げる
+            nb = ndimage.maximum_filter(np.where(road2d, pathy, -1), size=5)
+            fill = road2d & (pathy < 0) & ~made2d & (nb >= 0) & (gfloor - nb >= 1) & (gfloor - nb <= 4)
+            if not fill.any():
+                break
+            pathy = np.where(fill, nb, pathy)
+        gfloor = np.where(road2d & (pathy >= 0), pathy, gfloor)
+    R = np.where(road2d & keep, gfloor, R)  # 岩の張り出しの下を通る道は、岩の上でなく道の高さで (灰の崖の道で岩が道に落ちた)
+    roadc = road2d & mine & ~in_town & ~no_road_fix & ((dist_built > 1) | relief) & (g + OY >= 62) & ~(pond_wl > -10**5)
     Rf = R.copy()
     for _ in range(80):
         M = np.where(roadc, Rf, -10**6)
         up = ndimage.maximum_filter(M, size=3) - 1
-        nxt = np.where(roadc, np.minimum(np.maximum(Rf, up), R + 1), Rf)  # 1 段まで (崖ぞいの道を坂に変えない)
+        nxt = np.where(roadc, np.minimum(np.maximum(Rf, up), R + 3), Rf)  # 上げるのは 3 まで (崖をまたぐ道は上げと削りの両方で坂にする)
         if (nxt == Rf).all():
             break
         Rf = nxt
     for _ in range(80):
         M = np.where(roadc, Rf, 10**6)
         dn = ndimage.minimum_filter(M, size=3) + 1
-        nxt = np.where(roadc, np.maximum(np.minimum(Rf, dn), R - 4), Rf)  # 削るのは 4 まで (溝にしない)
+        nxt = np.where(roadc, np.maximum(np.minimum(Rf, dn), R - 5), Rf)  # 削るのは 5 まで (深い溝にしない)
         if (nxt == Rf).all():
             break
         Rf = nxt
@@ -478,7 +528,7 @@ def main():
     if os.environ.get("LAND_DEBUG_PT"):
         px, pz = (int(t) for t in os.environ["LAND_DEBUG_PT"].split(","))
         w = (slice(pz - Z0 - 3, pz - Z0 + 4), slice(px - X0 - 3, px - X0 + 4))
-        for nm, arr in (("R", R + OY), ("Rf", Rf + OY), ("roadc", roadc.astype(int)), ("keep", keep.astype(int)), ("road_out", road_out.astype(int)), ("site_keep", site_keep.astype(int)), ("dist_built", dist_built.astype(int))):
+        for nm, arr in (("H", H + OY), ("g", g + OY), ("Rf", Rf + OY), ("roadc", roadc.astype(int)), ("keep", keep.astype(int)), ("road_out", road_out.astype(int)), ("site_keep", site_keep.astype(int)), ("dist_built", dist_built.astype(int)), ("road2d", road2d.astype(int)), ("pathy", pathy + OY), ("gfloor", gfloor + OY), ("made2d", made2d.astype(int))):
             print(nm)
             print(arr[w])
     if relief:
@@ -734,6 +784,12 @@ def build_tile(v, L, sz, sx):
 _TREE = None
 
 
+# 道に乗った岩を除くとき、これが混じる列は人の作った物として触らない
+MADE_WORDS = ("brick", "plank", "_log", "_wood", "slab", "stairs", "_wall", "fence", "lantern", "torch", "sign", "door", "glass", "wool",
+              "chain", "bars", "chest", "barrel", "campfire", "bed", "polished_basalt", "smooth_stone", "chiseled", "cut_", "carpet",
+              "banner", "candle", "bell", "anvil", "table", "pot", "rail", "ladder", "scaffold", "hay", "terracotta_glazed", "concrete")
+
+
 def tree_names():
     """木の部品 (Java の土地ごとの木が使うブロック。地面のブロックは除く)"""
     global _TREE
@@ -821,6 +877,22 @@ def build_tile_relief(v, L, sz, sx):
     keep, H, g = sl(L["keep"]), sl(L["H"]), sl(L["g"])
     conv = _subst(v, L["cfg"].get("subst", {}))
     air = v.id("minecraft:air")
+    # 0. 道に乗った岩 (元の世界の散らし岩) を除く: 道のすぐ上に積もった岩と、頭がつかえる低い張り出し (4 段より下) だけ。
+    #    高い所の岩の門・張り出しは残す (道の幅だけ切り欠かない)
+    py, rd = sl(L["pathy"]), sl(L["road2d"])
+    path_id = v.id("minecraft:dirt_path")
+    for (iz, ix) in np.argwhere(rd & sl(L["mine"]) & (py >= 0) & (py < g)):
+        y = int(py[iz, ix])
+        col = ids[:, iz, ix]
+        k = y + 1
+        while k <= g[iz, ix] and col[k] != air:
+            k += 1
+        a = k
+        while a <= g[iz, ix] and col[a] == air:
+            a += 1
+        top = int(g[iz, ix]) if a <= g[iz, ix] and a - k < 4 else k - 1
+        ids[y + 1:top + 1, iz, ix] = air
+        ids[y, iz, ix] = path_id
     # 1. 列を上下させる (元の地面の 6 下から上を、まるごと d だけずらす)
     Dl = np.where(keep | (g < 0), 0, H - g)
     Y = np.arange(SY)[:, None]
@@ -875,8 +947,17 @@ def build_tile_relief(v, L, sz, sx):
         ids[int(cf[iz, ix]):int(cf[iz, ix]) + 15, iz, ix] = air
     # 4. 形や池にかかった木は、木ごと消す (大きな林のつながりは、かかった所のまわり 7 だけ)
     tf = tree_flags(v.states)
-    tree0 = tf[before]
-    touched = tree0 & ((before != ids) | (pw > -10**5)[None])
+    prot = sl(L["protect"])
+    tree0 = tf[before] & ~prot[None]
+    drawn = before != ids
+    rockw = ("stone", "basalt", "blackstone", "tuff", "terracotta", "deepslate", "andesite", "diorite", "granite", "calcite", "sandstone")
+    rock_ = np.array([any(w in s_.split("[")[0] for w in rockw) and not s_.split("[")[0].endswith(("_slab", "_stairs", "_wall", "button"))
+                      for s_ in v.states])[ids] & ~tf[ids]
+    under = np.zeros_like(drawn)  # 岩や形のすぐ下 3 段の木 (木の頭と岩のあいだに 1〜2 段の隙間を残さない。自己テスト continent overhangs)
+    for k in (1, 2, 3):
+        under[:-k] |= rock_[k:]
+    woody = np.array([s_.split("[")[0].endswith(("_log", "_leaves", "_wood")) for s_ in v.states])[before]  # 花びらなどの地面の草は岩の下でも消さない
+    touched = tree0 & (drawn | (under & woody) | (pw > -10**5)[None])
     if touched.any():
         lab, _ = ndimage.label(tree0, structure=np.ones((3, 3, 3)))
         hit = np.unique(lab[touched])
@@ -891,7 +972,9 @@ def build_tile_relief(v, L, sz, sx):
             near = ndimage.distance_transform_edt(~touched.any(axis=0)) <= 7
             ids[np.isin(lab, big) & now_tree & near[None]] = air
     # 4b. 岩の張り出しの下に 1〜2 段の空きがあれば埋める (頭がつかえる隙間を作らない。自己テスト continent overhangs)
-    feat_cols = (before != ids).any(axis=0) | (sl(L["mine"]) & ~sl(L["built2d"]))  # 形を描いた列と、人の作った物のない土地の列
+    # 形を描いた列と、人の作った物のない土地の列。形を描く前に人の作った物がある列 (都の吊り灯・戸の前の階段) は埋めない
+    made_p = np.array([any(w in s_.split("[")[0] for w in MADE_WORDS) for s_ in v.states]) & ~tree_flags(v.states)
+    feat_cols = ((before != ids).any(axis=0) | (sl(L["mine"]) & ~sl(L["built2d"]))) & ~made_p[before].any(axis=0)
     if feat_cols.any():
         tf2 = tree_flags(v.states)
         soft = np.array([s.endswith(":air") or s.startswith("minecraft:water") for s in v.states])

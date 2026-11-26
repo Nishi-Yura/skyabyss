@@ -58,7 +58,9 @@ public final class ContinentSelfTest {
                         int bx = (x & ~15) + dx;
                         int bz = (z & ~15) + dz;
                         int top = chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, dx, dz);
-                        for (int y = top; y > top - 14; y--) {
+                        // 前もって組んだ土地に建っている見どころ (岩の屋根の下に灯りや柱) は自然の張り出しとして数えない
+                        boolean poi = ContinentAuthored.nearBuiltPoi(bx, bz, 48);
+                        for (int y = top; y > top - 14 && !poi; y--) {
                             BlockPos p = new BlockPos(bx, y, bz);
                             if (!rocks.contains(level.getBlockState(p).getBlock()) || !level.getBlockState(p.below()).isAir()) {
                                 continue;
