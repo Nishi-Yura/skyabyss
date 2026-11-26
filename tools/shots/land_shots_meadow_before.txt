@@ -31,7 +31,7 @@ wait 200
 close
 wait 5
 shot massif_2
-camera 46 185 187 135 30
+camera 177 185 219 135 30
 waitchunks 1500
 wait 200
 close
@@ -43,7 +43,7 @@ wait 200
 close
 wait 5
 shot arch_0
-camera -1042 188 833 135 30
+camera 129 185 172 135 30
 waitchunks 1500
 wait 200
 close

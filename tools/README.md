@@ -236,6 +236,10 @@ python tools/audit/check_light.py        # 都の街路・広場・階段の明�
 - 書き出し `SKYABYSS_AUTHORED=0 SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/whale_authored_dump.txt -PshotsName=whale_authored` → `python -I tools/gen/world/authored/whale_town.py` → `data/skyabyss/continent/authored/whale_town.sbd`（`index.json` に名前）。ゲームは既定で読む。組む前の世界を書き出す・見るときは `SKYABYSS_AUTHORED=0`。上から見る `preview.py <.sbd> <png>`、比べの台本 `gen_whale_shots.py`、比べ絵 `cmp_sheet.py`。
 - 書き出しは観戦者だと見どころが建たない（創造で町に立って待つ）。範囲は `forceload` を 256 チャンク以下ずつ。書き出しの header の `sites` が、建て直さない町・見どころ・祠の記録。
 
+## 旅の地図の絵 (ブロックを写す。`dev/MapDump` → `tools/gen/world/map/render_map.py`)
+
+- 書き出し: `bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/map_dump.txt -PshotsName=map_dump`（64 区画、約 20 分。`/skyabyss dev mapdump <名> x0 z0 x1 z1` → `dumps/<名>.smap`）。絵にする: `python -I tools/gen/world/map/render_map.py --tiles`（`textures/gui/map/blocks/` の 8×8 区画と引きの 2 枚。出た海の色を `TravelMapScreen.SEA_COLOR` へ）。ゲームで見る: `tools/shots/map_blocks.txt`（`SKYABYSS_OPENING_SITES=1`）。土地を変えたら書き出しからやり直す。
+
 ## 構造をデータで確かめる (`dev/StructureDump` と `tools/structure/`)
 
 ブロックを範囲ごとファイル (`.sbd`) に書き出し、Python で図と検査を出す。歩いて回らなくても、穴・行き止まり・水漏れ・看板が分かる。

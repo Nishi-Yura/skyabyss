@@ -17,6 +17,9 @@ cmd gamemode creative
 cmd tp @s -1645 200 1608
 waitchunks 300
 wait 300
+cmd tp @s -1707 200 1665
+waitchunks 300
+wait 300
 cmd gamemode spectator
 hud off
 camera -1575 185 1678 135 30
@@ -25,3 +28,9 @@ wait 200
 close
 wait 5
 shot massif_0
+camera -1637 185 1735 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot waterfall_0

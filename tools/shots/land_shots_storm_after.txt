@@ -26,7 +26,7 @@ wait 300
 cmd tp @s -1544 200 894
 waitchunks 300
 wait 300
-cmd tp @s -839 200 -424
+cmd tp @s -966 200 -391
 waitchunks 300
 wait 300
 cmd tp @s -1306 200 838
@@ -64,7 +64,7 @@ wait 200
 close
 wait 5
 shot massif_2
-camera -769 301 -354 135 30
+camera -896 309 -321 135 30
 waitchunks 1500
 wait 200
 close

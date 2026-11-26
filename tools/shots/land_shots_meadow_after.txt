@@ -23,13 +23,13 @@ wait 300
 cmd tp @s -548 200 382
 waitchunks 300
 wait 300
-cmd tp @s -24 200 117
+cmd tp @s 107 200 149
 waitchunks 300
 wait 300
 cmd tp @s -449 200 255
 waitchunks 300
 wait 300
-cmd tp @s -1112 200 763
+cmd tp @s 59 200 102
 waitchunks 300
 wait 300
 cmd gamemode spectator
@@ -52,7 +52,7 @@ wait 200
 close
 wait 5
 shot massif_2
-camera 46 185 187 135 30
+camera 177 185 219 135 30
 waitchunks 1500
 wait 200
 close
@@ -64,7 +64,7 @@ wait 200
 close
 wait 5
 shot arch_0
-camera -1042 188 833 135 30
+camera 129 185 172 135 30
 waitchunks 1500
 wait 200
 close

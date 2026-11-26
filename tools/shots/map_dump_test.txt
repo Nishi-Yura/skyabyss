@@ -1,0 +1,16 @@
+# 旅の地図の書き出しの試し (鯨見の町のまわり 512 x 512)
+world map_dump continent
+size 960 540
+timeout 2400
+render 4
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd gamerule doMobSpawning false
+cmd skyabyss dev opening build
+wait 100
+cmd gamemode spectator
+cmd tp @s -120 250 -760
+cmd skyabyss dev mapdump map_test -376 -1016 135 -505
+waitdump
+quit

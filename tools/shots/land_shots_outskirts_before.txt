@@ -19,3 +19,9 @@ wait 200
 close
 wait 5
 shot massif_0
+camera -1637 185 1735 135 30
+waitchunks 1500
+wait 200
+close
+wait 5
+shot waterfall_0

@@ -1025,7 +1025,7 @@ public final class ShotRunner {
                 if (stepTicks > 20 * 600) {
                     throw new IllegalStateException("the structure dump did not finish");
                 }
-                return stepTicks > 2 && !StructureDump.busy();
+                return stepTicks > 2 && !StructureDump.busy() && !jp.revati.skyabyss.dev.MapDump.busy();
             }
             case "quit" -> {
                 finish("SHOTS OK " + shots + " shots (quit)");

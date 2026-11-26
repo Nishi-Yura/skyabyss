@@ -518,11 +518,9 @@ public class TravelMapScreen extends Screen {
     }
 
     // ---------------------------------------------------------------- 天と淵の大陸 (docs/design/40 の 3 章)
-    // 大陸の世界では、丸い盤の中に描いた大陸の絵 (continent.png。tools/gen/world/gen_continent.py) を敷き、引いたときは土地の名前と目安のレベルを書く
-    static final ResourceLocation CONTINENT = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/map/continent.png");
-    static final int CONTINENT_HALF = 2000;
+    // 大陸の世界では、ブロックを写した大陸の絵 (下の drawBlocks) を敷き、引いたときは土地の名前と目安のレベルを書く
     // 外の海の色 (continent.png の海と同じ。gen_continent.py の deep_ocean と紙の色を混ぜたもの)
-    static final int SEA_COLOR = 0xFFA4B7B6;
+    static final int SEA_COLOR = 0xFF33569A;
 
     // ---------------------------------------------------------------- 月 (docs/design/46 の 3.6。2026-10-28 の試遊「月行ったらマップ変わる様にしてほしい」)
     // 月にいる間は、月の絵 (moon.png。tools/gen/ch6/gen_moon_map.py。512 x 512 で x -256..256、z -128..384) を敷く
@@ -559,20 +557,67 @@ public class TravelMapScreen extends Screen {
             return;
         }
         double k = radius / view;
-        int x0 = cx + (int) Math.round((-CONTINENT_HALF - centerX()) * k);
-        int y0 = cy + (int) Math.round((-CONTINENT_HALF - centerZ()) * k);
-        int size = (int) Math.round(CONTINENT_HALF * 2 * k);
-        // 枠いっぱいの四角に描く。外の海は透けて、下に敷いた海の色になじむ
+        // 枠いっぱいの四角に描く。絵の外は海の色
         g.fill(rx0 - 1, ry0 - 1, rx1 + 1, ry1 + 1, 0xFF4A3E2E);
         g.fill(rx0, ry0, rx1, ry1, SEA_COLOR);
         com.mojang.blaze3d.systems.RenderSystem.enableBlend();
         g.enableScissor(rx0, ry0, rx1, ry1);
-        g.blit(CONTINENT, x0, y0, size, size, 0, 0, 1024, 1024, 1024, 1024);
-        if (MapPrefs.shows(MapPrefs.Layer.ROADS)) {
+        drawBlocks(g, k);
+        // 寄せたときは絵の中の本物の道が見えるので、道の線は引いたときだけ重ねる
+        if (MapPrefs.shows(MapPrefs.Layer.ROADS) && view > ROADS_ABOVE) {
             drawRoads(g, k);
         }
         g.disableScissor();
         com.mojang.blaze3d.systems.RenderSystem.disableBlend();
+    }
+
+    // ブロックを真上から写した大陸の絵 (2026-11-26 ユーザー「ブロックをそのまま投影している地図」。tools/gen/world/map/render_map.py)。
+    // 1 ブロック 1 点の 512 x 512 の区画が 8 x 8 (x・z -2048〜2047)。引いたときは縮めた絵 (1024 と 256) を使う (細かい点がちらつかないように)
+    static final double ROADS_ABOVE = 500;
+    static final int BLOCK_TILE = 512;
+    static final int BLOCK_TILES = 8;
+    static final int BLOCK_ORIGIN = -2048;
+    private static final ResourceLocation[] BLOCK_TEX = new ResourceLocation[BLOCK_TILES * BLOCK_TILES];
+    static final ResourceLocation BLOCKS_1024 = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/map/blocks/all_1024.png");
+    static final ResourceLocation BLOCKS_256 = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/map/blocks/all_256.png");
+
+    static ResourceLocation blockTile(int i, int j) {
+        int n = j * BLOCK_TILES + i;
+        if (BLOCK_TEX[n] == null) {
+            BLOCK_TEX[n] = ResourceLocation.fromNamespaceAndPath(SkyAbyss.MODID, "textures/gui/map/blocks/" + i + "_" + j + ".png");
+        }
+        return BLOCK_TEX[n];
+    }
+
+    // k = 画面の 1 点あたりのブロック数の逆数 (radius / view)
+    private void drawBlocks(GuiGraphics g, double k) {
+        int span = BLOCK_TILE * BLOCK_TILES;
+        double px = k * Minecraft.getInstance().getWindow().getGuiScale();
+        if (px < 0.6) {
+            // 引いたとき: 一枚の縮めた絵
+            ResourceLocation tex = px < 0.15 ? BLOCKS_256 : BLOCKS_1024;
+            int n = px < 0.15 ? 256 : 1024;
+            int x0 = (int) Math.floor(cx + (BLOCK_ORIGIN - centerX()) * k);
+            int y0 = (int) Math.floor(cy + (BLOCK_ORIGIN - centerZ()) * k);
+            int x1 = (int) Math.ceil(cx + (BLOCK_ORIGIN + span - centerX()) * k);
+            int y1 = (int) Math.ceil(cy + (BLOCK_ORIGIN + span - centerZ()) * k);
+            g.blit(tex, x0, y0, x1 - x0, y1 - y0, 0, 0, n, n, n, n);
+            return;
+        }
+        for (int j = 0; j < BLOCK_TILES; j++) {
+            for (int i = 0; i < BLOCK_TILES; i++) {
+                int wx = BLOCK_ORIGIN + i * BLOCK_TILE;
+                int wz = BLOCK_ORIGIN + j * BLOCK_TILE;
+                int x0 = (int) Math.floor(cx + (wx - centerX()) * k);
+                int y0 = (int) Math.floor(cy + (wz - centerZ()) * k);
+                int x1 = (int) Math.ceil(cx + (wx + BLOCK_TILE - centerX()) * k);
+                int y1 = (int) Math.ceil(cy + (wz + BLOCK_TILE - centerZ()) * k);
+                if (x1 < rx0 || x0 > rx1 || y1 < ry0 || y0 > ry1) {
+                    continue;
+                }
+                g.blit(blockTile(i, j), x0, y0, x1 - x0, y1 - y0, 0, 0, BLOCK_TILE, BLOCK_TILE, BLOCK_TILE, BLOCK_TILE);
+            }
+        }
     }
 
     // 道は絵に焼かず、地形が使うのと同じ道の線 (ContinentLayout.roads。町と都の前で門へつなぎ直したもの) をここで描く
@@ -626,17 +671,10 @@ public class TravelMapScreen extends Screen {
         if (tex == null || view > LocalArea.SHOW_BELOW || onMoon() || radius <= 0 || self() == null) {
             return;
         }
-        double k = radius / view;
-        int x0 = cx + (int) Math.round((LocalArea.originX() - centerX()) * k);
-        int y0 = cy + (int) Math.round((LocalArea.originZ() - centerZ()) * k);
-        int size = (int) Math.round(LocalArea.R * 2 * k);
-        // 寄せるほど濃く (大陸の絵から町の絵へ移る)
+        // 寄せたときだけ係の人の点を出す。町の絵は重ねない (ブロックを写した大陸の絵がもう町まで描いている。2026-11-26)
         float a = (float) Mth.clamp((LocalArea.SHOW_BELOW - view) / 80.0, 0, 1);
         com.mojang.blaze3d.systems.RenderSystem.enableBlend();
         g.enableScissor(rx0, ry0, rx1, ry1);
-        g.setColor(1f, 1f, 1f, a);
-        g.blit(tex, x0, y0, size, size, 0, 0, LocalArea.R * 2, LocalArea.R * 2, LocalArea.R * 2, LocalArea.R * 2);
-        g.setColor(1f, 1f, 1f, 1f);
         if (a > 0.5f) {
             for (LocalArea.Keeper kp : LocalArea.keepers(Minecraft.getInstance())) {
                 int[] at = project(kp.x(), kp.z());

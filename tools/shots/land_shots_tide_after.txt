@@ -17,22 +17,19 @@ cmd gamemode creative
 cmd tp @s 1330 200 160
 waitchunks 300
 wait 300
-cmd tp @s 1343 200 -273
+cmd tp @s 1436 200 719
 waitchunks 300
 wait 300
-cmd tp @s 1556 200 -189
+cmd tp @s 1578 200 526
 waitchunks 300
 wait 300
-cmd tp @s 1496 200 -651
+cmd tp @s 1008 200 395
 waitchunks 300
 wait 300
-cmd tp @s 1493 200 664
+cmd tp @s 1199 200 -363
 waitchunks 300
 wait 300
 cmd tp @s 1402 200 282
-waitchunks 300
-wait 300
-cmd tp @s 1654 200 588
 waitchunks 300
 wait 300
 cmd tp @s 1300 200 -652
@@ -46,25 +43,25 @@ wait 200
 close
 wait 5
 shot town
-camera 1413 185 -203 135 30
+camera 1506 185 789 135 30
 waitchunks 1500
 wait 200
 close
 wait 5
 shot massif_0
-camera 1626 185 -119 135 30
+camera 1648 185 596 135 30
 waitchunks 1500
 wait 200
 close
 wait 5
 shot massif_1
-camera 1566 185 -581 135 30
+camera 1078 185 465 135 30
 waitchunks 1500
 wait 200
 close
 wait 5
 shot massif_2
-camera 1563 185 734 135 30
+camera 1269 185 -293 135 30
 waitchunks 1500
 wait 200
 close
@@ -76,12 +73,6 @@ wait 200
 close
 wait 5
 shot arch_0
-camera 1724 185 658 135 30
-waitchunks 1500
-wait 200
-close
-wait 5
-shot arch_1
 camera 1370 185 -582 135 30
 waitchunks 1500
 wait 200

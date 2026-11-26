@@ -1,0 +1,33 @@
+# 旅の地図: ブロックを写した大陸の絵 (2026-11-26)。引き・中・寄せ・町の寄せ
+# SKYABYSS_OPENING_SITES=1 bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/map_blocks.txt -PshotsName=map_dump
+world map_dump continent
+size 1600 900
+timeout 900
+render 6
+clouds off
+guiscale 3
+wait 100
+cmd skyabyss cinematic stop
+cmd time set noon
+cmd weather clear
+cmd gamemode creative
+cmd tp @s -120 200 -760
+waitchunks
+wait 40
+hud on
+open travel_map
+wait 20
+mapscale 2200
+wait 10
+shot map_blocks_far
+mapscale 800
+wait 10
+shot map_blocks_mid
+mapscale 250
+wait 10
+shot map_blocks_near
+mapscale 96
+wait 10
+shot map_blocks_town
+close
+quit

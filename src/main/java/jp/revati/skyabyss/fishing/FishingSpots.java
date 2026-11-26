@@ -177,13 +177,19 @@ public final class FishingSpots {
         }
         int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, s.x(), s.z());
         BlockPos at = new BlockPos(s.x(), y, s.z());
-        if (level.getBlockState(at).getBlock() instanceof StandingSignBlock) {
-            return;
+        // 組んだ土地 (.bin) には札の形だけが入り字が無いことがある。字の無い札には字を書く
+        boolean blank = level.getBlockState(at).getBlock() instanceof StandingSignBlock
+                && level.getBlockEntity(at) instanceof SignBlockEntity old
+                && old.getFrontText().getMessage(1, false).getString().isEmpty();
+        if (!blank) {
+            if (level.getBlockState(at).getBlock() instanceof StandingSignBlock) {
+                return;
+            }
+            if (!level.getBlockState(at).isAir() || !level.getBlockState(at.below()).isSolid()) {
+                return;
+            }
+            level.setBlock(at, Blocks.SPRUCE_SIGN.defaultBlockState(), 3);
         }
-        if (!level.getBlockState(at).isAir() || !level.getBlockState(at.below()).isSolid()) {
-            return;
-        }
-        level.setBlock(at, Blocks.SPRUCE_SIGN.defaultBlockState(), 3);
         if (level.getBlockEntity(at) instanceof SignBlockEntity sign) {
             SignText text = new SignText()
                     .setMessage(1, Component.translatable("sign.skyabyss.fishing_spot"))

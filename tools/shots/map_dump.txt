@@ -1,0 +1,205 @@
+# travel map dump of the whole continent (64 tiles of 512). written by hand 2026-11-26
+world map_dump continent
+size 960 540
+timeout 10800
+render 4
+clouds off
+wait 100
+cmd skyabyss cinematic stop
+cmd gamerule doMobSpawning false
+cmd skyabyss dev opening build
+wait 200
+cmd gamemode spectator
+cmd tp @s -1792 250 -1792
+cmd skyabyss dev mapdump map_0_0 -2048 -2048 -1537 -1537
+waitdump
+cmd tp @s -1280 250 -1792
+cmd skyabyss dev mapdump map_1_0 -1536 -2048 -1025 -1537
+waitdump
+cmd tp @s -768 250 -1792
+cmd skyabyss dev mapdump map_2_0 -1024 -2048 -513 -1537
+waitdump
+cmd tp @s -256 250 -1792
+cmd skyabyss dev mapdump map_3_0 -512 -2048 -1 -1537
+waitdump
+cmd tp @s 256 250 -1792
+cmd skyabyss dev mapdump map_4_0 0 -2048 511 -1537
+waitdump
+cmd tp @s 768 250 -1792
+cmd skyabyss dev mapdump map_5_0 512 -2048 1023 -1537
+waitdump
+cmd tp @s 1280 250 -1792
+cmd skyabyss dev mapdump map_6_0 1024 -2048 1535 -1537
+waitdump
+cmd tp @s 1792 250 -1792
+cmd skyabyss dev mapdump map_7_0 1536 -2048 2047 -1537
+waitdump
+cmd tp @s -1792 250 -1280
+cmd skyabyss dev mapdump map_0_1 -2048 -1536 -1537 -1025
+waitdump
+cmd tp @s -1280 250 -1280
+cmd skyabyss dev mapdump map_1_1 -1536 -1536 -1025 -1025
+waitdump
+cmd tp @s -768 250 -1280
+cmd skyabyss dev mapdump map_2_1 -1024 -1536 -513 -1025
+waitdump
+cmd tp @s -256 250 -1280
+cmd skyabyss dev mapdump map_3_1 -512 -1536 -1 -1025
+waitdump
+cmd tp @s 256 250 -1280
+cmd skyabyss dev mapdump map_4_1 0 -1536 511 -1025
+waitdump
+cmd tp @s 768 250 -1280
+cmd skyabyss dev mapdump map_5_1 512 -1536 1023 -1025
+waitdump
+cmd tp @s 1280 250 -1280
+cmd skyabyss dev mapdump map_6_1 1024 -1536 1535 -1025
+waitdump
+cmd tp @s 1792 250 -1280
+cmd skyabyss dev mapdump map_7_1 1536 -1536 2047 -1025
+waitdump
+cmd tp @s -1792 250 -768
+cmd skyabyss dev mapdump map_0_2 -2048 -1024 -1537 -513
+waitdump
+cmd tp @s -1280 250 -768
+cmd skyabyss dev mapdump map_1_2 -1536 -1024 -1025 -513
+waitdump
+cmd tp @s -768 250 -768
+cmd skyabyss dev mapdump map_2_2 -1024 -1024 -513 -513
+waitdump
+cmd tp @s -256 250 -768
+cmd skyabyss dev mapdump map_3_2 -512 -1024 -1 -513
+waitdump
+cmd tp @s 256 250 -768
+cmd skyabyss dev mapdump map_4_2 0 -1024 511 -513
+waitdump
+cmd tp @s 768 250 -768
+cmd skyabyss dev mapdump map_5_2 512 -1024 1023 -513
+waitdump
+cmd tp @s 1280 250 -768
+cmd skyabyss dev mapdump map_6_2 1024 -1024 1535 -513
+waitdump
+cmd tp @s 1792 250 -768
+cmd skyabyss dev mapdump map_7_2 1536 -1024 2047 -513
+waitdump
+cmd tp @s -1792 250 -256
+cmd skyabyss dev mapdump map_0_3 -2048 -512 -1537 -1
+waitdump
+cmd tp @s -1280 250 -256
+cmd skyabyss dev mapdump map_1_3 -1536 -512 -1025 -1
+waitdump
+cmd tp @s -768 250 -256
+cmd skyabyss dev mapdump map_2_3 -1024 -512 -513 -1
+waitdump
+cmd tp @s -256 250 -256
+cmd skyabyss dev mapdump map_3_3 -512 -512 -1 -1
+waitdump
+cmd tp @s 256 250 -256
+cmd skyabyss dev mapdump map_4_3 0 -512 511 -1
+waitdump
+cmd tp @s 768 250 -256
+cmd skyabyss dev mapdump map_5_3 512 -512 1023 -1
+waitdump
+cmd tp @s 1280 250 -256
+cmd skyabyss dev mapdump map_6_3 1024 -512 1535 -1
+waitdump
+cmd tp @s 1792 250 -256
+cmd skyabyss dev mapdump map_7_3 1536 -512 2047 -1
+waitdump
+cmd tp @s -1792 250 256
+cmd skyabyss dev mapdump map_0_4 -2048 0 -1537 511
+waitdump
+cmd tp @s -1280 250 256
+cmd skyabyss dev mapdump map_1_4 -1536 0 -1025 511
+waitdump
+cmd tp @s -768 250 256
+cmd skyabyss dev mapdump map_2_4 -1024 0 -513 511
+waitdump
+cmd tp @s -256 250 256
+cmd skyabyss dev mapdump map_3_4 -512 0 -1 511
+waitdump
+cmd tp @s 256 250 256
+cmd skyabyss dev mapdump map_4_4 0 0 511 511
+waitdump
+cmd tp @s 768 250 256
+cmd skyabyss dev mapdump map_5_4 512 0 1023 511
+waitdump
+cmd tp @s 1280 250 256
+cmd skyabyss dev mapdump map_6_4 1024 0 1535 511
+waitdump
+cmd tp @s 1792 250 256
+cmd skyabyss dev mapdump map_7_4 1536 0 2047 511
+waitdump
+cmd tp @s -1792 250 768
+cmd skyabyss dev mapdump map_0_5 -2048 512 -1537 1023
+waitdump
+cmd tp @s -1280 250 768
+cmd skyabyss dev mapdump map_1_5 -1536 512 -1025 1023
+waitdump
+cmd tp @s -768 250 768
+cmd skyabyss dev mapdump map_2_5 -1024 512 -513 1023
+waitdump
+cmd tp @s -256 250 768
+cmd skyabyss dev mapdump map_3_5 -512 512 -1 1023
+waitdump
+cmd tp @s 256 250 768
+cmd skyabyss dev mapdump map_4_5 0 512 511 1023
+waitdump
+cmd tp @s 768 250 768
+cmd skyabyss dev mapdump map_5_5 512 512 1023 1023
+waitdump
+cmd tp @s 1280 250 768
+cmd skyabyss dev mapdump map_6_5 1024 512 1535 1023
+waitdump
+cmd tp @s 1792 250 768
+cmd skyabyss dev mapdump map_7_5 1536 512 2047 1023
+waitdump
+cmd tp @s -1792 250 1280
+cmd skyabyss dev mapdump map_0_6 -2048 1024 -1537 1535
+waitdump
+cmd tp @s -1280 250 1280
+cmd skyabyss dev mapdump map_1_6 -1536 1024 -1025 1535
+waitdump
+cmd tp @s -768 250 1280
+cmd skyabyss dev mapdump map_2_6 -1024 1024 -513 1535
+waitdump
+cmd tp @s -256 250 1280
+cmd skyabyss dev mapdump map_3_6 -512 1024 -1 1535
+waitdump
+cmd tp @s 256 250 1280
+cmd skyabyss dev mapdump map_4_6 0 1024 511 1535
+waitdump
+cmd tp @s 768 250 1280
+cmd skyabyss dev mapdump map_5_6 512 1024 1023 1535
+waitdump
+cmd tp @s 1280 250 1280
+cmd skyabyss dev mapdump map_6_6 1024 1024 1535 1535
+waitdump
+cmd tp @s 1792 250 1280
+cmd skyabyss dev mapdump map_7_6 1536 1024 2047 1535
+waitdump
+cmd tp @s -1792 250 1792
+cmd skyabyss dev mapdump map_0_7 -2048 1536 -1537 2047
+waitdump
+cmd tp @s -1280 250 1792
+cmd skyabyss dev mapdump map_1_7 -1536 1536 -1025 2047
+waitdump
+cmd tp @s -768 250 1792
+cmd skyabyss dev mapdump map_2_7 -1024 1536 -513 2047
+waitdump
+cmd tp @s -256 250 1792
+cmd skyabyss dev mapdump map_3_7 -512 1536 -1 2047
+waitdump
+cmd tp @s 256 250 1792
+cmd skyabyss dev mapdump map_4_7 0 1536 511 2047
+waitdump
+cmd tp @s 768 250 1792
+cmd skyabyss dev mapdump map_5_7 512 1536 1023 2047
+waitdump
+cmd tp @s 1280 250 1792
+cmd skyabyss dev mapdump map_6_7 1024 1536 1535 2047
+waitdump
+cmd tp @s 1792 250 1792
+cmd skyabyss dev mapdump map_7_7 1536 1536 2047 2047
+waitdump
+quit

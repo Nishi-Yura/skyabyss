@@ -37,7 +37,7 @@ wait 200
 close
 wait 5
 shot massif_2
-camera -769 301 -354 135 30
+camera -896 309 -321 135 30
 waitchunks 1500
 wait 200
 close
