@@ -142,6 +142,12 @@ public final class TreeVariants {
             case SHIELD_RUSH -> {
                 if (r == 1) {
                     TreeActions.shieldBash(player, rank);
+                    // 盾殴りの形と粒も出す (突進の形のすぐ後)
+                    SkillProps.follow(player, skill, Skill.SHIELD_BASH);
+                    if (!(player instanceof net.neoforged.neoforge.common.util.FakePlayer) && player.connection != null) {
+                        net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingEntityAndSelf(player,
+                                new jp.revati.skyabyss.rpg.skill.net.SkillFxPayload(player.getId(), Skill.SHIELD_BASH.id, rank, false, null));
+                    }
                 }
             }
             case LAMP_CHARM -> {

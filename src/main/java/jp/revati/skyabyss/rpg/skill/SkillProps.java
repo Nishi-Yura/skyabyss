@@ -93,6 +93,15 @@ public final class SkillProps {
         decorate(c, element(p), change(p, skill), mastery);
     }
 
+    // 技に続いて別の技が動いたとき (盾突進の刻印「盾殴り」など)、その技の形も置く。熟練は元の技のもの
+    public static void follow(ServerPlayer p, Skill skill, Skill fx) {
+        if (!(p.level() instanceof ServerLevel level)) {
+            return;
+        }
+        int mastery = SkillManager.get(p).masteryLevel(skill);
+        place(new Cast(level, p, fx.tree, null, 1f + MASTERY_GROW * mastery), fx);
+    }
+
     static void place(Cast c, Skill fx) {
         switch (fx) {
             // ---------------------------------------------------------------- 戦士 (花崗岩)
