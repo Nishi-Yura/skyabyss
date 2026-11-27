@@ -172,6 +172,31 @@ public class AttackPropRenderer extends LowPolyGeoRenderer<AttackProp> {
                 float cool = net.minecraft.util.Mth.clamp(burn * 1.5f, 0f, 1f);
                 int rr = (int) (255f * (1f - 0.6f * cool)), gg = (int) (255f * (1f - 0.45f * cool)), bb = (int) (255f * (1f - 0.4f * cool));
                 c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_SPARK) {
+                // 火花の跡: 白金から青鋼へ
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.4f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.55f * cool)), gg = (int) (255f * (1f - 0.5f * cool)), bb = (int) (255f * (1f - 0.35f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_FORGE) {
+                // 炉の跡: 黄白から煉瓦の茶へ
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.4f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.45f * cool)), gg = (int) (255f * (1f - 0.6f * cool)), bb = (int) (255f * (1f - 0.65f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_ASH) {
+                // 灰の跡: 藤鼠から暗い灰へ
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.3f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.4f * cool)), gg = (int) (255f * (1f - 0.45f * cool)), bb = (int) (255f * (1f - 0.3f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_EMBERHAM) {
+                // 熾の跡: 深紅から冷えた灰へ
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.4f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.5f * cool)), gg = (int) (255f * (1f - 0.3f * cool)), bb = (int) (255f * (1f - 0.3f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_TEMPER) {
+                // 焼き戻しの跡: 麦わらから冷えた青へ
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.4f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.6f * cool)), gg = (int) (255f * (1f - 0.5f * cool)), bb = (int) (255f * (1f - 0.1f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
             } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_LAMP) {
                 // 灯の跡: 灯の桃白から銅の茶へ
                 float cool = net.minecraft.util.Mth.clamp(burn * 1.5f, 0f, 1f);
@@ -314,6 +339,11 @@ public class AttackPropRenderer extends LowPolyGeoRenderer<AttackProp> {
             case jp.revati.skyabyss.client.look.BurnDraw.STYLE_CYCLE -> new float[] {0f, 0f};
             case jp.revati.skyabyss.client.look.BurnDraw.STYLE_CURSE -> new float[] {0f, 0f};
             case jp.revati.skyabyss.client.look.BurnDraw.STYLE_LAMP -> new float[] {0f, 0f};
+            case jp.revati.skyabyss.client.look.BurnDraw.STYLE_TEMPER -> new float[] {0f, 0f};
+            case jp.revati.skyabyss.client.look.BurnDraw.STYLE_EMBERHAM -> new float[] {0f, 0.35f};
+            case jp.revati.skyabyss.client.look.BurnDraw.STYLE_ASH -> new float[] {0f, 0f};
+            case jp.revati.skyabyss.client.look.BurnDraw.STYLE_FORGE -> new float[] {0f, 0f};
+            case jp.revati.skyabyss.client.look.BurnDraw.STYLE_SPARK -> new float[] {0f, 0f};
             default -> null;
         };
     }
@@ -353,6 +383,85 @@ public class AttackPropRenderer extends LowPolyGeoRenderer<AttackProp> {
                     for (int i = 0; i < 3; i++) {
                         level.addParticle(slate, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.2, 0.06 + rnd.nextFloat() * 0.1, (rnd.nextFloat() - 0.5f) * 0.2);
                     }
+                }
+            }
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_SPARK) {
+            // 火花散らし: 筋が消える所は火花と金の塵、板が沈む所は深層岩
+            if (kind == jp.revati.skyabyss.client.look.BurnDraw.SMOKE) {
+                var dust = new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(1.0f, 0.93f, 0.7f), 0.6f);
+                level.addParticle(dust, wx, wy, wz, 0, 0, 0);
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK, wx, wy, wz,
+                        (rnd.nextFloat() - 0.5f) * 0.2, 0.1, (rnd.nextFloat() - 0.5f) * 0.2);
+            } else {
+                var steel = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                        net.minecraft.world.level.block.Blocks.POLISHED_DEEPSLATE.defaultBlockState());
+                for (int i = 0; i < 3; i++) {
+                    level.addParticle(steel, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.15, 0.08, (rnd.nextFloat() - 0.5f) * 0.15);
+                }
+            }
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_FORGE) {
+            // 炉の踏み: 舌が消える所は黄白い火の粉と煙、壁が沈む所は煉瓦
+            if (kind == jp.revati.skyabyss.client.look.BurnDraw.SMOKE) {
+                var dust = new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(1.0f, 0.96f, 0.66f), 0.8f);
+                level.addParticle(dust, wx + (rnd.nextFloat() - 0.5f) * 0.3f, wy + rnd.nextFloat() * 0.3f, wz + (rnd.nextFloat() - 0.5f) * 0.3f, 0, 0, 0);
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, wx, wy, wz, 0, 0.03, 0);
+            } else {
+                var brick = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                        net.minecraft.world.level.block.Blocks.BRICKS.defaultBlockState());
+                for (int i = 0; i < 3; i++) {
+                    level.addParticle(brick, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.15, 0.08, (rnd.nextFloat() - 0.5f) * 0.15);
+                }
+            }
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_ASH) {
+            // 灰散らし: 旋風が消える所は藤鼠の灰、鉄滓が沈む所は黒い石
+            if (kind == jp.revati.skyabyss.client.look.BurnDraw.SMOKE) {
+                var dust = new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(0.8f, 0.76f, 0.9f), 1.0f);
+                for (int i = 0; i < 2; i++) {
+                    level.addParticle(dust, wx + (rnd.nextFloat() - 0.5f) * 0.6f, wy + rnd.nextFloat() * 0.5f, wz + (rnd.nextFloat() - 0.5f) * 0.6f, 0, 0, 0);
+                }
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.WHITE_ASH, wx, wy, wz, 0, 0.02, 0);
+            } else {
+                var slag = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                        net.minecraft.world.level.block.Blocks.BLACKSTONE.defaultBlockState());
+                for (int i = 0; i < 3; i++) {
+                    level.addParticle(slag, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.15, 0.08, (rnd.nextFloat() - 0.5f) * 0.15);
+                }
+            }
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_EMBERHAM) {
+            // 熾の鎚: 灰が消える所は灰と熾の塵、鎚と炭が沈む所は炭
+            if (kind == jp.revati.skyabyss.client.look.BurnDraw.SMOKE) {
+                var dust = new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(0.86f, 0.14f, 0.2f), 0.7f);
+                level.addParticle(dust, wx + (rnd.nextFloat() - 0.5f) * 0.3f, wy + rnd.nextFloat() * 0.3f, wz + (rnd.nextFloat() - 0.5f) * 0.3f, 0, 0, 0);
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.WHITE_ASH, wx, wy, wz, 0, 0.02, 0);
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, wx, wy, wz, 0, 0.03, 0);
+            } else {
+                var coal = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                        net.minecraft.world.level.block.Blocks.COAL_BLOCK.defaultBlockState());
+                for (int i = 0; i < 3; i++) {
+                    level.addParticle(coal, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.15, 0.08, (rnd.nextFloat() - 0.5f) * 0.15);
+                }
+            }
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_TEMPER) {
+            // 焼き入れ: 湯気が消える所は白い湯気と焼き色の塵、刃が沈む所は鋼
+            if (kind == jp.revati.skyabyss.client.look.BurnDraw.SMOKE) {
+                var dust = new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(0.62f, 0.44f, 0.86f), 0.8f);
+                level.addParticle(dust, wx + (rnd.nextFloat() - 0.5f) * 0.3f, wy + rnd.nextFloat() * 0.3f, wz + (rnd.nextFloat() - 0.5f) * 0.3f, 0, 0, 0);
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.CLOUD, wx, wy, wz, 0, 0.04, 0);
+            } else {
+                var steel = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                        net.minecraft.world.level.block.Blocks.ANVIL.defaultBlockState());
+                for (int i = 0; i < 3; i++) {
+                    level.addParticle(steel, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.15, 0.08, (rnd.nextFloat() - 0.5f) * 0.15);
                 }
             }
             return;

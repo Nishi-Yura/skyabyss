@@ -355,10 +355,15 @@ def shaman(only):
 # 火花散らし = 炉の踏みの刻印 1 (spark_stomp)。濃い灰 (thick_ash) は灰の風を塞ぐので、ash_wind を目当てに入れて熱い灰から通す
 SMITH = [
     ("temper", "temper", ["temper"], 0, cam(6.5, -57.0, -4.5, 0.5, -58.8, 0.5, 0.8), [(4, "a"), (12, "b")], False),
+    ("temper", "temper", ["temper"], 0, cam(6.5, -57.0, -4.5, 0.5, -58.8, 0.5, 0.8), [(3, "seq01"), (10, "seq02"), (10, "seq03")] + [(2, "seq%02d" % t) for t in range(4, 17)], False),  # look d: cool and sink
     ("ember_hammer", "ember_hammer", ["ember_hammer"], 0, cam(8.0, -56.5, -1.0, 0.5, -59.0, 2.5, 0.85), [(4, "a"), (9, "b")], False),
+    ("ember_hammer", "ember_hammer", ["ember_hammer"], 0, cam(8.0, -56.5, -1.0, 0.5, -59.0, 2.5, 0.85), [(4, "seq01")] + [(3, "seq%02d" % t) for t in range(2, 18)], False),  # look d: strike and sink
     ("ash_scatter", "ash_scatter", ["ash_scatter"], 0, cam(11.0, -53.5, -7.0, 0.5, -59.5, 0.5, 0.85), [(5, "a"), (20, "b")], 3.5),
+    ("ash_scatter", "ash_scatter", ["ash_scatter"], 0, cam(11.0, -53.5, -7.0, 0.5, -59.5, 0.5, 0.85), [(4, "seq01"), (15, "seq02"), (15, "seq03")] + [(3, "seq%02d" % t) for t in range(4, 16)], 3.5),  # look d: blow away
     ("forge_stomp", "forge_stomp", ["forge_stomp"], 0, cam(10.0, -54.5, -6.0, 0.5, -59.5, 0.5, 0.85), [(2, "a"), (5, "b")], False),
+    ("forge_stomp", "forge_stomp", ["forge_stomp"], 0, cam(10.0, -54.5, -6.0, 0.5, -59.5, 0.5, 0.85), [(2, "seq%02d" % t) for t in range(1, 22)], False),  # look d: two rings fall
     ("spark_burst", "forge_stomp", ["forge_stomp", "ash_wind", "spark_stomp"], 0, cam(7.5, -56.0, -5.0, 0.5, -59.0, 0.5, 0.85), [(2, "a"), (5, "b")], False),
+    ("spark_burst", "forge_stomp", ["forge_stomp", "ash_wind", "spark_stomp"], 0, cam(7.5, -56.0, -5.0, 0.5, -59.0, 0.5, 0.85), [(2, "seq%02d" % t) for t in range(1, 15)], False),  # look d: sparks fly
 ]
 
 
@@ -371,9 +376,19 @@ def smith(only):
                 continue
             out.append("cmd skyabyss skill forget @s\ncmd skyabyss skill points @s 100\n")
             out.append("".join(f"cmd skyabyss skill node @s {n}\n" for n in tree_path("smith", nodes)))
-            out.append(cast(pitch, slot_skill, cm, foe))
+            c = cast(pitch, slot_skill, cm, foe)
+            slow = any(tag.startswith("seq") for _, tag in shots)
+            if slow:
+                # 連続 (seq) は放つ前に世界を止め、1 枚ごとに w tick 進める (shaman() と同じ)
+                c = c.replace("cmd skyabyss skill cast", "cmd tick freeze\ncmd skyabyss skill cast")
+            out.append(c)
             for w, tag in shots:
-                out.append(f"wait {w}\nshot {look}_{name}_{tag}\n")
+                if tag.startswith("seq"):
+                    out.append(f"cmd tick step {w}\nwait {max(3, w + 3)}\ncamera {cm}\nshot {look}_{name}_{tag}\n")
+                else:
+                    out.append(f"wait {w}\nshot {look}_{name}_{tag}\n")
+            if slow:
+                out.append("cmd tick unfreeze\n")
             out.append("wait 120\n")
     return out
 

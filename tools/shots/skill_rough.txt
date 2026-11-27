@@ -19,113 +19,131 @@ chat clear
 wait 200
 fov 70
 cmd skyabyss level set @p 30
-cmd skyabyss job choose shaman
-cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bell_staff
+cmd skyabyss job choose smith
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_hammer
 cmd skyabyss skill forget @s
 perspective first
 # ======== d
 gearlook skill d
 cmd skyabyss skill forget @s
 cmd skyabyss skill points @s 100
-cmd skyabyss skill node @s ward_song
-cmd skyabyss skill node @s spi_1
-cmd skyabyss skill node @s ebb_tide
+cmd skyabyss skill node @s temper
+cmd skyabyss skill node @s str_1
+cmd skyabyss skill node @s forge_stomp
 camera 0.5 -60 0.5 0 0
-cmd skyabyss skill slot @s 1 ebb_tide
+cmd skyabyss skill slot @s 1 forge_stomp
 cmd kill @e[type=!player]
-cmd summon skyabyss:bandit 0.5 -60 5.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],active_effects:[{id:"minecraft:resistance",amplifier:4,duration:99999,show_particles:0b}]}
 wait 30
 cmd skyabyss skill cooldowns @s
 cmd skyabyss skill mana @s full
 chat clear
 cmd skyabyss skill cast @s 1
-camera 7.3 -56.52 -1.25 58 20
+camera 8.57 -55.25 -5.02 56 23
 hud off
-wait 3
-shot d_ebb_tide_a
-wait 6
-shot d_ebb_tide_b
+wait 2
+shot d_forge_stomp_a
+wait 5
+shot d_forge_stomp_b
 wait 120
 cmd skyabyss skill forget @s
 cmd skyabyss skill points @s 100
-cmd skyabyss skill node @s ward_song
-cmd skyabyss skill node @s spi_1
-cmd skyabyss skill node @s ebb_tide
+cmd skyabyss skill node @s temper
+cmd skyabyss skill node @s str_1
+cmd skyabyss skill node @s forge_stomp
 camera 0.5 -60 0.5 0 0
-cmd skyabyss skill slot @s 1 ebb_tide
+cmd skyabyss skill slot @s 1 forge_stomp
 cmd kill @e[type=!player]
-cmd summon skyabyss:bandit 0.5 -60 5.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],active_effects:[{id:"minecraft:resistance",amplifier:4,duration:99999,show_particles:0b}]}
 wait 30
 cmd skyabyss skill cooldowns @s
 cmd skyabyss skill mana @s full
 chat clear
 cmd tick freeze
 cmd skyabyss skill cast @s 1
-camera 7.3 -56.52 -1.25 58 20
+camera 8.57 -55.25 -5.02 56 23
 hud off
-cmd tick step 3
-wait 6
-camera 7.3 -56.52 -1.25 58 20
-shot d_ebb_tide_seq01
 cmd tick step 2
 wait 5
-camera 7.3 -56.52 -1.25 58 20
-shot d_ebb_tide_seq02
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq01
 cmd tick step 2
 wait 5
-camera 7.3 -56.52 -1.25 58 20
-shot d_ebb_tide_seq03
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq02
 cmd tick step 2
 wait 5
-camera 7.3 -56.52 -1.25 58 20
-shot d_ebb_tide_seq04
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq03
 cmd tick step 2
 wait 5
-camera 7.3 -56.52 -1.25 58 20
-shot d_ebb_tide_seq05
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq04
 cmd tick step 2
 wait 5
-camera 7.3 -56.52 -1.25 58 20
-shot d_ebb_tide_seq06
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq05
 cmd tick step 2
 wait 5
-camera 7.3 -56.52 -1.25 58 20
-shot d_ebb_tide_seq07
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq06
 cmd tick step 2
 wait 5
-camera 7.3 -56.52 -1.25 58 20
-shot d_ebb_tide_seq08
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq07
 cmd tick step 2
 wait 5
-camera 7.3 -56.52 -1.25 58 20
-shot d_ebb_tide_seq09
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq08
 cmd tick step 2
 wait 5
-camera 7.3 -56.52 -1.25 58 20
-shot d_ebb_tide_seq10
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq09
 cmd tick step 2
 wait 5
-camera 7.3 -56.52 -1.25 58 20
-shot d_ebb_tide_seq11
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq10
 cmd tick step 2
 wait 5
-camera 7.3 -56.52 -1.25 58 20
-shot d_ebb_tide_seq12
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq11
 cmd tick step 2
 wait 5
-camera 7.3 -56.52 -1.25 58 20
-shot d_ebb_tide_seq13
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq12
 cmd tick step 2
 wait 5
-camera 7.3 -56.52 -1.25 58 20
-shot d_ebb_tide_seq14
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq13
 cmd tick step 2
 wait 5
-camera 7.3 -56.52 -1.25 58 20
-shot d_ebb_tide_seq15
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq14
 cmd tick step 2
 wait 5
-camera 7.3 -56.52 -1.25 58 20
-shot d_ebb_tide_seq16
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq15
+cmd tick step 2
+wait 5
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq16
+cmd tick step 2
+wait 5
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq17
+cmd tick step 2
+wait 5
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq18
+cmd tick step 2
+wait 5
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq19
+cmd tick step 2
+wait 5
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq20
+cmd tick step 2
+wait 5
+camera 8.57 -55.25 -5.02 56 23
+shot d_forge_stomp_seq21
 cmd tick unfreeze
 wait 120

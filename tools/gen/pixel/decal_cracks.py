@@ -26,6 +26,11 @@ PALETTES = {
     "mist": [(252, 250, 244), (226, 224, 222), (170, 168, 176), (70, 68, 76)],
     "snare": [(255, 255, 255), (220, 230, 240), (120, 124, 136), (30, 30, 36)],
     "rain": [(240, 246, 255), (176, 188, 210), (98, 108, 132), (40, 44, 56)],
+    "spark": [(255, 255, 255), (240, 222, 160), (120, 132, 160), (30, 32, 42)],
+    "forge": [(255, 255, 236), (250, 236, 160), (176, 96, 70), (52, 30, 26)],
+    "ash": [(246, 242, 252), (206, 198, 226), (140, 128, 172), (52, 44, 50)],
+    "coal": [(255, 214, 214), (240, 70, 84), (168, 20, 42), (30, 26, 28)],
+    "temper": [(255, 246, 206), (232, 182, 104), (146, 90, 184), (44, 52, 104)],
     "lamp": [(255, 248, 232), (255, 224, 180), (240, 178, 122), (80, 52, 36)],
     "seal": [(255, 228, 196), (250, 104, 46), (198, 48, 26), (40, 30, 32)],
     "cycle": [(255, 240, 252), (236, 190, 236), (196, 128, 206), (70, 72, 84)],
@@ -101,6 +106,16 @@ def main():
         snare(n, c, cr, rnd, put)
     elif a.shape == "pocks":
         pocks(n, c, cr, rnd, put)
+    elif a.shape == "sparks":
+        sparks(n, c, cr, rnd, put)
+    elif a.shape == "forge":
+        forge(n, c, cr, rnd, put)
+    elif a.shape == "ashswirl":
+        ashswirl(n, c, cr, rnd, put)
+    elif a.shape == "crater":
+        crater(n, c, cr, rnd, put, crack)
+    elif a.shape == "temper":
+        temper(n, c, cr, rnd, put)
     elif a.shape == "lamp":
         lamp(n, c, cr, rnd, put)
     elif a.shape == "seal":
@@ -261,6 +276,128 @@ def pocks(n, c, cr, rnd, put):
         a = 2 * math.pi * k / int(cr * 3)
         if k % 3:
             put(int(round(c + cr * math.cos(a))), int(round(c + cr * math.sin(a))), 2)
+
+
+def sparks(n, c, cr, rnd, put):
+    """火花散らしの跡: 真ん中の十字の割れ目 (太い)、外へ走る 24 本の細い火花の筋 (先に二股)、筋の間の点"""
+    for k in range(4):
+        a = math.radians(90 * k)
+        for t in range(0, int(cr * 0.42)):
+            for s in (-1, 0, 1):
+                put(int(round(c + t * math.cos(a) - s * math.sin(a))), int(round(c + t * math.sin(a) + s * math.cos(a))), 4 if s == 0 else 3)
+    for k in range(24):
+        a = 2 * math.pi * k / 24 + rnd.uniform(-0.08, 0.08)
+        r1 = cr * rnd.uniform(0.6, 1.0)
+        r0 = cr * 0.36
+        for j in range(int(r1 - r0)):
+            r = r0 + j
+            put(int(round(c + r * math.cos(a))), int(round(c + r * math.sin(a))), 3 if j < (r1 - r0) * 0.6 else 2)
+        for s in (-0.35, 0.35):
+            for j in range(int(cr * 0.12)):
+                x = c + r1 * math.cos(a) + j * math.cos(a + s)
+                y = c + r1 * math.sin(a) + j * math.sin(a + s)
+                put(int(round(x)), int(round(y)), 2)
+    for k in range(int(cr * 1.5)):
+        a = rnd.uniform(0, 2 * math.pi)
+        r = rnd.uniform(0.4, 1.1) * cr
+        put(int(round(c + r * math.cos(a))), int(round(c + r * math.sin(a))), 1)
+
+
+def forge(n, c, cr, rnd, put):
+    """炉の踏みの跡: 壁の下の八角の焼け跡 (太い)、壁の間から外へ流れた湯の短い舌 8 本、内の細い八角、外の焦げの点"""
+    def octagon(r, wd, lv, gap=False):
+        for k in range(8):
+            a1, a2 = math.radians(22.5 + 45 * k), math.radians(22.5 + 45 * (k + 1))
+            for j in range(120):
+                f = j / 119.0
+                if gap and 0.42 < f < 0.58:
+                    continue
+                x = c + r * ((1 - f) * math.sin(a1) + f * math.sin(a2))
+                y = c + r * ((1 - f) * math.cos(a1) + f * math.cos(a2))
+                for o in range(-wd, wd + 1):
+                    put(int(round(x + o * math.sin((a1 + a2) / 2))), int(round(y + o * math.cos((a1 + a2) / 2))), lv if abs(o) < wd else lv - 1)
+    octagon(cr * 0.72, 1, 4)
+    octagon(cr * 0.45, 1, 3, gap=True)
+    for k in range(8):
+        a = math.radians(45 * k)
+        for t in range(int(cr * 0.78), int(cr * 0.98)):
+            f = (t - cr * 0.78) / (cr * 0.2)
+            w = 1.6 * (1 - f)
+            for s in range(-2, 3):
+                if abs(s) <= w:
+                    put(int(round(c + t * math.sin(a) + s * math.cos(a))), int(round(c + t * math.cos(a) - s * math.sin(a))), 3 if abs(s) < w * 0.5 else 2)
+    for k in range(int(cr * 1.3)):
+        a = rnd.uniform(0, 2 * math.pi)
+        r = rnd.uniform(0.85, 1.08) * cr
+        put(int(round(c + r * math.cos(a))), int(round(c + r * math.sin(a))), 1)
+
+
+def ashswirl(n, c, cr, rnd, put):
+    """灰散らしの跡: 模型の 3 本の渦の腕 (半径 4 → 17、200 度) に重なる灰の筋 (床は模型と 180 度回るので逆へ)、腕の間の灰の点"""
+    for i in range(3):
+        a0 = 120 * i + 20 + 180
+        for j in range(900):
+            s = j / 899.0
+            th = math.radians(a0 + 200 * s)
+            r = cr * (4 + 13 * s) / 17.0
+            w = 0.6 + 2.2 * s
+            for o in range(-3, 4):
+                if abs(o) > w:
+                    continue
+                rr = r + o
+                x = c + rr * math.sin(th)
+                y = c + rr * math.cos(th)
+                put(int(round(x)), int(round(y)), 4 if abs(o) < w * 0.35 else 3 if abs(o) < w * 0.7 else 2)
+    for k in range(int(cr * 3)):
+        a = rnd.uniform(0, 2 * math.pi)
+        r = rnd.uniform(0.2, 1.05) * cr
+        put(int(round(c + r * math.cos(a))), int(round(c + r * math.sin(a))), rnd.choice((1, 2, 2)))
+
+
+def crater(n, c, cr, rnd, put, crack):
+    """熾の鎚の跡: 真ん中の打ち跡 (焦げの四角と熾の縁)、そこから走る 7 本のひび、外の割れた輪、灰の点"""
+    h = cr * 0.3
+    for y in range(int(c - h), int(c + h) + 1):
+        for x in range(int(c - h), int(c + h) + 1):
+            e = min(x - (c - h), (c + h) - x, y - (c - h), (c + h) - y)
+            put(x, y, 3 if e < 1.2 else 1)
+    for k in range(7):
+        a = 2 * math.pi * k / 7 + rnd.uniform(-0.2, 0.2)
+        crack(c + h * 1.1 * math.cos(a), c + h * 1.1 * math.sin(a), a, cr * rnd.uniform(0.55, 0.75), 0.6, 1, taper=0.7)
+    for i in range(720):
+        a = 2 * math.pi * i / 720
+        if (i // 20) % 4 == 3:
+            continue
+        r = cr * (0.86 + 0.03 * math.sin(i * 0.31))
+        put(int(round(c + r * math.cos(a))), int(round(c + r * math.sin(a))), 3)
+    for k in range(int(cr * 1.4)):
+        a = rnd.uniform(0, 2 * math.pi)
+        r = rnd.uniform(0.4, 1.05) * cr
+        put(int(round(c + r * math.cos(a))), int(round(c + r * math.sin(a))), 1)
+
+
+def temper(n, c, cr, rnd, put):
+    """焼き入れの跡: 焼き戻しの輪 3 本 (内ほど明るい、外は途切れる)、斜め 4 方の刃の焼け跡 (細長い菱形)、湯気の滴の点"""
+    for i in range(720):
+        a = 2 * math.pi * i / 720
+        for f, lv in ((0.34, 4), (0.5, 3), (0.98, 2)):
+            if lv == 2 and (i // 18) % 3 == 2:
+                continue
+            put(int(round(c + cr * f * math.cos(a))), int(round(c + cr * f * math.sin(a))), lv)
+    for k in range(4):
+        a = math.radians(45 + 90 * k)
+        for t in range(int(cr * 0.58), int(cr * 0.92)):
+            f = (t - cr * 0.58) / (cr * 0.34)
+            w = 2.2 * math.sin(math.pi * f)
+            for s in range(-3, 4):
+                if abs(s) <= w:
+                    x = c + t * math.cos(a) - s * math.sin(a)
+                    y = c + t * math.sin(a) + s * math.cos(a)
+                    put(int(round(x)), int(round(y)), 4 if abs(s) < w * 0.4 else 3)
+    for k in range(int(cr * 1.2)):
+        a = rnd.uniform(0, 2 * math.pi)
+        r = rnd.uniform(0.6, 1.08) * cr
+        put(int(round(c + r * math.cos(a))), int(round(c + r * math.sin(a))), rnd.choice((1, 2)))
 
 
 def lamp(n, c, cr, rnd, put):
