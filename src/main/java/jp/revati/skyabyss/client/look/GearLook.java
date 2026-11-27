@@ -16,7 +16,8 @@ public final class GearLook {
 
     public static boolean set(String what, String value) {
         char v = value.isEmpty() ? '0' : Character.toLowerCase(value.charAt(0));
-        if ("0abc".indexOf(v) < 0) {
+        // d = 技の試作 (2026-11-27 参照の動画に寄せる: 光る・広い床のひび。今は熾の玉の当たりだけ)
+        if ("0abcd".indexOf(v) < 0) {
             return false;
         }
         switch (what) {

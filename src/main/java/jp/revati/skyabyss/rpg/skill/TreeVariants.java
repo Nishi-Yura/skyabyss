@@ -137,6 +137,12 @@ public final class TreeVariants {
             case LUNGE -> {
                 if (r == 8 && JobActions.mistVeil(player, rank) == null) {
                     LegendRewrites.afterHeld(player, Skill.MIST_VEIL, rank, from);
+                    // 霧隠れの形と粒も出す (踏み込みの形のすぐ後)
+                    SkillProps.follow(player, skill, Skill.MIST_VEIL);
+                    if (!(player instanceof net.neoforged.neoforge.common.util.FakePlayer) && player.connection != null) {
+                        net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingEntityAndSelf(player,
+                                new jp.revati.skyabyss.rpg.skill.net.SkillFxPayload(player.getId(), Skill.MIST_VEIL.id, rank, false, null));
+                    }
                 }
             }
             case SHIELD_RUSH -> {

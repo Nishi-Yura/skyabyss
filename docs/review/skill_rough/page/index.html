@@ -1,0 +1,116 @@
+<title>技の見た目ラフ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Antique&display=swap">
+<style>
+/* 夜の空の板に、ゲームの絵を 4 案ずつ横に並べる。選ぶ札は下にひとつ */
+:root{
+  --bg:#eef1f6; --panel:#ffffff; --fg:#1c2230; --muted:#5b6578; --line:#d5dbe6;
+  --accent:#c8481a; --ice:#3f8fc4; --pick:#fff1e6;
+  --title:"Zen Antique",serif; --body:"DotGothic16",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1420; --panel:#171e2d; --fg:#e8ecf4; --muted:#9aa5ba; --line:#2a3447; --accent:#ff9a30; --ice:#8fd3f0; --pick:#2a2016; color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1420; --panel:#171e2d; --fg:#e8ecf4; --muted:#9aa5ba; --line:#2a3447; --accent:#ff9a30; --ice:#8fd3f0; --pick:#2a2016; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);line-height:1.7}
+.wrap{max-width:1180px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
+h1{font-family:var(--title);font-weight:400;font-size:2rem;margin:0;text-wrap:balance}
+h2{font-family:var(--title);font-weight:400;font-size:1.3rem;margin:0 0 4px}
+p{margin:0;max-width:65ch}
+.lead{color:var(--muted)}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.legend div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.legend b{color:var(--accent);margin-right:6px}
+.row{display:grid;gap:10px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+figure{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+figure.on{outline:3px solid var(--accent);outline-offset:-3px}
+figure img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;image-rendering:pixelated}
+figcaption{padding:6px 10px;font-size:.85rem;color:var(--muted)}
+figcaption b{color:var(--fg)}
+.choose{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;display:grid;gap:12px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.btns button{font:inherit;padding:8px 16px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer}
+.btns button[aria-pressed="true"]{background:var(--pick);border-color:var(--accent);color:var(--accent)}
+.btns button:focus-visible,textarea:focus-visible,.save:focus-visible{outline:2px solid var(--ice);outline-offset:2px}
+textarea{font:inherit;width:100%;box-sizing:border-box;min-height:84px;padding:8px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+.save{font:inherit;justify-self:start;padding:8px 20px;border-radius:6px;border:0;background:var(--accent);color:#fff;cursor:pointer}
+.status{font-size:.85rem;color:var(--muted)}
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:8px">
+    <h1>技の見た目ラフ</h1>
+    <p class="lead">魔法使いの「凍て潮」と「熾の玉（当たり）」を、同じ場所・同じ時刻・同じカメラで撮りました。シェーダーなしのゲーム内の絵です。模型は Blockbench で組んだラフです（清書の前）。</p>
+  </header>
+
+  <section class="legend" aria-label="案の説明">
+    <div><b>今</b>光の板（輪・筋）と、低ポリの模型</div>
+    <div><b>A</b>動画寄り。太い立方体の塊と、床のドットの印</div>
+    <div><b>B</b>2D が主役。ドット絵の板を交差させて立て、床に紋</div>
+    <div><b>C</b>3D が主役。大きな立方体の模型だけ（床の印なし）</div>
+  </section>
+
+  <section class="row">
+    <h2>凍て潮（床の範囲・半径 5〜6）</h2>
+    <div class="grid" data-row="frost"></div>
+  </section>
+  <section class="row">
+    <h2>熾の玉の当たり（半径 3）</h2>
+    <div class="grid" data-row="ember"></div>
+  </section>
+
+  <section class="choose" aria-label="選ぶ">
+    <h2>どれにしますか</h2>
+    <div class="btns" role="group" aria-label="案">
+      <button type="button" id="pick-a" data-pick="A" aria-pressed="false">A</button>
+      <button type="button" id="pick-b" data-pick="B" aria-pressed="false">B</button>
+      <button type="button" id="pick-c" data-pick="C" aria-pressed="false">C</button>
+      <button type="button" id="pick-mix" data-pick="mix" aria-pressed="false">組み合わせ</button>
+      <button type="button" id="pick-none" data-pick="none" aria-pressed="false">どれも違う</button>
+    </div>
+    <label for="note">気になる所・組み合わせ方（例: 氷は C、爆発は B）</label>
+    <textarea id="note"></textarea>
+    <button type="button" class="save" id="save">送る</button>
+    <p class="status" id="status">選んで「送る」を押すと、Claude が読めるように保存されます。</p>
+  </section>
+</div>
+
+<script>
+const LOOKS=[["0","今"],["a","A"],["b","B"],["c","C"]];
+const ROWS={frost:"frost_tide_a",ember:"ember_orb_hit"};
+let pick=null;
+for(const [row,file] of Object.entries(ROWS)){
+  const g=document.querySelector(`[data-row="${row}"]`);
+  for(const [k,label] of LOOKS){
+    const f=document.createElement("figure"); f.dataset.look=label;
+    const img=document.createElement("img"); img.src=`${k}_${file}.jpg`; img.alt=`${label} の ${row==="frost"?"凍て潮":"熾の玉の当たり"}`; img.loading="lazy";
+    const c=document.createElement("figcaption"); const b=document.createElement("b"); b.textContent=label; c.append(b);
+    f.append(img,c); g.append(f);
+  }
+}
+function show(){
+  document.querySelectorAll("[data-pick]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.pick===pick)));
+  document.querySelectorAll("figure").forEach(f=>f.classList.toggle("on",f.dataset.look===pick));
+}
+document.querySelectorAll("[data-pick]").forEach(b=>b.addEventListener("click",()=>{pick=b.dataset.pick;show();}));
+const status=document.getElementById("status"), note=document.getElementById("note"), save=document.getElementById("save");
+let db=null;
+(async()=>{
+  db=await window.claude?.use?.("db");
+  if(!db){status.textContent="ここでは保存できません。チャットで「A」などと答えてください。";save.disabled=true;return;}
+  const t=setTimeout(()=>{},10000);
+  try{const s=await db.doc("choices/skill_look").get(); clearTimeout(t);
+    if(s&&s.exists){const d=s.data(); pick=d.pick||null; note.value=d.note||""; show(); status.textContent="前に送った答えを読み込みました。";}
+  }catch(e){clearTimeout(t);}
+})();
+save.addEventListener("click",async()=>{
+  if(!db){return;}
+  if(!pick){status.textContent="先に案を一つ選んでください。";return;}
+  save.disabled=true; status.textContent="送っています…";
+  try{await db.doc("choices/skill_look").set({pick,note:note.value.slice(0,2000),at:new Date().toISOString()});
+    status.textContent="送りました。Claude に「選んだ」と伝えてください。";}
+  catch(e){status.textContent="送れませんでした（"+(e&&e.code||"error")+"）。チャットで答えてください。";}
+  finally{save.disabled=false;}
+});
+</script>

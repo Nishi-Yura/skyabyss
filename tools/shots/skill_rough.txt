@@ -1,0 +1,105 @@
+# 技の見た目のラフ (今 0 / A / B / C)。tools/gen/shots/gen_skill_rough_shots.py が書く
+world skill_rough flat
+size 1280 720
+timeout 3000
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd gamerule doMobLoot false
+cmd gamerule fallDamage false
+camera 0.5 -60 0.5 0 0
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 70
+cmd skyabyss level set @p 30
+cmd skyabyss job choose mage
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_staff
+cmd skyabyss skill forget @s
+perspective first
+# ======== d
+gearlook skill d
+cmd skyabyss skill forget @s
+cmd skyabyss skill learn @s thunder_bolt 3
+cmd skyabyss skill learn @s star_reading 1
+cmd skyabyss skill learn @s ember_orb 1
+cmd skyabyss skill learn @s frost_tide 1
+cmd skyabyss skill learn @s blink 1
+camera 0.5 -60 0.5 0 0
+cmd skyabyss skill slot @s 1 ember_orb
+cmd kill @e[type=!player]
+wait 30
+cmd skyabyss skill cooldowns @s
+cmd skyabyss skill mana @s full
+chat clear
+cmd skyabyss skill cast @s 1
+camera 5 -58.5 7 48 2
+hud off
+wait 1
+shot d_ember_orb_fly
+wait 40
+camera 0.5 -60 0.5 0 0
+cmd skyabyss skill slot @s 1 ember_orb
+cmd kill @e[type=!player]
+wait 30
+cmd skyabyss skill cooldowns @s
+cmd skyabyss skill mana @s full
+chat clear
+cmd skyabyss skill cast @s 1
+camera 5 -58 10 52 15
+hud off
+wait 8
+shot d_ember_orb_hit
+wait 40
+camera 0.5 -60 0.5 0 0
+cmd skyabyss skill slot @s 1 ember_orb
+cmd kill @e[type=!player]
+wait 30
+cmd skyabyss skill cooldowns @s
+cmd skyabyss skill mana @s full
+chat clear
+cmd skyabyss skill cast @s 1
+camera 11.3 -53 5 52 24
+hud off
+wait 4
+shot d_ember_orb_wide
+wait 8
+shot d_ember_orb_hit_wide
+wait 40
+camera 0.5 -60 0.5 0 0
+cmd skyabyss skill slot @s 1 ember_orb
+cmd kill @e[type=!player]
+wait 30
+cmd skyabyss skill cooldowns @s
+cmd skyabyss skill mana @s full
+chat clear
+cmd skyabyss skill cast @s 1
+camera 5 -58 10 52 15
+hud off
+wait 8
+shot d_ember_orb_burn08
+wait 3
+shot d_ember_orb_burn11
+wait 3
+shot d_ember_orb_burn14
+wait 3
+shot d_ember_orb_burn17
+wait 3
+shot d_ember_orb_burn20
+wait 3
+shot d_ember_orb_burn23
+wait 3
+shot d_ember_orb_burn26
+wait 3
+shot d_ember_orb_burn29
+wait 3
+shot d_ember_orb_burn32
+wait 3
+shot d_ember_orb_burn35
+wait 40

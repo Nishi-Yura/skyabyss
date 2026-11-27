@@ -242,6 +242,13 @@ public final class AttackProps {
     }
 
     // 床から突き出る形を、delay tick 後に出す (予告の始まりに呼んで、打つ瞬間に合わせる)
+    // 試作 d (技の見た目) の燃え尽きの間 (tick)。形の命はこの分だけ長く、d 以外の見た目ではこの分を描かない
+    private static final Map<String, Integer> AFTERBURN = Map.of("ss_ember_orb", 22);
+
+    public static int afterburn(String kind) {
+        return AFTERBURN.getOrDefault(kind, 0);
+    }
+
     public static void riseLater(ServerLevel level, String kind, @Nullable Entity owner, Vec3 at, float yaw, float size, int linger, int delay) {
         AttackProp p = make(level, kind, owner);
         if (p == null) {

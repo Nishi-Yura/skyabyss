@@ -60,6 +60,8 @@ MAGE = [
     ("frost_tide", 25, "8 -56.5 -3 47 19", [(3, "a")]),
     ("ember_orb", 0, "5 -58.5 7 48 2", [(1, "fly")]),
     ("ember_orb", 0, "5 -58 10 52 15", [(8, "hit")]),
+    ("ember_orb", 0, "11.3 -53 5 52 24", [(4, "wide"), (8, "hit_wide")]),  # 広く見下ろす (試作 d の床のひび)
+    ("ember_orb", 0, "5 -58 10 52 15", [(8, "burn08")] + [(3, "burn%02d" % (8 + 3 * k)) for k in range(1, 10)]),  # 燃える間と燃え尽き (試作 d)
     ("thunder_bolt", 15, "8 -56.5 4 49 15", [(1, "a"), (3, "b")]),
     ("blink", 0, "10 -56 2 67 16", [(2, "a")]),
     # 星屑は雷撃の刻印 1 (最後に置く。刻印は案ごとの覚え直しで外れる)
@@ -256,8 +258,95 @@ def archer(only):
     return out
 
 
+# ---------------------------------------------------------------- 呪術師
+# (技, 枠に入れる技, 取る節の並び, 放つ向きの pitch, 撮る位置, 撮る tick の並び, 前に敵を置くか)
+# 引き潮は前 8 ブロック以内の敵が要る (ebbRange)。呪いの印は 16 ブロック以内の狙った敵が要り、印は敵の所に 3 tick 遅れて出る。
+# 灯の守り札は見ている先に置くので、少し下を向いて放つ。巡りの唄 = 守りの唄の刻印 8 (cycle_ward)
+SHAMAN = [
+    ("ward_song", "ward_song", ["ward_song"], 0, cam(6.5, -57.0, -4.5, 0.5, -59.3, 0.5, 0.8), [(4, "a"), (12, "b")], False),
+    ("ebb_tide", "ebb_tide", ["ebb_tide"], 0, cam(8.5, -56.0, -2.0, 0.5, -59.5, 3.0, 0.85), [(3, "a"), (6, "b")], 5.0),
+    ("cycle_song", "ward_song", ["cycle_ward"], 0, cam(6.5, -57.0, -4.5, 0.5, -59.3, 0.5, 0.8), [(4, "a"), (12, "b")], False),
+    ("curse_mark", "curse_mark", ["curse_mark"], 0, cam(6.0, -57.5, 1.5, 0.5, -58.8, 6.0, 0.8), [(6, "a"), (20, "b")], 6.0),
+    ("lamp_charm", "lamp_charm", ["lamp_charm"], 30, cam(6.5, -57.0, -1.0, 0.5, -59.3, 3.0, 0.8), [(5, "a"), (30, "b")], False),
+]
+
+
+def shaman(only):
+    out = [HEAD.format(job="shaman", weapon="shrine_bell_staff")]
+    for look in LOOKS:
+        out.append(f"# ======== {look}\ngearlook skill {look}\n")
+        for name, slot_skill, nodes, pitch, cm, shots, foe in SHAMAN:
+            if only and name not in only:
+                continue
+            out.append("cmd skyabyss skill forget @s\ncmd skyabyss skill points @s 100\n")
+            out.append("".join(f"cmd skyabyss skill node @s {n}\n" for n in tree_path("shaman", nodes)))
+            out.append(cast(pitch, slot_skill, cm, foe))
+            for w, tag in shots:
+                out.append(f"wait {w}\nshot {look}_{name}_{tag}\n")
+            out.append("wait 120\n")
+    return out
+
+
+# ---------------------------------------------------------------- 鍛冶師
+# (技, 枠に入れる技, 取る節の並び, 放つ向きの pitch, 撮る位置, 撮る tick の並び, 前に敵を置くか)
+# 灰散らしは 5 ブロック以内の敵が要る。炉の踏みは 2 つ目の輪が 3 tick 遅れて出て、どちらも 10 tick で消える。
+# 火花散らし = 炉の踏みの刻印 1 (spark_stomp)。濃い灰 (thick_ash) は灰の風を塞ぐので、ash_wind を目当てに入れて熱い灰から通す
+SMITH = [
+    ("temper", "temper", ["temper"], 0, cam(6.5, -57.0, -4.5, 0.5, -58.8, 0.5, 0.8), [(4, "a"), (12, "b")], False),
+    ("ember_hammer", "ember_hammer", ["ember_hammer"], 0, cam(8.0, -56.5, -1.0, 0.5, -59.0, 2.5, 0.85), [(4, "a"), (9, "b")], False),
+    ("ash_scatter", "ash_scatter", ["ash_scatter"], 0, cam(11.0, -53.5, -7.0, 0.5, -59.5, 0.5, 0.85), [(5, "a"), (20, "b")], 3.5),
+    ("forge_stomp", "forge_stomp", ["forge_stomp"], 0, cam(10.0, -54.5, -6.0, 0.5, -59.5, 0.5, 0.85), [(2, "a"), (5, "b")], False),
+    ("spark_burst", "forge_stomp", ["forge_stomp", "ash_wind", "spark_stomp"], 0, cam(7.5, -56.0, -5.0, 0.5, -59.0, 0.5, 0.85), [(2, "a"), (5, "b")], False),
+]
+
+
+def smith(only):
+    out = [HEAD.format(job="smith", weapon="shrine_hammer")]
+    for look in LOOKS:
+        out.append(f"# ======== {look}\ngearlook skill {look}\n")
+        for name, slot_skill, nodes, pitch, cm, shots, foe in SMITH:
+            if only and name not in only:
+                continue
+            out.append("cmd skyabyss skill forget @s\ncmd skyabyss skill points @s 100\n")
+            out.append("".join(f"cmd skyabyss skill node @s {n}\n" for n in tree_path("smith", nodes)))
+            out.append(cast(pitch, slot_skill, cm, foe))
+            for w, tag in shots:
+                out.append(f"wait {w}\nshot {look}_{name}_{tag}\n")
+            out.append("wait 120\n")
+    return out
+
+
+# ---------------------------------------------------------------- 淵・前世 (どの職でも覚える技。skill learn で覚えて放つ)
+# (技, 撮る位置, 撮る tick の並び, 前に敵を置くか)。淵の顎は見ている先 8 ブロック、遺響の一撃は前 2.5 ブロック。墓鐘は降る形 (3 tick で落ちる)
+DEEP = [
+    ("deep_pull", cam(10.0, -54.5, -6.0, 0.5, -59.5, 0.5, 0.85), [(3, "a"), (8, "b")], 3.0),
+    ("deep_echo", cam(6.5, -57.0, -4.5, 0.5, -59.0, 0.5, 0.8), [(4, "a"), (12, "b")], False),
+    ("deep_maw", cam(9.0, -55.5, 0.0, 0.5, -59.5, 6.0, 0.85), [(6, "a"), (10, "b")], 6.0),
+    ("echo_strike", cam(7.0, -56.5, -1.5, 0.5, -59.0, 2.5, 0.8), [(3, "a"), (12, "b")], 3.0),
+    ("grave_bell", cam(7.0, -56.5, -5.0, 0.5, -59.0, 0.5, 0.8), [(1, "a"), (2, "b"), (3, "c")], False),
+    ("final_light", cam(11.0, -53.5, -7.0, 0.5, -59.5, 0.5, 0.85), [(4, "a"), (9, "b")], False),
+]
+
+
+def deep(only):
+    out = [HEAD.format(job="warrior", weapon="shrine_sword"), "cmd skyabyss level set @p 60\n"]
+    for look in LOOKS:
+        out.append(f"# ======== {look}\ngearlook skill {look}\n")
+        for name, cm, shots, foe in DEEP:
+            if only and name not in only:
+                continue
+            out.append(f"cmd skyabyss skill forget @s\ncmd skyabyss skill learn @s {name} 1\n")
+            out.append(cast(0, name, cm, foe))
+            for w, tag in shots:
+                out.append(f"wait {w}\nshot {look}_{name}_{tag}\n")
+            out.append("wait 60\n")
+    return out
+
+
 JOBS = {"mage": (mage, [s[0] for s in MAGE]), "warrior": (warrior, [s[0] for s in WARRIOR]),
-        "assassin": (assassin, [s[0] for s in ASSASSIN]), "archer": (archer, [s[0] for s in ARCHER])}
+        "assassin": (assassin, [s[0] for s in ASSASSIN]), "archer": (archer, [s[0] for s in ARCHER]),
+        "shaman": (shaman, [s[0] for s in SHAMAN]), "smith": (smith, [s[0] for s in SMITH]),
+        "deep": (deep, [s[0] for s in DEEP])}
 
 
 def main():
@@ -266,6 +355,10 @@ def main():
     if "--job" in args:
         i = args.index("--job")
         job = args[i + 1]
+        args = args[:i] + args[i + 2:]
+    if "--looks" in args:  # 例: --looks a,d
+        i = args.index("--looks")
+        LOOKS[:] = args[i + 1].split(",")
         args = args[:i] + args[i + 2:]
     if job is None:
         job = next((j for j, (_, names) in JOBS.items() if args and args[0] in names), "mage")

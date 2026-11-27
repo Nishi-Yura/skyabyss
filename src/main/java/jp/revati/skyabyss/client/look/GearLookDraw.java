@@ -26,13 +26,18 @@ public final class GearLookDraw {
 
     // clear > 0: カメラから clear ブロック以内の面は描かない (技の形が画面をふさがない。描く空間の原点がカメラのとき)
     public static void mesh(LowPolyMesh mesh, String bone, PoseStack pose, MultiBufferSource buffers, int light, int overlay, float clear) {
-        draw(mesh, bone, pose, buffers.getBuffer(RenderType.entityCutoutNoCull(mesh.texture)), light, overlay, clear);
+        mesh(mesh, bone, pose, buffers, light, overlay, clear, false);
+    }
+
+    // flat: 面の向きの陰を付けない (どの面も上向きの明るさ)。光そのものの技 (炎など) 用
+    public static void mesh(LowPolyMesh mesh, String bone, PoseStack pose, MultiBufferSource buffers, int light, int overlay, float clear, boolean flat) {
+        draw(mesh, bone, pose, buffers.getBuffer(RenderType.entityCutoutNoCull(mesh.texture)), light, overlay, clear, flat);
         if (mesh.glowMask != null) {
-            draw(mesh, bone, pose, buffers.getBuffer(RenderType.eyes(mesh.glowMask)), LightTexture.FULL_BRIGHT, overlay, clear);
+            draw(mesh, bone, pose, buffers.getBuffer(RenderType.eyes(mesh.glowMask)), LightTexture.FULL_BRIGHT, overlay, clear, flat);
         }
     }
 
-    private static void draw(LowPolyMesh mesh, String bone, PoseStack pose, VertexConsumer buf, int light, int overlay, float clear) {
+    private static void draw(LowPolyMesh mesh, String bone, PoseStack pose, VertexConsumer buf, int light, int overlay, float clear, boolean flat) {
         PoseStack.Pose p = pose.last();
         org.joml.Vector3f c = new org.joml.Vector3f();
         for (LowPolyMesh.Bone b : mesh.bones.values()) {
@@ -48,7 +53,7 @@ public final class GearLookDraw {
                         continue;
                     }
                 }
-                float nx = b.nrm[q * 3], ny = b.nrm[q * 3 + 1], nz = b.nrm[q * 3 + 2];
+                float nx = flat ? 0f : b.nrm[q * 3], ny = flat ? 1f : b.nrm[q * 3 + 1], nz = flat ? 0f : b.nrm[q * 3 + 2];
                 for (int k = 0; k < 4; k++) {
                     int o = q * 12 + k * 3;
                     buf.addVertex(p, b.pos[o], b.pos[o + 1], b.pos[o + 2]).setColor(-1).setUv(b.uv[q * 8 + k * 2], b.uv[q * 8 + k * 2 + 1])

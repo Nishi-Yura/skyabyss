@@ -294,7 +294,7 @@ public final class SkillProps {
         // 技の模型を床に置く (at は床へ下ろす)。yawOff = 前から回す角 (度)
         void put(String key, Vec3 at, float size, int linger, int delay, float yawOff) {
             at = ground(at);
-            AttackProps.riseLater(level, "ss_" + key, p, at, yaw() + yawOff, size * grow, linger, delay);
+            AttackProps.riseLater(level, "ss_" + key, p, at, yaw() + yawOff, size * grow, linger + AttackProps.afterburn("ss_" + key), delay);
             mark(at, delay);
         }
 

@@ -15,6 +15,7 @@ import base64
 import io
 import json
 import math
+import os
 import sys
 from pathlib import Path
 
@@ -22,7 +23,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[3]
 ASSETS = ROOT / "src/main/resources/assets/skyabyss"
-OUT = "look/a"
+OUT = "look/" + os.environ.get("BB_LOOK", "a")  # 案 (技の見た目の比べなど) は環境変数 BB_LOOK=b|c
 
 
 def rot_point(p, rot, origin):
@@ -149,6 +150,7 @@ def main(path):
            "texture": texname, "texture_size": [img.width, img.height],
            "note": "Made by hand in Blockbench (tools/models/%s%s.bbmodel), written by tools/gen/pixel/bb_import.py" % ("x32/" if scale != 1.0 else "", name),
            "bones": {"root": {"pivot": [0, 0, 0], "vertices": V, "uvs": UV, "triangles": T, "triangle_count": len(T)}}}
+    (ASSETS / "lowpoly" / OUT).mkdir(parents=True, exist_ok=True)
     (ASSETS / "lowpoly" / OUT / (name + ".json")).write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
     print(name, len(T), "tris")
 
