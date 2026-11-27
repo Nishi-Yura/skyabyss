@@ -260,7 +260,12 @@ public final class AttackProps {
             Map.entry("ss_sky_rain", 24),
             Map.entry("ss_sky_rain_fall", 14),
             Map.entry("ss_snare_shot", 24),
-            Map.entry("ss_snare_shot_fly", 10));
+            Map.entry("ss_snare_shot_fly", 10),
+            Map.entry("ss_ward_song", 20),
+            Map.entry("ss_ebb_tide", 16),
+            Map.entry("ss_cycle_song", 20),
+            Map.entry("ss_curse_mark", 20),
+            Map.entry("ss_lamp_charm", 24));
 
     public static int afterburn(String kind) {
         return AFTERBURN.getOrDefault(kind, 0);

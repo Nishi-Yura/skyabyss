@@ -80,6 +80,23 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 //   OTHER = 縄、岩 = 墨の杭。燃え尽きで閃きは横へ伸びて消え、縄の輪は締まってから切れて落ち (粒は雪)、
 //   雪の舞は昇って消え、渦は広がって消え、杭は地へ沈む (粒は黒い石)。
 // 雪縛りの矢 (snare_shot_fly、飛ぶ形): 矢柄に巻いた縄が着くとほどけて外へ散り、矢は雪になって縮み、雪の尾は矢じりへ縮む。
+// 守りの唄 (ward_song、呪術師): 炎の絵 = 寝かせた唄の輪 (u < 0.25) と縦の唄の幕、熾 = 真珠、岩 = 真珠貝の扇。
+//   輪は燃える間ゆっくり回って上下し、幕はゆらぐ。燃え尽きで輪は広がって昇り消え (粒は水浅葱の塵と音符)、
+//   幕は床へ沈み、扇は内へ閉じてから地へ沈む (粒は方解石)。
+// 引き潮 (ebb_tide、呪術師): 炎の絵 = 引き波の波頭 (u < 0.25、縦の板の弧 3 段) と床を引く泡のレース、OTHER = 海松色の藻、岩 = 藤壺の岩。
+//   波頭は燃える間上下に揺れ、藻は先がなびく。燃え尽きで波頭は放った人へ駆け戻りながら低くなって消え (粒は泡としぶき)、
+//   レースも引かれて消え、藻は放った人へ引きずられてから岩ごと地へ沈む (粒は乾いた昆布)。
+// 巡りの唄 (cycle_song、呪術師、守りの唄の刻印 8): 炎の絵 = 螺旋の唄の帯 (u < 0.25, v < 0.5)・床の花の輪 (u < 0.25, v >= 0.5)・藤の房、
+//   熾 = 鈴の舌、岩 = 暗い銀の鈴の柱。帯はゆっくり巡り、花の輪は逆へ回り、房と鈴は揺れる。
+//   燃え尽きで鈴が大きく鳴り (揺れ)、帯は速く巡りながら昇って広がり消え、房は花びらになって落ち (粒は桜の花びらと紅藤の塵)、
+//   輪は広がって消え、柱は地へ沈む (粒は鉄)。
+// 呪いの印 (curse_mark、呪術師、敵の足もと): 炎の絵 = 頭上の朱印 (u < 0.25。v < 0.5 が大きい輪、v >= 0.5 が内の印)・字の糸 (u < 0.3125)・札、
+//   OTHER = 朱漆の帯、岩 = 黒漆の杭。印は燃える間ゆっくり回って脈打ち、杭は震える。
+//   燃え尽きで印は敵の頭へ押し下がりながら縮んで消え (粒は朱の塵)、糸は杭の頭へ縮み、札は下から燃え上がって消え (粒は灰と煙)、
+//   杭は地へ沈む (粒は黒い石)。
+// 灯の守り札 (lamp_charm、呪術師): 炎の絵 = 床の灯だまり (u < 0.25, v < 0.5)・灯の差す筋 (u < 0.25, v >= 0.5)・行灯の紙 (u < 0.375)・炎、
+//   OTHER = 銅の縁、岩 = 暗い銅の灯籠。炎はゆらぎ、行灯は鉤から小さく揺れ、筋は脈打ち、灯だまりはゆっくり回る。
+//   燃え尽きで炎は縮んで消え (粒は煙)、筋は細って消え、灯だまりは縮み、紙は暗くなり、行灯は床へ落ちてから灯籠ごと地へ沈む (粒は銅)。
 public final class BurnDraw {
     // 粒を出す所 (模型の座標)。kind: SMOKE 炎の燃え尽き / ROCK 岩くずが地面に着いた / CRUMBLE 玉が崩れた
     public interface Sink {
@@ -93,7 +110,7 @@ public final class BurnDraw {
     }
 
     // 消え方の種類: 炎 (熾の玉) / 氷 / 雷
-    public static final int STYLE_EMBER = 0, STYLE_FROST = 1, STYLE_THUNDER = 2, STYLE_STAR = 3, STYLE_CLEAVE = 4, STYLE_EARTH = 5, STYLE_TIDE = 6, STYLE_RUSH = 7, STYLE_BASH = 8, STYLE_BONE = 9, STYLE_SPIN = 10, STYLE_LUNGE = 11, STYLE_BACK = 12, STYLE_MIST = 13, STYLE_FANG = 14, STYLE_WIND = 15, STYLE_PIERCE = 16, STYLE_TRAP = 17, STYLE_RAIN = 18, STYLE_RAINFALL = 19, STYLE_SNARE = 20, STYLE_SNAREFLY = 21;
+    public static final int STYLE_EMBER = 0, STYLE_FROST = 1, STYLE_THUNDER = 2, STYLE_STAR = 3, STYLE_CLEAVE = 4, STYLE_EARTH = 5, STYLE_TIDE = 6, STYLE_RUSH = 7, STYLE_BASH = 8, STYLE_BONE = 9, STYLE_SPIN = 10, STYLE_LUNGE = 11, STYLE_BACK = 12, STYLE_MIST = 13, STYLE_FANG = 14, STYLE_WIND = 15, STYLE_PIERCE = 16, STYLE_TRAP = 17, STYLE_RAIN = 18, STYLE_RAINFALL = 19, STYLE_SNARE = 20, STYLE_SNAREFLY = 21, STYLE_WARD = 22, STYLE_EBB = 23, STYLE_CYCLE = 24, STYLE_CURSE = 25, STYLE_LAMP = 26;
 
     public static int style(String kind) {
         if (kind.equals("ss_rock_call")) {
@@ -122,6 +139,21 @@ public final class BurnDraw {
         }
         if (kind.equals("ss_mist_veil")) {
             return STYLE_MIST;
+        }
+        if (kind.equals("ss_ward_song")) {
+            return STYLE_WARD;
+        }
+        if (kind.equals("ss_ebb_tide")) {
+            return STYLE_EBB;
+        }
+        if (kind.equals("ss_cycle_song")) {
+            return STYLE_CYCLE;
+        }
+        if (kind.equals("ss_curse_mark")) {
+            return STYLE_CURSE;
+        }
+        if (kind.equals("ss_lamp_charm")) {
+            return STYLE_LAMP;
         }
         if (kind.equals("ss_snare_shot")) {
             return STYLE_SNARE;
@@ -219,6 +251,11 @@ public final class BurnDraw {
                             : style == STYLE_WIND ? windQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
                             : style == STYLE_PIERCE ? pierceQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
                             : style == STYLE_TRAP ? trapQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
+                            : style == STYLE_WARD ? wardQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
+                            : style == STYLE_EBB ? ebbQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
+                            : style == STYLE_CYCLE ? cycleQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
+                            : style == STYLE_CURSE ? curseQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
+                            : style == STYLE_LAMP ? lampQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
                             : style == STYLE_RAIN ? rainQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
                             : style == STYLE_SNARE ? snareQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
                             : style == STYLE_SNAREFLY ? snareFlyQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
@@ -639,6 +676,418 @@ public final class BurnDraw {
             }
             if (k > 0.3f && sink != null) {
                 sink.at(0f, 0.03f, 0f, ROCK);
+            }
+        }
+        return rgb(r, g, b);
+    }
+
+    // 灯の守り札の面 1 枚。形を書き換えて色を返す。描かないときは 0
+    private static int lampQuad(int part, float[] xs, float[] ys, float[] zs, float[] us, float[] vs, float au,
+                                float cx, float cy, float cz, float t, float burn, Sink sink) {
+        if (part == SPARK || part == EMBER) {
+            return 0;
+        }
+        float av = (vs[0] + vs[1] + vs[2] + vs[3]) / 4f;
+        if (part == FIRE && au < 0.25f) {
+            if (av < 0.5f) {
+                // 灯だまり: ゆっくり回り、燃え尽きで縮む
+                float k = burn / 0.45f;
+                if (k >= 1f) {
+                    return 0;
+                }
+                float a = t * 0.02f, sc = 1f - 0.8f * k;
+                float cs = (float) Math.cos(a), sn = (float) Math.sin(a);
+                for (int i = 0; i < 4; i++) {
+                    float x = xs[i], z = zs[i];
+                    xs[i] = (x * cs - z * sn) * sc;
+                    zs[i] = (x * sn + z * cs) * sc;
+                }
+                return 0xFFFFFFFF;
+            }
+            // 灯の差す筋: 脈打ち、燃え尽きで細る
+            float k = burn / 0.3f;
+            if (k >= 1f) {
+                return 0;
+            }
+            float sc = (1f + 0.06f * (float) Math.sin(t * 0.2f)) * (1f - k);
+            for (int i = 0; i < 4; i++) {
+                xs[i] *= sc;
+                zs[i] *= sc;
+            }
+            return 0xFFFFFFFF;
+        }
+        // 行灯 (鉤から下、真ん中): 小さく揺れ、燃え尽きの途中で床へ落ちる
+        boolean lantern = Math.abs(cx) < 0.25f && Math.abs(cz) < 0.25f && cy > 0.9f && cy < 1.75f;
+        float drop = 0f;
+        if (lantern) {
+            float sw = 0.05f * (float) Math.sin(t * 0.12f) * (1f - Math.min(1f, burn * 3f));
+            float k2 = net.minecraft.util.Mth.clamp((burn - 0.3f) / 0.25f, 0f, 1f);
+            drop = 0.95f * k2 * k2;
+            for (int i = 0; i < 4; i++) {
+                xs[i] += (1.8f - ys[i]) * sw;
+                ys[i] -= drop;
+            }
+            if (k2 >= 1f && sink != null && hash(cx, cy, cz) < 0.3f) {
+                sink.at(cx, 0.1f, cz, ROCK);
+            }
+        }
+        float col = 1f;
+        if (part == FIRE) {
+            if (au >= 0.375f) {
+                // 炎: ゆらぎ、燃え尽きで底へ縮んで消える
+                float k = burn / 0.3f;
+                if (k >= 1f) {
+                    return 0;
+                }
+                float base = 1.025f - drop;
+                float fl = (1f + 0.12f * (float) Math.sin(t * 1.3f) + 0.06f * (float) Math.sin(t * 2.9f)) * (1f - k);
+                for (int i = 0; i < 4; i++) {
+                    xs[i] *= 1f + 0.1f * (float) Math.sin(t * 0.9f);
+                    zs[i] *= 1f + 0.1f * (float) Math.sin(t * 0.9f);
+                    ys[i] = base + (ys[i] - base) * fl;
+                }
+                if (k > 0.5f && sink != null) {
+                    sink.at(0f, 1.15f - drop, 0f, SMOKE);
+                }
+                return 0xFFFFFFFF;
+            }
+            // 紙: 燃え尽きで暗くなる
+            col = 1f - 0.6f * Math.min(1f, burn / 0.4f);
+        }
+        // 地へ沈む
+        float k = (burn - 0.6f) / 0.4f;
+        if (k > 0f) {
+            if (k >= 1f) {
+                return 0;
+            }
+            float d = k * k * 2.1f;
+            for (int i = 0; i < 4; i++) {
+                ys[i] -= d;
+            }
+            if (sink != null && hash(cx, cy, cz) < 0.2f) {
+                sink.at(cx, 0.05f, cz, ROCK);
+            }
+        }
+        return part == FIRE ? rgb(col, col * 0.95f, col * 0.9f) : 0xFFFFFFFF;
+    }
+
+    // 呪いの印の面 1 枚。形を書き換えて色を返す。描かないときは 0
+    private static int curseQuad(int part, float[] xs, float[] ys, float[] zs, float[] us, float[] vs, float au,
+                                 float cx, float cy, float cz, float t, float burn, Sink sink) {
+        if (part == SPARK || part == EMBER) {
+            return 0;
+        }
+        if (part == FIRE) {
+            float av = (vs[0] + vs[1] + vs[2] + vs[3]) / 4f;
+            if (au < 0.25f) {
+                // 朱印: 回って脈打つ。燃え尽きで敵の頭へ押し下がりながら縮む
+                boolean inner = av >= 0.5f;
+                float k = burn / 0.4f;
+                if (k >= 1f) {
+                    return 0;
+                }
+                float a = inner ? -t * 0.08f : t * 0.05f;
+                float sc = (1f + 0.05f * (float) Math.sin(t * 0.5f)) * (1f - 0.7f * k * k);
+                float drop = 0.9f * k * k;
+                float cs = (float) Math.cos(a), sn = (float) Math.sin(a);
+                for (int i = 0; i < 4; i++) {
+                    float x = xs[i], z = zs[i];
+                    xs[i] = (x * cs - z * sn) * sc;
+                    zs[i] = (x * sn + z * cs) * sc;
+                    ys[i] -= drop;
+                }
+                if (!inner && k > 0.7f && sink != null) {
+                    for (int j = 0; j < 4; j++) {
+                        float b = j * 1.5708f + 0.4f;
+                        sink.at(0.5f * sc * (float) Math.cos(b), cy - drop, 0.5f * sc * (float) Math.sin(b), SMOKE);
+                    }
+                }
+                return 0xFFFFFFFF;
+            }
+            float lo = Math.min(Math.min(ys[0], ys[1]), Math.min(ys[2], ys[3]));
+            float hi = Math.max(Math.max(ys[0], ys[1]), Math.max(ys[2], ys[3]));
+            if (au < 0.3125f) {
+                // 字の糸: 燃え尽きの初めに杭の頭へ縮む
+                float k = burn / 0.25f;
+                if (k >= 1f) {
+                    return 0;
+                }
+                for (int i = 0; i < 4; i++) {
+                    ys[i] = lo + (ys[i] - lo) * (1f - k);
+                }
+                return 0xFFFFFFFF;
+            }
+            // 札: 下から燃え上がる
+            float k = burn / 0.6f;
+            if (k >= 1f) {
+                return 0;
+            }
+            for (int i = 0; i < 4; i++) {
+                ys[i] = hi - (hi - ys[i]) * (1f - k);
+            }
+            if (k > 0.1f && sink != null && hash(cx, cy, cz) < 0.8f) {
+                sink.at(cx, hi - (hi - lo) * (1f - k), cz, SMOKE);
+            }
+            float r = 1f, g = 1f - 0.4f * k, b = 1f - 0.5f * k;
+            return rgb(r, g, b);
+        }
+        // 杭と帯: 燃える間と燃え尽きの初めは震え、後半に地へ沈む
+        float shake = burn < 0.5f ? 0.012f + 0.03f * burn : 0f;
+        for (int i = 0; i < 4; i++) {
+            xs[i] += shake * (float) Math.sin(t * 2.7f + cz * 9f);
+            zs[i] += shake * (float) Math.cos(t * 2.3f + cx * 9f);
+        }
+        float k = (burn - 0.5f) / 0.5f;
+        if (k > 0f) {
+            if (k >= 1f) {
+                return 0;
+            }
+            float d = k * k * 1.5f;
+            for (int i = 0; i < 4; i++) {
+                ys[i] -= d;
+            }
+            if (sink != null && hash(cx, cy, cz) < 0.2f) {
+                sink.at(cx, 0.05f, cz, ROCK);
+            }
+        }
+        return 0xFFFFFFFF;
+    }
+
+    // 巡りの唄の面 1 枚。形を書き換えて色を返す。描かないときは 0
+    private static int cycleQuad(int part, float[] xs, float[] ys, float[] zs, float[] us, float[] vs, float au,
+                                 float cx, float cy, float cz, float t, float burn, Sink sink) {
+        if (part == SPARK || part == OTHER) {
+            return 0;
+        }
+        float av = (vs[0] + vs[1] + vs[2] + vs[3]) / 4f;
+        if (part == FIRE && au < 0.25f) {
+            boolean floor = av >= 0.5f;
+            float k = burn / (floor ? 0.5f : 0.6f);
+            if (k >= 1f) {
+                return 0;
+            }
+            // 帯は巡り、花の輪は逆へ回る。燃え尽きで帯は速く巡って昇り広がる
+            float a = floor ? -t * 0.04f : t * 0.07f + 2.5f * k * k;
+            float grow = 1f + (floor ? 0.8f : 0.6f) * k;
+            float cs = (float) Math.cos(a), sn = (float) Math.sin(a);
+            for (int i = 0; i < 4; i++) {
+                float x = xs[i], z = zs[i];
+                xs[i] = (x * cs - z * sn) * grow;
+                zs[i] = (x * sn + z * cs) * grow;
+                if (!floor) {
+                    ys[i] += 0.9f * k;
+                }
+            }
+            if (!floor && k > 0.7f && sink != null && hash(cx, cy, cz) < 0.5f) {
+                sink.at(xs[0], ys[0], zs[0], SMOKE);
+            }
+            return 0xFFFFFFFF;
+        }
+        float rad = (float) Math.hypot(cx, cz) + 1e-4f;
+        float tx = -cz / rad, tz = cx / rad;  // 接線
+        if (part == FIRE) {
+            // 藤の房: 下ほど揺れ、燃え尽きで花びらになって落ちる
+            float k = burn / 0.5f;
+            if (k >= 1f) {
+                return 0;
+            }
+            for (int i = 0; i < 4; i++) {
+                float sw = 0.07f * (1.3f - ys[i]) * (float) Math.sin(t * 0.3f + cx * 3f + cz * 2f);
+                xs[i] += tx * sw;
+                zs[i] += tz * sw;
+                ys[i] -= 0.9f * k * k;
+            }
+            if (k > 0.3f && sink != null && hash(cx, cy, cz) < 0.7f) {
+                sink.at(cx, cy - 0.9f * k * k, cz, SMOKE);
+            }
+            return 0xFFFFFFFF;
+        }
+        // 鈴と舌 (腕の先、半径 0.5 の辺り、高い所): 揺れる。燃え尽きの初めに大きく鳴る
+        boolean bell = rad < 0.6f && cy > 0.8f && cy < 1.28f;
+        if (bell) {
+            float k1 = Math.min(1f, burn / 0.45f);
+            float ang = 0.08f * (float) Math.sin(t * 0.25f + rad * 5f) + (burn > 0f ? 0.45f * (float) Math.sin(burn * 34f) * (1f - 0.6f * k1) : 0f);
+            for (int i = 0; i < 4; i++) {
+                float d = (1.3f - ys[i]) * (float) Math.sin(ang);
+                xs[i] += tx * d;
+                zs[i] += tz * d;
+            }
+        }
+        float r = 1f, g = 1f, b = 1f;
+        if (part == EMBER) {
+            float cool = Math.min(1f, burn * 1.6f);
+            r = 1f - 0.4f * cool;
+            g = 1f - 0.55f * cool;
+            b = 1f - 0.35f * cool;
+        }
+        // 地へ沈む
+        float k = (burn - 0.45f) / 0.55f;
+        if (k > 0f) {
+            if (k >= 1f) {
+                return 0;
+            }
+            float d = k * k * 1.6f;
+            for (int i = 0; i < 4; i++) {
+                ys[i] -= d;
+            }
+            if (sink != null && hash(cx, cy, cz) < 0.2f) {
+                sink.at(cx, 0.05f, cz, ROCK);
+            }
+        }
+        return rgb(r, g, b);
+    }
+
+    // 引き潮の面 1 枚。形を書き換えて色を返す。描かないときは 0
+    private static int ebbQuad(int part, float[] xs, float[] ys, float[] zs, float[] us, float[] vs, float au,
+                               float cx, float cy, float cz, float t, float burn, Sink sink) {
+        if (part == SPARK || part == EMBER) {
+            return 0;
+        }
+        float rad = (float) Math.hypot(cx, cz);
+        if (part == FIRE) {
+            if (au < 0.25f) {
+                // 波頭: 燃える間は上下に揺れ、燃え尽きで放った人へ駆け戻りながら低くなる
+                float k = burn / 0.55f;
+                if (k >= 1f) {
+                    return 0;
+                }
+                float f = 1f - 0.7f * k * (2f - k);
+                float hgt = (1f + 0.14f * (float) Math.sin(t * 0.35f + rad * 3f)) * (float) Math.pow(1f - k, 0.7f);
+                for (int i = 0; i < 4; i++) {
+                    xs[i] *= f;
+                    zs[i] *= f;
+                    ys[i] *= hgt;
+                }
+                if (k > 0.45f && sink != null && hash(cx, cy, cz) < 0.6f) {
+                    sink.at(cx * f, 0.25f * hgt, cz * f, SMOKE);
+                }
+                return 0xFFFFFFFF;
+            }
+            // 泡のレース: 引かれて消える
+            float k = burn / 0.45f;
+            if (k >= 1f) {
+                return 0;
+            }
+            float f = 1f - 0.55f * k;
+            for (int i = 0; i < 4; i++) {
+                xs[i] *= f;
+                zs[i] *= f;
+            }
+            return 0xFFFFFFFF;
+        }
+        // 藻: 先がなびく (岩は揺れない)
+        if (part == OTHER) {
+            for (int i = 0; i < 4; i++) {
+                float w = 0.35f * ys[i] * (float) Math.sin(t * 0.4f + cz * 4f + cx * 2f);
+                xs[i] += w;
+            }
+        }
+        // 燃え尽きの前半: 藻は放った人へ引きずられる
+        float k1 = Math.min(1f, burn / 0.5f);
+        if (part == OTHER && k1 > 0f) {
+            float f = 1f - 0.35f * k1 * k1;
+            for (int i = 0; i < 4; i++) {
+                xs[i] *= f;
+                zs[i] *= f;
+            }
+        }
+        // 後半: 地へ沈む
+        float k = (burn - 0.5f) / 0.5f;
+        if (k > 0f) {
+            if (k >= 1f) {
+                return 0;
+            }
+            float d = k * k * 0.45f;
+            for (int i = 0; i < 4; i++) {
+                ys[i] -= d;
+            }
+            if (sink != null && hash(cx, cy, cz) < 0.25f) {
+                float f = part == OTHER ? 0.65f : 1f;
+                sink.at(cx * f, 0.05f, cz * f, ROCK);
+            }
+        }
+        return 0xFFFFFFFF;
+    }
+
+    // 守りの唄の面 1 枚。形を書き換えて色を返す。描かないときは 0
+    private static int wardQuad(int part, float[] xs, float[] ys, float[] zs, float[] us, float[] vs, float au,
+                                float cx, float cy, float cz, float t, float burn, Sink sink) {
+        if (part == SPARK || part == OTHER) {
+            return 0;
+        }
+        if (part == FIRE) {
+            if (au < 0.25f) {
+                // 唄の輪: 段ごとに逆へ回り、上下に揺れる。燃え尽きで広がって昇り消える
+                float dir = cy > 0.5f ? -1f : 1f;
+                float a = dir * t * 0.05f + cy * 2f;
+                float cs = (float) Math.cos(a), sn = (float) Math.sin(a);
+                float k = burn / 0.5f;
+                if (k >= 1f) {
+                    return 0;
+                }
+                float grow = 1f + 1.3f * k * k;
+                float lift = 0.04f * (float) Math.sin(t * 0.22f + cy * 5f) + 0.7f * k;
+                for (int i = 0; i < 4; i++) {
+                    float x = xs[i], z = zs[i];
+                    xs[i] = (x * cs - z * sn) * grow;
+                    zs[i] = (x * sn + z * cs) * grow;
+                    ys[i] += lift;
+                }
+                if (k > 0.75f && sink != null) {
+                    float rr = 0.8f * grow * (1.1f - cy * 0.5f);
+                    for (int j = 0; j < 4; j++) {
+                        float b = j * 1.5708f + cy;
+                        sink.at(rr * (float) Math.cos(b), cy + lift, rr * (float) Math.sin(b), SMOKE);
+                    }
+                }
+                return 0xFFFFFFFF;
+            }
+            // 唄の幕: 上ほど外へゆらぐ。燃え尽きで床へ沈む
+            float k = burn / 0.35f;
+            if (k >= 1f) {
+                return 0;
+            }
+            float r = (float) Math.hypot(cx, cz) + 1e-4f;
+            for (int i = 0; i < 4; i++) {
+                float h = ys[i];
+                float w = 0.05f * h * (float) Math.sin(t * 0.3f + h * 4f + cx * 3f);
+                xs[i] += cx / r * w;
+                zs[i] += cz / r * w;
+                ys[i] = h * (1f - k);
+            }
+            return 0xFFFFFFFF;
+        }
+        float r = 1f, g = 1f, b = 1f;
+        if (part == EMBER) {
+            // 真珠: 燃え尽きで灰色に曇る
+            float cool = Math.min(1f, burn * 1.6f);
+            r = 1f - 0.45f * cool;
+            g = 1f - 0.45f * cool;
+            b = 1f - 0.35f * cool;
+        }
+        // 扇: 内へ閉じる (上ほど真ん中へ寄る)
+        float rad = (float) Math.hypot(cx, cz) + 1e-4f;
+        float k1 = Math.min(1f, burn / 0.45f);
+        if (k1 > 0f) {
+            float e = k1 * k1 * (3f - 2f * k1);
+            for (int i = 0; i < 4; i++) {
+                float pull = 0.55f * ys[i] * e;
+                xs[i] -= cx / rad * pull;
+                zs[i] -= cz / rad * pull;
+            }
+        }
+        // 地へ沈む
+        float k = (burn - 0.45f) / 0.55f;
+        if (k > 0f) {
+            if (k >= 1f) {
+                return 0;
+            }
+            float d = k * k * 1.1f;
+            for (int i = 0; i < 4; i++) {
+                ys[i] -= d;
+            }
+            if (sink != null && hash(cx, cy, cz) < 0.2f) {
+                sink.at(cx, 0.05f, cz, ROCK);
             }
         }
         return rgb(r, g, b);

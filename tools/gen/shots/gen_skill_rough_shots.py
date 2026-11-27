@@ -311,10 +311,15 @@ def archer(only):
 # 灯の守り札は見ている先に置くので、少し下を向いて放つ。巡りの唄 = 守りの唄の刻印 8 (cycle_ward)
 SHAMAN = [
     ("ward_song", "ward_song", ["ward_song"], 0, cam(6.5, -57.0, -4.5, 0.5, -59.3, 0.5, 0.8), [(4, "a"), (12, "b")], False),
+    ("ward_song", "ward_song", ["ward_song"], 0, cam(6.5, -57.0, -4.5, 0.5, -59.3, 0.5, 0.8), [(2, "seq01")] + [(3, "seq%02d" % t) for t in range(2, 17)], False),  # look d: song and close
     ("ebb_tide", "ebb_tide", ["ebb_tide"], 0, cam(8.5, -56.0, -2.0, 0.5, -59.5, 3.0, 0.85), [(3, "a"), (6, "b")], 5.0),
+    ("ebb_tide", "ebb_tide", ["ebb_tide"], 0, cam(8.5, -56.0, -2.0, 0.5, -59.5, 3.0, 0.85), [(3, "seq01")] + [(2, "seq%02d" % t) for t in range(2, 17)], 5.0),  # look d: pull back
     ("cycle_song", "ward_song", ["cycle_ward"], 0, cam(6.5, -57.0, -4.5, 0.5, -59.3, 0.5, 0.8), [(4, "a"), (12, "b")], False),
+    ("cycle_song", "ward_song", ["cycle_ward"], 0, cam(6.5, -57.0, -4.5, 0.5, -59.3, 0.5, 0.8), [(2, "seq01")] + [(3, "seq%02d" % t) for t in range(2, 17)], False),  # look d: ring and unwind
     ("curse_mark", "curse_mark", ["curse_mark"], 0, cam(6.0, -57.5, 1.5, 0.5, -58.8, 6.0, 0.8), [(6, "a"), (20, "b")], 6.0),
+    ("curse_mark", "curse_mark", ["curse_mark"], 0, cam(6.0, -57.5, 1.5, 0.5, -58.8, 6.0, 0.8), [(5, "seq01"), (10, "seq02"), (10, "seq03"), (10, "seq04")] + [(3, "seq%02d" % t) for t in range(5, 16)], 6.0),  # look d: press the seal
     ("lamp_charm", "lamp_charm", ["lamp_charm"], 30, cam(6.5, -57.0, -1.0, 0.5, -59.3, 3.0, 0.8), [(5, "a"), (30, "b")], False),
+    ("lamp_charm", "lamp_charm", ["lamp_charm"], 30, cam(6.5, -57.0, -1.0, 0.5, -59.3, 3.0, 0.8), [(5, "seq01"), (30, "seq02"), (50, "seq03"), (15, "seq04")] + [(3, "seq%02d" % t) for t in range(5, 14)], False),  # look d: lamp out
 ]
 
 
@@ -327,9 +332,19 @@ def shaman(only):
                 continue
             out.append("cmd skyabyss skill forget @s\ncmd skyabyss skill points @s 100\n")
             out.append("".join(f"cmd skyabyss skill node @s {n}\n" for n in tree_path("shaman", nodes)))
-            out.append(cast(pitch, slot_skill, cm, foe))
+            c = cast(pitch, slot_skill, cm, foe)
+            slow = any(tag.startswith("seq") for _, tag in shots)
+            if slow:
+                # 連続 (seq) は放つ前に世界を止め、1 枚ごとに w tick 進める (archer() と同じ)
+                c = c.replace("cmd skyabyss skill cast", "cmd tick freeze\ncmd skyabyss skill cast")
+            out.append(c)
             for w, tag in shots:
-                out.append(f"wait {w}\nshot {look}_{name}_{tag}\n")
+                if tag.startswith("seq"):
+                    out.append(f"cmd tick step {w}\nwait {max(3, w + 3)}\ncamera {cm}\nshot {look}_{name}_{tag}\n")
+                else:
+                    out.append(f"wait {w}\nshot {look}_{name}_{tag}\n")
+            if slow:
+                out.append("cmd tick unfreeze\n")
             out.append("wait 120\n")
     return out
 

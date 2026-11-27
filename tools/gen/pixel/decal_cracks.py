@@ -26,6 +26,11 @@ PALETTES = {
     "mist": [(252, 250, 244), (226, 224, 222), (170, 168, 176), (70, 68, 76)],
     "snare": [(255, 255, 255), (220, 230, 240), (120, 124, 136), (30, 30, 36)],
     "rain": [(240, 246, 255), (176, 188, 210), (98, 108, 132), (40, 44, 56)],
+    "lamp": [(255, 248, 232), (255, 224, 180), (240, 178, 122), (80, 52, 36)],
+    "seal": [(255, 228, 196), (250, 104, 46), (198, 48, 26), (40, 30, 32)],
+    "cycle": [(255, 240, 252), (236, 190, 236), (196, 128, 206), (70, 72, 84)],
+    "ebb": [(252, 255, 250), (214, 240, 228), (120, 170, 150), (62, 74, 46)],
+    "ward": [(236, 255, 255), (132, 236, 242), (44, 172, 200), (60, 56, 76)],
     "trap": [(255, 214, 200), (236, 64, 72), (150, 16, 40), (58, 30, 30)],
     "fang": [(255, 252, 200), (255, 222, 50), (196, 146, 10), (40, 34, 20)],
     "bone": [(252, 244, 255), (204, 156, 255), (130, 80, 210), (52, 40, 64)],
@@ -96,6 +101,16 @@ def main():
         snare(n, c, cr, rnd, put)
     elif a.shape == "pocks":
         pocks(n, c, cr, rnd, put)
+    elif a.shape == "lamp":
+        lamp(n, c, cr, rnd, put)
+    elif a.shape == "seal":
+        seal(n, c, cr, rnd, put)
+    elif a.shape == "cycle":
+        cycle(n, c, cr, rnd, put)
+    elif a.shape == "ebb":
+        ebb(n, c, cr, rnd, put)
+    elif a.shape == "ward":
+        ward(n, c, cr, rnd, put)
     elif a.shape == "jaw":
         jaw(n, c, cr, rnd, put)
     elif a.shape == "bomb":
@@ -246,6 +261,117 @@ def pocks(n, c, cr, rnd, put):
         a = 2 * math.pi * k / int(cr * 3)
         if k % 3:
             put(int(round(c + cr * math.cos(a))), int(round(c + cr * math.sin(a))), 2)
+
+
+def lamp(n, c, cr, rnd, put):
+    """灯の守り札の跡: 灯だまりの輪 3 本 (内ほど明るい)、8 方の灯の筋、外の焦げの点"""
+    for i in range(720):
+        a = 2 * math.pi * i / 720
+        for f, lv in ((0.3, 4), (0.58, 3), (0.9, 2)):
+            if lv == 2 and (i // 12) % 2:
+                continue
+            put(int(round(c + cr * f * math.cos(a))), int(round(c + cr * f * math.sin(a))), lv)
+    for k in range(8):
+        a = math.radians(22.5 + 45 * k)
+        for t in range(int(cr * 0.36), int(cr * 0.85)):
+            put(int(round(c + t * math.cos(a))), int(round(c + t * math.sin(a))), 3 if t < cr * 0.6 else 2)
+    for k in range(int(cr * 1.5)):
+        a = rnd.uniform(0, 2 * math.pi)
+        r = rnd.uniform(0.95, 1.1) * cr
+        put(int(round(c + r * math.cos(a))), int(round(c + r * math.sin(a))), 1)
+
+
+def seal(n, c, cr, rnd, put):
+    """呪いの印の跡: 二重の輪、輪の間の字の刻み、斜め 4 方の杭の穴とそこから真ん中へ走る焦げ、真ん中の菱形"""
+    for i in range(720):
+        a = 2 * math.pi * i / 720
+        for f, lv in ((0.95, 3), (0.7, 4)):
+            put(int(round(c + cr * f * math.cos(a))), int(round(c + cr * f * math.sin(a))), lv)
+        seg = i * 16 / 720
+        if 0.25 < seg % 1 < 0.75 and int(seg) % 2 == 0:
+            r = cr * 0.83
+            put(int(round(c + r * math.cos(a))), int(round(c + r * math.sin(a))), 2)
+    for k in range(4):
+        a = math.radians(45 + 90 * k)
+        x, y = c + cr * 0.62 * math.cos(a), c + cr * 0.62 * math.sin(a)
+        for dx in range(-2, 3):
+            for dy in range(-2, 3):
+                if dx * dx + dy * dy <= 5:
+                    put(int(round(x)) + dx, int(round(y)) + dy, 1 if dx * dx + dy * dy > 1 else 2)
+        for t in range(int(cr * 0.2), int(cr * 0.55)):
+            put(int(round(c + t * math.cos(a) + rnd.uniform(-0.5, 0.5))), int(round(c + t * math.sin(a))), 1)
+    for i in range(-int(cr * 0.18), int(cr * 0.18) + 1):
+        w = int(cr * 0.18) - abs(i)
+        put(int(c + i), int(c - w), 4)
+        put(int(c + i), int(c + w), 4)
+
+
+def cycle(n, c, cr, rnd, put):
+    """巡りの唄の跡: 真ん中から巻き出す 3 本の渦の腕、外の花びらの輪、6 つの小さな鈴の跡"""
+    for arm in range(3):
+        for i in range(500):
+            f = i / 499
+            a = 2 * math.pi * arm / 3 + f * 3.4
+            r = cr * (0.12 + 0.75 * f)
+            x, y = c + r * math.cos(a), c + r * math.sin(a)
+            put(int(round(x)), int(round(y)), 4 if f < 0.5 else 3)
+            put(int(round(x + 0.7 * math.cos(a + 1.57))), int(round(y + 0.7 * math.sin(a + 1.57))), 2)
+    for i in range(720):
+        a = 2 * math.pi * i / 720
+        r = cr * (0.92 + 0.06 * abs(math.cos(a * 4)))
+        put(int(round(c + r * math.cos(a))), int(round(c + r * math.sin(a))), 3)
+    for k in range(6):
+        a = math.radians(30 + 60 * k)
+        x, y = c + cr * 0.6 * math.cos(a), c + cr * 0.6 * math.sin(a)
+        for dx in range(-2, 3):
+            for dy in range(-2, 3):
+                if dx * dx + dy * dy <= 4:
+                    put(int(round(x)) + dx, int(round(y)) + dy, 1 if dx * dx + dy * dy > 1 else 2)
+
+
+def ebb(n, c, cr, rnd, put):
+    """引き潮の跡: 前 (絵の下) の扇 ±55 度に、泡の縁の弧 3 本、真ん中へ寄る引き波の筋、濡れた砂の点"""
+    for k, (f, lv) in enumerate(((0.95, 3), (0.68, 3), (0.42, 4))):
+        for i in range(400):
+            a = math.radians(90 - 56 + 112 * i / 399)
+            r = cr * f * (1 + 0.035 * math.sin(a * 23 + k))
+            x, y = c + r * math.cos(a), c + r * math.sin(a)
+            put(int(round(x)), int(round(y)), lv)
+            put(int(round(x)), int(round(y)) + 1, 2)
+    for j in range(13):
+        a = math.radians(90 - 50 + 100 * j / 12 + rnd.uniform(-3, 3))
+        for t in range(int(cr * 0.28), int(cr * 0.9)):
+            if (t // 3) % 3 == 2:
+                continue
+            put(int(round(c + t * math.cos(a))), int(round(c + t * math.sin(a))), 2)
+    for k in range(int(cr * 3)):
+        a = math.radians(rnd.uniform(90 - 55, 90 + 55))
+        r = rnd.uniform(0.3, 1.0) * cr
+        put(int(round(c + r * math.cos(a))), int(round(c + r * math.sin(a))), 1)
+
+
+def ward(n, c, cr, rnd, put):
+    """守りの唄の跡: 波打つ唄の輪 2 本、6 枚の扇の根元の焦げた扇形、輪の間の音の刻み"""
+    for k in range(720):
+        a = 2 * math.pi * k / 720
+        r1 = cr * (0.62 + 0.04 * math.sin(a * 12))
+        put(int(round(c + r1 * math.cos(a))), int(round(c + r1 * math.sin(a))), 3)
+        put(int(round(c + (r1 + 1) * math.cos(a))), int(round(c + (r1 + 1) * math.sin(a))), 2)
+        if math.sin(a * 6) > -0.3:
+            r2 = cr * 0.4
+            put(int(round(c + r2 * math.cos(a))), int(round(c + r2 * math.sin(a))), 4)
+    for i in range(6):
+        a0 = math.radians(30 + 60 * i)
+        for j in range(-2, 3):
+            a = a0 + j * 0.1
+            for t in range(int(cr * 0.18)):
+                rr = cr * 0.72 + t
+                put(int(round(c + rr * math.cos(a))), int(round(c + rr * math.sin(a))), 1 if t > 1 else 2)
+    for i in range(12):
+        a = math.radians(15 + 30 * i)
+        for t in range(int(cr * 0.08)):
+            rr = cr * 0.47 + t
+            put(int(round(c + rr * math.cos(a))), int(round(c + rr * math.sin(a))), 3)
 
 
 def jaw(n, c, cr, rnd, put):
