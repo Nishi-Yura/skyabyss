@@ -249,7 +249,12 @@ public final class AttackProps {
             Map.entry("ss_shield_rush", 22),
             Map.entry("ss_shield_bash", 16),
             Map.entry("ss_bone_swing", 24),
-            Map.entry("ss_spin_cut", 22));
+            Map.entry("ss_spin_cut", 22),
+            Map.entry("ss_lunge", 20),
+            Map.entry("ss_backstep", 20),
+            Map.entry("ss_mist_veil", 24),
+            Map.entry("ss_twin_fang", 18),
+            Map.entry("ss_wind_rend_fly", 16));
 
     public static int afterburn(String kind) {
         return AFTERBURN.getOrDefault(kind, 0);
@@ -327,7 +332,7 @@ public final class AttackProps {
         }
         Vec3 d = to.subtract(from);
         float yaw = (float) Math.toDegrees(Math.atan2(-d.x, d.z));
-        p.setup(AttackProp.TOSS, from, to, 0, Math.max(1, flight), 0, size, 0f, yaw);
+        p.setup(AttackProp.TOSS, from, to, 0, Math.max(1, flight), afterburn(kind), size, 0f, yaw);
         spawn(level, p);
         return p;
     }

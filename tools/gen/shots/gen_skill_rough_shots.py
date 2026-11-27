@@ -202,12 +202,17 @@ def warrior(only):
 # 踏み込み・跳び退き・風裂きは近くに敵がいないと放てない。双牙は敵へ向けて置く (targetOr)
 ASSASSIN = [
     ("lunge", "lunge", ["lunge"], cam(10.5, -56, 1.5, 0.5, -59.5, 4.0, 0.8), [(2, "a")], True),
+    ("lunge", "lunge", ["lunge"], cam(11.5, -55.5, 4.5, 0.5, -59.5, 6.0, 0.95), [(1, "seq%02d" % t) for t in range(1, 29)], True),  # look d: thrust and sink
     ("backstep", "backstep", ["backstep"], cam(8.5, -56.5, -4.5, 0.5, -59.5, -0.5, 0.65), [(3, "a")], True),
+    ("backstep", "backstep", ["backstep"], cam(9.5, -56.0, -4.5, 0.5, -59.5, -0.8, 0.75), [(1, "seq%02d" % t) for t in range(1, 29)], True),  # look d: smoke and sink
     # 双牙は 3.5 ブロックまでしか届かない (FANG_RANGE)。野盗を 2.5 ブロック前に置く
     ("twin_fang", "twin_fang", ["twin_fang"], cam(8.5, -56.5, -1.5, 0.5, -59.5, 3.0, 0.7), [(4, "a"), (5, "b")], 3.0),
+    ("twin_fang", "twin_fang", ["twin_fang"], cam(5.0, -56.8, -3.0, 0.5, -59.2, 3.0, 0.85), [(1, "seq%02d" % t) for t in range(1, 41)], 3.0),  # look d: bite and retract
     ("wind_rend", "wind_rend", ["wind_rend"], cam(8.5, -57.5, 0.5, 0.5, -58.5, 3.5, 0.8), [(1, "a"), (1, "b")], True),
+    ("wind_rend", "wind_rend", ["wind_rend"], cam(5.5, -57.0, -2.5, 0.5, -58.6, 3.5, 1.0), [(1, "seq%02d" % t) for t in range(1, 29)], True),  # look d: spin and scatter
     # 霧隠れ = 踏み込みの刻印 8「霧の踏み込み」(veil_lunge)。踏み込みのあと足もとに出る
     ("mist_veil", "lunge", ["veil_lunge"], cam(7.5, -56, -3.5, 0.5, -58.5, 2.5, 0.75), [(6, "a")], True),
+    ("mist_veil", "lunge", ["veil_lunge"], cam(9.5, -55.5, -3.5, 0.5, -59.0, 3.0, 0.85), [(2, "seq%02d" % t) for t in range(1, 31)], True),  # look d: veil and settle
 ]
 
 
@@ -229,8 +234,17 @@ def assassin(only):
                 else:
                     out.append("".join(f"cmd skyabyss skill node @s {n}\n" for n in tree_path("assassin", nodes)))
                 out.append(cast(0, slot_skill, cm, foe))
+            # 連続 (seq) は 1 枚に 5 tick ほどかかる (tick rate を落としても同じ)。世界を止めて、1 枚ごとに w tick だけ進める
+            slow = any(tag.startswith("seq") for _, tag in shots)
+            if slow:
+                out.append("cmd tick freeze\n")
             for w, tag in shots:
-                out.append(f"wait {w}\nshot {look}_{name}_{tag}\n")
+                if tag.startswith("seq"):
+                    out.append(f"cmd tick step {w}\nwait 3\ncamera {cm}\nshot {look}_{name}_{tag}\n")
+                else:
+                    out.append(f"wait {w}\nshot {look}_{name}_{tag}\n")
+            if slow:
+                out.append("cmd tick unfreeze\n")
             out.append("wait 40\n")
     return out
 

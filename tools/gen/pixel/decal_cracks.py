@@ -21,6 +21,10 @@ PALETTES = {
     "tide": [(240, 252, 255), (130, 206, 244), (44, 118, 184), (30, 52, 76)],
     "rush": [(255, 246, 214), (255, 200, 90), (196, 70, 52), (62, 40, 30)],
     "wind": [(244, 255, 250), (160, 244, 206), (40, 160, 130), (28, 54, 48)],
+    "lunge": [(255, 236, 250), (255, 140, 214), (210, 48, 150), (48, 24, 44)],
+    "back": [(255, 214, 190), (232, 120, 90), (160, 60, 42), (44, 38, 40)],
+    "mist": [(252, 250, 244), (226, 224, 222), (170, 168, 176), (70, 68, 76)],
+    "fang": [(255, 252, 200), (255, 222, 50), (196, 146, 10), (40, 34, 20)],
     "bone": [(252, 244, 255), (204, 156, 255), (130, 80, 210), (52, 40, 64)],
     "bash": [(255, 252, 240), (255, 160, 64), (200, 64, 30), (44, 42, 50)],
 }
@@ -83,6 +87,14 @@ def main():
         skid(n, c, cr, rnd, put)
     elif a.shape == "cuts":
         cuts(n, c, cr, rnd, put)
+    elif a.shape == "lance":
+        lance(n, c, cr, rnd, put)
+    elif a.shape == "bomb":
+        bomb(n, c, cr, rnd, put)
+    elif a.shape == "veil":
+        veil(n, c, cr, rnd, put)
+    elif a.shape == "bite":
+        bite(n, c, cr, rnd, put)
     elif a.shape == "arc":
         arc(n, c, cr, rnd, put, crack)
     elif a.shape == "wings":
@@ -115,7 +127,7 @@ def fissure(n, c, cr, rnd, put, crack, paths, core=1.7):
 def cuts(n, c, cr, rnd, put):
     """回し斬りの跡: 半径 cr の 0.58 の輪に沿う接線の斬り跡 14 本 (両端ほど細い刃の形、半径を少しずつずらす)。輪の内に薄い焦げ"""
     rr = cr * 0.58
-    for i in range(14):
+    for i in range(6):
         a0 = i * 360 / 14 + rnd.uniform(-6, 6)
         span = rnd.uniform(26, 40)
         r0 = rr * rnd.uniform(0.82, 1.18)
@@ -137,6 +149,131 @@ def cuts(n, c, cr, rnd, put):
             d = math.hypot(x - c, y - c) / rr
             if 0.75 < d < 1.25 and rnd.random() < 0.25:
                 put(x, y, 1)
+
+
+def lance(n, c, cr, rnd, put):
+    """突きの溝: 真ん中の少し前から前 (絵の下) の端まで 1 本 (前ほど太い)。溝を横切る弓なりの衝撃のひび 3 本 (外の端が後ろへ反る)。溝のまわりに焦げ"""
+    y0 = c + cr * 0.06
+    x = c
+    y = y0
+    while y < n - 1:
+        f = (y - y0) / (n - 1 - y0)
+        x += rnd.uniform(-0.15, 0.15)
+        x = c + (x - c) * 0.9
+        w = 1.0 + 2.6 * f
+        for dx in range(-5, 6):
+            d = abs(dx)
+            v = 4 if d <= w * 0.5 else 3 if d <= w * 0.5 + 1 else 2 if d <= w * 0.5 + 2 else 0
+            if v:
+                put(int(round(x)) + dx, int(y), v)
+        y += 1
+    for i, fy in enumerate((0.3, 0.55, 0.8)):
+        yk = c + cr * fy
+        half = cr * (0.16 + 0.1 * i)
+        for j in range(int(half * 2) + 1):
+            xx = c - half + j
+            q = (xx - c) / half
+            yy = yk - 6 * q * q
+            w = 0.9 * (1 - abs(q)) + 0.3
+            for dx in range(-2, 3):
+                for dy in range(-2, 3):
+                    d = math.hypot(dx, dy)
+                    v = 3 if d <= w else 2 if d <= w + 1 else 0
+                    if v:
+                        put(int(round(xx)) + dx, int(round(yy)) + dy, v)
+    for yy in range(int(y0), n):
+        for xx in range(n):
+            if abs(xx - c) < 4 + 6 * (yy - y0) / n and rnd.random() < 0.4:
+                put(xx, yy, 1)
+
+
+def bomb(n, c, cr, rnd, put):
+    """煙玉の跡: 真ん中に煤のしみ (縁がぎざぎざ)、そこから外へ短い焼けの筋 9 本。前 (絵の下) の端の手前に着地の擦り跡 2 本"""
+    rb = cr * 0.22
+    for y in range(n):
+        for x in range(n):
+            a = math.atan2(y - c, x - c)
+            d = math.hypot(x - c, y - c)
+            edge = rb * (1 + 0.18 * math.sin(a * 5 + 1) + 0.1 * math.sin(a * 9))
+            if d < edge * 0.45:
+                put(x, y, 2)
+            elif d < edge:
+                put(x, y, 1)
+            elif d < edge + 2 and rnd.random() < 0.4:
+                put(x, y, 1)
+    for i in range(9):
+        a = i * 2 * math.pi / 9 + rnd.uniform(-0.2, 0.2)
+        ln = cr * rnd.uniform(0.16, 0.26)
+        for j in range(int(ln)):
+            d = rb * 0.8 + j
+            w = 1.2 * (1 - j / ln) + 0.3
+            x, y = c + d * math.cos(a), c + d * math.sin(a)
+            for dx in range(-2, 3):
+                for dy in range(-2, 3):
+                    q = math.hypot(dx, dy)
+                    v = 4 if q <= w * 0.5 else 3 if q <= w * 0.5 + 1 else 0
+                    if v:
+                        put(int(round(x)) + dx, int(round(y)) + dy, v)
+    yk = c + cr * 0.78
+    for side in (-1, 1):
+        x = c + side * cr * 0.07
+        for j in range(int(cr * 0.16)):
+            w = 0.6 + 1.6 * j / (cr * 0.16)
+            for dx in range(-3, 4):
+                d = abs(dx)
+                v = 4 if d <= w * 0.5 else 3 if d <= w * 0.5 + 1 else 2 if d <= w * 0.5 + 2 else 0
+                if v:
+                    put(int(round(x)) + dx, int(yk + j), v)
+
+
+def veil(n, c, cr, rnd, put):
+    """霧の露: 前 (絵の下) ±75 度を空けた馬蹄形に、丸い露のしみ (芯が明るい) を散らす。丸太の転がった擦り跡 1 本 (後ろ = 絵の上)"""
+    for i in range(40):
+        a = rnd.uniform(math.radians(75), math.radians(285))  # 0 = 前 (絵の下)
+        r = cr * rnd.uniform(0.5, 0.95)
+        x, y = c + r * math.sin(a), c + r * math.cos(a)
+        rb = rnd.uniform(1.0, 2.6)
+        for dx in range(-5, 6):
+            for dy in range(-5, 6):
+                d = math.hypot(dx, dy)
+                v = 4 if d <= rb * 0.4 else 3 if d <= rb * 0.75 else 2 if d <= rb else 1 if d <= rb + 1.2 and rnd.random() < 0.5 else 0
+                if v:
+                    put(int(round(x)) + dx, int(round(y)) + dy, v)
+    y0 = c - cr * 0.42
+    for j in range(int(cr * 0.5)):
+        x = c - cr * 0.25 + j
+        y = y0 - 0.3 * j * 0.32
+        for dy in range(-2, 3):
+            v = 2 if abs(dy) <= 1 else 1
+            put(int(round(x)), int(round(y)) + dy, v)
+
+
+def bite(n, c, cr, rnd, put):
+    """噛み跡: 左右から向き合う弧に並ぶ牙の穴 5 つずつ (真ん中の穴ほど大きい)。真ん中に毒のしみ"""
+    for side in (-1, 1):
+        ox = c + side * cr * 0.55
+        for i in range(5):
+            a = math.radians(-50 + i * 25)
+            r = cr * 0.45
+            x = ox - side * r * math.cos(a)
+            y = c + r * math.sin(a)
+            hr = 1.6 + 1.4 * (1 - abs(i - 2) / 2)
+            for dx in range(-5, 6):
+                for dy in range(-5, 6):
+                    d = math.hypot(dx, dy)
+                    v = 4 if d <= hr * 0.55 else 3 if d <= hr else 2 if d <= hr + 1 else 0
+                    if v:
+                        put(int(round(x)) + dx, int(round(y)) + dy, v)
+    for i in range(6):
+        x = c + rnd.gauss(0, cr * 0.15)
+        y = c + rnd.gauss(0, cr * 0.15)
+        rb = rnd.uniform(0.6, 1.6)
+        for dx in range(-3, 4):
+            for dy in range(-3, 4):
+                d = math.hypot(dx, dy)
+                v = 3 if d <= rb * 0.5 else 2 if d <= rb else 1 if d <= rb + 1 else 0
+                if v:
+                    put(int(round(x)) + dx, int(round(y)) + dy, v)
 
 
 def arc(n, c, cr, rnd, put, crack):

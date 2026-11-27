@@ -172,6 +172,26 @@ public class AttackPropRenderer extends LowPolyGeoRenderer<AttackProp> {
                 float cool = net.minecraft.util.Mth.clamp(burn * 1.5f, 0f, 1f);
                 int rr = (int) (255f * (1f - 0.6f * cool)), gg = (int) (255f * (1f - 0.45f * cool)), bb = (int) (255f * (1f - 0.4f * cool));
                 c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_FANG) {
+                // 噛み跡: 黄から黒ずんだ黄土へ
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.5f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.45f * cool)), gg = (int) (255f * (1f - 0.6f * cool)), bb = (int) (255f * (1f - 0.7f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_MIST) {
+                // 露の跡: 乳白から乾いた灰へ
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.5f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.45f * cool)), gg = (int) (255f * (1f - 0.45f * cool)), bb = (int) (255f * (1f - 0.4f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_BACK) {
+                // 煤の跡: 弁柄から灰へ
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.5f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.6f * cool)), gg = (int) (255f * (1f - 0.55f * cool)), bb = (int) (255f * (1f - 0.5f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_LUNGE) {
+                // 突きの溝: 牡丹から黒ずんだ葡萄色へ
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.5f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.55f * cool)), gg = (int) (255f * (1f - 0.7f * cool)), bb = (int) (255f * (1f - 0.55f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
             } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_SPIN) {
                 // 斬り跡: 翡翠から苔の緑へ
                 float cool = net.minecraft.util.Mth.clamp(burn * 1.5f, 0f, 1f);
@@ -242,6 +262,10 @@ public class AttackPropRenderer extends LowPolyGeoRenderer<AttackProp> {
             case jp.revati.skyabyss.client.look.BurnDraw.STYLE_BASH -> new float[] {0f, 0f};
             case jp.revati.skyabyss.client.look.BurnDraw.STYLE_BONE -> new float[] {0f, 0f};
             case jp.revati.skyabyss.client.look.BurnDraw.STYLE_SPIN -> new float[] {0f, 0f};
+            case jp.revati.skyabyss.client.look.BurnDraw.STYLE_LUNGE -> new float[] {4.9f, 0.5f};
+            case jp.revati.skyabyss.client.look.BurnDraw.STYLE_BACK -> new float[] {0f, 0f};
+            case jp.revati.skyabyss.client.look.BurnDraw.STYLE_MIST -> new float[] {0f, 0f};
+            case jp.revati.skyabyss.client.look.BurnDraw.STYLE_FANG -> new float[] {0f, 0f};
             default -> null;
         };
     }
@@ -281,6 +305,90 @@ public class AttackPropRenderer extends LowPolyGeoRenderer<AttackProp> {
                     for (int i = 0; i < 3; i++) {
                         level.addParticle(slate, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.2, 0.06 + rnd.nextFloat() * 0.1, (rnd.nextFloat() - 0.5f) * 0.2);
                     }
+                }
+            }
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_WIND) {
+            // 風裂き: 刃は萌黄の塵、葉はつつじの葉のかけら
+            if (kind == jp.revati.skyabyss.client.look.BurnDraw.SMOKE) {
+                var dust = new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(0.7f, 0.92f, 0.3f), 1.0f);
+                for (int i = 0; i < 3; i++) {
+                    level.addParticle(dust, wx + (rnd.nextFloat() - 0.5f) * 0.6f, wy + (rnd.nextFloat() - 0.5f) * 0.6f, wz, 0, 0, 0);
+                }
+            } else {
+                var leaf = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                        net.minecraft.world.level.block.Blocks.AZALEA_LEAVES.defaultBlockState());
+                for (int i = 0; i < 3; i++) {
+                    level.addParticle(leaf, wx, wy, wz, (rnd.nextFloat() - 0.5f) * 0.1, -0.02, (rnd.nextFloat() - 0.5f) * 0.1);
+                }
+            }
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_FANG) {
+            // 双牙: しぶきは黄の塵、牙が引っ込む所は黒い石
+            if (kind == jp.revati.skyabyss.client.look.BurnDraw.SMOKE) {
+                var dust = new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(1f, 0.85f, 0.15f), 1.0f);
+                for (int i = 0; i < 3; i++) {
+                    level.addParticle(dust, wx + (rnd.nextFloat() - 0.5f) * 0.4f, wy, wz + (rnd.nextFloat() - 0.5f) * 0.4f, 0, 0, 0);
+                }
+            } else {
+                var coal = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                        net.minecraft.world.level.block.Blocks.COAL_BLOCK.defaultBlockState());
+                for (int i = 0; i < 4; i++) {
+                    level.addParticle(coal, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.2, 0.08 + rnd.nextFloat() * 0.1, (rnd.nextFloat() - 0.5f) * 0.2);
+                }
+            }
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_MIST) {
+            // 霧隠れ: 霧は雲、丸太は雲と木くず
+            if (kind == jp.revati.skyabyss.client.look.BurnDraw.SMOKE) {
+                for (int i = 0; i < 2; i++) {
+                    level.addParticle(net.minecraft.core.particles.ParticleTypes.CLOUD, wx + (rnd.nextFloat() - 0.5f) * s, wy, wz + (rnd.nextFloat() - 0.5f) * s,
+                            0, 0.01, 0);
+                }
+            } else {
+                var wood = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                        net.minecraft.world.level.block.Blocks.SPRUCE_LOG.defaultBlockState());
+                for (int i = 0; i < 8; i++) {
+                    level.addParticle(net.minecraft.core.particles.ParticleTypes.CLOUD, wx + (rnd.nextFloat() - 0.5f) * 1.2f, wy + rnd.nextFloat() * 0.5f,
+                            wz + (rnd.nextFloat() - 0.5f) * 1.2f, 0, 0.03, 0);
+                    level.addParticle(wood, wx, wy, wz, (rnd.nextFloat() - 0.5f) * 0.25, 0.1 + rnd.nextFloat() * 0.1, (rnd.nextFloat() - 0.5f) * 0.25);
+                }
+            }
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_BACK) {
+            // 後ろ跳び: 煙は大きな煙、殻は素焼きのかけら、撒き菱は小さな煙
+            if (kind == jp.revati.skyabyss.client.look.BurnDraw.SMOKE) {
+                for (int i = 0; i < 3; i++) {
+                    level.addParticle(net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE, wx + (rnd.nextFloat() - 0.5f) * s, wy, wz + (rnd.nextFloat() - 0.5f) * s,
+                            0, 0.04, 0);
+                }
+            } else if (kind == jp.revati.skyabyss.client.look.BurnDraw.ROCK) {
+                var clay = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                        net.minecraft.world.level.block.Blocks.TERRACOTTA.defaultBlockState());
+                for (int i = 0; i < 3; i++) {
+                    level.addParticle(clay, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.2, 0.06 + rnd.nextFloat() * 0.1, (rnd.nextFloat() - 0.5f) * 0.2);
+                }
+            } else {
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, wx, wy + 0.1, wz, 0, 0.03, 0);
+            }
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_LUNGE) {
+            // 踏み込み: 輪は牡丹の塵、苦無が沈む所は黒い石の粒
+            if (kind == jp.revati.skyabyss.client.look.BurnDraw.SMOKE) {
+                var dust = new net.minecraft.core.particles.DustParticleOptions(new org.joml.Vector3f(1f, 0.4f, 0.82f), 1.2f);
+                for (int i = 0; i < 4; i++) {
+                    level.addParticle(dust, wx + (rnd.nextFloat() - 0.5f) * s, wy + (rnd.nextFloat() - 0.5f) * s, wz, 0, 0.02, 0);
+                }
+            } else {
+                var stone = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                        net.minecraft.world.level.block.Blocks.BLACKSTONE.defaultBlockState());
+                for (int i = 0; i < 4; i++) {
+                    level.addParticle(stone, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.2, 0.08 + rnd.nextFloat() * 0.1, (rnd.nextFloat() - 0.5f) * 0.2);
                 }
             }
             return;
