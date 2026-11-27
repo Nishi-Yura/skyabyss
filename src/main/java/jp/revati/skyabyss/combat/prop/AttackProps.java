@@ -243,7 +243,13 @@ public final class AttackProps {
 
     // 床から突き出る形を、delay tick 後に出す (予告の始まりに呼んで、打つ瞬間に合わせる)
     // 試作 d (技の見た目) の燃え尽きの間 (tick)。形の命はこの分だけ長く、d 以外の見た目ではこの分を描かない
-    private static final Map<String, Integer> AFTERBURN = Map.of("ss_ember_orb", 22);
+    private static final Map<String, Integer> AFTERBURN = Map.ofEntries(Map.entry("ss_ember_orb", 22), Map.entry("ss_frost_tide", 36),
+            Map.entry("ss_thunder_bolt", 14), Map.entry("ss_blink", 16), Map.entry("ss_stardust", 20), Map.entry("ss_titan_cleave", 26),
+            Map.entry("ss_rock_call", 28), Map.entry("ss_whale_sweep", 24),
+            Map.entry("ss_shield_rush", 22),
+            Map.entry("ss_shield_bash", 16),
+            Map.entry("ss_bone_swing", 24),
+            Map.entry("ss_spin_cut", 22));
 
     public static int afterburn(String kind) {
         return AFTERBURN.getOrDefault(kind, 0);

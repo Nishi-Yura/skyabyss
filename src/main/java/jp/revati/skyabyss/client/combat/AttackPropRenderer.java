@@ -98,11 +98,29 @@ public class AttackPropRenderer extends LowPolyGeoRenderer<AttackProp> {
         if (!flying) {
             pose.pushPose();
             pose.translate(0, sunk, 0);
-            shadow(pose, buffers, 0f, 0.02f, 0f, 1.0f, 0.5f * Math.min(1f, grow));
+            // 氷・雷: 形が崩れるのに合わせて影も薄れる (形のない所に影だけ残さない)
+            int st = jp.revati.skyabyss.client.look.BurnDraw.style(e.kind());
+            float shadeEnd = st == jp.revati.skyabyss.client.look.BurnDraw.STYLE_FROST ? 0.75f
+                    : e.kind().equals("ss_blink") ? 0.5f : 0.95f;
+            float shade = burnLook && st != jp.revati.skyabyss.client.look.BurnDraw.STYLE_EMBER
+                    ? net.minecraft.util.Mth.clamp((shadeEnd - burn) / 0.45f, 0f, 1f) : 1f;
+            if (shade > 0f) {
+                float[] spot = look == 'd' ? shadowSpot(st) : null;
+                if (spot != null) {
+                    // 真ん中に立つ物がない技: 影は前の物の足もと (spot = 前への距離, 半径)。半径 0 は影なし
+                    pose.mulPose(Axis.YP.rotationDegrees(-e.getYRot()));
+                    if (spot[1] > 0f) {
+                        shadow(pose, buffers, 0f, 0.02f, spot[0], spot[1], 0.5f * Math.min(1f, grow) * shade);
+                    }
+                } else {
+                    shadow(pose, buffers, 0f, 0.02f, 0f, 1.0f, 0.5f * Math.min(1f, grow) * shade);
+                }
+            }
             pose.popPose();
         }
         pose.pushPose();
-        pose.mulPose(Axis.YP.rotationDegrees(180f));
+        // 技の向き (放った向き)。模型の前 (-z) を体の前へ
+        pose.mulPose(Axis.YP.rotationDegrees(180f - e.getYRot()));
         float pitch = e.pitch(partial);
         if (pitch != 0f) {
             pose.translate(0, 0.25, 0);
@@ -115,7 +133,7 @@ public class AttackPropRenderer extends LowPolyGeoRenderer<AttackProp> {
         if (look == 'd') {
             final float ss = e.size();
             jp.revati.skyabyss.client.look.BurnDraw.draw(cube, pose, buffers, 2.5f, e.tickCount + partial, burn, after,
-                    (x, y, z, kind) -> burst(e, ss, x, y, z, kind));
+                    (x, y, z, kind) -> burst(e, ss, x, y, z, kind), jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()));
         } else {
             jp.revati.skyabyss.client.look.GearLookDraw.mesh(cube, null, pose, buffers, meshLight, net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, 2.5f, false);
         }
@@ -142,13 +160,64 @@ public class AttackPropRenderer extends LowPolyGeoRenderer<AttackProp> {
         if (decal != NONE && !flying) {
             pose.pushPose();
             pose.translate(0, sunk, 0);
+            pose.mulPose(Axis.YP.rotationDegrees(-e.getYRot()));
             float r = DECAL_R.getOrDefault(look + "/prop_" + e.kind(), 1.7f) * net.minecraft.util.Mth.clamp(age / 4f, 0.2f, 1f);
             float fade = burnLook ? net.minecraft.util.Mth.clamp((1f - burn) / 0.3f, 0f, 1f)
                     : u < 0.7f ? 1f : net.minecraft.util.Mth.clamp((1f - u) / 0.3f, 0f, 1f);
             com.mojang.blaze3d.vertex.VertexConsumer buf = buffers.getBuffer(net.minecraft.client.renderer.RenderType.entityTranslucentEmissive(decal));
             PoseStack.Pose p = pose.last();
             int c = ((int) (fade * 255f) << 24) | 0xFFFFFF;
-            if (burnLook) {
+            if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_CLEAVE) {
+                // 地割れ: 青緑から暗い石の色へ
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.5f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.6f * cool)), gg = (int) (255f * (1f - 0.45f * cool)), bb = (int) (255f * (1f - 0.4f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_SPIN) {
+                // 斬り跡: 翡翠から苔の緑へ
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.5f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.6f * cool)), gg = (int) (255f * (1f - 0.4f * cool)), bb = (int) (255f * (1f - 0.55f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_BONE) {
+                // 擦り溝: 菫から灰紫へ
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.5f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.55f * cool)), gg = (int) (255f * (1f - 0.6f * cool)), bb = (int) (255f * (1f - 0.35f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_BASH) {
+                // 扇のひび: 白熱から黒い焦げへ
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.6f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.65f * cool)), gg = (int) (255f * (1f - 0.75f * cool)), bb = (int) (255f * (1f - 0.7f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_RUSH) {
+                // 擦り跡: 金から焦げ茶へ
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.5f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.5f * cool)), gg = (int) (255f * (1f - 0.65f * cool)), bb = (int) (255f * (1f - 0.7f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_TIDE) {
+                // 渦のぬれた跡: 乾いて暗い青へ
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.5f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.55f * cool)), gg = (int) (255f * (1f - 0.45f * cool)), bb = (int) (255f * (1f - 0.3f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_EARTH) {
+                // 割れた輪: 琥珀から土の茶へ
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.5f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.45f * cool)), gg = (int) (255f * (1f - 0.6f * cool)), bb = (int) (255f * (1f - 0.7f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.frost(e.kind())) {
+                // 霜のひび: 少し灰がかって薄れる
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.5f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.3f * cool)), gg = (int) (255f * (1f - 0.18f * cool)), bb = (int) (255f * (1f - 0.08f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_STAR) {
+                // 空間のひび: 金から夜の藍へ
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.5f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.6f * cool)), gg = (int) (255f * (1f - 0.55f * cool)), bb = (int) (255f * (1f - 0.1f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook && jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_THUNDER) {
+                // 雷のひび: クリーム色から灰紫へ冷める
+                float cool = net.minecraft.util.Mth.clamp(burn * 1.5f, 0f, 1f);
+                int rr = (int) (255f * (1f - 0.45f * cool)), gg = (int) (255f * (1f - 0.55f * cool)), bb = (int) (255f * (1f - 0.15f * cool));
+                c = ((int) (fade * 255f) << 24) | (rr << 16) | (gg << 8) | bb;
+            } else if (burnLook) {
                 // ひびが冷える: 黄 → 赤 → 赤茶の焦げ跡
                 float cool = net.minecraft.util.Mth.clamp(burn * 1.5f, 0f, 1f);
                 int rr = (int) (255f * (1f - 0.55f * cool)), gg = (int) (255f * (1f - 0.85f * cool)), bb = (int) (255f * (1f - 0.9f * cool));
@@ -164,6 +233,19 @@ public class AttackPropRenderer extends LowPolyGeoRenderer<AttackProp> {
         return true;
     }
 
+    // 試作 d の影の位置 (模型の大きさ 1 のときの前への距離, 半径)。null = 真ん中に半径 1
+    private static float[] shadowSpot(int style) {
+        return switch (style) {
+            case jp.revati.skyabyss.client.look.BurnDraw.STYLE_CLEAVE -> new float[] {1.16f, 0.4f};
+            case jp.revati.skyabyss.client.look.BurnDraw.STYLE_RUSH -> new float[] {4.38f, 0.6f};
+            case jp.revati.skyabyss.client.look.BurnDraw.STYLE_TIDE -> new float[] {0f, 0f};
+            case jp.revati.skyabyss.client.look.BurnDraw.STYLE_BASH -> new float[] {0f, 0f};
+            case jp.revati.skyabyss.client.look.BurnDraw.STYLE_BONE -> new float[] {0f, 0f};
+            case jp.revati.skyabyss.client.look.BurnDraw.STYLE_SPIN -> new float[] {0f, 0f};
+            default -> null;
+        };
+    }
+
     // 試作 d の燃え尽きの粒 (BurnDraw.Sink)。模型の座標 (Y 軸 180 度回し、技の大きさ倍) を世界へ。同じ所からは 1 度だけ
     private static final java.util.Set<Long> BURST = new java.util.HashSet<>();
 
@@ -176,8 +258,168 @@ public class AttackPropRenderer extends LowPolyGeoRenderer<AttackProp> {
             BURST.clear();
         }
         net.minecraft.world.level.Level level = e.level();
-        double wx = e.getX() - x * s, wy = e.getY() + y * s, wz = e.getZ() - z * s;
+        // 模型の座標を技の向き (Y 軸 180 - yaw 度) で回す
+        double ya = Math.toRadians(180f - e.getYRot());
+        double wx = e.getX() + (x * Math.cos(ya) + z * Math.sin(ya)) * s, wy = e.getY() + y * s, wz = e.getZ() + (-x * Math.sin(ya) + z * Math.cos(ya)) * s;
         net.minecraft.util.RandomSource rnd = level.random;
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_CLEAVE) {
+            // 巨神斬り: 弧は END_ROD、光の幕は GLOW、大剣が沈む所は土ぼこり、岩板は深層岩の粒
+            var slate = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                    net.minecraft.world.level.block.Blocks.COBBLED_DEEPSLATE.defaultBlockState());
+            switch (kind) {
+                case jp.revati.skyabyss.client.look.BurnDraw.GLINT -> level.addParticle(net.minecraft.core.particles.ParticleTypes.END_ROD, wx, wy, wz,
+                        (rnd.nextFloat() - 0.5f) * 0.04, 0.02 + rnd.nextFloat() * 0.03, (rnd.nextFloat() - 0.5f) * 0.04);
+                case jp.revati.skyabyss.client.look.BurnDraw.SMOKE -> level.addParticle(net.minecraft.core.particles.ParticleTypes.GLOW, wx, wy + 0.2, wz,
+                        (rnd.nextFloat() - 0.5f) * 0.02, 0.05, (rnd.nextFloat() - 0.5f) * 0.02);
+                case jp.revati.skyabyss.client.look.BurnDraw.ROCK -> {
+                    for (int i = 0; i < 5; i++) {
+                        level.addParticle(slate, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.3, 0.1 + rnd.nextFloat() * 0.15, (rnd.nextFloat() - 0.5f) * 0.3);
+                    }
+                    level.addParticle(net.minecraft.core.particles.ParticleTypes.WHITE_SMOKE, wx, wy + 0.2, wz, 0, 0.03, 0);
+                }
+                default -> {
+                    for (int i = 0; i < 3; i++) {
+                        level.addParticle(slate, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.2, 0.06 + rnd.nextFloat() * 0.1, (rnd.nextFloat() - 0.5f) * 0.2);
+                    }
+                }
+            }
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_SPIN) {
+            // 回し斬り: 輪は SWEEP_ATTACK、石柱は方解石
+            if (kind == jp.revati.skyabyss.client.look.BurnDraw.SMOKE) {
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK, wx, wy, wz, 0, 0, 0);
+            } else {
+                var calcite = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                        net.minecraft.world.level.block.Blocks.CALCITE.defaultBlockState());
+                for (int i = 0; i < 3; i++) {
+                    level.addParticle(calcite, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.2, 0.06 + rnd.nextFloat() * 0.1, (rnd.nextFloat() - 0.5f) * 0.2);
+                }
+            }
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_BONE) {
+            // 鯨骨の振り: 帯と噴きは WITCH、骨は骨のブロック
+            if (kind == jp.revati.skyabyss.client.look.BurnDraw.SMOKE) {
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.WITCH, wx, wy, wz, 0, 0.03, 0);
+            } else {
+                var bone = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                        net.minecraft.world.level.block.Blocks.BONE_BLOCK.defaultBlockState());
+                for (int i = 0; i < 3; i++) {
+                    level.addParticle(bone, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.2, 0.06 + rnd.nextFloat() * 0.1, (rnd.nextFloat() - 0.5f) * 0.2);
+                }
+            }
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_BASH) {
+            // 盾殴り: 波は POOF、火花は LAVA、楔は黒石
+            switch (kind) {
+                case jp.revati.skyabyss.client.look.BurnDraw.SMOKE -> level.addParticle(net.minecraft.core.particles.ParticleTypes.POOF, wx, wy, wz,
+                        (rnd.nextFloat() - 0.5f) * 0.05, 0.02, (rnd.nextFloat() - 0.5f) * 0.05);
+                case jp.revati.skyabyss.client.look.BurnDraw.GLINT -> level.addParticle(net.minecraft.core.particles.ParticleTypes.LAVA, wx, wy, wz, 0, 0, 0);
+                default -> {
+                    var stone = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                            net.minecraft.world.level.block.Blocks.BLACKSTONE.defaultBlockState());
+                    for (int i = 0; i < 3; i++) {
+                        level.addParticle(stone, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.2, 0.08 + rnd.nextFloat() * 0.1, (rnd.nextFloat() - 0.5f) * 0.2);
+                    }
+                }
+            }
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_RUSH) {
+            // 盾の踏み込み: 閃光は CRIT、残像は END_ROD、畝は土、盾は紅の焼き物の粒
+            switch (kind) {
+                case jp.revati.skyabyss.client.look.BurnDraw.SMOKE -> level.addParticle(net.minecraft.core.particles.ParticleTypes.CRIT, wx, wy, wz,
+                        (rnd.nextFloat() - 0.5f) * 0.5, (rnd.nextFloat() - 0.2f) * 0.4, (rnd.nextFloat() - 0.5f) * 0.5);
+                case jp.revati.skyabyss.client.look.BurnDraw.GLINT -> level.addParticle(net.minecraft.core.particles.ParticleTypes.END_ROD, wx, wy, wz,
+                        (rnd.nextFloat() - 0.5f) * 0.03, 0.02, (rnd.nextFloat() - 0.5f) * 0.03);
+                case jp.revati.skyabyss.client.look.BurnDraw.ROCK -> {
+                    var dirt = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                            net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState());
+                    for (int i = 0; i < 3; i++) {
+                        level.addParticle(dirt, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.2, 0.08 + rnd.nextFloat() * 0.1, (rnd.nextFloat() - 0.5f) * 0.2);
+                    }
+                }
+                default -> {
+                    var red = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                            net.minecraft.world.level.block.Blocks.RED_TERRACOTTA.defaultBlockState());
+                    for (int i = 0; i < 3; i++) {
+                        level.addParticle(red, wx, wy, wz, (rnd.nextFloat() - 0.5f) * 0.2, 0.05 + rnd.nextFloat() * 0.1, (rnd.nextFloat() - 0.5f) * 0.2);
+                    }
+                }
+            }
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_TIDE) {
+            // 鯨尾薙ぎ: しぶきと潜る所は SPLASH、潜る所には泡も
+            for (int i = 0; i < (kind == jp.revati.skyabyss.client.look.BurnDraw.SMOKE ? 2 : 5); i++) {
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.SPLASH, wx + (rnd.nextFloat() - 0.5f) * 0.4, wy + 0.1, wz + (rnd.nextFloat() - 0.5f) * 0.4,
+                        (rnd.nextFloat() - 0.5f) * 0.1, 0.1 + rnd.nextFloat() * 0.1, (rnd.nextFloat() - 0.5f) * 0.1);
+            }
+            if (kind != jp.revati.skyabyss.client.look.BurnDraw.SMOKE) {
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.BUBBLE_POP, wx, wy + 0.15, wz, 0, 0.02, 0);
+            }
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_EARTH) {
+            // 岩呼び: 土煙は DUST_PLUME、牙が割れたら砂岩の粒
+            if (kind == jp.revati.skyabyss.client.look.BurnDraw.SMOKE) {
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.DUST_PLUME, wx, wy, wz, (rnd.nextFloat() - 0.5f) * 0.04, 0.04, (rnd.nextFloat() - 0.5f) * 0.04);
+            } else {
+                var sand = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                        net.minecraft.world.level.block.Blocks.SANDSTONE.defaultBlockState());
+                for (int i = 0; i < 3; i++) {
+                    level.addParticle(sand, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.2, 0.05 + rnd.nextFloat() * 0.1, (rnd.nextFloat() - 0.5f) * 0.2);
+                }
+            }
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.frost(e.kind())) {
+            // 氷: 冷気の光は雪に、砕けた氷は氷のかけらと雪に
+            if (kind == jp.revati.skyabyss.client.look.BurnDraw.SMOKE) {
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.SNOWFLAKE, wx, wy + 0.3, wz, (rnd.nextFloat() - 0.5f) * 0.02, 0.04, (rnd.nextFloat() - 0.5f) * 0.02);
+            } else {
+                var ice = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                        net.minecraft.world.level.block.Blocks.PACKED_ICE.defaultBlockState());
+                for (int i = 0; i < 4; i++) {
+                    level.addParticle(ice, wx, wy, wz, (rnd.nextFloat() - 0.5f) * 0.3, 0.08 + rnd.nextFloat() * 0.15, (rnd.nextFloat() - 0.5f) * 0.3);
+                }
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.SNOWFLAKE, wx, wy + 0.2, wz, 0, 0.03, 0);
+            }
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_STAR) {
+            // 星: 光の柱は花火のきらめき (FIREWORK) になって昇る。星屑の石が崩れたら黒い石の粒
+            if (kind == jp.revati.skyabyss.client.look.BurnDraw.CRUMBLE) {
+                var stone = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                        net.minecraft.world.level.block.Blocks.BLACKSTONE.defaultBlockState());
+                for (int i = 0; i < 3; i++) {
+                    level.addParticle(stone, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.2, 0.06 + rnd.nextFloat() * 0.1, (rnd.nextFloat() - 0.5f) * 0.2);
+                }
+                return;
+            }
+            level.addParticle(net.minecraft.core.particles.ParticleTypes.FIREWORK, wx + (rnd.nextFloat() - 0.5f) * 0.3, wy, wz + (rnd.nextFloat() - 0.5f) * 0.3,
+                    (rnd.nextFloat() - 0.5f) * 0.02, 0.03 + rnd.nextFloat() * 0.03, (rnd.nextFloat() - 0.5f) * 0.02);
+            return;
+        }
+        if (jp.revati.skyabyss.client.look.BurnDraw.style(e.kind()) == jp.revati.skyabyss.client.look.BurnDraw.STYLE_THUNDER) {
+            // 雷: 消える雷は電気の火花、焦げた岩は白い煙、崩れた岩は黒い石の粒
+            if (kind == jp.revati.skyabyss.client.look.BurnDraw.ROCK) {
+                for (int i = 0; i < 2; i++) {
+                    level.addParticle(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK, wx, wy, wz, (rnd.nextFloat() - 0.5f) * 0.4, (rnd.nextFloat() - 0.5f) * 0.4, (rnd.nextFloat() - 0.5f) * 0.4);
+                }
+            } else if (kind == jp.revati.skyabyss.client.look.BurnDraw.SMOKE) {
+                level.addParticle(net.minecraft.core.particles.ParticleTypes.WHITE_SMOKE, wx, wy + 0.2, wz, 0, 0.03, 0);
+            } else {
+                var stone = new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+                        net.minecraft.world.level.block.Blocks.BLACKSTONE.defaultBlockState());
+                for (int i = 0; i < 3; i++) {
+                    level.addParticle(stone, wx, wy + 0.1, wz, (rnd.nextFloat() - 0.5f) * 0.2, 0.06 + rnd.nextFloat() * 0.1, (rnd.nextFloat() - 0.5f) * 0.2);
+                }
+            }
+            return;
+        }
         switch (kind) {
             case jp.revati.skyabyss.client.look.BurnDraw.SMOKE -> {
                 level.addParticle(net.minecraft.core.particles.ParticleTypes.WHITE_SMOKE, wx, wy + 0.4, wz, 0, 0.04, 0);

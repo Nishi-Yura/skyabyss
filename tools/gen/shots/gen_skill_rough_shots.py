@@ -58,14 +58,18 @@ def cam(x, y, z, tx, ty, tz, near=1.0):
 # (技, 放つ向きの pitch, 撮る位置 x y z yaw pitch, 撮る tick の並び)
 MAGE = [
     ("frost_tide", 25, "8 -56.5 -3 47 19", [(3, "a")]),
+    ("frost_tide", 25, "9.6 -56.5 -4.4 47 5", [(3, "seq03"), (3, "seq06"), (2, "seq08")] + [(2, "seq%02d" % t) for t in range(10, 29, 2)]),  # look d: alive and shatter
     ("ember_orb", 0, "5 -58.5 7 48 2", [(1, "fly")]),
     ("ember_orb", 0, "5 -58 10 52 15", [(8, "hit")]),
     ("ember_orb", 0, "11.3 -53 5 52 24", [(4, "wide"), (8, "hit_wide")]),  # 広く見下ろす (試作 d の床のひび)
     ("ember_orb", 0, "5 -58 10 52 15", [(8, "burn08")] + [(3, "burn%02d" % (8 + 3 * k)) for k in range(1, 10)]),  # 燃える間と燃え尽き (試作 d)
     ("thunder_bolt", 15, "8 -56.5 4 49 15", [(1, "a"), (3, "b")]),
+    ("thunder_bolt", 15, "7.5 -56.5 4.4 58 -2", [(1, "seq%02d" % t) for t in range(1, 15)]),  # look d: strike and burnout
     ("blink", 0, "10 -56 2 67 16", [(2, "a")]),
+    ("blink", 0, "5.2 -58.6 6.6 50 2", [(1, "seq%02d" % t) for t in range(1, 15)]),  # look d: afterglow and fade
     # 星屑は雷撃の刻印 1 (最後に置く。刻印は案ごとの覚え直しで外れる)
     ("stardust", 10, "8 -55.5 4 49 24", [(2, "a"), (3, "b"), (6, "c")]),
+    ("stardust", 10, "7 -56 4.5 47 16", [(2, "seq%02d" % t) for t in range(2, 31, 2)]),  # look d: field and fade
 ]
 
 
@@ -95,15 +99,25 @@ def mage(only):
 # 岩呼び・盾の踏み込み・鯨骨の振りは、近くに敵がいないと放てない (FAILED)。動かない・倒れない野盗を前に置く
 WARRIOR = [
     ("titan_cleave", "titan_cleave", ["titan_cleave"], cam(8.5, -56.5, -3.5, 0.5, -59.5, 2.0, 0.65), [(5, "a")], False),
+    # look d: 地割れが前へ 7 ブロック・弧が高さ 5.5 ブロックまで届くので引いて撮る。打ち込みから沈むまで
+    ("titan_cleave", "titan_cleave", ["titan_cleave"], cam(8.5, -56.5, -3.5, 0.5, -59.5, 2.5, 0.85), [(1, "seq%02d" % t) for t in range(1, 23)], False),
     ("rock_call", "rock_call", ["rock_call"], cam(7.5, -56, -6.5, 0.5, -59.5, 0.5, 0.65), [(6, "a")], True),
+    ("rock_call", "rock_call", ["rock_call"], cam(7.5, -56, -6.5, 0.5, -59.5, 0.5, 0.62), [(1, "seq%02d" % t) for t in range(1, 25)], True),  # look d: rise and crumble
     ("whale_sweep", "whale_sweep", ["whale_sweep"], cam(8.5, -55.5, -7.5, 0.5, -59.5, 0.5, 0.65), [(5, "a")], False),
+    ("whale_sweep", "whale_sweep", ["whale_sweep"], cam(8.5, -55.5, -7.5, 0.5, -59.5, 0.5, 0.75), [(1, "seq%02d" % t) for t in range(1, 21)], False),  # look d: wave and dive
     ("shield_rush", "shield_rush", ["shield_rush"], cam(10.5, -56, -2.5, 0.5, -59, 3.5, 0.8), [(3, "a")], True),
+    ("shield_rush", "shield_rush", ["shield_rush"], cam(11.5, -55.5, -1.5, 0.5, -59, 4.0, 0.85), [(1, "seq%02d" % t) for t in range(1, 21)], True),  # look d: rush and shatter
     # 盾殴りは今の木では見た目が出ない (盾の踏み込みの刻印 1 は殴りの当たりだけで見た目は踏み込み。直に覚えても枠に入らない)。
     # 模型だけを dev prop で置いて撮る (大きさ 1。技の 1.3 より小さい)
     ("shield_bash", None, None, cam(8.5, -56.5, -3.5, 0.5, -59.5, 1.5, 0.65), [(4, "a")], False),
+    ("shield_bash", None, None, cam(4.5, -57.5, -1.5, 0.5, -59.4, 1.6, 1.0), [(4, "close")], False),  # look d の寄り
+    # look d: 盾殴りは踏み込みの刻印 1 (bash_rush) で踏み込みのすぐ後に出る。踏み込みごと撮る
+    ("shield_bash", "shield_rush", ["shield_rush", "bash_rush"], cam(7.0, -57.5, -0.5, 0.5, -60.0, 3.0, 1.0), [(1, "seq%02d" % t) for t in range(1, 21)], True),
     # 鯨骨の振り = 巨神斬りの刻印 2 (deep_blade)、回し斬り = 鯨尾薙ぎの刻印 8 (spin_sweep)。技を極めてから刻印を取る
     ("bone_swing", "titan_cleave", ["titan_cleave_2", "titan_cleave_3", "deep_blade"], cam(8.5, -56.5, -3.5, 0.5, -59.5, 1.5, 0.65), [(6, "a")], True),
+    ("bone_swing", "titan_cleave", ["titan_cleave_2", "titan_cleave_3", "deep_blade"], cam(8.5, -55.5, -4.5, 0.5, -59.5, 1.5, 0.75), [(1, "seq%02d" % t) for t in range(1, 23)], True),  # look d: swing and crumble
     ("spin_cut", "whale_sweep", ["whale_sweep_2", "spin_sweep"], cam(8.5, -55.5, -7.5, 0.5, -59.5, 0.5, 0.65), [(4, "a")], False),
+    ("spin_cut", "whale_sweep", ["whale_sweep_2", "spin_sweep"], cam(8.5, -55.5, -7.5, 0.5, -59.5, 0.5, 0.75), [(1, "seq%02d" % t) for t in range(1, 21)], False),  # look d: spin and topple
 ]
 
 
@@ -177,7 +191,8 @@ def warrior(only):
                 out.append("".join(f"cmd skyabyss skill node @s {n}\n" for n in tree_path("warrior", nodes)))
                 out.append(cast(0, slot_skill, cm, foe))
             for w, tag in shots:
-                out.append(f"wait {w}\nshot {look}_{name}_{tag}\n")
+                # 連続撮影: 技で体が流されるので、1 枚ごとにカメラを置き直す
+                out.append(f"wait {w}\n" + (f"camera {cm}\n" if tag.startswith("seq") else "") + f"shot {look}_{name}_{tag}\n")
             out.append("wait 40\n")
     return out
 
