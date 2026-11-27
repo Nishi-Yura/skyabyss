@@ -24,6 +24,9 @@ PALETTES = {
     "lunge": [(255, 236, 250), (255, 140, 214), (210, 48, 150), (48, 24, 44)],
     "back": [(255, 214, 190), (232, 120, 90), (160, 60, 42), (44, 38, 40)],
     "mist": [(252, 250, 244), (226, 224, 222), (170, 168, 176), (70, 68, 76)],
+    "snare": [(255, 255, 255), (220, 230, 240), (120, 124, 136), (30, 30, 36)],
+    "rain": [(240, 246, 255), (176, 188, 210), (98, 108, 132), (40, 44, 56)],
+    "trap": [(255, 214, 200), (236, 64, 72), (150, 16, 40), (58, 30, 30)],
     "fang": [(255, 252, 200), (255, 222, 50), (196, 146, 10), (40, 34, 20)],
     "bone": [(252, 244, 255), (204, 156, 255), (130, 80, 210), (52, 40, 64)],
     "bash": [(255, 252, 240), (255, 160, 64), (200, 64, 30), (44, 42, 50)],
@@ -89,6 +92,12 @@ def main():
         cuts(n, c, cr, rnd, put)
     elif a.shape == "lance":
         lance(n, c, cr, rnd, put)
+    elif a.shape == "snare":
+        snare(n, c, cr, rnd, put)
+    elif a.shape == "pocks":
+        pocks(n, c, cr, rnd, put)
+    elif a.shape == "jaw":
+        jaw(n, c, cr, rnd, put)
     elif a.shape == "bomb":
         bomb(n, c, cr, rnd, put)
     elif a.shape == "veil":
@@ -185,6 +194,91 @@ def lance(n, c, cr, rnd, put):
         for xx in range(n):
             if abs(xx - c) < 4 + 6 * (yy - y0) / n and rnd.random() < 0.4:
                 put(xx, yy, 1)
+
+
+def snare(n, c, cr, rnd, put):
+    """縛りの跡: 3 本の杭の穴 (絵の角 270 / 30 / 150 度 = 模型の 90 / 210 / 330 度) から真ん中の輪へ引きずった縄の筋、
+    真ん中の点線の輪 (敵の足もと)、まわりに雪の点"""
+    for deg in (270, 30, 150):
+        a = math.radians(deg)
+        sx, sy = c + cr * math.cos(a), c + cr * math.sin(a)
+        for dx in range(-3, 4):
+            for dy in range(-3, 4):
+                d = math.hypot(dx, dy)
+                v = 1 if d <= 1.2 else 2 if d <= 2.4 else 0
+                if v:
+                    put(int(round(sx)) + dx, int(round(sy)) + dy, v)
+        steps = int(cr * 0.65)
+        for i in range(3, steps):
+            f = i / cr
+            x = sx - f * cr * math.cos(a) + math.sin(i * 0.9) * 0.6
+            y = sy - f * cr * math.sin(a)
+            put(int(round(x)), int(round(y)), 4 if i % 4 else 3)
+            put(int(round(x + math.sin(a))), int(round(y - math.cos(a))), 2)
+    rr = cr * 0.38
+    for k in range(60):
+        if k % 5 < 3:
+            a = 2 * math.pi * k / 60
+            put(int(round(c + rr * math.cos(a))), int(round(c + rr * math.sin(a))), 3)
+    for k in range(int(cr * 1.2)):
+        a = rnd.uniform(0, 2 * math.pi)
+        d = cr * math.sqrt(rnd.random()) * 1.1
+        put(int(round(c + d * math.cos(a))), int(round(c + d * math.sin(a))), rnd.choice((2, 3, 4)))
+
+
+def pocks(n, c, cr, rnd, put):
+    """矢の雨の跡: 場いっぱいの小さな矢の穴 (芯 + 縁) と、穴から一方へ短く走る擦り筋。外の縁に点の輪"""
+    for k in range(int(cr * 1.6)):
+        a = rnd.uniform(0, 2 * math.pi)
+        d = cr * math.sqrt(rnd.random()) * 0.92
+        x, y = c + d * math.cos(a), c + d * math.sin(a)
+        for dx in range(-2, 3):
+            for dy in range(-2, 3):
+                r = math.hypot(dx, dy)
+                v = 4 if r <= 0.6 else 3 if r <= 1.3 else 1 if r <= 2.1 else 0
+                if v:
+                    put(int(round(x)) + dx, int(round(y)) + dy, v)
+        if rnd.random() < 0.5:
+            b = rnd.uniform(0, 2 * math.pi)
+            for i in range(2, rnd.randint(4, 7)):
+                put(int(round(x + i * math.cos(b))), int(round(y + i * math.sin(b))), 2)
+    for k in range(int(cr * 3)):
+        a = 2 * math.pi * k / int(cr * 3)
+        if k % 3:
+            put(int(round(c + cr * math.cos(a))), int(round(c + cr * math.sin(a))), 2)
+
+
+def jaw(n, c, cr, rnd, put):
+    """トラバサミの跡: 前後の半円に並ぶ牙の穴、穴から外へ引っかいた筋、左右へ張るばねの焦げ、真ん中の X の印と輪"""
+    def dot(x, y, rr, vin, vout):
+        for dx in range(-4, 5):
+            for dy in range(-4, 5):
+                d = math.hypot(dx, dy)
+                v = vin if d <= rr else vout if d <= rr + 1 else 0
+                if v:
+                    put(int(round(x)) + dx, int(round(y)) + dy, v)
+
+    r = cr * 0.5
+    for k in range(12):
+        a = math.radians(15 + 30 * k + (0 if k < 6 else -15))
+        x, y = c + r * math.cos(a), c + r * math.sin(a)
+        dot(x, y, 1.3, 4, 2)
+        # 外へ引っかいた筋
+        ln = rnd.uniform(0.25, 0.45) * cr
+        for i in range(int(ln)):
+            f = 1.0 + i / r
+            put(int(round(c + r * f * math.cos(a) + rnd.uniform(-0.4, 0.4))), int(round(c + r * f * math.sin(a))), 3 if i < ln * 0.5 else 2)
+    for side in (-1, 1):
+        for i in range(int(cr * 0.5), int(cr * 0.95)):
+            put(int(round(c + side * i)), int(round(c)), 1)
+            put(int(round(c + side * i)), int(round(c)) + 1, 1)
+        dot(c + side * cr * 0.95, c, 1.5, 1, 1)
+    for i in range(-5, 6):
+        put(int(round(c + i)), int(round(c + i)), 4)
+        put(int(round(c + i)), int(round(c - i)), 4)
+    for k in range(48):
+        a = 2 * math.pi * k / 48
+        put(int(round(c + cr * 0.2 * math.cos(a))), int(round(c + cr * 0.2 * math.sin(a))), 3)
 
 
 def bomb(n, c, cr, rnd, put):

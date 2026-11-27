@@ -66,6 +66,20 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 //   閃きは昇りながら細って消え、しぶきは外へ広がって地へ落ちる (粒は黄の塵)。牙は地へ引っ込む (粒は黒い石)。
 // 風裂き (wind_rend_fly、暗殺者、飛ぶ形): 炎の絵 = 風車の刃 (進む向きを軸に回る)、OTHER と岩 = 木の葉、熾 = 葉脈。
 //   飛ぶ間も着いてからも z 軸まわりに回る。燃え尽きで刃は広がって消え (粒は萌黄の塵)、葉は外へ散って落ちる (粒は葉)。
+// 雲穿ち (cloud_pierce_fly、弓使い、飛ぶ形): 炎の絵 = 破れた雲の輪 (u < 0.25)・飛行機雲 (v < 0.19)・矢じりの前の衝撃波、
+//   OTHER = 矢羽、熾 = 矢じり、岩 = 骨の矢柄。矢は進む向きを軸に回り、雲の輪は逆へゆっくり回る。
+//   燃え尽きで衝撃波はすぐ広がって消え、飛行機雲は尾から縮み、雲の輪は広がって薄れ (粒は鴇色の塵と雲)、矢は面ごとに割れて落ちる (粒は骨)。
+// 骨の罠 (bone_trap、弓使い): 炎の絵 = 踏み板から立つ鬼火 (u < 0.25) と顎の内の光の帯、OTHER = 牙、熾 = 牙の先と踏み板の印、
+//   岩 = 骨の顎 (v < 0.5) と動かない骨 (蝶番・ばね・踏み板、v >= 0.5)。鬼火は燃える間ゆらぐ。
+//   燃え尽きの初めに顎が x 軸まわりに跳ね上がって噛み合い (光の帯は床へ沈む。粒は臙脂の塵)、鬼火は伸びて細って消え、
+//   罠は地へ沈む (粒は骨)。
+// 空の雨 (sky_rain、弓使い): 炎の絵 = 降りしきる矢の光の筋 (u < 0.25、燃える間は上から下へ流れ続ける) と刺さった所の衝撃の星 (脈打つ)、
+//   OTHER = 矢羽、熾 = 月白の帯、岩 = 鉛色の矢柄。燃え尽きで筋は流れ落ちて消え、星は広がって消え、刺さった矢は地へ沈む (粒は銀の塵と砂利)。
+// 空の雨の降る矢 (sky_rain_fall、FALL は X 軸 90 度で描くので模型の +z = 下): 光の尾は着くと矢じりへ縮み、矢は刺さったまま沈む (粒は銀の塵と砂利)。
+// 雪縛り (snare_shot、弓使い): 炎の絵 = 床の雪の渦 (u < 0.25, v < 0.5、ゆっくり回る)・締まる閃き (u < 0.25, v >= 0.5)・雪の舞、
+//   OTHER = 縄、岩 = 墨の杭。燃え尽きで閃きは横へ伸びて消え、縄の輪は締まってから切れて落ち (粒は雪)、
+//   雪の舞は昇って消え、渦は広がって消え、杭は地へ沈む (粒は黒い石)。
+// 雪縛りの矢 (snare_shot_fly、飛ぶ形): 矢柄に巻いた縄が着くとほどけて外へ散り、矢は雪になって縮み、雪の尾は矢じりへ縮む。
 public final class BurnDraw {
     // 粒を出す所 (模型の座標)。kind: SMOKE 炎の燃え尽き / ROCK 岩くずが地面に着いた / CRUMBLE 玉が崩れた
     public interface Sink {
@@ -79,7 +93,7 @@ public final class BurnDraw {
     }
 
     // 消え方の種類: 炎 (熾の玉) / 氷 / 雷
-    public static final int STYLE_EMBER = 0, STYLE_FROST = 1, STYLE_THUNDER = 2, STYLE_STAR = 3, STYLE_CLEAVE = 4, STYLE_EARTH = 5, STYLE_TIDE = 6, STYLE_RUSH = 7, STYLE_BASH = 8, STYLE_BONE = 9, STYLE_SPIN = 10, STYLE_LUNGE = 11, STYLE_BACK = 12, STYLE_MIST = 13, STYLE_FANG = 14, STYLE_WIND = 15;
+    public static final int STYLE_EMBER = 0, STYLE_FROST = 1, STYLE_THUNDER = 2, STYLE_STAR = 3, STYLE_CLEAVE = 4, STYLE_EARTH = 5, STYLE_TIDE = 6, STYLE_RUSH = 7, STYLE_BASH = 8, STYLE_BONE = 9, STYLE_SPIN = 10, STYLE_LUNGE = 11, STYLE_BACK = 12, STYLE_MIST = 13, STYLE_FANG = 14, STYLE_WIND = 15, STYLE_PIERCE = 16, STYLE_TRAP = 17, STYLE_RAIN = 18, STYLE_RAINFALL = 19, STYLE_SNARE = 20, STYLE_SNAREFLY = 21;
 
     public static int style(String kind) {
         if (kind.equals("ss_rock_call")) {
@@ -109,11 +123,29 @@ public final class BurnDraw {
         if (kind.equals("ss_mist_veil")) {
             return STYLE_MIST;
         }
+        if (kind.equals("ss_snare_shot")) {
+            return STYLE_SNARE;
+        }
+        if (kind.equals("ss_snare_shot_fly")) {
+            return STYLE_SNAREFLY;
+        }
+        if (kind.equals("ss_sky_rain")) {
+            return STYLE_RAIN;
+        }
+        if (kind.equals("ss_sky_rain_fall")) {
+            return STYLE_RAINFALL;
+        }
+        if (kind.equals("ss_bone_trap")) {
+            return STYLE_TRAP;
+        }
         if (kind.equals("ss_twin_fang")) {
             return STYLE_FANG;
         }
         if (kind.equals("ss_wind_rend_fly")) {
             return STYLE_WIND;
+        }
+        if (kind.equals("ss_cloud_pierce_fly")) {
+            return STYLE_PIERCE;
         }
         if (kind.equals("ss_titan_cleave")) {
             return STYLE_CLEAVE;
@@ -185,6 +217,12 @@ public final class BurnDraw {
                             : style == STYLE_MIST ? mistQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
                             : style == STYLE_FANG ? fangQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
                             : style == STYLE_WIND ? windQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
+                            : style == STYLE_PIERCE ? pierceQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
+                            : style == STYLE_TRAP ? trapQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
+                            : style == STYLE_RAIN ? rainQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
+                            : style == STYLE_SNARE ? snareQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
+                            : style == STYLE_SNAREFLY ? snareFlyQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
+                            : style == STYLE_RAINFALL ? rainFallQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink)
                             : thunderQuad(part, xs, ys, zs, us, vs, au, cx, cy, cz, t, burn, sink);
                     if (col == 0) {
                         continue;
@@ -352,6 +390,419 @@ public final class BurnDraw {
             ys[i] = cy + (ys[i] - cy) * (1f - k);
             zs[i] = cz + (zs[i] - cz) * (1f - k);
         }
+    }
+
+    // z 軸 (y = 0.25 の芯) まわりに d ラジアン回す
+    private static void rollZ(float[] xs, float[] ys, float d) {
+        float cs = (float) Math.cos(d), sn = (float) Math.sin(d);
+        for (int i = 0; i < 4; i++) {
+            float x = xs[i], y = ys[i] - 0.25f;
+            xs[i] = x * cs - y * sn;
+            ys[i] = 0.25f + x * sn + y * cs;
+        }
+    }
+
+    // 雪縛り (地の縛り) の面 1 枚。形を書き換えて色を返す。描かないときは 0
+    private static int snareQuad(int part, float[] xs, float[] ys, float[] zs, float[] us, float[] vs, float au,
+                                 float cx, float cy, float cz, float t, float burn, Sink sink) {
+        if (part == SPARK || part == EMBER) {
+            return 0;
+        }
+        float av = (vs[0] + vs[1] + vs[2] + vs[3]) / 4f;
+        if (part == FIRE && au < 0.25f && av < 0.5f) {
+            // 雪の渦: ゆっくり回り、燃え尽きで広がって消える
+            float k = burn / 0.6f;
+            if (k >= 1f) {
+                return 0;
+            }
+            float d = t * 0.08f;
+            float cs = (float) Math.cos(d), sn = (float) Math.sin(d), sc = 1f + 0.8f * k;
+            for (int i = 0; i < 4; i++) {
+                float x = xs[i], z = zs[i];
+                xs[i] = (x * cs - z * sn) * sc;
+                zs[i] = (x * sn + z * cs) * sc;
+            }
+            return 0xFFFFFFFF;
+        }
+        if (part == FIRE && au < 0.25f) {
+            // 締まる閃き: 燃え尽きで横へ伸びながら細って消える
+            float k = burn / 0.2f;
+            if (k >= 1f) {
+                return 0;
+            }
+            for (int i = 0; i < 4; i++) {
+                xs[i] *= 1f + 1.2f * k;
+                zs[i] *= 1f + 1.2f * k;
+                ys[i] = cy + (ys[i] - cy) * (1f - 0.8f * k);
+            }
+            return 0xFFFFFFFF;
+        }
+        if (part == FIRE) {
+            // 雪の舞: ゆるく揺れ、燃え尽きで昇って消える
+            float k = burn / 0.7f;
+            if (k >= 1f) {
+                return 0;
+            }
+            for (int i = 0; i < 4; i++) {
+                ys[i] += 0.03f * (float) Math.sin(t * 0.2f) + 0.8f * k;
+                xs[i] *= 1f + 0.3f * k;
+                zs[i] *= 1f + 0.3f * k;
+            }
+            return 0xFFFFFFFF;
+        }
+        if (part == OTHER) {
+            // 縄: 締まってから切れて落ちる
+            float k1 = Math.min(1f, burn / 0.2f);
+            float sq = 1f - 0.3f * k1;
+            for (int i = 0; i < 4; i++) {
+                xs[i] *= sq;
+                zs[i] *= sq;
+            }
+            float k = (burn - 0.25f) / 0.6f;
+            if (k > 0f) {
+                if (k >= 1f) {
+                    return 0;
+                }
+                float h = hash(cx, cy, cz);
+                float out = 1f + 0.6f * k;
+                float dy = -k * k * 1.3f;
+                for (int i = 0; i < 4; i++) {
+                    xs[i] *= out;
+                    zs[i] *= out;
+                    ys[i] = Math.max(0.02f, ys[i] + dy * (0.7f + 0.6f * h));
+                }
+                if (k < 0.3f && sink != null && h < 0.3f) {
+                    sink.at(cx * sq, cy, cz * sq, SMOKE);
+                }
+            }
+            return 0xFFFFFFFF;
+        }
+        // 杭: 地へ沈む
+        float k = (burn - 0.4f) / 0.6f;
+        if (k > 0f) {
+            if (k >= 1f) {
+                return 0;
+            }
+            float d = k * k * 0.8f;
+            for (int i = 0; i < 4; i++) {
+                ys[i] -= d;
+            }
+            if (sink != null && hash(cx, cy, cz) < 0.3f) {
+                sink.at(cx, 0.05f, cz, ROCK);
+            }
+        }
+        return 0xFFFFFFFF;
+    }
+
+    // 雪縛りの矢の面 1 枚。形を書き換えて色を返す。描かないときは 0
+    private static int snareFlyQuad(int part, float[] xs, float[] ys, float[] zs, float[] us, float[] vs, float au,
+                                    float cx, float cy, float cz, float t, float burn, Sink sink) {
+        if (part == SPARK) {
+            return 0;
+        }
+        if (part == FIRE) {
+            // 雪の尾: 矢じり (-z) へ縮む
+            float k = burn / 0.35f;
+            if (k >= 1f) {
+                return 0;
+            }
+            float front = Math.min(Math.min(zs[0], zs[1]), Math.min(zs[2], zs[3]));
+            for (int i = 0; i < 4; i++) {
+                zs[i] = front + (zs[i] - front) * (1f - k);
+            }
+            return 0xFFFFFFFF;
+        }
+        if (part == OTHER) {
+            // 縄: 矢柄の芯から外へほどけて散る
+            float k = burn / 0.8f;
+            if (k >= 1f) {
+                return 0;
+            }
+            for (int i = 0; i < 4; i++) {
+                xs[i] *= 1f + 2.2f * k;
+                ys[i] = 0.25f + (ys[i] - 0.25f) * (1f + 2.2f * k) - 0.4f * k * k;
+            }
+            return 0xFFFFFFFF;
+        }
+        // 矢: 雪になって縮む
+        float k = burn / 0.55f;
+        if (k >= 1f) {
+            return 0;
+        }
+        if (k > 0f) {
+            shrink(xs, ys, zs, cx, cy, cz, k);
+            if (k > 0.5f && sink != null && hash(cx, cy, cz) < 0.3f) {
+                sink.at(cx, cy, cz, SMOKE);
+            }
+        }
+        return 0xFFFFFFFF;
+    }
+
+    // 空の雨 (地の形) の面 1 枚。形を書き換えて色を返す。描かないときは 0
+    private static int rainQuad(int part, float[] xs, float[] ys, float[] zs, float[] us, float[] vs, float au,
+                                float cx, float cy, float cz, float t, float burn, Sink sink) {
+        if (part == SPARK) {
+            return 0;
+        }
+        if (part == FIRE && au < 0.25f) {
+            // 光の筋: 上から下へ流れ、上へ戻る (板ごとに位相をずらす)。燃え尽きで流れ落ちて消える
+            float k = burn / 0.4f;
+            if (k >= 1f) {
+                return 0;
+            }
+            float ph = t * 0.08f + hash(cx, 0f, cz) * 3f;
+            float off = (ph - (float) Math.floor(ph)) * 0.45f + k * 1.2f;
+            for (int i = 0; i < 4; i++) {
+                ys[i] -= off;
+            }
+            return 0xFFFFFFFF;
+        }
+        if (part == FIRE) {
+            // 衝撃の星: 脈打ち、燃え尽きで広がって消える
+            float k = burn / 0.5f;
+            if (k >= 1f) {
+                return 0;
+            }
+            float sc = (1f + 0.12f * (float) Math.sin(t * 0.5f + hash(cx, 0f, cz) * 6f)) * (1f + 0.9f * k);
+            for (int i = 0; i < 4; i++) {
+                xs[i] = cx + (xs[i] - cx) * sc;
+                zs[i] = cz + (zs[i] - cz) * sc;
+            }
+            if (k > 0.5f && sink != null) {
+                sink.at(cx, 0.05f, cz, SMOKE);
+            }
+            return 0xFFFFFFFF;
+        }
+        float r = 1f, g = 1f, b = 1f;
+        if (part == EMBER) {
+            float cool = Math.min(1f, burn * 1.4f);
+            r = 1f - 0.45f * cool;
+            g = 1f - 0.4f * cool;
+            b = 1f - 0.3f * cool;
+        }
+        // 刺さった矢: 地へ沈む
+        float k = (burn - 0.3f) / 0.7f;
+        if (k > 0f) {
+            if (k >= 1f) {
+                return 0;
+            }
+            float d = k * k * 0.7f;
+            for (int i = 0; i < 4; i++) {
+                ys[i] -= d;
+            }
+            if (sink != null && hash(cx, cy, cz) < 0.2f) {
+                sink.at(cx, 0.03f, cz, ROCK);
+            }
+        }
+        return rgb(r, g, b);
+    }
+
+    // 空の雨の降る矢の面 1 枚 (模型の +z = 下)。形を書き換えて色を返す。描かないときは 0
+    private static int rainFallQuad(int part, float[] xs, float[] ys, float[] zs, float[] us, float[] vs, float au,
+                                    float cx, float cy, float cz, float t, float burn, Sink sink) {
+        if (part == SPARK) {
+            return 0;
+        }
+        if (part == FIRE) {
+            // 光の尾: 着くと矢じり (+z) へ縮んで消える
+            float k = burn / 0.3f;
+            if (k >= 1f) {
+                return 0;
+            }
+            if (k > 0f) {
+                float head = Math.max(Math.max(zs[0], zs[1]), Math.max(zs[2], zs[3]));
+                for (int i = 0; i < 4; i++) {
+                    zs[i] = head + (zs[i] - head) * (1f - k);
+                }
+                if (sink != null) {
+                    sink.at(0f, 0.05f, 0f, SMOKE);
+                }
+            }
+            return 0xFFFFFFFF;
+        }
+        float r = 1f, g = 1f, b = 1f;
+        if (part == EMBER) {
+            float cool = Math.min(1f, burn * 1.4f);
+            r = 1f - 0.45f * cool;
+            g = 1f - 0.4f * cool;
+            b = 1f - 0.3f * cool;
+        }
+        // 矢: 刺さったまま地へ沈む
+        float k = (burn - 0.35f) / 0.65f;
+        if (k > 0f) {
+            if (k >= 1f) {
+                return 0;
+            }
+            float d = k * k * 1.4f;
+            for (int i = 0; i < 4; i++) {
+                zs[i] += d;
+            }
+            if (k > 0.3f && sink != null) {
+                sink.at(0f, 0.03f, 0f, ROCK);
+            }
+        }
+        return rgb(r, g, b);
+    }
+
+    // 骨の罠の面 1 枚。形を書き換えて色を返す。描かないときは 0
+    private static int trapQuad(int part, float[] xs, float[] ys, float[] zs, float[] us, float[] vs, float au,
+                                float cx, float cy, float cz, float t, float burn, Sink sink) {
+        if (part == SPARK) {
+            return 0;
+        }
+        float av = (vs[0] + vs[1] + vs[2] + vs[3]) / 4f;
+        if (part == FIRE) {
+            if (au < 0.25f) {
+                // 鬼火: 上ほどゆらぎ、燃え尽きで伸びて細って消える
+                float k = burn / 0.35f;
+                if (k >= 1f) {
+                    return 0;
+                }
+                for (int i = 0; i < 4; i++) {
+                    float h = ys[i];
+                    xs[i] += 0.12f * h * (float) Math.sin(t * 0.35f + h * 3f);
+                    zs[i] += 0.12f * h * (float) Math.cos(t * 0.3f + h * 3f);
+                    if (k > 0f) {
+                        ys[i] = h * (1f + 0.9f * k);
+                        xs[i] *= 1f - 0.7f * k;
+                        zs[i] *= 1f - 0.7f * k;
+                    }
+                }
+                if (k > 0.6f && sink != null) {
+                    sink.at(0f, 1.6f, 0f, SMOKE);
+                }
+                return 0xFFFFFFFF;
+            }
+            // 光の帯: 顎が閉じる間に床へ沈む
+            float k = burn / 0.15f;
+            if (k >= 1f) {
+                return 0;
+            }
+            for (int i = 0; i < 4; i++) {
+                ys[i] *= 1f - k;
+            }
+            return 0xFFFFFFFF;
+        }
+        float r = 1f, g = 1f, b = 1f;
+        if (part == EMBER) {
+            float cool = Math.min(1f, burn * 1.4f);
+            r = 1f - 0.4f * cool;
+            g = 1f - 0.6f * cool;
+            b = 1f - 0.5f * cool;
+        }
+        // 顎と牙: 蝶番の線 (x 軸) まわりに跳ね上がって噛み合う。動かない骨と踏み板はそのまま
+        boolean jaw = Math.hypot(cx, cz) > 0.4f && !(part == STONE && av >= 0.5f);
+        if (jaw && burn > 0f) {
+            float k = Math.min(1f, burn / 0.16f);
+            float a = (float) (Math.PI * 0.47) * k * k * (cz < 0f ? 1f : -1f);
+            float cs = (float) Math.cos(a), sn = (float) Math.sin(a);
+            for (int i = 0; i < 4; i++) {
+                float y = ys[i], z = zs[i];
+                ys[i] = y * cs - z * sn;
+                zs[i] = y * sn + z * cs;
+            }
+            if (k >= 1f && sink != null) {
+                sink.at(0f, 0.6f, 0f, SMOKE);
+            }
+        }
+        // 罠ごと地へ沈む
+        float k = (burn - 0.4f) / 0.6f;
+        if (k > 0f) {
+            if (k >= 1f) {
+                return 0;
+            }
+            float d = k * k * 0.9f;
+            for (int i = 0; i < 4; i++) {
+                ys[i] -= d;
+            }
+            if (sink != null && hash(cx, cy, cz) < 0.25f) {
+                sink.at(cx, 0.05f, cz, ROCK);
+            }
+        }
+        return rgb(r, g, b);
+    }
+
+    // 雲穿ちの面 1 枚。形を書き換えて色を返す。描かないときは 0
+    private static int pierceQuad(int part, float[] xs, float[] ys, float[] zs, float[] us, float[] vs, float au,
+                                  float cx, float cy, float cz, float t, float burn, Sink sink) {
+        if (part == SPARK) {
+            return 0;
+        }
+        float av = (vs[0] + vs[1] + vs[2] + vs[3]) / 4f;
+        if (part == FIRE && au < 0.25f) {
+            // 雲の輪: 逆へゆっくり回り、燃え尽きで広がって後ろへ流れ、薄れて消える
+            rollZ(xs, ys, -t * 0.12f);
+            float k = burn / 0.75f;
+            if (k >= 1f) {
+                return 0;
+            }
+            if (k > 0f) {
+                float sc = 1f + 0.9f * k;
+                for (int i = 0; i < 4; i++) {
+                    xs[i] *= sc;
+                    ys[i] = 0.25f + (ys[i] - 0.25f) * sc;
+                    zs[i] = cz + (zs[i] - cz) * sc + 0.5f * k;
+                }
+                if (k > 0.3f && sink != null) {
+                    sink.at(cx * sc, cy, cz + 0.5f * k, SMOKE);
+                }
+            }
+            return 0xFFFFFFFF;
+        }
+        rollZ(xs, ys, t * 0.5f);
+        if (part == FIRE) {
+            if (av < 0.19f) {
+                // 飛行機雲: 尾 (+z) から前の端へ縮んで細る
+                float k = burn / 0.45f;
+                if (k >= 1f) {
+                    return 0;
+                }
+                float front = Math.min(Math.min(zs[0], zs[1]), Math.min(zs[2], zs[3]));
+                for (int i = 0; i < 4; i++) {
+                    zs[i] = front + (zs[i] - front) * (1f - k);
+                    xs[i] = xs[i] * (1f - 0.6f * k);
+                    ys[i] = 0.25f + (ys[i] - 0.25f) * (1f - 0.6f * k);
+                }
+                return 0xFFFFFFFF;
+            }
+            // 衝撃波: すぐ広がって消える
+            float k = burn / 0.2f;
+            if (k >= 1f) {
+                return 0;
+            }
+            for (int i = 0; i < 4; i++) {
+                xs[i] *= 1f + 0.8f * k;
+                ys[i] = 0.25f + (ys[i] - 0.25f) * (1f + 0.8f * k);
+            }
+            return 0xFFFFFFFF;
+        }
+        float r = 1f, g = 1f, b = 1f;
+        if (part == EMBER) {
+            float cool = Math.min(1f, burn * 1.5f);
+            r = 1f - 0.25f * cool;
+            g = 1f - 0.5f * cool;
+            b = 1f - 0.45f * cool;
+        }
+        // 矢: 面ごとに割れて、ばらばらの向きへ落ちる
+        float k = (burn - 0.2f) / 0.75f;
+        if (k > 0f) {
+            if (k >= 1f) {
+                return 0;
+            }
+            float h = hash(cx, cy, cz);
+            float ox = (h - 0.5f) * 0.9f * k, oy = (hash(cz, cx, cy) - 0.3f) * 0.4f * k - 1.1f * k * k, oz = (hash(cy, cz, cx) - 0.5f) * 0.6f * k;
+            float sc = 1f - 0.5f * k;
+            float mx = (xs[0] + xs[1] + xs[2] + xs[3]) / 4f, my = (ys[0] + ys[1] + ys[2] + ys[3]) / 4f, mz = (zs[0] + zs[1] + zs[2] + zs[3]) / 4f;
+            for (int i = 0; i < 4; i++) {
+                xs[i] = mx + (xs[i] - mx) * sc + ox;
+                ys[i] = my + (ys[i] - my) * sc + oy;
+                zs[i] = mz + (zs[i] - mz) * sc + oz;
+            }
+            if (k > 0.75f && sink != null && h < 0.3f) {
+                sink.at(mx + ox, my + oy, mz + oz, ROCK);
+            }
+        }
+        return rgb(r, g, b);
     }
 
     // 風裂きの面 1 枚。形を書き換えて色を返す。描かないときは 0

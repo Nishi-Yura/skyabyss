@@ -187,7 +187,7 @@ SKYABYSS_LANG=en_us ./gradlew runShots -Pscript=tools/shots/first_hour.txt   # �
 - 施設の浮く名札 (`opening/site/FacilityLabels`、35 の 2.1): `bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/facility_labels.txt -PshotsName=facility_labels` (都の 10 枚と鯨見の町・風待の里の市を、係の人から名札の向きの正面と、壁に沿った横から。係の人は観戦の人のそばには立たないので、はじめは創造で待つ)。置き場の検めは自己テスト `facility labels` (設計図だけで 38 枚)。
 - 乗り物の新しい見た目のラフ (00 の 346〜348): `python -I tools/rough/lowpoly/mounts2/roughs.py [abyss|moon|sky]` → `docs/review/roughs_mounts2/<題>.png` と案ごとの `<題>_<a|b|c>.png`。部品は `tools/gen/mobs/mounts_lp/mlp.py`。選んだ案は `mounts_lp/<id>.py` へ移して作り込み、`build_all.py` で入れる。
 
-- 1 tick ずつの連続撮影: `shot` は 1 枚に 5 tick ほどかかり、`cmd tick rate` を落としても同じ。世界を `cmd tick freeze` で止め、1 枚ごとに `cmd tick step <n>` → `wait 3` → `shot` で撮り、終わりに `cmd tick unfreeze` (gen_skill_rough_shots.py の assassin())。
+- 1 tick ずつの連続撮影: `shot` は 1 枚に 5 tick ほどかかり、`cmd tick rate` を落としても同じ。世界を `cmd tick freeze` で止め、1 枚ごとに `cmd tick step <n>` → `wait 3` → `shot` で撮り、終わりに `cmd tick unfreeze` (gen_skill_rough_shots.py の assassin())。次の `tick step` は残りの歩みを打ち消すので、n が大きいときは `wait n+3` まで待つ。数 tick で飛び切る矢は、放つ前に freeze する (archer())。
 
 ## 生成スクリプトとコミット済みデータの同期 (`tools/audit/check_generators.py`)
 

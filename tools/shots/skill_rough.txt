@@ -19,169 +19,174 @@ chat clear
 wait 200
 fov 70
 cmd skyabyss level set @p 30
-cmd skyabyss job choose assassin
-cmd item replace entity @s weapon.mainhand with skyabyss:shrine_dagger
+cmd skyabyss job choose archer
+cmd item replace entity @s weapon.mainhand with skyabyss:shrine_bow
 cmd skyabyss skill forget @s
 perspective first
+cmd give @s minecraft:arrow 64
 # ======== d
 gearlook skill d
 cmd skyabyss skill forget @s
 cmd skyabyss skill points @s 100
-cmd skyabyss skill node @s lunge
+cmd skyabyss skill node @s cloud_pierce
 cmd skyabyss skill node @s agi_1
-cmd skyabyss skill node @s quick_lunge
-cmd skyabyss skill node @s foresight
-cmd skyabyss skill node @s quick_backstep
-cmd skyabyss skill node @s agi_5
-cmd skyabyss skill node @s wind_rend
+cmd skyabyss skill node @s bow_spirit
+cmd skyabyss skill node @s str_2
+cmd skyabyss skill node @s agi_4
+cmd skyabyss skill node @s cloud_pierce_2
+cmd skyabyss skill node @s agi_9
+cmd skyabyss skill node @s sharp_tip
+cmd skyabyss skill node @s cloud_pierce_3
+cmd skyabyss skill node @s bow_spirit_2
+cmd skyabyss skill node @s snare_pierce
 camera 0.5 -60 0.5 0 0
-cmd skyabyss skill slot @s 1 wind_rend
+cmd skyabyss skill slot @s 1 cloud_pierce
 cmd kill @e[type=!player]
-cmd summon skyabyss:bandit 0.5 -60 4.5 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],active_effects:[{id:"minecraft:resistance",amplifier:4,duration:99999,show_particles:0b}]}
+cmd summon skyabyss:bandit 0.5 -60 6.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],active_effects:[{id:"minecraft:resistance",amplifier:4,duration:99999,show_particles:0b}]}
 wait 30
 cmd skyabyss skill cooldowns @s
 cmd skyabyss skill mana @s full
 chat clear
 cmd skyabyss skill cast @s 1
-camera 6.9 -57.7 1.1 69 7
+camera 6.9 -57.4 1.6 69 13
 hud off
 wait 1
-shot d_wind_rend_a
-wait 1
-shot d_wind_rend_b
-wait 40
+shot d_snare_shot_a
+wait 6
+shot d_snare_shot_b
+wait 80
 cmd skyabyss skill forget @s
 cmd skyabyss skill points @s 100
-cmd skyabyss skill node @s lunge
+cmd skyabyss skill node @s cloud_pierce
 cmd skyabyss skill node @s agi_1
-cmd skyabyss skill node @s quick_lunge
-cmd skyabyss skill node @s foresight
-cmd skyabyss skill node @s quick_backstep
-cmd skyabyss skill node @s agi_5
-cmd skyabyss skill node @s wind_rend
+cmd skyabyss skill node @s bow_spirit
+cmd skyabyss skill node @s str_2
+cmd skyabyss skill node @s agi_4
+cmd skyabyss skill node @s cloud_pierce_2
+cmd skyabyss skill node @s agi_9
+cmd skyabyss skill node @s sharp_tip
+cmd skyabyss skill node @s cloud_pierce_3
+cmd skyabyss skill node @s bow_spirit_2
+cmd skyabyss skill node @s snare_pierce
 camera 0.5 -60 0.5 0 0
-cmd skyabyss skill slot @s 1 wind_rend
+cmd skyabyss skill slot @s 1 cloud_pierce
 cmd kill @e[type=!player]
-cmd summon skyabyss:bandit 0.5 -60 4.5 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],active_effects:[{id:"minecraft:resistance",amplifier:4,duration:99999,show_particles:0b}]}
+cmd summon skyabyss:bandit 0.5 -60 6.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],active_effects:[{id:"minecraft:resistance",amplifier:4,duration:99999,show_particles:0b}]}
 wait 30
 cmd skyabyss skill cooldowns @s
 cmd skyabyss skill mana @s full
 chat clear
-cmd skyabyss skill cast @s 1
-camera 5.5 -57.0 -2.5 40 12
-hud off
 cmd tick freeze
+cmd skyabyss skill cast @s 1
+camera 5.6 -57.64 8.18 53 12
+hud off
 cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq01
+wait 4
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq01
 cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq02
+wait 4
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq02
 cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq03
+wait 4
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq03
 cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq04
+wait 4
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq04
 cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq05
+wait 4
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq05
 cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq06
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq07
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq08
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq09
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq10
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq11
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq12
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq13
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq14
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq15
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq16
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq17
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq18
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq19
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq20
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq21
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq22
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq23
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq24
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq25
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq26
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq27
-cmd tick step 1
-wait 3
-camera 5.5 -57.0 -2.5 40 12
-shot d_wind_rend_seq28
+wait 4
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq06
+cmd tick step 30
+wait 33
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq07
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq08
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq09
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq10
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq11
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq12
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq13
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq14
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq15
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq16
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq17
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq18
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq19
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq20
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq21
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq22
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq23
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq24
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq25
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq26
+cmd tick step 2
+wait 5
+camera 5.6 -57.64 8.18 53 12
+shot d_snare_shot_seq27
 cmd tick unfreeze
-wait 40
+wait 80

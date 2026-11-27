@@ -254,7 +254,13 @@ public final class AttackProps {
             Map.entry("ss_backstep", 20),
             Map.entry("ss_mist_veil", 24),
             Map.entry("ss_twin_fang", 18),
-            Map.entry("ss_wind_rend_fly", 16));
+            Map.entry("ss_wind_rend_fly", 16),
+            Map.entry("ss_cloud_pierce_fly", 18),
+            Map.entry("ss_bone_trap", 22),
+            Map.entry("ss_sky_rain", 24),
+            Map.entry("ss_sky_rain_fall", 14),
+            Map.entry("ss_snare_shot", 24),
+            Map.entry("ss_snare_shot_fly", 10));
 
     public static int afterburn(String kind) {
         return AFTERBURN.getOrDefault(kind, 0);
@@ -306,7 +312,7 @@ public final class AttackProps {
             return;
         }
         int ft = Math.max(2, Math.min(warn, fallTicks));
-        p.setup(AttackProp.FALL, at, at, warn - ft, ft, linger, size, height, level.random.nextFloat() * 360f);
+        p.setup(AttackProp.FALL, at, at, warn - ft, ft, linger + afterburn(kind), size, height, level.random.nextFloat() * 360f);
         spawn(level, p);
     }
 

@@ -256,9 +256,13 @@ def assassin(only):
 ARCHER = [
     # 的を置かずに 24 ブロック先へ飛ばす (6 tick)。近い的だと撮る前に飛び切る
     ("cloud_pierce", "cloud_pierce", ["cloud_pierce"], 0, cam(14.5, -57.5, 9.0, 0.5, -58.5, 9.0, 0.9), [(1, "a"), (1, "b")], False),
+    ("cloud_pierce", "cloud_pierce", ["cloud_pierce"], 0, cam(5.0, -57.9, 17.0, 0.5, -58.6, 22.5, 1.0), [(1, "seq%02d" % t) for t in range(1, 27)], False),  # look d: pierce and shatter
     ("bone_trap", "bone_trap", ["bone_trap"], 0, cam(5.5, -57.0, -1.0, 0.5, -59.8, 1.8, 0.75), [(5, "a")], False),
+    ("bone_trap", "bone_trap", ["bone_trap"], 0, cam(4.5, -57.6, -1.5, 0.5, -59.7, 1.6, 0.85), [(3, "seq01"), (3, "seq02"), (3, "seq03"), (50, "seq04")] + [(2, "seq%02d" % t) for t in range(5, 19)], False),  # look d: snap and sink
     ("sky_rain", "sky_rain", ["sky_rain"], 14, cam(13.5, -54.0, 1.5, 0.5, -59.5, 7.0, 0.85), [(8, "a"), (14, "b")], False),
+    ("sky_rain", "sky_rain", ["sky_rain"], 14, cam(12.5, -54.5, 2.0, 0.5, -59.5, 7.5, 0.9), [(2, "seq%02d" % t) for t in range(1, 11)] + [(30, "seq11")] + [(2, "seq%02d" % t) for t in range(12, 31)], False),  # look d: rain and sink
     ("snare_shot", "cloud_pierce", ["snare_pierce"], 0, cam(8.5, -57.0, 1.0, 0.5, -59.0, 4.0, 0.8), [(1, "a"), (6, "b")], 6.0),
+    ("snare_shot", "cloud_pierce", ["snare_pierce"], 0, cam(6.5, -57.4, 7.5, 0.5, -59.0, 12.0, 0.85), [(1, "seq%02d" % t) for t in range(1, 7)] + [(30, "seq07")] + [(2, "seq%02d" % t) for t in range(8, 28)], 6.0),  # look d: bind and snap (形は 12 ブロック先に出る)
     # 飛ぶ・降る形は技では速すぎて写らない (雲穿ちは 6 tick で 24 ブロック)。dev prop で遅く飛ばして撮る (40 tick・大きさ 1.4)
     ("cloud_pierce_toss", "toss 0.5 -58.8 0.5 0.5 -58.8 24.5 40", None, 0, cam(9.0, -55.3, 6.0, 0.5, -55.8, 6.0, 0.8), [(10, "a")], False),
     ("snare_shot_toss", "toss 0.5 -58.8 0.5 0.5 -58.8 24.5 40", None, 0, cam(9.0, -55.3, 6.0, 0.5, -55.8, 6.0, 0.8), [(10, "a")], False),
@@ -280,9 +284,23 @@ def archer(only):
             else:
                 out.append("cmd skyabyss skill forget @s\ncmd skyabyss skill points @s 100\n")
                 out.append("".join(f"cmd skyabyss skill node @s {n}\n" for n in tree_path("archer", nodes)))
-                out.append(cast(pitch, slot_skill, cm, foe))
+                c = cast(pitch, slot_skill, cm, foe)
+                if any(tag.startswith("seq") for _, tag in shots):
+                    # 矢は数 tick で飛び切るので、放つ前に世界を止める
+                    c = c.replace("cmd skyabyss skill cast", "cmd tick freeze\ncmd skyabyss skill cast")
+                out.append(c)
+            # 連続 (seq) は世界を止めて 1 枚ごとに w tick 進める (assassin() と同じ)
+            slow = any(tag.startswith("seq") for _, tag in shots)
+            if slow and nodes is None:
+                out.append("cmd tick freeze\n")
             for w, tag in shots:
-                out.append(f"wait {w}\nshot {look}_{name}_{tag}\n")
+                if tag.startswith("seq"):
+                    # 次の tick step は残りの歩みを打ち消すので、歩み切るまで待つ
+                    out.append(f"cmd tick step {w}\nwait {max(3, w + 3)}\ncamera {cm}\nshot {look}_{name}_{tag}\n")
+                else:
+                    out.append(f"wait {w}\nshot {look}_{name}_{tag}\n")
+            if slow:
+                out.append("cmd tick unfreeze\n")
             out.append("wait 80\n")
     return out
 
