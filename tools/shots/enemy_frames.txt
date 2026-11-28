@@ -1,0 +1,160 @@
+# 攻撃の模型すべての 3 コマ (allframes.py が書く)
+world attack_frames flat
+size 1280 720
+timeout 6000
+render 8
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd effect give @s minecraft:resistance infinite 255 true
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 60
+cmd tp @s 0.5 -60 -30 0 30
+gearlook skill d
+cmd tick unfreeze
+cmd kill @e[type=!player]
+wait 10
+cmd tick freeze
+cmd skyabyss dev prop bone_spike rise 12.4 -60 10.5 20 1.0
+cmd skyabyss dev prop rock rise 9.0 -59 10.5 20 1.0
+cmd skyabyss dev prop bone_shard rise 5.6 -59 10.5 20 1.0
+cmd skyabyss dev prop tentacle rise 2.2 -60 10.5 20 1.0
+cmd skyabyss dev prop ink_blob rise -1.2 -59 10.5 20 1.0
+cmd skyabyss dev prop crystal_spike rise -4.6 -60 10.5 20 1.0
+cmd skyabyss dev prop fireball rise -8.0 -59 10.5 20 1.0
+cmd skyabyss dev prop lava_pillar rise -11.4 -60 10.5 20 1.0
+cmd tick step 1
+wait 4
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot e00_0
+cmd tick step 2
+wait 5
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot e00_a
+cmd tick step 9
+wait 12
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot e00_b
+cmd tick step 18
+wait 21
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot e00_c
+cmd tick unfreeze
+cmd kill @e[type=!player]
+wait 10
+cmd tick freeze
+cmd skyabyss dev prop ice_spike rise 12.4 -60 10.5 20 1.0
+cmd skyabyss dev prop icicle fall 9.0 -60 10.5 6 4 20 1.0
+cmd skyabyss dev prop water_spout rise 5.6 -60 10.5 20 1.0
+cmd skyabyss dev prop coral_spear rise 2.2 -59 10.5 20 1.0
+cmd skyabyss dev prop lightning rise -1.2 -60 10.5 20 1.0
+cmd skyabyss dev prop ash_ball rise -4.6 -59 10.5 20 1.0
+cmd skyabyss dev prop shell_spike rise -8.0 -60 10.5 20 1.0
+cmd skyabyss dev prop pearl rise -11.4 -59 10.5 20 1.0
+cmd tick step 1
+wait 4
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot e01_0
+cmd tick step 2
+wait 5
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot e01_a
+cmd tick step 9
+wait 12
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot e01_b
+cmd tick step 18
+wait 21
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot e01_c
+cmd tick unfreeze
+cmd kill @e[type=!player]
+wait 10
+cmd tick freeze
+cmd skyabyss dev prop arrow rise 12.4 -59 10.5 20 1.0
+cmd skyabyss dev prop arrow_volley fall 9.0 -60 10.5 6 4 20 1.0
+cmd skyabyss dev prop wind_blade rise 5.6 -59 10.5 20 1.0
+cmd skyabyss dev prop spore rise 2.2 -60 10.5 20 1.0
+cmd skyabyss dev prop wisp_orb rise -1.2 -59 10.5 20 1.0
+cmd skyabyss dev prop net rise -4.6 -59 10.5 20 1.0
+cmd skyabyss dev prop whirlwind rise -8.0 -60 10.5 20 1.0
+cmd skyabyss dev prop light_pillar rise -11.4 -60 10.5 20 1.0
+cmd tick step 1
+wait 4
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot e02_0
+cmd tick step 2
+wait 5
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot e02_a
+cmd tick step 9
+wait 12
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot e02_b
+cmd tick step 18
+wait 21
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot e02_c
+cmd tick unfreeze
+cmd kill @e[type=!player]
+wait 10
+cmd tick freeze
+cmd skyabyss dev prop feather fall 2.2 -60 10.5 6 4 20 1.0
+cmd skyabyss dev prop weight fall -1.2 -60 10.5 6 4 20 1.0
+cmd tick step 1
+wait 4
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot e03_0
+cmd tick step 2
+wait 5
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot e03_a
+cmd tick step 9
+wait 12
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot e03_b
+cmd tick step 18
+wait 21
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot e03_c
+cmd tick unfreeze
+wait 20

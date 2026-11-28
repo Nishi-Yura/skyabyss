@@ -1,0 +1,65 @@
+# 神器の大きな能力を実際に発動して撮る (myth_cast.py が書く)
+world myth_cast flat
+size 1280 720
+timeout 3000
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd gamerule doMobLoot false
+cmd gamerule fallDamage false
+camera 0.5 -60 0.5 0 0
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 70
+cmd skyabyss level set @p 50
+cmd attribute @s skyabyss:max_mana base set 200
+perspective first
+gearlook skill d
+# ---- feather
+camera 0.5 -60 0.5 0 0
+cmd kill @e[type=!player]
+cmd effect clear @s
+cmd effect give @s minecraft:instant_health 1 5 true
+cmd skyabyss job choose archer
+cmd skyabyss skill forget @s
+cmd item replace entity @s weapon.mainhand with skyabyss:divine_plume_bow
+cmd summon skyabyss:bandit 0.5 -60 3.0 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Rotation:[180f,0f],active_effects:[{id:"minecraft:resistance",amplifier:3,duration:99999,show_particles:0b},{id:"minecraft:regeneration",amplifier:9,duration:99999,show_particles:0b}]}
+wait 30
+chat clear
+camera 0.5 -60 0.5 0 14
+cmd give @s minecraft:arrow 64
+use
+wait 30
+stopuse
+wait 6
+use
+wait 30
+stopuse
+wait 6
+use
+wait 30
+stopuse
+wait 6
+camera 0.5 -60 0.5 0 14
+cmd skyabyss skill points @s 100
+cmd skyabyss skill node @s cloud_pierce
+cmd skyabyss skill learn @s cloud_pierce 1
+cmd skyabyss skill slot @s 1 cloud_pierce
+cmd skyabyss skill cooldowns @s
+cmd skyabyss skill mana @s full
+cmd skyabyss skill cast @s 1
+wait 3
+camera 5 -57 -1.5 45 21
+hud off
+wait 4
+shot d_my_feather_a
+wait 8
+shot d_my_feather_b
+wait 30

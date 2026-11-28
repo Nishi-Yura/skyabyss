@@ -137,6 +137,12 @@ public final class TideMobRenderers {
 
         @Override
         public void render(BubbleShot shot, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {
+            // 試作 d: 泡の D の模型 (縁と光沢の 2D、進む向きへ頭を向ける)
+            if (jp.revati.skyabyss.client.combat.AttackPropRenderer.drawKindD("bubble_shot", shot.tickCount + partialTick, shot.getYRot(),
+                    shot.getDeltaMovement(), 1.0f, pose, buffers)) {
+                super.render(shot, yaw, partialTick, pose, buffers, light);
+                return;
+            }
             pose.pushPose();
             float wobble = 1f + 0.08f * (float) Math.sin((shot.tickCount + partialTick) * 0.6f);
             pose.scale(0.55f * wobble, 0.55f / wobble, 0.55f);

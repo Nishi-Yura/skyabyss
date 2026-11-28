@@ -145,12 +145,21 @@ public final class AreaFx {
                 float s = k.scale;
                 // 出る瞬間は少し縦に伸び、沈むときは縦に縮む
                 pose.scale(s, s * (0.55f + 0.45f * h), s);
+                // 試作 d: 敵の形と同じ D の模型 (光の板と暗い固いもの)。無ければ点の模型
+                if (jp.revati.skyabyss.client.combat.AttackPropRenderer.drawKindD(meshOf(d.look.element, k.b), since - k.delay, 0f, null, 1f, pose,
+                        mc.renderBuffers().bufferSource())) {
+                    pose.popPose();
+                    continue;
+                }
                 // 点の模型 (client/splat)
                 jp.revati.skyabyss.client.splat.SplatDraw.mesh(mesh, null, null, pose.last().pose(), null, light, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
                 pose.popPose();
             }
         }
         STATIC.keySet().retainAll(live);
+        if (jp.revati.skyabyss.client.look.GearLook.skill == 'd') {
+            mc.renderBuffers().bufferSource().endBatch();
+        }
         for (Map.Entry<RenderType, com.mojang.blaze3d.vertex.BufferBuilder> e : builders.entrySet()) {
             com.mojang.blaze3d.vertex.MeshData md = e.getValue().build();
             if (md != null) {

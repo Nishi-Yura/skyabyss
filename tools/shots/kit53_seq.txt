@@ -1,0 +1,50 @@
+# 形の連続 (seq53.py が書く)
+world kit53 flat
+size 1280 720
+timeout 2400
+render 8
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 60
+cmd tp @s 0.5 -60 -20 0 30
+gearlook skill d
+cmd kill @e[type=skyabyss:prop_my_warden]
+wait 10
+camera 0.5 -56.5 -3.5 0 22
+hud off
+cmd tick freeze
+cmd skyabyss dev prop my_sky_hand fall 11.0 -60 10.5 4
+cmd skyabyss dev prop my_warden rise 6.8 -60 10.5 16
+cmd skyabyss dev prop my_balance rise 2.6 -60 10.5 16
+cmd skyabyss dev prop my_big_bell fall -1.6 -60 10.5 4
+cmd skyabyss dev prop my_melt rise -5.8 -60 10.5 16
+cmd skyabyss dev prop my_pull rise -10.0 -60 10.5 16
+cmd tick step 2
+wait 5
+shot d_my0_t02
+cmd tick step 4
+wait 7
+shot d_my0_t06
+cmd tick step 8
+wait 11
+shot d_my0_t14
+cmd tick step 6
+wait 9
+shot d_my0_t20
+cmd tick step 4
+wait 7
+shot d_my0_t24
+cmd tick step 4
+wait 7
+shot d_my0_t28
+cmd tick unfreeze
+wait 20

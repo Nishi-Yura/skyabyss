@@ -35,13 +35,36 @@ public final class AttackPropDev {
                             Vec3 at = Vec3Argument.getVec3(ctx, "at");
                             AttackProps.rise(lv, StringArgumentType.getString(ctx, "kind"), null, at, 0f, 1f, 200);
                             return 1;
-                        })))
+                        }).then(Commands.argument("linger", IntegerArgumentType.integer(1, 400)).executes(ctx -> {
+                            // 留まる tick を短くすると、燃え尽き (AttackProps の AFTERBURN) まで撮れる
+                            // 本番の呼び出しと同じ riseLater を通す (神器などはここで燃え尽きが命に足される)
+                            AttackProps.riseLater(ctx.getSource().getLevel(), StringArgumentType.getString(ctx, "kind"), null, Vec3Argument.getVec3(ctx, "at"), 0f, 1f,
+                                    IntegerArgumentType.getInteger(ctx, "linger"), 0);
+                            return 1;
+                        }).then(Commands.argument("size", com.mojang.brigadier.arguments.FloatArgumentType.floatArg(0.1f, 8f)).executes(ctx -> {
+                            // 本番の大きさで撮る
+                            AttackProps.riseLater(ctx.getSource().getLevel(), StringArgumentType.getString(ctx, "kind"), null, Vec3Argument.getVec3(ctx, "at"), 0f,
+                                    com.mojang.brigadier.arguments.FloatArgumentType.getFloat(ctx, "size"), IntegerArgumentType.getInteger(ctx, "linger"), 0);
+                            return 1;
+                        })))))
                         .then(Commands.literal("fall").then(Commands.argument("at", Vec3Argument.vec3()).then(Commands.argument("warn", IntegerArgumentType.integer(2, 400))
                                 .executes(ctx -> {
                                     AttackProps.fall(ctx.getSource().getLevel(), StringArgumentType.getString(ctx, "kind"), null, Vec3Argument.getVec3(ctx, "at"),
                                             IntegerArgumentType.getInteger(ctx, "warn"), 14, 14f, 1.4f, 200);
                                     return 1;
-                                }))))
+                                }).then(Commands.argument("fallTicks", IntegerArgumentType.integer(2, 40)).then(Commands.argument("linger", IntegerArgumentType.integer(1, 400))
+                                        .executes(ctx -> {
+                                            // 本番と同じ落ちる tick・留まる tick で着地と燃え尽きまで撮る
+                                            AttackProps.fall(ctx.getSource().getLevel(), StringArgumentType.getString(ctx, "kind"), null, Vec3Argument.getVec3(ctx, "at"),
+                                                    IntegerArgumentType.getInteger(ctx, "warn"), IntegerArgumentType.getInteger(ctx, "fallTicks"), 7f, 1.4f,
+                                                    IntegerArgumentType.getInteger(ctx, "linger"));
+                                            return 1;
+                                        }).then(Commands.argument("size", com.mojang.brigadier.arguments.FloatArgumentType.floatArg(0.1f, 8f)).executes(ctx -> {
+                                            AttackProps.fall(ctx.getSource().getLevel(), StringArgumentType.getString(ctx, "kind"), null, Vec3Argument.getVec3(ctx, "at"),
+                                                    IntegerArgumentType.getInteger(ctx, "warn"), IntegerArgumentType.getInteger(ctx, "fallTicks"), 7f,
+                                                    com.mojang.brigadier.arguments.FloatArgumentType.getFloat(ctx, "size"), IntegerArgumentType.getInteger(ctx, "linger"));
+                                            return 1;
+                                        })))))))
                         .then(Commands.literal("toss").then(Commands.argument("from", Vec3Argument.vec3()).then(Commands.argument("to", Vec3Argument.vec3())
                                 .then(Commands.argument("warn", IntegerArgumentType.integer(2, 400)).executes(ctx -> {
                                     AttackProps.toss(ctx.getSource().getLevel(), StringArgumentType.getString(ctx, "kind"), null, Vec3Argument.getVec3(ctx, "from"),

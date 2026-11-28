@@ -34,7 +34,16 @@ public final class TideHeartClient {
     static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(TideHeartSetup.TIDE_HEART.get(), TideHeartRenderer::new);
         event.registerEntityRenderer(TideHeartSetup.TIDE_BUBBLE.get(), TideBubbleRenderer::new);
-        event.registerEntityRenderer(TideHeartSetup.TIDE_PEARL.get(), ctx -> new ThrownItemRenderer<>(ctx, 1.6f, true));
+        event.registerEntityRenderer(TideHeartSetup.TIDE_PEARL.get(), ctx -> new ThrownItemRenderer<jp.revati.skyabyss.titan.tide.heart.TidePearl>(ctx, 1.6f, true) {
+            @Override
+            public void render(jp.revati.skyabyss.titan.tide.heart.TidePearl e, float yaw, float partial, com.mojang.blaze3d.vertex.PoseStack pose,
+                               net.minecraft.client.renderer.MultiBufferSource buffers, int light) {
+                // 試作 d: 敵の真珠と同じ D の模型
+                if (!jp.revati.skyabyss.client.combat.AttackPropRenderer.drawKindD("pearl", e.tickCount + partial, e.getYRot(), e.getDeltaMovement(), 1.2f, pose, buffers)) {
+                    super.render(e, yaw, partial, pose, buffers, light);
+                }
+            }
+        });
     }
 
     // サーバーからの引き寄せ・跳ね上げ

@@ -1,0 +1,44 @@
+# 技の連続撮影 (skillframes.py が書く)
+world skill_frames flat
+size 1280 720
+timeout 3000
+render 8
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd effect give @s minecraft:resistance infinite 255 true
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 60
+cmd tp @s 0.5 -60 -30 0 30
+gearlook skill d
+cmd kill @e[type=!player]
+wait 10
+cmd tick freeze
+cmd skyabyss dev prop ss_ebb_tide rise 0.5 -60 10.5 30 2.4
+cmd tick step 2
+wait 5
+camera 0.5 -55 -2 0 25
+hud off
+wait 4
+shot sf_02
+cmd tick step 4
+wait 7
+camera 0.5 -55 -2 0 25
+hud off
+wait 4
+shot sf_06
+cmd tick step 8
+wait 11
+camera 0.5 -55 -2 0 25
+hud off
+wait 4
+shot sf_14
+cmd tick unfreeze
+wait 20

@@ -9,7 +9,9 @@ public final class GearLook {
     public static volatile char weapon = 'a';
     // 防具も 2026-11-21 から a が既定 (look5 の作り直し)。a の模型が無い組は前の描き方のまま
     public static volatile char armor = 'a';
-    public static volatile char skill = '0';
+    // 技・敵の攻撃の形も 2026-11-28 から d が既定 (試作 D: 光は手描きの 2D の板、固いものは暗い 3D。技 118・敵 26・範囲 8 すべてに D の模型がある)。
+    // 前の描き方 (点の模型・FxDraw・SkillFx の光) は `gearlook skill 0` で見られる
+    public static volatile char skill = 'd';
 
     private GearLook() {
     }

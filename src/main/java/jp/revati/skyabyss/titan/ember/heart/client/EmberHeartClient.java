@@ -46,7 +46,16 @@ public final class EmberHeartClient {
     @SubscribeEvent
     static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(EmberHeartSetup.EMBER_HEART.get(), EmberHeartRenderer::new);
-        event.registerEntityRenderer(EmberHeartSetup.ASH_PELLET.get(), ctx -> new ThrownItemRenderer<>(ctx, 1.4f, true));
+        event.registerEntityRenderer(EmberHeartSetup.ASH_PELLET.get(), ctx -> new ThrownItemRenderer<jp.revati.skyabyss.titan.ember.heart.EmberAshPellet>(ctx, 1.4f, true) {
+            @Override
+            public void render(jp.revati.skyabyss.titan.ember.heart.EmberAshPellet e, float yaw, float partial, com.mojang.blaze3d.vertex.PoseStack pose,
+                               net.minecraft.client.renderer.MultiBufferSource buffers, int light) {
+                // 試作 d: 敵の灰の玉と同じ D の模型
+                if (!jp.revati.skyabyss.client.combat.AttackPropRenderer.drawKindD("ash_ball", e.tickCount + partial, e.getYRot(), e.getDeltaMovement(), 1.2f, pose, buffers)) {
+                    super.render(e, yaw, partial, pose, buffers, light);
+                }
+            }
+        });
     }
 
     // サーバーからの引き寄せ・跳ね上げ

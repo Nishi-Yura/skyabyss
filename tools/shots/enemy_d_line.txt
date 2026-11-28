@@ -1,0 +1,71 @@
+# 敵の攻撃の形を D で並べて撮る (enemyline.py が書く)
+world enemy_d flat
+size 1280 720
+timeout 4000
+render 8
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd effect give @s minecraft:resistance infinite 255 true
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 60
+cmd tp @s 0.5 -60 -30 0 30
+gearlook skill d
+camera 0.5 -60 -30 0 30
+cmd kill @e[type=!player]
+wait 10
+cmd skyabyss dev prop bone_spike rise 13.3 -60 10.5
+cmd skyabyss dev prop tentacle rise 10.1 -60 10.5
+cmd skyabyss dev prop crystal_spike rise 6.9 -60 10.5
+cmd skyabyss dev prop lava_pillar rise 3.7 -60 10.5
+cmd skyabyss dev prop ice_spike rise 0.5 -60 10.5
+cmd skyabyss dev prop water_spout rise -2.7 -60 10.5
+cmd skyabyss dev prop lightning rise -5.9 -60 10.5
+cmd skyabyss dev prop shell_spike rise -9.1 -60 10.5
+cmd skyabyss dev prop spore rise -12.3 -60 10.5
+wait 14
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot en_d00
+camera 0.5 -60 -30 0 30
+cmd kill @e[type=!player]
+wait 10
+cmd skyabyss dev prop whirlwind rise 13.3 -60 10.5
+cmd skyabyss dev prop light_pillar rise 10.1 -60 10.5
+cmd skyabyss dev prop rock rise 6.9 -59 10.5
+cmd skyabyss dev prop bone_shard rise 3.7 -59 10.5
+cmd skyabyss dev prop ink_blob rise 0.5 -59 10.5
+cmd skyabyss dev prop fireball rise -2.7 -59 10.5
+cmd skyabyss dev prop coral_spear rise -5.9 -59 10.5
+cmd skyabyss dev prop ash_ball rise -9.1 -59 10.5
+cmd skyabyss dev prop pearl rise -12.3 -59 10.5
+wait 14
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot en_d01
+camera 0.5 -60 -30 0 30
+cmd kill @e[type=!player]
+wait 10
+cmd skyabyss dev prop arrow rise 11.7 -59 10.5
+cmd skyabyss dev prop wind_blade rise 8.5 -59 10.5
+cmd skyabyss dev prop wisp_orb rise 5.3 -59 10.5
+cmd skyabyss dev prop net rise 2.1 -59 10.5
+cmd skyabyss dev prop icicle fall -1.1 -60 10.5 4
+cmd skyabyss dev prop arrow_volley fall -4.3 -60 10.5 4
+cmd skyabyss dev prop feather fall -7.5 -60 10.5 4
+cmd skyabyss dev prop weight fall -10.7 -60 10.5 4
+wait 14
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 4
+shot en_d02
+wait 20

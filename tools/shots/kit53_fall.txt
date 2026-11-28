@@ -1,0 +1,90 @@
+# 落ちる形の連続 (fall53.py が書く)
+world kit53 flat
+size 1280 720
+timeout 2400
+render 8
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 60
+cmd tp @s 0.5 -60 -20 0 30
+gearlook skill a
+camera 0.5 -55.5 -6 0 18
+hud off
+wait 10
+cmd tick freeze
+cmd skyabyss dev prop my_sky_hand fall 13.1 -60 10.5 8 6 10
+cmd skyabyss dev prop my_big_bell fall 9.5 -60 10.5 3 3 14
+cmd skyabyss dev prop my_new_moon fall 5.9 -60 10.5 10 8 10
+cmd skyabyss dev prop lg_whale_fall fall 2.3 -60 10.5 20 8 10
+cmd skyabyss dev prop lg_moon_fall fall -1.3 -60 10.5 16 8 10
+cmd skyabyss dev prop my_feather fall -4.9 -60 10.5 10 6 8
+cmd skyabyss dev prop ss_grave_bell_fall fall -8.5 -60 10.5 3 3 10
+cmd skyabyss dev prop ss_stardust_fall fall -12.1 -60 10.5 6 6 10
+cmd tick step 6
+wait 9
+shot a_fall_t06
+cmd tick step 4
+wait 7
+shot a_fall_t10
+cmd tick step 4
+wait 7
+shot a_fall_t14
+cmd tick step 6
+wait 9
+shot a_fall_t20
+cmd tick step 6
+wait 9
+shot a_fall_t26
+cmd tick step 6
+wait 9
+shot a_fall_t32
+cmd tick step 6
+wait 9
+shot a_fall_t38
+cmd tick unfreeze
+wait 60
+gearlook skill d
+camera 0.5 -55.5 -6 0 18
+hud off
+wait 10
+cmd tick freeze
+cmd skyabyss dev prop my_sky_hand fall 13.1 -60 10.5 8 6 10
+cmd skyabyss dev prop my_big_bell fall 9.5 -60 10.5 3 3 14
+cmd skyabyss dev prop my_new_moon fall 5.9 -60 10.5 10 8 10
+cmd skyabyss dev prop lg_whale_fall fall 2.3 -60 10.5 20 8 10
+cmd skyabyss dev prop lg_moon_fall fall -1.3 -60 10.5 16 8 10
+cmd skyabyss dev prop my_feather fall -4.9 -60 10.5 10 6 8
+cmd skyabyss dev prop ss_grave_bell_fall fall -8.5 -60 10.5 3 3 10
+cmd skyabyss dev prop ss_stardust_fall fall -12.1 -60 10.5 6 6 10
+cmd tick step 6
+wait 9
+shot d_fall_t06
+cmd tick step 4
+wait 7
+shot d_fall_t10
+cmd tick step 4
+wait 7
+shot d_fall_t14
+cmd tick step 6
+wait 9
+shot d_fall_t20
+cmd tick step 6
+wait 9
+shot d_fall_t26
+cmd tick step 6
+wait 9
+shot d_fall_t32
+cmd tick step 6
+wait 9
+shot d_fall_t38
+cmd tick unfreeze
+wait 60

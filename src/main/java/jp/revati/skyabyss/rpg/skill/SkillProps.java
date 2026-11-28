@@ -130,7 +130,7 @@ public final class SkillProps {
             case EBB_TIDE -> c.put("ebb_tide", c.foot(), 2.4f, 14, 2, 0f);
             case CYCLE_SONG -> c.put("cycle_song", c.foot(), 1.3f, 24, 0, 0f);
             case CURSE_MARK -> c.put("curse_mark", c.targetOr(10.0), 1.0f, 40, 3, 0f);
-            case LAMP_CHARM -> c.put("lamp_charm", c.targetOr(3.0), 1.0f, 100, 0, 0f);
+            case LAMP_CHARM -> c.put("lamp_charm", c.targetOr(3.0), 1.5f, 100, 0, 0f);  // 2026-11-28: 1.0 では細く小さかった (見た目だけ)
             // ---------------------------------------------------------------- 鍛冶師 (赤熱の鉄)
             case TEMPER -> c.put("temper", c.foot(), 1.1f, 24, 0, 0f);
             case EMBER_HAMMER -> c.put("ember_hammer", c.front(2.0), 1.6f, 16, 3, 0f);

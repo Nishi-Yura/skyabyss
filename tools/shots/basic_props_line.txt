@@ -1,0 +1,98 @@
+# 通常攻撃の形を並べて置いて撮る (元の見た目 a と試作 d)。bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/basic_props_line.txt -PshotsName=basic_line
+world basic_props flat
+size 1280 720
+timeout 2400
+render 6
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd gamerule doMobLoot false
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+perspective back
+fov 60
+cmd tp @s 20.5 -60 -12 0 0
+gearlook skill a
+cmd kill @e[type=!player]
+wait 10
+cmd skyabyss dev prop sk_el_stone rise -10.5 -60 14.5
+cmd skyabyss dev prop sk_el_wind rise -8.3 -60 14.5
+cmd skyabyss dev prop sk_el_tide rise -6.1 -60 14.5
+cmd skyabyss dev prop sk_el_ash rise -3.9 -60 14.5
+cmd skyabyss dev prop sk_el_bone rise -1.7 -60 14.5
+cmd skyabyss dev prop sk_ch_rune rise 0.5 -60 14.5
+cmd skyabyss dev prop sk_ch_rewrite rise 2.7 -60 14.5
+cmd skyabyss dev prop sk_ch_mutation rise 4.9 -60 14.5
+cmd skyabyss dev prop sk_ch_secret rise 7.1 -60 14.5
+cmd skyabyss dev prop sk_mastery_3 rise 9.3 -60 14.5
+cmd skyabyss dev prop sk_mastery_5 rise 11.5 -60 14.5
+cmd skyabyss dev prop sk_bolt_0 rise -7.5 -59.5 2.5
+cmd skyabyss dev prop sk_hex_0 rise -7.5 -60 8.5
+cmd skyabyss dev prop sk_bolt_1 rise -3.5 -59.5 2.5
+cmd skyabyss dev prop sk_hex_1 rise -3.5 -60 8.5
+cmd skyabyss dev prop sk_bolt_2 rise 0.5 -59.5 2.5
+cmd skyabyss dev prop sk_hex_2 rise 0.5 -60 8.5
+cmd skyabyss dev prop sk_bolt_3 rise 4.5 -59.5 2.5
+cmd skyabyss dev prop sk_hex_3 rise 4.5 -60 8.5
+cmd skyabyss dev prop sk_bolt_4 rise 8.5 -59.5 2.5
+cmd skyabyss dev prop sk_hex_4 rise 8.5 -60 8.5
+wait 12
+camera 0.5 -55.5 -6 0 22
+hud off
+wait 5
+shot a_all
+camera 0.5 -57.5 -2.5 0 18
+wait 5
+shot a_bolts
+camera 0.5 -55 1 0 25
+wait 5
+shot a_hexes
+camera 0.5 -57 8 0 28
+wait 5
+shot a_kit
+wait 20
+gearlook skill d
+cmd kill @e[type=!player]
+wait 10
+cmd skyabyss dev prop sk_el_stone rise -10.5 -60 14.5
+cmd skyabyss dev prop sk_el_wind rise -8.3 -60 14.5
+cmd skyabyss dev prop sk_el_tide rise -6.1 -60 14.5
+cmd skyabyss dev prop sk_el_ash rise -3.9 -60 14.5
+cmd skyabyss dev prop sk_el_bone rise -1.7 -60 14.5
+cmd skyabyss dev prop sk_ch_rune rise 0.5 -60 14.5
+cmd skyabyss dev prop sk_ch_rewrite rise 2.7 -60 14.5
+cmd skyabyss dev prop sk_ch_mutation rise 4.9 -60 14.5
+cmd skyabyss dev prop sk_ch_secret rise 7.1 -60 14.5
+cmd skyabyss dev prop sk_mastery_3 rise 9.3 -60 14.5
+cmd skyabyss dev prop sk_mastery_5 rise 11.5 -60 14.5
+cmd skyabyss dev prop sk_bolt_0 rise -7.5 -59.5 2.5
+cmd skyabyss dev prop sk_hex_0 rise -7.5 -60 8.5
+cmd skyabyss dev prop sk_bolt_1 rise -3.5 -59.5 2.5
+cmd skyabyss dev prop sk_hex_1 rise -3.5 -60 8.5
+cmd skyabyss dev prop sk_bolt_2 rise 0.5 -59.5 2.5
+cmd skyabyss dev prop sk_hex_2 rise 0.5 -60 8.5
+cmd skyabyss dev prop sk_bolt_3 rise 4.5 -59.5 2.5
+cmd skyabyss dev prop sk_hex_3 rise 4.5 -60 8.5
+cmd skyabyss dev prop sk_bolt_4 rise 8.5 -59.5 2.5
+cmd skyabyss dev prop sk_hex_4 rise 8.5 -60 8.5
+wait 12
+camera 0.5 -55.5 -6 0 22
+hud off
+wait 5
+shot d_all
+camera 0.5 -57.5 -2.5 0 18
+wait 5
+shot d_bolts
+camera 0.5 -55 1 0 25
+wait 5
+shot d_hexes
+camera 0.5 -57 8 0 28
+wait 5
+shot d_kit
+wait 20

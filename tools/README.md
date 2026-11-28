@@ -422,6 +422,8 @@ python tools/gen/sound/gen_cinematic_voice.py --review                     # 3 �
 
 ### 技の見た目（動く絵）
 
+- 試作 D の形を並べて置いて撮る: 技 `tools/shots/kit_all_line.txt`、敵の攻撃の形 `tools/shots/enemy_d_line.txt`（`bash tools/dev/mc_run.sh runShots -Pscript=<台本> -PshotsName=<名>`。`/skyabyss dev prop <種類> rise|fall …` で置く）。敵の本番の動き（落ちる途中・投げる途中を `cmd tick freeze`／`tick step` で止める）`tools/shots/enemy_d_move.txt`、範囲攻撃 `tools/shots/area_d.txt`。
+
 - 撮り方: `python tools/gen/shots/gen_skill_fx_shots.py`（台本 `tools/shots/skill_fx.txt` と `tools/shots/skill_fx_clips.json` を書く）→ `bash tools/dev/mc_run.sh runShots -Pscript=tools/shots/skill_fx.txt -PshotsName=skill_fx`。一技を一本の録画（`record <技> <tick> <fps>`）で撮り、`run/shots/skill_fx/<技>/0000.png …` に書く。録画の間は `/tick rate 5` で、論理時刻で 30 枚/秒ずつ撮る（台本の手順は止めない。終わるのを待つのは `recwait`）。撮りは 25 本で十数分。
 - 絵にする: `python tools/site/encode_skill_fx_clips.py`（幅 640・ループの動く webp を `site/img/skill_fx/<技>.webp`、当たりの瞬間の止めた絵を `<技>_poster.webp` に書く。目安 500 KB 以下、超えたら画質を下げる。ffmpeg は使わない）。録画の場所を変えるときは引数に渡す。
 

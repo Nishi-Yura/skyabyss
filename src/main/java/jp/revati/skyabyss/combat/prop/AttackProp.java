@@ -101,6 +101,11 @@ public class AttackProp extends Entity implements GeoEntity, jp.revati.skyabyss.
         return entityData.get(DELAY);
     }
 
+    // FALL・TOSS が着く tick (生まれてから)
+    public int landTick() {
+        return entityData.get(DELAY) + entityData.get(TRAVEL);
+    }
+
     public int life() {
         int m = mode();
         if (m == FOLLOW) {

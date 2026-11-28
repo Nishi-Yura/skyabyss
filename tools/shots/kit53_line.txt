@@ -1,0 +1,173 @@
+# 神器・粉の技・伝説・型の放ちの形を並べて撮る (line53.py が書く)
+world kit53 flat
+size 1280 720
+timeout 3000
+render 8
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd effect give @s minecraft:resistance infinite 255 true
+cmd gamerule doMobLoot false
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 60
+cmd tp @s 0.5 -60 -20 0 30
+gearlook skill a
+cmd kill @e[type=!player]
+wait 10
+cmd skyabyss dev prop my_sky_hand fall 11.0 -60 10.5 4
+cmd skyabyss dev prop my_warden rise 6.8 -60 10.5
+cmd skyabyss dev prop my_balance rise 2.6 -60 10.5
+cmd skyabyss dev prop my_big_bell fall -1.6 -60 10.5 4
+cmd skyabyss dev prop my_melt rise -5.8 -60 10.5
+cmd skyabyss dev prop my_pull rise -10.0 -60 10.5
+wait 14
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 5
+shot a_my0
+cmd kill @e[type=!player]
+wait 10
+cmd skyabyss dev prop my_life_lamp rise 11.0 -60 10.5
+cmd skyabyss dev prop my_gaze rise 6.8 -60 10.5
+cmd skyabyss dev prop my_new_moon fall 2.6 -60 10.5 4
+cmd skyabyss dev prop my_feather rise -1.6 -60 10.5
+cmd skyabyss dev prop my_mist rise -5.8 -60 10.5
+cmd skyabyss dev prop my_eye_arrow rise -10.0 -60 10.5
+wait 14
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 5
+shot a_my1
+cmd kill @e[type=!player]
+wait 10
+cmd skyabyss dev prop my_rewind rise 11.0 -60 10.5
+cmd skyabyss dev prop my_moth rise 6.8 -60 10.5
+cmd skyabyss dev prop my_chase_mark rise 2.6 -60 10.5
+cmd skyabyss dev prop my_promise rise -1.6 -60 10.5
+cmd skyabyss dev prop my_silence rise -5.8 -60 10.5
+cmd skyabyss dev prop my_clap rise -10.0 -60 10.5
+wait 14
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 5
+shot a_my2
+cmd kill @e[type=!player]
+wait 10
+cmd skyabyss dev prop gx_smash rise 11.0 -60 10.5
+cmd skyabyss dev prop gx_cleaver rise 6.8 -60 10.5
+cmd skyabyss dev prop gx_forge rise 2.6 -60 10.5
+cmd skyabyss dev prop gx_temper rise -1.6 -60 10.5
+cmd skyabyss dev prop gx_ash rise -5.8 -60 10.5
+cmd skyabyss dev prop gx_thunder rise -10.0 -60 10.5
+wait 14
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 5
+shot a_gx0
+cmd kill @e[type=!player]
+wait 10
+cmd skyabyss dev prop gx_fire rise 11.0 -60 10.5
+cmd skyabyss dev prop gx_freeze rise 6.8 -60 10.5
+cmd skyabyss dev prop gx_pierce rise 2.6 -60 10.5
+cmd skyabyss dev prop gx_trap rise -1.6 -60 10.5
+cmd skyabyss dev prop gx_shadow rise -5.8 -60 10.5
+cmd skyabyss dev prop gx_lone rise -10.0 -60 10.5
+wait 14
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 5
+shot a_gx1
+cmd kill @e[type=!player]
+wait 10
+cmd skyabyss dev prop gx_ward rise 4.7 -60 10.5
+cmd skyabyss dev prop gx_tide rise 0.5 -60 10.5
+cmd skyabyss dev prop gx_curse rise -3.7 -60 10.5
+wait 14
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 5
+shot a_gx2
+gearlook skill d
+cmd kill @e[type=!player]
+wait 10
+cmd skyabyss dev prop my_sky_hand fall 11.0 -60 10.5 4
+cmd skyabyss dev prop my_warden rise 6.8 -60 10.5
+cmd skyabyss dev prop my_balance rise 2.6 -60 10.5
+cmd skyabyss dev prop my_big_bell fall -1.6 -60 10.5 4
+cmd skyabyss dev prop my_melt rise -5.8 -60 10.5
+cmd skyabyss dev prop my_pull rise -10.0 -60 10.5
+wait 14
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 5
+shot d_my0
+cmd kill @e[type=!player]
+wait 10
+cmd skyabyss dev prop my_life_lamp rise 11.0 -60 10.5
+cmd skyabyss dev prop my_gaze rise 6.8 -60 10.5
+cmd skyabyss dev prop my_new_moon fall 2.6 -60 10.5 4
+cmd skyabyss dev prop my_feather rise -1.6 -60 10.5
+cmd skyabyss dev prop my_mist rise -5.8 -60 10.5
+cmd skyabyss dev prop my_eye_arrow rise -10.0 -60 10.5
+wait 14
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 5
+shot d_my1
+cmd kill @e[type=!player]
+wait 10
+cmd skyabyss dev prop my_rewind rise 11.0 -60 10.5
+cmd skyabyss dev prop my_moth rise 6.8 -60 10.5
+cmd skyabyss dev prop my_chase_mark rise 2.6 -60 10.5
+cmd skyabyss dev prop my_promise rise -1.6 -60 10.5
+cmd skyabyss dev prop my_silence rise -5.8 -60 10.5
+cmd skyabyss dev prop my_clap rise -10.0 -60 10.5
+wait 14
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 5
+shot d_my2
+cmd kill @e[type=!player]
+wait 10
+cmd skyabyss dev prop gx_smash rise 11.0 -60 10.5
+cmd skyabyss dev prop gx_cleaver rise 6.8 -60 10.5
+cmd skyabyss dev prop gx_forge rise 2.6 -60 10.5
+cmd skyabyss dev prop gx_temper rise -1.6 -60 10.5
+cmd skyabyss dev prop gx_ash rise -5.8 -60 10.5
+cmd skyabyss dev prop gx_thunder rise -10.0 -60 10.5
+wait 14
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 5
+shot d_gx0
+cmd kill @e[type=!player]
+wait 10
+cmd skyabyss dev prop gx_fire rise 11.0 -60 10.5
+cmd skyabyss dev prop gx_freeze rise 6.8 -60 10.5
+cmd skyabyss dev prop gx_pierce rise 2.6 -60 10.5
+cmd skyabyss dev prop gx_trap rise -1.6 -60 10.5
+cmd skyabyss dev prop gx_shadow rise -5.8 -60 10.5
+cmd skyabyss dev prop gx_lone rise -10.0 -60 10.5
+wait 14
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 5
+shot d_gx1
+cmd kill @e[type=!player]
+wait 10
+cmd skyabyss dev prop gx_ward rise 4.7 -60 10.5
+cmd skyabyss dev prop gx_tide rise 0.5 -60 10.5
+cmd skyabyss dev prop gx_curse rise -3.7 -60 10.5
+wait 14
+camera 0.5 -56.5 -3.5 0 22
+hud off
+wait 5
+shot d_gx2
+wait 20

@@ -27,6 +27,11 @@ public class FallingLightRenderer extends EntityRenderer<FallingLight> {
     public void render(FallingLight e, float yaw, float partial, PoseStack pose, MultiBufferSource buffers, int light) {
         int look = e.look();
         float s = look == 1 ? 0.45f : look == 2 ? 1.1f : e.isShot() ? 0.6f : 1.1f;
+        // 試作 d: 技の形と同じ D の模型 (落ちる向きへ頭を向ける)
+        if (jp.revati.skyabyss.client.combat.AttackPropRenderer.drawKindD(look == 1 ? "rock" : look == 2 ? "wind_blade" : "pearl", e.tickCount + partial,
+                e.getYRot(), e.getDeltaMovement(), s, pose, buffers)) {
+            return;
+        }
         LowPolyGeoRenderer<FallingLight> r = look == 1 ? rock : look == 2 ? blade : pearl;
         pose.pushPose();
         pose.scale(s, s, s);

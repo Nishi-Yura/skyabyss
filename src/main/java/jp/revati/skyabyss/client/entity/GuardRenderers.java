@@ -122,6 +122,17 @@ public final class GuardRenderers {
             public ResourceLocation getTextureLocation(BoneSpike entity) {
                 return SPIKE;
             }
+
+            @Override
+            public void render(BoneSpike e, float yaw, float partial, com.mojang.blaze3d.vertex.PoseStack pose, net.minecraft.client.renderer.MultiBufferSource buffers, int light) {
+                // 試作 d: 敵の骨の欠片と同じ D の模型 (刺さって止まった棘も矢の向きのまま)
+                double yr = Math.toRadians(net.minecraft.util.Mth.lerp(partial, e.yRotO, e.getYRot()));
+                double xr = Math.toRadians(net.minecraft.util.Mth.lerp(partial, e.xRotO, e.getXRot()));
+                net.minecraft.world.phys.Vec3 dir = new net.minecraft.world.phys.Vec3(Math.sin(yr) * Math.cos(xr), Math.sin(xr), Math.cos(yr) * Math.cos(xr));
+                if (!jp.revati.skyabyss.client.combat.AttackPropRenderer.drawKindD("bone_shard", e.tickCount + partial, 0f, dir, 0.7f, pose, buffers)) {
+                    super.render(e, yaw, partial, pose, buffers, light);
+                }
+            }
         });
     }
 

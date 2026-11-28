@@ -27,6 +27,11 @@ PALETTES = {
     "snare": [(255, 255, 255), (220, 230, 240), (120, 124, 136), (30, 30, 36)],
     "rain": [(240, 246, 255), (176, 188, 210), (98, 108, 132), (40, 44, 56)],
     "spark": [(255, 255, 255), (240, 222, 160), (120, 132, 160), (30, 32, 42)],
+    "dusk": [(255, 248, 236), (250, 172, 122), (112, 62, 66), (30, 20, 24)],
+    "memory": [(255, 248, 232), (234, 208, 166), (98, 72, 54), (34, 24, 18)],
+    "lure": [(246, 255, 222), (200, 236, 128), (72, 50, 82), (24, 14, 26)],
+    "echoviolet": [(246, 236, 255), (192, 152, 250), (72, 58, 132), (22, 20, 44)],
+    "abyss": [(214, 255, 240), (110, 226, 200), (46, 84, 120), (16, 20, 36)],
     "forge": [(255, 255, 236), (250, 236, 160), (176, 96, 70), (52, 30, 26)],
     "ash": [(246, 242, 252), (206, 198, 226), (140, 128, 172), (52, 44, 50)],
     "coal": [(255, 214, 214), (240, 70, 84), (168, 20, 42), (30, 26, 28)],
@@ -108,6 +113,16 @@ def main():
         pocks(n, c, cr, rnd, put)
     elif a.shape == "sparks":
         sparks(n, c, cr, rnd, put)
+    elif a.shape == "dusk":
+        dusk(n, c, cr, rnd, put)
+    elif a.shape == "scar":
+        scar(n, c, cr, rnd, put)
+    elif a.shape == "maw":
+        maw(n, c, cr, rnd, put)
+    elif a.shape == "echo":
+        echo(n, c, cr, rnd, put)
+    elif a.shape == "maelstrom":
+        maelstrom(n, c, cr, rnd, put)
     elif a.shape == "forge":
         forge(n, c, cr, rnd, put)
     elif a.shape == "ashswirl":
@@ -300,6 +315,140 @@ def sparks(n, c, cr, rnd, put):
     for k in range(int(cr * 1.5)):
         a = rnd.uniform(0, 2 * math.pi)
         r = rnd.uniform(0.4, 1.1) * cr
+        put(int(round(c + r * math.cos(a))), int(round(c + r * math.sin(a))), 1)
+
+
+def dusk(n, c, cr, rnd, put):
+    """最期の光の跡: 光の幕の下の輪 (太く明るい)、内の点の輪、輪から外へ短い光の筋 24 本、欠片の下の焦げ 8 つ。真ん中は空ける
+    (大きさ違いの 3 つが入れ子に出るので、輪だけを描く)"""
+    for i in range(1440):
+        a = 2 * math.pi * i / 1440
+        for f, lv in ((0.93, 3), (0.95, 4), (0.97, 4), (0.99, 3)):
+            put(int(round(c + cr * f * math.cos(a))), int(round(c + cr * f * math.sin(a))), lv)
+        if (i // 12) % 2 == 0:
+            put(int(round(c + cr * 0.86 * math.cos(a))), int(round(c + cr * 0.86 * math.sin(a))), 2)
+    for k in range(24):
+        a = 2 * math.pi * (k + 0.5) / 24
+        ln = 0.06 if k % 2 else 0.1
+        for j in range(int(cr * ln)):
+            r = cr * 1.0 + j
+            put(int(round(c + r * math.cos(a))), int(round(c + r * math.sin(a))), 3 if j < cr * ln * 0.5 else 2)
+    for k in range(8):
+        a = math.radians(22.5 + 45 * k)
+        x0, y0 = c + cr * 1.08 * math.sin(a), c + cr * 1.08 * math.cos(a)
+        for y in range(n):
+            for x in range(n):
+                if math.hypot(x - x0, y - y0) < cr * 0.06:
+                    put(x, y, 1)
+
+
+def scar(n, c, cr, rnd, put):
+    """遺響の一撃の跡: 真ん中で X に交わる 2 本の斬り跡 (真ん中が太い)、剣の影の下の短い傷 6 つ、刺さった剣の穴 3 つ"""
+    for ang in (35, -55):
+        a = math.radians(ang)
+        for j in range(-int(cr * 0.95), int(cr * 0.95) + 1):
+            f = abs(j) / (cr * 0.95)
+            w = 2.6 * (1 - f) + 0.4
+            bow = 0.12 * cr * (1 - f * f)
+            for s in range(-3, 4):
+                if abs(s) > w:
+                    continue
+                x = c + j * math.cos(a) - (s + bow) * math.sin(a)
+                y = c + j * math.sin(a) + (s + bow) * math.cos(a)
+                put(int(round(x)), int(round(y)), 4 if abs(s) < w * 0.45 else 3)
+    for k in range(6):
+        a = math.radians(30 + 60 * k)
+        for j in range(int(cr * 0.12)):
+            r = cr * 0.78 + j
+            put(int(round(c + r * math.sin(a))), int(round(c + r * math.cos(a))), 2)
+    for k in range(3):
+        a = math.radians(60 + 120 * k)
+        x0, y0 = c + cr * 0.55 * math.sin(a), c + cr * 0.55 * math.cos(a)
+        for y in range(n):
+            for x in range(n):
+                d = math.hypot(x - x0, y - y0)
+                if d < cr * 0.06:
+                    put(x, y, 1)
+                elif d < cr * 0.06 + 1.2:
+                    put(x, y, 2)
+
+
+def maw(n, c, cr, rnd, put):
+    """淵の顎の跡: 歯の根元の輪 (12 の黒い穴)、内の明るい喉の輪、穴と穴の間から真ん中へ走る短いひび"""
+    for i in range(720):
+        a = 2 * math.pi * i / 720
+        for f, lv in ((0.52, 4), (0.56, 3), (0.86, 2)):
+            put(int(round(c + cr * f * math.cos(a))), int(round(c + cr * f * math.sin(a))), lv)
+    for k in range(12):
+        a = math.radians(15 + 30 * k)
+        x0, y0 = c + cr * 0.74 * math.sin(a), c + cr * 0.74 * math.cos(a)
+        rad = cr * (0.11 if k in (0, 5, 6, 11) else 0.085)
+        for y in range(n):
+            for x in range(n):
+                d = math.hypot(x - x0, y - y0)
+                if d < rad:
+                    put(x, y, 1)
+                elif d < rad + 1.2:
+                    put(x, y, 3)
+        b = math.radians(30 * k)
+        for j in range(int(cr * 0.2)):
+            r = cr * 0.72 - j
+            put(int(round(c + r * math.sin(b) + rnd.choice((-1, 0, 0, 1)))), int(round(c + r * math.cos(b))), 3)
+    for k in range(int(cr * 0.6)):
+        a = rnd.uniform(0, 2 * math.pi)
+        r = rnd.uniform(0.2, 0.48) * cr
+        put(int(round(c + r * math.cos(a))), int(round(c + r * math.sin(a))), 2)
+
+
+def echo(n, c, cr, rnd, put):
+    """淵の残響の跡: 外へ広がる八角の波紋 4 重 (内ほど明るく、外ほど切れる)、四隅の石の下の焦げ。真ん中は空ける"""
+    for j, (f, lv, gap) in enumerate(((0.42, 4, 0), (0.6, 3, 0), (0.78, 3, 3), (0.96, 2, 2))):
+        r = cr * f
+        for k in range(8):
+            a1, a2 = math.radians(22.5 + 45 * k), math.radians(22.5 + 45 * (k + 1))
+            for i in range(160):
+                g = i / 159.0
+                if gap and (i // 20) % gap == gap - 1:
+                    continue
+                x = c + r * ((1 - g) * math.sin(a1) + g * math.sin(a2))
+                y = c + r * ((1 - g) * math.cos(a1) + g * math.cos(a2))
+                put(int(round(x)), int(round(y)), lv)
+    for k in range(4):
+        a = math.radians(45 + 90 * k)
+        x0, y0 = c + cr * 0.86 * math.sin(a), c + cr * 0.86 * math.cos(a)
+        for y in range(n):
+            for x in range(n):
+                if (x - x0) ** 2 + (y - y0) ** 2 < (cr * 0.09) ** 2:
+                    put(x, y, 1)
+
+
+def maelstrom(n, c, cr, rnd, put):
+    """淵の引きの跡: 外から真ん中へ巻き込む細い渦の筋 6 本、真ん中の淵の暗い穴と明るい縁、外の切れた輪。
+    床は模型と 180 度回るので、巻く向きは模型の腕と同じ (角が増えると内へ)"""
+    for k in range(6):
+        a0 = 2 * math.pi * k / 6
+        for j in range(400):
+            f = j / 399.0
+            r = cr * (0.98 - 0.8 * f)
+            a = a0 + 2.4 * f
+            x, y = c + r * math.sin(a), c + r * math.cos(a)
+            lv = 3 if (k % 2 == 0 or f > 0.3) else 2
+            put(int(round(x)), int(round(y)), lv)
+            if f > 0.55:
+                put(int(round(x + 1)), int(round(y)), lv)
+    for i in range(720):
+        a = 2 * math.pi * i / 720
+        for f, lv in ((0.2, 4), (0.235, 3)):
+            put(int(round(c + cr * f * math.cos(a))), int(round(c + cr * f * math.sin(a))), lv)
+        if (i // 30) % 3 != 2:
+            put(int(round(c + cr * 1.02 * math.cos(a))), int(round(c + cr * 1.02 * math.sin(a))), 2)
+    for y in range(n):
+        for x in range(n):
+            if (x - c) ** 2 + (y - c) ** 2 < (cr * 0.17) ** 2:
+                put(x, y, 1)
+    for k in range(int(cr * 0.8)):
+        a = rnd.uniform(0, 2 * math.pi)
+        r = rnd.uniform(0.3, 1.0) * cr
         put(int(round(c + r * math.cos(a))), int(round(c + r * math.sin(a))), 1)
 
 

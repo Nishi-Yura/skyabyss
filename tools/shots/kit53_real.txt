@@ -1,0 +1,416 @@
+# 本番の大きさで並べて撮る (real53.py が書く)
+world kit53 flat
+size 1280 720
+timeout 3600
+render 8
+clouds off
+guiscale 2
+cmd time set noon
+cmd gamerule doWeatherCycle false
+cmd weather clear
+cmd gamemode survival
+cmd effect give @s minecraft:resistance infinite 255 true
+hud off
+cmd skyabyss cinematic stop
+waitchunks
+chat clear
+wait 200
+fov 60
+cmd tp @s 0.5 -60 -30 0 30
+gearlook skill d
+cmd tick unfreeze
+cmd kill @e[type=minecraft:armor_stand]
+wait 5
+camera 0.5 -55 -1 0 22
+hud off
+wait 4
+cmd tick freeze
+cmd skyabyss dev prop my_sky_hand fall 8.0 -60 12.5 8 6 10 1.40
+cmd summon minecraft:armor_stand 10.2 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop my_warden rise 0.5 -60.0 12.5 14 1.30
+cmd summon minecraft:armor_stand 2.7 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop my_balance rise -7.0 -60.0 12.5 16 1.00
+cmd summon minecraft:armor_stand -4.8 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd tick step 6
+wait 9
+shot d_real00_t06
+cmd tick step 6
+wait 9
+shot d_real00_t12
+cmd tick step 10
+wait 13
+shot d_real00_t22
+cmd tick unfreeze
+cmd kill @e[type=minecraft:armor_stand]
+wait 5
+camera 0.5 -55 -1 0 22
+hud off
+wait 4
+cmd tick freeze
+cmd skyabyss dev prop my_big_bell fall 8.0 -60 12.5 3 3 14 2.00
+cmd summon minecraft:armor_stand 10.2 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop my_melt rise 0.5 -60.0 12.5 12 0.80
+cmd summon minecraft:armor_stand 2.7 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop my_pull rise -7.0 -60.0 12.5 16 3.15
+cmd summon minecraft:armor_stand -4.8 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd tick step 6
+wait 9
+shot d_real01_t06
+cmd tick step 6
+wait 9
+shot d_real01_t12
+cmd tick step 10
+wait 13
+shot d_real01_t22
+cmd tick unfreeze
+cmd kill @e[type=minecraft:armor_stand]
+wait 5
+camera 0.5 -55 -1 0 22
+hud off
+wait 4
+cmd tick freeze
+cmd skyabyss dev prop my_life_lamp rise 8.0 -60.0 12.5 20 1.00
+cmd summon minecraft:armor_stand 10.2 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop my_gaze rise 0.5 -57.6 12.5 18 0.80
+cmd summon minecraft:armor_stand 2.7 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop my_new_moon fall -7.0 -60 12.5 10 8 10 1.80
+cmd summon minecraft:armor_stand -4.8 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd tick step 6
+wait 9
+shot d_real02_t06
+cmd tick step 6
+wait 9
+shot d_real02_t12
+cmd tick step 10
+wait 13
+shot d_real02_t22
+cmd tick unfreeze
+cmd kill @e[type=minecraft:armor_stand]
+wait 5
+camera 0.5 -55 -1 0 22
+hud off
+wait 4
+cmd tick freeze
+cmd skyabyss dev prop my_feather rise 8.0 -60.0 12.5 20 1.40
+cmd summon minecraft:armor_stand 10.2 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop my_mist rise 0.5 -60.0 12.5 30 1.00
+cmd summon minecraft:armor_stand 2.7 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop my_eye_arrow rise -7.0 -60.0 12.5 12 0.80
+cmd summon minecraft:armor_stand -4.8 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd tick step 6
+wait 9
+shot d_real03_t06
+cmd tick step 6
+wait 9
+shot d_real03_t12
+cmd tick step 10
+wait 13
+shot d_real03_t22
+cmd tick unfreeze
+cmd kill @e[type=minecraft:armor_stand]
+wait 5
+camera 0.5 -55 -1 0 22
+hud off
+wait 4
+cmd tick freeze
+cmd skyabyss dev prop my_rewind rise 8.0 -60.0 12.5 16 1.30
+cmd summon minecraft:armor_stand 10.2 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop my_moth rise 0.5 -60.0 12.5 14 1.00
+cmd summon minecraft:armor_stand 2.7 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop my_chase_mark rise -7.0 -60.0 12.5 24 1.00
+cmd summon minecraft:armor_stand -4.8 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd tick step 6
+wait 9
+shot d_real04_t06
+cmd tick step 6
+wait 9
+shot d_real04_t12
+cmd tick step 10
+wait 13
+shot d_real04_t22
+cmd tick unfreeze
+cmd kill @e[type=minecraft:armor_stand]
+wait 5
+camera 0.5 -55 -1 0 22
+hud off
+wait 4
+cmd tick freeze
+cmd skyabyss dev prop my_promise rise 8.0 -60.0 12.5 14 0.90
+cmd summon minecraft:armor_stand 10.2 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop my_silence rise 0.5 -60.0 12.5 18 1.30
+cmd summon minecraft:armor_stand 2.7 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop my_clap rise -7.0 -60.0 12.5 20 1.20
+cmd summon minecraft:armor_stand -4.8 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd tick step 6
+wait 9
+shot d_real05_t06
+cmd tick step 6
+wait 9
+shot d_real05_t12
+cmd tick step 10
+wait 13
+shot d_real05_t22
+cmd tick unfreeze
+cmd kill @e[type=minecraft:armor_stand]
+wait 5
+camera 0.5 -55 -1 0 22
+hud off
+wait 4
+cmd tick freeze
+cmd skyabyss dev prop pa_quake rise 8.0 -60.0 12.5 12 2.40
+cmd summon minecraft:armor_stand 10.2 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop pa_whirl rise 0.5 -60.0 12.5 20 1.20
+cmd summon minecraft:armor_stand 2.7 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop pa_ebb rise -7.0 -60.0 12.5 16 1.00
+cmd summon minecraft:armor_stand -4.8 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd tick step 6
+wait 9
+shot d_real06_t06
+cmd tick step 6
+wait 9
+shot d_real06_t12
+cmd tick step 10
+wait 13
+shot d_real06_t22
+cmd tick unfreeze
+cmd kill @e[type=minecraft:armor_stand]
+wait 5
+camera 0.5 -55 -1 0 22
+hud off
+wait 4
+cmd tick freeze
+cmd skyabyss dev prop pa_brand rise 8.0 -60.0 12.5 40 0.60
+cmd summon minecraft:armor_stand 10.2 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop pa_brand_burst rise 0.5 -60.0 12.5 12 1.20
+cmd summon minecraft:armor_stand 2.7 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop pa_curse rise -7.0 -60.0 12.5 30 0.60
+cmd summon minecraft:armor_stand -4.8 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd tick step 6
+wait 9
+shot d_real07_t06
+cmd tick step 6
+wait 9
+shot d_real07_t12
+cmd tick step 10
+wait 13
+shot d_real07_t22
+cmd tick unfreeze
+cmd kill @e[type=minecraft:armor_stand]
+wait 5
+camera 0.5 -55 -1 0 22
+hud off
+wait 4
+cmd tick freeze
+cmd skyabyss dev prop lg_whale_rise rise 8.0 -60.0 12.5 16 0.90
+cmd summon minecraft:armor_stand 10.2 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop lg_whale_wave rise 0.5 -60.0 12.5 16 2.60
+cmd summon minecraft:armor_stand 2.7 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop lg_whale_fall fall -7.0 -60 12.5 20 8 10 1.40
+cmd summon minecraft:armor_stand -4.8 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd tick step 6
+wait 9
+shot d_real08_t06
+cmd tick step 6
+wait 9
+shot d_real08_t12
+cmd tick step 10
+wait 13
+shot d_real08_t22
+cmd tick unfreeze
+cmd kill @e[type=minecraft:armor_stand]
+wait 5
+camera 0.5 -55 -1 0 22
+hud off
+wait 4
+cmd tick freeze
+cmd skyabyss dev prop lg_tide_rise rise 8.0 -60.0 12.5 60 0.80
+cmd summon minecraft:armor_stand 10.2 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop lg_tide_wave rise 0.5 -60.0 12.5 16 2.60
+cmd summon minecraft:armor_stand 2.7 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop lg_storm_rise rise -7.0 -60.0 12.5 10 0.70
+cmd summon minecraft:armor_stand -4.8 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd tick step 6
+wait 9
+shot d_real09_t06
+cmd tick step 6
+wait 9
+shot d_real09_t12
+cmd tick step 10
+wait 13
+shot d_real09_t22
+cmd tick unfreeze
+cmd kill @e[type=minecraft:armor_stand]
+wait 5
+camera 0.5 -55 -1 0 22
+hud off
+wait 4
+cmd tick freeze
+cmd skyabyss dev prop lg_storm_wave rise 8.0 -60.0 12.5 16 2.60
+cmd summon minecraft:armor_stand 10.2 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop lg_ember_rise rise 0.5 -60.0 12.5 14 0.70
+cmd summon minecraft:armor_stand 2.7 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop lg_ember_wave rise -7.0 -60.0 12.5 14 2.60
+cmd summon minecraft:armor_stand -4.8 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd tick step 6
+wait 9
+shot d_real10_t06
+cmd tick step 6
+wait 9
+shot d_real10_t12
+cmd tick step 10
+wait 13
+shot d_real10_t22
+cmd tick unfreeze
+cmd kill @e[type=minecraft:armor_stand]
+wait 5
+camera 0.5 -55 -1 0 22
+hud off
+wait 4
+cmd tick freeze
+cmd skyabyss dev prop lg_moon_rise rise 8.0 -60.0 12.5 14 1.00
+cmd summon minecraft:armor_stand 10.2 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop lg_moon_wave rise 0.5 -60.0 12.5 14 2.60
+cmd summon minecraft:armor_stand 2.7 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop lg_moon_fall fall -7.0 -60 12.5 16 8 10 1.20
+cmd summon minecraft:armor_stand -4.8 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd tick step 6
+wait 9
+shot d_real11_t06
+cmd tick step 6
+wait 9
+shot d_real11_t12
+cmd tick step 10
+wait 13
+shot d_real11_t22
+cmd tick unfreeze
+cmd kill @e[type=minecraft:armor_stand]
+wait 5
+camera 0.5 -55 -1 0 22
+hud off
+wait 4
+cmd tick freeze
+cmd skyabyss dev prop lg_light_rise rise 8.0 -60.0 12.5 44 1.00
+cmd summon minecraft:armor_stand 10.2 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop lg_light_wave rise 0.5 -60.0 12.5 10 2.60
+cmd summon minecraft:armor_stand 2.7 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop gx_smash rise -7.0 -60.0 12.5 16 2.40
+cmd summon minecraft:armor_stand -4.8 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd tick step 6
+wait 9
+shot d_real12_t06
+cmd tick step 6
+wait 9
+shot d_real12_t12
+cmd tick step 10
+wait 13
+shot d_real12_t22
+cmd tick unfreeze
+cmd kill @e[type=minecraft:armor_stand]
+wait 5
+camera 0.5 -55 -1 0 22
+hud off
+wait 4
+cmd tick freeze
+cmd skyabyss dev prop gx_cleaver rise 8.0 -60.0 12.5 14 1.20
+cmd summon minecraft:armor_stand 10.2 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop gx_forge rise 0.5 -60.0 12.5 16 1.00
+cmd summon minecraft:armor_stand 2.7 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop gx_temper rise -7.0 -60.0 12.5 16 1.00
+cmd summon minecraft:armor_stand -4.8 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd tick step 6
+wait 9
+shot d_real13_t06
+cmd tick step 6
+wait 9
+shot d_real13_t12
+cmd tick step 10
+wait 13
+shot d_real13_t22
+cmd tick unfreeze
+cmd kill @e[type=minecraft:armor_stand]
+wait 5
+camera 0.5 -55 -1 0 22
+hud off
+wait 4
+cmd tick freeze
+cmd skyabyss dev prop gx_ash rise 8.0 -60.0 12.5 12 0.70
+cmd summon minecraft:armor_stand 10.2 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop gx_thunder rise 0.5 -60.0 12.5 12 0.90
+cmd summon minecraft:armor_stand 2.7 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop gx_fire rise -7.0 -60.0 12.5 12 0.90
+cmd summon minecraft:armor_stand -4.8 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd tick step 6
+wait 9
+shot d_real14_t06
+cmd tick step 6
+wait 9
+shot d_real14_t12
+cmd tick step 10
+wait 13
+shot d_real14_t22
+cmd tick unfreeze
+cmd kill @e[type=minecraft:armor_stand]
+wait 5
+camera 0.5 -55 -1 0 22
+hud off
+wait 4
+cmd tick freeze
+cmd skyabyss dev prop gx_freeze rise 8.0 -60.0 12.5 20 0.70
+cmd summon minecraft:armor_stand 10.2 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop gx_pierce rise 0.5 -60.0 12.5 20 1.40
+cmd summon minecraft:armor_stand 2.7 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop gx_trap rise -7.0 -60.0 12.5 12 1.20
+cmd summon minecraft:armor_stand -4.8 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd tick step 6
+wait 9
+shot d_real15_t06
+cmd tick step 6
+wait 9
+shot d_real15_t12
+cmd tick step 10
+wait 13
+shot d_real15_t22
+cmd tick unfreeze
+cmd kill @e[type=minecraft:armor_stand]
+wait 5
+camera 0.5 -55 -1 0 22
+hud off
+wait 4
+cmd tick freeze
+cmd skyabyss dev prop gx_shadow rise 8.0 -60.0 12.5 14 0.70
+cmd summon minecraft:armor_stand 10.2 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop gx_lone rise 0.5 -60.0 12.5 12 1.00
+cmd summon minecraft:armor_stand 2.7 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop gx_ward rise -7.0 -60.0 12.5 40 2.20
+cmd summon minecraft:armor_stand -4.8 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd tick step 6
+wait 9
+shot d_real16_t06
+cmd tick step 6
+wait 9
+shot d_real16_t12
+cmd tick step 10
+wait 13
+shot d_real16_t22
+cmd tick unfreeze
+cmd kill @e[type=minecraft:armor_stand]
+wait 5
+camera 0.5 -55 -1 0 22
+hud off
+wait 4
+cmd tick freeze
+cmd skyabyss dev prop gx_tide rise 4.2 -60.0 12.5 14 0.90
+cmd summon minecraft:armor_stand 6.5 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd skyabyss dev prop gx_curse rise -3.2 -60.0 12.5 16 0.70
+cmd summon minecraft:armor_stand -1.0 -60 15.5 {NoGravity:1b,Invulnerable:1b}
+cmd tick step 6
+wait 9
+shot d_real17_t06
+cmd tick step 6
+wait 9
+shot d_real17_t12
+cmd tick step 10
+wait 13
+shot d_real17_t22
+cmd tick unfreeze
+wait 20

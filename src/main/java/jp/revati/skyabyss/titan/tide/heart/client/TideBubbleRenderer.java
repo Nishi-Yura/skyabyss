@@ -27,6 +27,11 @@ public class TideBubbleRenderer extends EntityRenderer<TideBubble> {
     @Override
     public void render(TideBubble bubble, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {
         float t = bubble.tickCount + partialTick;
+        // 試作 d: 人を包む縦長の泡の D の模型 (縁と光沢の 2D を交差させ、中は透ける。息づく)
+        if (jp.revati.skyabyss.client.combat.AttackPropRenderer.drawKindD("tide_bubble", t, 0f, null, 1.0f, pose, buffers)) {
+            super.render(bubble, yaw, partialTick, pose, buffers, light);
+            return;
+        }
         float wobble = 1f + 0.04f * Mth.sin(t * 0.35f);
         pose.pushPose();
         pose.translate(0, 1.2, 0);

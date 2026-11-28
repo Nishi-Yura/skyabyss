@@ -270,7 +270,27 @@ public final class AttackProps {
             Map.entry("ss_ember_hammer", 20),
             Map.entry("ss_ash_scatter", 24),
             Map.entry("ss_forge_stomp", 14),
-            Map.entry("ss_spark_burst", 12));
+            Map.entry("ss_spark_burst", 12),
+            Map.entry("ss_deep_pull", 18),
+            Map.entry("ss_deep_echo", 20),
+            Map.entry("ss_deep_maw", 16),
+            Map.entry("ss_echo_strike", 14),
+            Map.entry("ss_grave_bell_fall", 16),
+            Map.entry("ss_final_light", 14),
+            Map.entry("ss_stardust_fall", 10),
+            Map.entry("sk_hex_0", 8), Map.entry("sk_hex_1", 8), Map.entry("sk_hex_2", 8), Map.entry("sk_hex_3", 8), Map.entry("sk_hex_4", 8),
+            Map.entry("sk_el_stone", 8), Map.entry("sk_el_wind", 8), Map.entry("sk_el_tide", 8), Map.entry("sk_el_ash", 8), Map.entry("sk_el_bone", 8), Map.entry("sk_ch_rune", 8), Map.entry("sk_ch_rewrite", 8), Map.entry("sk_ch_mutation", 8), Map.entry("sk_ch_secret", 8), Map.entry("sk_mastery_3", 8), Map.entry("sk_mastery_5", 8),
+            Map.entry("my_sky_hand", 12), Map.entry("my_warden", 12), Map.entry("my_balance", 10), Map.entry("my_big_bell", 14), Map.entry("my_melt", 6), Map.entry("my_pull", 12), Map.entry("my_life_lamp", 8), Map.entry("my_gaze", 6), Map.entry("my_new_moon", 12), Map.entry("my_rewind", 12), Map.entry("my_moth", 10), Map.entry("my_chase_mark", 10), Map.entry("my_promise", 6), Map.entry("my_silence", 12), Map.entry("my_clap", 12),
+            Map.entry("pa_quake", 10), Map.entry("pa_whirl", 10), Map.entry("pa_ebb", 10), Map.entry("pa_brand", 10), Map.entry("pa_brand_burst", 10), Map.entry("pa_curse", 10), Map.entry("lg_whale_rise", 10), Map.entry("lg_whale_wave", 10), Map.entry("lg_whale_fall", 10), Map.entry("lg_tide_rise", 10), Map.entry("lg_tide_wave", 10), Map.entry("lg_storm_rise", 10), Map.entry("lg_storm_wave", 10), Map.entry("lg_ember_rise", 10), Map.entry("lg_ember_wave", 10), Map.entry("lg_moon_rise", 10), Map.entry("lg_moon_wave", 10), Map.entry("lg_moon_fall", 10), Map.entry("lg_light_rise", 10), Map.entry("lg_light_wave", 10), Map.entry("gx_smash", 10), Map.entry("gx_cleaver", 10), Map.entry("gx_forge", 10), Map.entry("gx_temper", 10), Map.entry("gx_ash", 10), Map.entry("gx_thunder", 10), Map.entry("gx_fire", 10), Map.entry("gx_freeze", 10), Map.entry("gx_pierce", 0), Map.entry("gx_trap", 10), Map.entry("gx_shadow", 10), Map.entry("gx_lone", 10), Map.entry("gx_ward", 10), Map.entry("gx_tide", 10), Map.entry("gx_curse", 10),
+            Map.entry("bone_spike", 8), Map.entry("tentacle", 8), Map.entry("crystal_spike", 8), Map.entry("lava_pillar", 8), Map.entry("ice_spike", 8), Map.entry("water_spout", 8), Map.entry("lightning", 8), Map.entry("shell_spike", 8), Map.entry("spore", 8), Map.entry("whirlwind", 8), Map.entry("light_pillar", 8));
+
+    // 神器・粉の技・伝説・型の放ち・通常攻撃と印 (sk_) は呼ぶ側が燃え尽きを足さないので、床から出す所 (rise・riseLater) で命に足す (技 ss_ は SkillProps が足す)
+    // 敵の攻撃の形のうち、試作 d で燃え尽きる形 (床から出る形)
+    private static final java.util.Set<String> ENEMY_D = java.util.Set.of("bone_spike", "tentacle", "crystal_spike", "lava_pillar", "ice_spike", "water_spout", "lightning", "shell_spike", "spore", "whirlwind", "light_pillar");
+
+    static int extraBurn(String kind) {
+        return kind.startsWith("my_") || kind.startsWith("pa_") || kind.startsWith("lg_") || kind.startsWith("gx_") || kind.startsWith("sk_") || ENEMY_D.contains(kind) ? afterburn(kind) : 0;
+    }
 
     public static int afterburn(String kind) {
         return AFTERBURN.getOrDefault(kind, 0);
@@ -281,7 +301,7 @@ public final class AttackProps {
         if (p == null) {
             return;
         }
-        p.setup(AttackProp.RISE, at, at, Math.max(0, delay), AttackProp.RISE_IN, delay + linger, size, 0f, yaw);
+        p.setup(AttackProp.RISE, at, at, Math.max(0, delay), AttackProp.RISE_IN, delay + linger + extraBurn(kind), size, 0f, yaw);
         spawn(level, p);
     }
 
@@ -311,7 +331,7 @@ public final class AttackProps {
         if (p == null) {
             return;
         }
-        p.setup(AttackProp.RISE, at, at, 0, AttackProp.RISE_IN, linger, size, 0f, yaw);
+        p.setup(AttackProp.RISE, at, at, 0, AttackProp.RISE_IN, linger + extraBurn(kind), size, 0f, yaw);
         spawn(level, p);
     }
 
@@ -335,7 +355,8 @@ public final class AttackProps {
         int ft = Math.max(2, Math.min(warn, flight));
         Vec3 d = to.subtract(from);
         float yaw = (float) Math.toDegrees(Math.atan2(-d.x, d.z));
-        p.setup(AttackProp.TOSS, from, to, warn - ft, ft, linger, size, arc, yaw);
+        // 敵の床から出る形を投げるとき (帯の撃ち出しの晶の棘) も燃え尽きの分を足す。足さないと d 以外の見た目で最後の分が欠ける
+        p.setup(AttackProp.TOSS, from, to, warn - ft, ft, linger + (ENEMY_D.contains(kind) ? afterburn(kind) : 0), size, arc, yaw);
         spawn(level, p);
     }
 

@@ -60,6 +60,7 @@ MAGE = [
     ("frost_tide", 25, "8 -56.5 -3 47 19", [(3, "a")]),
     ("frost_tide", 25, "9.6 -56.5 -4.4 47 5", [(3, "seq03"), (3, "seq06"), (2, "seq08")] + [(2, "seq%02d" % t) for t in range(10, 29, 2)]),  # look d: alive and shatter
     ("ember_orb", 0, "5 -58.5 7 48 2", [(1, "fly")]),
+    ("ember_orb", 0, "4.5 -58.6 6 60 2", [(1, "dfly1"), (1, "dfly2"), (1, "dfly3"), (1, "dfly4")]),  # look d: the flying orb
     ("ember_orb", 0, "5 -58 10 52 15", [(8, "hit")]),
     ("ember_orb", 0, "11.3 -53 5 52 24", [(4, "wide"), (8, "hit_wide")]),  # 広く見下ろす (試作 d の床のひび)
     ("ember_orb", 0, "5 -58 10 52 15", [(8, "burn08")] + [(3, "burn%02d" % (8 + 3 * k)) for k in range(1, 10)]),  # 燃える間と燃え尽き (試作 d)
@@ -397,25 +398,41 @@ def smith(only):
 # (技, 撮る位置, 撮る tick の並び, 前に敵を置くか)。淵の顎は見ている先 8 ブロック、遺響の一撃は前 2.5 ブロック。墓鐘は降る形 (3 tick で落ちる)
 DEEP = [
     ("deep_pull", cam(10.0, -54.5, -6.0, 0.5, -59.5, 0.5, 0.85), [(3, "a"), (8, "b")], 3.0),
+    ("deep_pull", cam(10.0, -54.5, -6.0, 0.5, -59.5, 0.5, 0.85), [(2, "seq%02d" % t) for t in range(1, 21)], 3.0),  # look d: seq
     ("deep_echo", cam(6.5, -57.0, -4.5, 0.5, -59.0, 0.5, 0.8), [(4, "a"), (12, "b")], False),
+    ("deep_echo", cam(6.5, -57.0, -4.5, 0.5, -59.0, 0.5, 0.8), [(2, "seq%02d" % t) for t in range(1, 25)], False),  # look d: seq
     ("deep_maw", cam(9.0, -55.5, 0.0, 0.5, -59.5, 6.0, 0.85), [(6, "a"), (10, "b")], 6.0),
+    ("deep_maw", cam(9.0, -55.5, 0.0, 0.5, -59.5, 6.0, 0.85), [(2, "seq%02d" % t) for t in range(1, 23)], 6.0),  # look d: seq
     ("echo_strike", cam(7.0, -56.5, -1.5, 0.5, -59.0, 2.5, 0.8), [(3, "a"), (12, "b")], 3.0),
+    ("echo_strike", cam(7.0, -56.5, -1.5, 0.5, -59.0, 2.5, 0.8), [(2, "seq%02d" % t) for t in range(1, 31)], 3.0),  # look d: seq
     ("grave_bell", cam(7.0, -56.5, -5.0, 0.5, -59.0, 0.5, 0.8), [(1, "a"), (2, "b"), (3, "c")], False),
+    ("grave_bell", cam(7.0, -56.5, -5.0, 0.5, -59.0, 0.5, 0.8), [(2, "seq%02d" % t) for t in range(1, 19)], False),  # look d: seq
     ("final_light", cam(11.0, -53.5, -7.0, 0.5, -59.5, 0.5, 0.85), [(4, "a"), (9, "b")], False),
+    ("final_light", cam(11.0, -53.5, -7.0, 0.5, -59.5, 0.5, 0.85), [(2, "seq%02d" % t) for t in range(1, 31)], False),  # look d: seq
 ]
 
 
 def deep(only):
-    out = [HEAD.format(job="warrior", weapon="shrine_sword"), "cmd skyabyss level set @p 60\n"]
+    out = [HEAD.format(job="warrior", weapon="shrine_sword"), "cmd skyabyss level set @p 50\ncmd attribute @s skyabyss:max_mana base set 200\n"]
     for look in LOOKS:
         out.append(f"# ======== {look}\ngearlook skill {look}\n")
         for name, cm, shots, foe in DEEP:
             if only and name not in only:
                 continue
             out.append(f"cmd skyabyss skill forget @s\ncmd skyabyss skill learn @s {name} 1\n")
-            out.append(cast(0, name, cm, foe))
+            c = cast(0, name, cm, foe)
+            slow = any(tag.startswith("seq") for _, tag in shots)
+            if slow:
+                # 連続 (seq) は放つ前に世界を止め、1 枚ごとに w tick 進める (smith() と同じ)
+                c = c.replace("cmd skyabyss skill cast", "cmd tick freeze\ncmd skyabyss skill cast")
+            out.append(c)
             for w, tag in shots:
-                out.append(f"wait {w}\nshot {look}_{name}_{tag}\n")
+                if tag.startswith("seq"):
+                    out.append(f"cmd tick step {w}\nwait {max(3, w + 3)}\ncamera {cm}\nshot {look}_{name}_{tag}\n")
+                else:
+                    out.append(f"wait {w}\nshot {look}_{name}_{tag}\n")
+            if slow:
+                out.append("cmd tick unfreeze\n")
             out.append("wait 60\n")
     return out
 
